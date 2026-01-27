@@ -1,0 +1,139 @@
+@import "tailwindcss";
+
+:root {
+  --neon-purple: #a855f7;
+  --neon-blue: #3b82f6;
+  --neon-cyan: #06b6d4;
+  --neon-pink: #ec4899;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #16213e 100%);
+  min-height: 100vh;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(168, 85, 247, 0.4);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(168, 85, 247, 0.6);
+}
+
+/* Glow effects */
+.glow-purple {
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.4), 0 0 40px rgba(168, 85, 247, 0.2);
+}
+
+.glow-blue {
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.4), 0 0 40px rgba(59, 130, 246, 0.2);
+}
+
+.glow-cyan {
+  box-shadow: 0 0 20px rgba(6, 182, 212, 0.4), 0 0 40px rgba(6, 182, 212, 0.2);
+}
+
+.glow-pink {
+  box-shadow: 0 0 20px rgba(236, 72, 153, 0.4), 0 0 40px rgba(236, 72, 153, 0.2);
+}
+
+/* Piano key animations */
+.piano-key {
+  transition: all 0.1s ease;
+}
+
+.piano-key.white:hover {
+  background: linear-gradient(180deg, #f0f0f0 0%, #d0d0d0 100%);
+  transform: translateY(2px);
+}
+
+.piano-key.black:hover {
+  background: linear-gradient(180deg, #3a3a3a 0%, #1a1a1a 100%);
+  transform: translateY(2px);
+}
+
+.piano-key.active.white {
+  background: linear-gradient(180deg, #a855f7 0%, #7c3aed 100%);
+  transform: translateY(3px);
+}
+
+.piano-key.active.black {
+  background: linear-gradient(180deg, #a855f7 0%, #6d28d9 100%);
+  transform: translateY(3px);
+}
+
+/* Chord slot */
+.chord-slot {
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+}
+
+.chord-slot:hover {
+  border-color: rgba(168, 85, 247, 0.5);
+  transform: scale(1.02);
+}
+
+.chord-slot.playing {
+  border-color: #a855f7;
+  box-shadow: 0 0 30px rgba(168, 85, 247, 0.6);
+}
+
+/* Button animations */
+.btn-glow {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.btn-glow::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.btn-glow:hover::before {
+  left: 100%;
+}
+
+/* Preset cards */
+.preset-card {
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.preset-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(168, 85, 247, 0.5);
+  transform: translateY(-2px);
+}
+
+/* Control panel glass effect */
+.glass-panel {
+  background: rgba(15, 15, 26, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
