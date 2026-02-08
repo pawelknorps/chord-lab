@@ -1,0 +1,380 @@
+{
+  "progressions": {
+    "major": [
+      {
+        "name": "I-V-vi-IV (Поп-прогрессия)",
+        "degrees": [1, 5, 6, 4],
+        "types": ["major", "major", "minor", "major"],
+        "description": "Самая популярная прогрессия в поп-музыке"
+      },
+      {
+        "name": "ii-V-I (Джазовая)",
+        "degrees": [2, 5, 1],
+        "types": ["min7", "dom7", "maj7"],
+        "description": "Основа джазовой гармонии"
+      },
+      {
+        "name": "I-vi-IV-V (50s Progression)",
+        "degrees": [1, 6, 4, 5],
+        "types": ["major", "minor", "major", "major"],
+        "description": "Классическая прогрессия 50-х годов"
+      },
+      {
+        "name": "vi-IV-I-V (Pop-punk)",
+        "degrees": [6, 4, 1, 5],
+        "types": ["minor", "major", "major", "major"],
+        "description": "Популярна в поп-панке и альтернативе"
+      },
+      {
+        "name": "I-vi-ii-V",
+        "degrees": [1, 6, 2, 5],
+        "types": ["maj7", "dom7", "min7", "dom7"],
+        "description": "Классический джаз/поп тёрнараунд"
+      },
+      {
+        "name": "I-IV-V",
+        "degrees": [1, 4, 5],
+        "types": ["major", "major", "major"],
+        "description": "Базовая рок/блюз схема"
+      },
+      {
+        "name": "I-V-IV",
+        "degrees": [1, 5, 4],
+        "types": ["major", "major", "major"],
+        "description": "Альтернатива I-IV-V"
+      },
+      {
+        "name": "I-V-ii-vi",
+        "degrees": [1, 5, 2, 6],
+        "types": ["major", "major", "minor", "minor"],
+        "description": "Поп/джаз обращение"
+      },
+      {
+        "name": "I-iii-vi-ii-V",
+        "degrees": [1, 3, 6, 2, 5],
+        "types": ["maj7", "min7", "dom7", "min7", "dom7"],
+        "description": "Расширенный тёрнараунд"
+      },
+      {
+        "name": "I-V-vi-iii-IV-I-IV-V",
+        "degrees": [1, 5, 6, 3, 4, 1, 4, 5],
+        "types": ["major", "major", "minor", "minor", "major", "major", "major", "major"],
+        "description": "Поп-цепочка восьми аккордов"
+      },
+      {
+        "name": "I-IV-ii-V",
+        "degrees": [1, 4, 2, 5],
+        "types": ["major", "major", "minor", "major"],
+        "description": "Подготовка к джазовой каденции"
+      },
+      {
+        "name": "ii-iii-IV-V",
+        "degrees": [2, 3, 4, 5],
+        "types": ["minor", "minor", "major", "major"],
+        "description": "Восходящая пошаговая прогрессия"
+      },
+      {
+        "name": "I-V-vi-IV-V",
+        "degrees": [1, 5, 6, 4, 5],
+        "types": ["major", "major", "minor", "major", "major"],
+        "description": "Расширенная поп-прогрессия"
+      },
+      {
+        "name": "I-VI-IV-V (Motown)",
+        "degrees": [1, 6, 4, 5],
+        "types": ["major", "minor", "major", "major"],
+        "description": "Классика Motown/соула"
+      },
+      {
+        "name": "I-V-I-IV",
+        "degrees": [1, 5, 1, 4],
+        "types": ["major", "major", "major", "major"],
+        "description": "Блюз/рок оборот"
+      },
+      {
+        "name": "I-vi-IV-ii-V",
+        "degrees": [1, 6, 4, 2, 5],
+        "types": ["major", "minor", "major", "minor", "major"],
+        "description": "Поп/джаз тёрнараунд"
+      },
+      {
+        "name": "iii-vi-ii-V",
+        "degrees": [3, 6, 2, 5],
+        "types": ["min7", "dom7", "min7", "dom7"],
+        "description": "Джазовый тёрнараунд"
+      },
+      {
+        "name": "I-IV-vii°-iii-vi-ii-V-I",
+        "degrees": [1, 4, 7, 3, 6, 2, 5, 1],
+        "types": ["major", "major", "dim", "minor", "minor", "minor", "major", "major"],
+        "description": "Цепочка по квинтам"
+      },
+      {
+        "name": "IV-I-V",
+        "degrees": [4, 1, 5],
+        "types": ["major", "major", "major"],
+        "description": "Кантри/фолк вариант I-IV-V"
+      },
+      {
+        "name": "I-IV-I-V-IV-I",
+        "degrees": [1, 4, 1, 5, 4, 1],
+        "types": ["major", "major", "major", "major", "major", "major"],
+        "description": "Сокращённый блюзовый оборот"
+      },
+      {
+        "name": "12-bar Blues",
+        "degrees": [1, 1, 1, 1, 4, 4, 1, 1, 5, 4, 1, 5],
+        "types": ["dom7","dom7","dom7","dom7","dom7","dom7","dom7","dom7","dom7","dom7","dom7","dom7"],
+        "description": "Классический 12-тактовый блюз"
+      },
+      {
+        "name": "I-V-vi-IV-ii-V-I",
+        "degrees": [1, 5, 6, 4, 2, 5, 1],
+        "types": ["major","major","minor","major","minor","major","major"],
+        "description": "Поп-каденция к тонике"
+      },
+      {
+        "name": "I-vi-iii-IV-ii-V-I",
+        "degrees": [1, 6, 3, 4, 2, 5, 1],
+        "types": ["major","minor","minor","major","minor","major","major"],
+        "description": "Балладный тёрнараунд"
+      },
+      {
+        "name": "I-ii-iii-IV-V",
+        "degrees": [1, 2, 3, 4, 5],
+        "types": ["major","minor","minor","major","major"],
+        "description": "Пошаговый восходящий ход"
+      },
+      {
+        "name": "I-iii-IV-iv",
+        "degrees": [1, 3, 4, 4],
+        "types": ["major","minor","major","minor"],
+        "description": "Смена мажор/минор IV (borrowed)"
+      }
+    ],
+    "minor": [
+      {
+        "name": "i-VII-VI-VII",
+        "degrees": [1, 7, 6, 7],
+        "types": ["minor", "major", "major", "major"],
+        "description": "Эмоциональная минорная прогрессия"
+      },
+      {
+        "name": "i-iv-V-i",
+        "degrees": [1, 4, 5, 1],
+        "types": ["minor", "minor", "major", "minor"],
+        "description": "Классическая минорная каденция"
+      },
+      {
+        "name": "i-VI-III-VII",
+        "degrees": [1, 6, 3, 7],
+        "types": ["minor", "major", "major", "major"],
+        "description": "Испанская прогрессия"
+      },
+      {
+        "name": "i-iv-v",
+        "degrees": [1, 4, 5],
+        "types": ["minor", "minor", "minor"],
+        "description": "Натуральный минор, базовая схема"
+      },
+      {
+        "name": "i-VI-iv-V",
+        "degrees": [1, 6, 4, 5],
+        "types": ["minor", "major", "minor", "major"],
+        "description": "Минорный поп-оборот"
+      },
+      {
+        "name": "i-VII-VI-V",
+        "degrees": [1, 7, 6, 5],
+        "types": ["minor", "major", "major", "major"],
+        "description": "Андалузская каденция (вариант)"
+      },
+      {
+        "name": "i-ii°-V-i",
+        "degrees": [1, 2, 5, 1],
+        "types": ["minor", "dim", "major", "minor"],
+        "description": "Классическая минорная джазовая каденция"
+      },
+      {
+        "name": "i-iv-VII-III",
+        "degrees": [1, 4, 7, 3],
+        "types": ["minor", "minor", "major", "major"],
+        "description": "Минорная смена опор"
+      },
+      {
+        "name": "i-iv-VI-V",
+        "degrees": [1, 4, 6, 5],
+        "types": ["minor", "minor", "major", "major"],
+        "description": "Поп/рок в миноре"
+      },
+      {
+        "name": "i-III-VI-VII",
+        "degrees": [1, 3, 6, 7],
+        "types": ["minor", "major", "major", "major"],
+        "description": "Эмоциональная минорная цепочка"
+      },
+      {
+        "name": "i-iv-i-VI-VII",
+        "degrees": [1, 4, 1, 6, 7],
+        "types": ["minor", "minor", "minor", "major", "major"],
+        "description": "Минор с подъёмом к VII"
+      },
+      {
+        "name": "i-V-i-iv",
+        "degrees": [1, 5, 1, 4],
+        "types": ["minor","major","minor","minor"],
+        "description": "Минорная классика"
+      },
+      {
+        "name": "i-iv-VI-III-VII",
+        "degrees": [1, 4, 6, 3, 7],
+        "types": ["minor","minor","major","major","major"],
+        "description": "Расширенная андалузская"
+      },
+      {
+        "name": "i-ii°-iii-iv-V",
+        "degrees": [1, 2, 3, 4, 5],
+        "types": ["minor","dim","major","minor","major"],
+        "description": "Минорная шаговая цепочка"
+      }
+    ],
+    "dorian": [
+      {
+        "name": "i-IV-VII-i",
+        "degrees": [1, 4, 7, 1],
+        "types": ["minor", "major", "major", "minor"],
+        "description": "Типичная дорийская прогрессия"
+      },
+      {
+        "name": "i-IV-i-VII",
+        "degrees": [1, 4, 1, 7],
+        "types": ["minor", "major", "minor", "major"],
+        "description": "Возврат к тонике через VII"
+      },
+      {
+        "name": "i-II-IV-i",
+        "degrees": [1, 2, 4, 1],
+        "types": ["minor", "major", "major", "minor"],
+        "description": "Яркая дорийская окраска"
+      },
+      {
+        "name": "i-VII-IV",
+        "degrees": [1, 7, 4],
+        "types": ["minor", "major", "major"],
+        "description": "Дорийская рок-схема"
+      },
+      {
+        "name": "i-ii-IV-VII",
+        "degrees": [1, 2, 4, 7],
+        "types": ["minor", "major", "major", "major"],
+        "description": "Шаговый подъём в дорийском"
+      },
+      {
+        "name": "i-v-IV-i",
+        "degrees": [1, 5, 4, 1],
+        "types": ["minor","minor","major","minor"],
+        "description": "Дорийский возврат к тонике"
+      },
+      {
+        "name": "i-IV-v-VII",
+        "degrees": [1, 4, 5, 7],
+        "types": ["minor","major","minor","major"],
+        "description": "Характерный дорийский рисунок"
+      }
+    ],
+    "mixolydian": [
+      {
+        "name": "I-bVII-IV-I",
+        "degrees": [1, 7, 4, 1],
+        "types": ["major", "major", "major", "major"],
+        "description": "Характерная миксолидийская прогрессия"
+      },
+      {
+        "name": "I-IV-I-V",
+        "degrees": [1, 4, 1, 5],
+        "types": ["major", "major", "major", "major"],
+        "description": "Фолк/кантри оборот"
+      },
+      {
+        "name": "I-bVII-V",
+        "degrees": [1, 7, 5],
+        "types": ["major", "major", "major"],
+        "description": "Рок-н-ролл схема"
+      },
+      {
+        "name": "I-bVII-IV-V",
+        "degrees": [1, 7, 4, 5],
+        "types": ["major", "major", "major", "major"],
+        "description": "Расширенная миксолидийская"
+      },
+      {
+        "name": "I-v-IV",
+        "degrees": [1, 5, 4],
+        "types": ["major", "minor", "major"],
+        "description": "Миксолидий с минорной V"
+      },
+      {
+        "name": "I-v-III-IV",
+        "degrees": [1, 5, 3, 4],
+        "types": ["major", "minor", "dim", "major"],
+        "description": "Более модальная окраска (iii как уменьшённый)"
+      },
+      {
+        "name": "I-IV-bVII-I",
+        "degrees": [1, 4, 7, 1],
+        "types": ["major","major","major","major"],
+        "description": "Грувовый миксолидий"
+      },
+      {
+        "name": "I-bVII-IV-IV",
+        "degrees": [1, 7, 4, 4],
+        "types": ["major","major","major","major"],
+        "description": "Ритмический рок-поворот"
+      }
+    ],
+    "lydian": [
+      {
+        "name": "I-II-I",
+        "degrees": [1, 2, 1],
+        "types": ["major", "major", "major"],
+        "description": "Прогрессия с характерным лидийским звучанием"
+      },
+      {
+        "name": "I-II-V-I",
+        "degrees": [1, 2, 5, 1],
+        "types": ["major", "major", "major", "major"],
+        "description": "Лидийская яркая каденция"
+      },
+      {
+        "name": "I-II-vi-V",
+        "degrees": [1, 2, 6, 5],
+        "types": ["major", "major", "minor", "major"],
+        "description": "Современное лидийское звучание"
+      },
+      {
+        "name": "I-II-iii-II",
+        "degrees": [1, 2, 3, 2],
+        "types": ["major", "major", "minor", "major"],
+        "description": "Лиричная лидийская последовательность"
+      },
+      {
+        "name": "I-V-ii-II",
+        "degrees": [1, 5, 2, 2],
+        "types": ["major", "major", "minor", "major"],
+        "description": "Лидийский акцент на II"
+      },
+      {
+        "name": "I-II-IV-I",
+        "degrees": [1, 2, 4, 1],
+        "types": ["major","major","major","major"],
+        "description": "Светлая лидийская фраза"
+      },
+      {
+        "name": "I-II-I-V",
+        "degrees": [1, 2, 1, 5],
+        "types": ["major","major","major","major"],
+        "description": "Возврат через V"
+      }
+    ]
+  }
+}

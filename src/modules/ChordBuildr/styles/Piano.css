@@ -1,0 +1,190 @@
+/*
+	Thanks to zastrow for getting us started with his piano css at 
+	https://codepen.io/zastrow/pen/oDBki
+*/
+.set {
+	display: flex;
+	justify-content: center;
+	margin: 0 0 0 0;
+	top: 0.38em;
+	margin-right: 0.2em;
+}
+
+ul {
+	height: auto;
+	width: auto;
+	margin: 1em auto;
+	padding: 1em 1em 1em 1em;
+	position: relative;
+}
+
+li {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	position: relative;
+	float: left;
+}
+
+ul .white {
+	height: 8.9em;
+	width: 2.4em;
+	z-index: 1;
+	border-left: 1px solid #bbb;
+	border-bottom: 1px solid #bbb;
+	border-radius: 0 0 5px 5px;
+	box-shadow: -1px 0 0 rgba(255, 255, 255, 0.8) inset, 0 0 5px #ccc inset,
+		0 0 3px rgba(0, 0, 0, 0.2);
+	background: linear-gradient(to bottom, #eee 0%, #fff 100%);
+}
+
+ul .white:active {
+	border-top: 1px solid #777;
+	border-left: 1px solid #999;
+	border-bottom: 1px solid #999;
+	box-shadow: 2px 0 3px rgba(0, 0, 0, 0.1) inset,
+		-5px 5px 20px rgba(0, 0, 0, 0.2) inset, 0 0 3px rgba(0, 0, 0, 0.2);
+	background: linear-gradient(to bottom, #fff 0%, #e9e9e9 100%);
+}
+
+
+
+.white[key-selected="true"] {
+	background: #007bff;
+
+	/* transition: 0.1s; */
+}
+
+.black[key-selected="true"] {
+	background: #007bff;
+
+	/* transition: 0.1s; */
+}
+
+.black[key-playing="true"],
+.white[key-playing="true"] {
+	background: #25C196;
+	transition: 0.6s ease-in-out;
+}
+
+.white[key-selected="true"][key-stopping="true"],
+.black[key-selected="true"][key-stopping="true"] {
+	background: #007bff;
+	transition: 0.4s ease-in-out;
+}
+
+  
+.black {
+	height: 5em;
+	width: 1.5em;
+	margin: 0 0 0 -1em;
+	right: 0.2em;
+	z-index: 2;
+	border: solid #000;
+	border-width: 0px 1px 1px 1px;
+	border-radius: 0 0 3px 3px;
+	box-shadow: -1px -1px 2px rgba(255, 255, 255, 0.2) inset,
+		0 -5px 2px 3px rgba(0, 0, 0, 0.6) inset, 0 2px 4px rgba(0, 0, 0, 0.5);
+	background: linear-gradient(45deg, #222 0%, #555 100%);
+}
+
+.black:active {
+	box-shadow: -1px -1px 2px rgba(255, 255, 255, 0.2) inset,
+		0 -2px 2px 3px rgba(0, 0, 0, 0.6) inset, 0 1px 2px rgba(0, 0, 0, 0.5);
+	background: linear-gradient(to right, #444 0%, #222 100%);
+}
+
+.A,
+.B,
+.G,
+.D,
+.E {
+	margin: 0 0 0 -1em;
+}
+
+.F, .C {
+	width: 2.3em !important; 
+}
+
+.E, .B {
+	margin-right: -8px;
+}
+
+.B-2{
+	border-radius: 5px 0 5px 5px !important;
+	width: 2em !important;
+	margin-right: 0.0em;
+}
+
+.piano-play-button:active {
+	color: rgb(103, 149, 187);
+	background: linear-gradient(45deg, #222 0%, rgb(75, 78, 82) 100%);
+	box-shadow: -1px -1px 2px rgba(255, 255, 255, 0.2) inset,
+		0 -5px 2px 3px rgba(46, 45, 45, 0.6) inset, 
+		0 2px 4px rgba(0, 0, 0, 0.5);
+}
+.piano-play-button {
+	color: rgb(133, 133, 133);
+	box-sizing: border-box;
+	position: absolute;
+	display: flex;
+	align-items: center;
+	vertical-align: center;
+	/* transform: scale(var(--ggs, 1)); */
+	width: 1.9em !important;
+	height: 100%;
+	border: 0.01em solid;
+	border-color: hsl(var(--border)) !important;
+	border-radius: 0.3em;
+	background: var(--main-compononent-gray);
+	left: 0.20em;
+	margin-top: 1em;
+	padding: 0em;
+	outline: none !important;
+	box-shadow: 
+		-1px -1px 2px  var(--main-compononent-gray) inset,
+		0 -3px 2px 3px rgba(46, 45, 45, 0.6) inset, 
+		3px 6px 3px rgba(16, 19, 26, 0.404);
+}
+
+@media only screen 
+and (min-device-width : 981px) {
+
+	.piano-play-button {
+		left: 0.3em;
+	}
+}
+
+.piano-play-button::before {
+	content: "";
+	display: inline-block;
+	text-align: center;
+	align-items: center;
+	box-sizing: border-box;
+	position: relative;
+	height: 0.7em;
+	border-top: 0.4em solid transparent;
+	border-bottom: 0.4em solid transparent;
+	border-left: 0.5em solid;
+	margin-left: 0.6em;
+	
+	/* left: 0.3em; */
+	outline: none !important;
+}
+
+
+
+/* Mobile*/
+@media only screen 
+and (min-device-width : 320px) 
+and (max-device-width : 980px) {
+
+	/* .piano-play-button {
+		height: 8em;
+	} */
+}
+
+.chordPianoComponent {
+	z-index: 200;
+}
+

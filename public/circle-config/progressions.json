@@ -1,0 +1,1034 @@
+{
+  "progressions": {
+    "major": [
+      {
+        "name": "I-V-vi-IV (Pop Progression)",
+        "degrees": [
+          1,
+          5,
+          6,
+          4
+        ],
+        "types": [
+          "major",
+          "major",
+          "minor",
+          "major"
+        ],
+        "description": "The most popular progression in pop music"
+      },
+      {
+        "name": "ii-V-I (Jazz)",
+        "degrees": [
+          2,
+          5,
+          1
+        ],
+        "types": [
+          "min7",
+          "dom7",
+          "maj7"
+        ],
+        "description": "The foundation of jazz harmony"
+      },
+      {
+        "name": "I-vi-IV-V (50s Progression)",
+        "degrees": [
+          1,
+          6,
+          4,
+          5
+        ],
+        "types": [
+          "major",
+          "minor",
+          "major",
+          "major"
+        ],
+        "description": "A classic progression from the 1950s"
+      },
+      {
+        "name": "vi-IV-I-V (Pop-punk)",
+        "degrees": [
+          6,
+          4,
+          1,
+          5
+        ],
+        "types": [
+          "minor",
+          "major",
+          "major",
+          "major"
+        ],
+        "description": "Popular in pop-punk and alternative rock"
+      },
+      {
+        "name": "I-vi-ii-V",
+        "degrees": [
+          1,
+          6,
+          2,
+          5
+        ],
+        "types": [
+          "maj7",
+          "dom7",
+          "min7",
+          "dom7"
+        ],
+        "description": "Classic jazz/pop turnaround"
+      },
+      {
+        "name": "I-IV-V",
+        "degrees": [
+          1,
+          4,
+          5
+        ],
+        "types": [
+          "major",
+          "major",
+          "major"
+        ],
+        "description": "Basic rock/blues scheme"
+      },
+      {
+        "name": "I-V-IV",
+        "degrees": [
+          1,
+          5,
+          4
+        ],
+        "types": [
+          "major",
+          "major",
+          "major"
+        ],
+        "description": "Alternative to I-IV-V"
+      },
+      {
+        "name": "I-V-ii-vi",
+        "degrees": [
+          1,
+          5,
+          2,
+          6
+        ],
+        "types": [
+          "major",
+          "major",
+          "minor",
+          "minor"
+        ],
+        "description": "Pop/jazz inversion"
+      },
+      {
+        "name": "I-iii-vi-ii-V",
+        "degrees": [
+          1,
+          3,
+          6,
+          2,
+          5
+        ],
+        "types": [
+          "maj7",
+          "min7",
+          "dom7",
+          "min7",
+          "dom7"
+        ],
+        "description": "Extended turnaround"
+      },
+      {
+        "name": "I-V-vi-iii-IV-I-IV-V",
+        "degrees": [
+          1,
+          5,
+          6,
+          3,
+          4,
+          1,
+          4,
+          5
+        ],
+        "types": [
+          "major",
+          "major",
+          "minor",
+          "minor",
+          "major",
+          "major",
+          "major",
+          "major"
+        ],
+        "description": "Eight-chord pop progression"
+      },
+      {
+        "name": "I-IV-ii-V",
+        "degrees": [
+          1,
+          4,
+          2,
+          5
+        ],
+        "types": [
+          "major",
+          "major",
+          "minor",
+          "major"
+        ],
+        "description": "Preparation for a jazz cadence"
+      },
+      {
+        "name": "ii-iii-IV-V",
+        "degrees": [
+          2,
+          3,
+          4,
+          5
+        ],
+        "types": [
+          "minor",
+          "minor",
+          "major",
+          "major"
+        ],
+        "description": "Stepwise ascending progression"
+      },
+      {
+        "name": "I-V-vi-IV-V",
+        "degrees": [
+          1,
+          5,
+          6,
+          4,
+          5
+        ],
+        "types": [
+          "major",
+          "major",
+          "minor",
+          "major",
+          "major"
+        ],
+        "description": "Extended pop progression"
+      },
+      {
+        "name": "I-VI-IV-V (Motown)",
+        "degrees": [
+          1,
+          6,
+          4,
+          5
+        ],
+        "types": [
+          "major",
+          "minor",
+          "major",
+          "major"
+        ],
+        "description": "Classic Motown/soul sound"
+      },
+      {
+        "name": "I-V-I-IV",
+        "degrees": [
+          1,
+          5,
+          1,
+          4
+        ],
+        "types": [
+          "major",
+          "major",
+          "major",
+          "major"
+        ],
+        "description": "Blues/rock turnaround"
+      },
+      {
+        "name": "I-vi-IV-ii-V",
+        "degrees": [
+          1,
+          6,
+          4,
+          2,
+          5
+        ],
+        "types": [
+          "major",
+          "minor",
+          "major",
+          "minor",
+          "major"
+        ],
+        "description": "Pop/jazz turnaround variant"
+      },
+      {
+        "name": "iii-vi-ii-V",
+        "degrees": [
+          3,
+          6,
+          2,
+          5
+        ],
+        "types": [
+          "min7",
+          "dom7",
+          "min7",
+          "dom7"
+        ],
+        "description": "Jazz turnaround"
+      },
+      {
+        "name": "I-IV-vii°-iii-vi-ii-V-I",
+        "degrees": [
+          1,
+          4,
+          7,
+          3,
+          6,
+          2,
+          5,
+          1
+        ],
+        "types": [
+          "major",
+          "major",
+          "dim",
+          "minor",
+          "minor",
+          "minor",
+          "major",
+          "major"
+        ],
+        "description": "Cycle of fifths chain"
+      },
+      {
+        "name": "IV-I-V",
+        "degrees": [
+          4,
+          1,
+          5
+        ],
+        "types": [
+          "major",
+          "major",
+          "major"
+        ],
+        "description": "Country/folk variant of I-IV-V"
+      },
+      {
+        "name": "I-IV-I-V-IV-I",
+        "degrees": [
+          1,
+          4,
+          1,
+          5,
+          4,
+          1
+        ],
+        "types": [
+          "major",
+          "major",
+          "major",
+          "major",
+          "major",
+          "major"
+        ],
+        "description": "Shortened blues progression"
+      },
+      {
+        "name": "12-bar Blues",
+        "degrees": [
+          1,
+          1,
+          1,
+          1,
+          4,
+          4,
+          1,
+          1,
+          5,
+          4,
+          1,
+          5
+        ],
+        "types": [
+          "dom7",
+          "dom7",
+          "dom7",
+          "dom7",
+          "dom7",
+          "dom7",
+          "dom7",
+          "dom7",
+          "dom7",
+          "dom7",
+          "dom7",
+          "dom7"
+        ],
+        "description": "Classic 12-bar blues"
+      },
+      {
+        "name": "I-V-vi-IV-ii-V-I",
+        "degrees": [
+          1,
+          5,
+          6,
+          4,
+          2,
+          5,
+          1
+        ],
+        "types": [
+          "major",
+          "major",
+          "minor",
+          "major",
+          "minor",
+          "major",
+          "major"
+        ],
+        "description": "Pop cadence to tonic"
+      },
+      {
+        "name": "I-vi-iii-IV-ii-V-I",
+        "degrees": [
+          1,
+          6,
+          3,
+          4,
+          2,
+          5,
+          1
+        ],
+        "types": [
+          "major",
+          "minor",
+          "minor",
+          "major",
+          "minor",
+          "major",
+          "major"
+        ],
+        "description": "Ballad turnaround"
+      },
+      {
+        "name": "I-ii-iii-IV-V",
+        "degrees": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "types": [
+          "major",
+          "minor",
+          "minor",
+          "major",
+          "major"
+        ],
+        "description": "Stepwise ascending motion"
+      },
+      {
+        "name": "I-iii-IV-iv",
+        "degrees": [
+          1,
+          3,
+          4,
+          4
+        ],
+        "types": [
+          "major",
+          "minor",
+          "major",
+          "minor"
+        ],
+        "description": "Major/minor IV change (borrowed chord)"
+      }
+    ],
+    "minor": [
+      {
+        "name": "i-VII-VI-VII",
+        "degrees": [
+          1,
+          7,
+          6,
+          7
+        ],
+        "types": [
+          "minor",
+          "major",
+          "major",
+          "major"
+        ],
+        "description": "Emotional minor progression"
+      },
+      {
+        "name": "i-iv-V-i",
+        "degrees": [
+          1,
+          4,
+          5,
+          1
+        ],
+        "types": [
+          "minor",
+          "minor",
+          "major",
+          "minor"
+        ],
+        "description": "Classic minor cadence"
+      },
+      {
+        "name": "i-VI-III-VII",
+        "degrees": [
+          1,
+          6,
+          3,
+          7
+        ],
+        "types": [
+          "minor",
+          "major",
+          "major",
+          "major"
+        ],
+        "description": "Spanish progression"
+      },
+      {
+        "name": "i-iv-v",
+        "degrees": [
+          1,
+          4,
+          5
+        ],
+        "types": [
+          "minor",
+          "minor",
+          "minor"
+        ],
+        "description": "Natural minor, basic scheme"
+      },
+      {
+        "name": "i-VI-iv-V",
+        "degrees": [
+          1,
+          6,
+          4,
+          5
+        ],
+        "types": [
+          "minor",
+          "major",
+          "minor",
+          "major"
+        ],
+        "description": "Minor pop turnaround"
+      },
+      {
+        "name": "i-VII-VI-V",
+        "degrees": [
+          1,
+          7,
+          6,
+          5
+        ],
+        "types": [
+          "minor",
+          "major",
+          "major",
+          "major"
+        ],
+        "description": "Andalusian cadence variant"
+      },
+      {
+        "name": "i-ii°-V-i",
+        "degrees": [
+          1,
+          2,
+          5,
+          1
+        ],
+        "types": [
+          "minor",
+          "dim",
+          "major",
+          "minor"
+        ],
+        "description": "Classic minor jazz cadence"
+      },
+      {
+        "name": "i-iv-VII-III",
+        "degrees": [
+          1,
+          4,
+          7,
+          3
+        ],
+        "types": [
+          "minor",
+          "minor",
+          "major",
+          "major"
+        ],
+        "description": "Minor anchor change"
+      },
+      {
+        "name": "i-iv-VI-V",
+        "degrees": [
+          1,
+          4,
+          6,
+          5
+        ],
+        "types": [
+          "minor",
+          "minor",
+          "major",
+          "major"
+        ],
+        "description": "Pop/rock in minor"
+      },
+      {
+        "name": "i-III-VI-VII",
+        "degrees": [
+          1,
+          3,
+          6,
+          7
+        ],
+        "types": [
+          "minor",
+          "major",
+          "major",
+          "major"
+        ],
+        "description": "Emotional minor chain"
+      },
+      {
+        "name": "i-iv-i-VI-VII",
+        "degrees": [
+          1,
+          4,
+          1,
+          6,
+          7
+        ],
+        "types": [
+          "minor",
+          "minor",
+          "minor",
+          "major",
+          "major"
+        ],
+        "description": "Minor rising to VII"
+      },
+      {
+        "name": "i-V-i-iv",
+        "degrees": [
+          1,
+          5,
+          1,
+          4
+        ],
+        "types": [
+          "minor",
+          "major",
+          "minor",
+          "minor"
+        ],
+        "description": "Minor classic"
+      },
+      {
+        "name": "i-iv-VI-III-VII",
+        "degrees": [
+          1,
+          4,
+          6,
+          3,
+          7
+        ],
+        "types": [
+          "minor",
+          "minor",
+          "major",
+          "major",
+          "major"
+        ],
+        "description": "Extended Andalusian cadence"
+      },
+      {
+        "name": "i-ii°-iii-iv-V",
+        "degrees": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "types": [
+          "minor",
+          "dim",
+          "major",
+          "minor",
+          "major"
+        ],
+        "description": "Minor stepwise progression"
+      }
+    ],
+    "dorian": [
+      {
+        "name": "i-IV-VII-i",
+        "degrees": [
+          1,
+          4,
+          7,
+          1
+        ],
+        "types": [
+          "minor",
+          "major",
+          "major",
+          "minor"
+        ],
+        "description": "Typical Dorian progression"
+      },
+      {
+        "name": "i-IV-i-VII",
+        "degrees": [
+          1,
+          4,
+          1,
+          7
+        ],
+        "types": [
+          "minor",
+          "major",
+          "minor",
+          "major"
+        ],
+        "description": "Return to tonic via VII"
+      },
+      {
+        "name": "i-II-IV-i",
+        "degrees": [
+          1,
+          2,
+          4,
+          1
+        ],
+        "types": [
+          "minor",
+          "major",
+          "major",
+          "minor"
+        ],
+        "description": "Bright Dorian color"
+      },
+      {
+        "name": "i-VII-IV",
+        "degrees": [
+          1,
+          7,
+          4
+        ],
+        "types": [
+          "minor",
+          "major",
+          "major"
+        ],
+        "description": "Dorian rock scheme"
+      },
+      {
+        "name": "i-ii-IV-VII",
+        "degrees": [
+          1,
+          2,
+          4,
+          7
+        ],
+        "types": [
+          "minor",
+          "major",
+          "major",
+          "major"
+        ],
+        "description": "Stepwise rise in Dorian"
+      },
+      {
+        "name": "i-v-IV-i",
+        "degrees": [
+          1,
+          5,
+          4,
+          1
+        ],
+        "types": [
+          "minor",
+          "minor",
+          "major",
+          "minor"
+        ],
+        "description": "Dorian return to tonic"
+      },
+      {
+        "name": "i-IV-v-VII",
+        "degrees": [
+          1,
+          4,
+          5,
+          7
+        ],
+        "types": [
+          "minor",
+          "major",
+          "minor",
+          "major"
+        ],
+        "description": "Characteristic Dorian figure"
+      }
+    ],
+    "mixolydian": [
+      {
+        "name": "I-bVII-IV-I",
+        "degrees": [
+          1,
+          7,
+          4,
+          1
+        ],
+        "types": [
+          "major",
+          "major",
+          "major",
+          "major"
+        ],
+        "description": "Characteristic Mixolydian progression"
+      },
+      {
+        "name": "I-IV-I-V",
+        "degrees": [
+          1,
+          4,
+          1,
+          5
+        ],
+        "types": [
+          "major",
+          "major",
+          "major",
+          "major"
+        ],
+        "description": "Folk/country turnaround"
+      },
+      {
+        "name": "I-bVII-V",
+        "degrees": [
+          1,
+          7,
+          5
+        ],
+        "types": [
+          "major",
+          "major",
+          "major"
+        ],
+        "description": "Rock'n'roll scheme"
+      },
+      {
+        "name": "I-bVII-IV-V",
+        "degrees": [
+          1,
+          7,
+          4,
+          5
+        ],
+        "types": [
+          "major",
+          "major",
+          "major",
+          "major"
+        ],
+        "description": "Extended Mixolydian"
+      },
+      {
+        "name": "I-v-IV",
+        "degrees": [
+          1,
+          5,
+          4
+        ],
+        "types": [
+          "major",
+          "minor",
+          "major"
+        ],
+        "description": "Mixolydian with minor V"
+      },
+      {
+        "name": "I-v-III-IV",
+        "degrees": [
+          1,
+          5,
+          3,
+          4
+        ],
+        "types": [
+          "major",
+          "minor",
+          "dim",
+          "major"
+        ],
+        "description": "Modal color (iii as diminished)"
+      },
+      {
+        "name": "I-IV-bVII-I",
+        "degrees": [
+          1,
+          4,
+          7,
+          1
+        ],
+        "types": [
+          "major",
+          "major",
+          "major",
+          "major"
+        ],
+        "description": "Groovy Mixolydian"
+      },
+      {
+        "name": "I-bVII-IV-IV",
+        "degrees": [
+          1,
+          7,
+          4,
+          4
+        ],
+        "types": [
+          "major",
+          "major",
+          "major",
+          "major"
+        ],
+        "description": "Rhythmic rock turnaround"
+      }
+    ],
+    "lydian": [
+      {
+        "name": "I-II-I",
+        "degrees": [
+          1,
+          2,
+          1
+        ],
+        "types": [
+          "major",
+          "major",
+          "major"
+        ],
+        "description": "Progression with characteristic Lydian sound"
+      },
+      {
+        "name": "I-II-V-I",
+        "degrees": [
+          1,
+          2,
+          5,
+          1
+        ],
+        "types": [
+          "major",
+          "major",
+          "major",
+          "major"
+        ],
+        "description": "Bright Lydian cadence"
+      },
+      {
+        "name": "I-II-vi-V",
+        "degrees": [
+          1,
+          2,
+          6,
+          5
+        ],
+        "types": [
+          "major",
+          "major",
+          "minor",
+          "major"
+        ],
+        "description": "Modern Lydian sound"
+      },
+      {
+        "name": "I-II-iii-II",
+        "degrees": [
+          1,
+          2,
+          3,
+          2
+        ],
+        "types": [
+          "major",
+          "major",
+          "minor",
+          "major"
+        ],
+        "description": "Lyrical Lydian sequence"
+      },
+      {
+        "name": "I-V-ii-II",
+        "degrees": [
+          1,
+          5,
+          2,
+          2
+        ],
+        "types": [
+          "major",
+          "major",
+          "minor",
+          "major"
+        ],
+        "description": "Lydian accent on II"
+      },
+      {
+        "name": "I-II-IV-I",
+        "degrees": [
+          1,
+          2,
+          4,
+          1
+        ],
+        "types": [
+          "major",
+          "major",
+          "major",
+          "major"
+        ],
+        "description": "Light Lydian phrase"
+      },
+      {
+        "name": "I-II-I-V",
+        "degrees": [
+          1,
+          2,
+          1,
+          5
+        ],
+        "types": [
+          "major",
+          "major",
+          "major",
+          "major"
+        ],
+        "description": "Return via V"
+      }
+    ]
+  }
+}
