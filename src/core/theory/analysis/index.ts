@@ -1,2 +1,2 @@
-export * from './AnalysisTypes';
-export * from './ConceptAnalyzer';
+export * from '../AnalysisTypes';
+export * from '../ConceptAnalyzer';

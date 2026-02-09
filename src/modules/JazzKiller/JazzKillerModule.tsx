@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useSignals } from "@preact/signals-react/runtime";
 import { useJazzLibrary, JazzStandard } from './hooks/useJazzLibrary';
 import { LeadSheet } from './components/LeadSheet';
@@ -56,21 +56,32 @@ export default function JazzKillerModule() {
         totalLoopsSignal
     } = useJazzPlayback(selectedSong);
 
+    // Track last analyzed song to prevent infinite loops
+    const lastAnalyzedSongRef = useRef<string | null>(null);
+
     // Analyze song when loaded
     useEffect(() => {
         if (selectedSong && selectedSong.music) {
-            const chords = selectedSong.music.measures
-                .flatMap(m => m.chords)
-                .filter(c => c && c !== "");
+            // Create a unique key for this song state
+            const songKey = `${selectedSong.title}-${transposeSignal.value}`;
 
-            loadSong({
-                title: selectedSong.title,
-                chords,
-                key: selectedSong.key,
-                bars: selectedSong.music.measures.length
-            });
+            // Only analyze if this is a different song or transposition
+            if (lastAnalyzedSongRef.current !== songKey) {
+                const chords = selectedSong.music.measures
+                    .flatMap(m => m.chords)
+                    .filter(c => c && c !== "");
+
+                loadSong({
+                    title: selectedSong.title,
+                    chords,
+                    key: selectedSong.key,
+                    bars: selectedSong.music.measures.length
+                });
+
+                lastAnalyzedSongRef.current = songKey;
+            }
         }
-    }, [selectedSong, loadSong]);
+    }, [selectedSong, transposeSignal.value]); // loadSong is stable from Zustand
 
     const filteredStandards = useMemo(() => {
         if (!searchQuery) return [];
@@ -386,12 +397,7 @@ export default function JazzKillerModule() {
                     </div>
 
                     <div className="flex-1 overflow-hidden flex flex-row p-6 gap-6">
-                        {/* Practice Exercise Panel (New Teaching Machine) */}
-                        {showPracticePanel && detectedPatterns.length > 0 && (
-                            <PracticeExercisePanel />
-                        )}
-
-                        {/* Guided Practice Sidebar (Original) */}
+                        {/* Guided Practice Sidebar (Original) - LEFT */}
                         {showPracticeTips && !showPracticePanel && (
                             <PracticeTips
                                 song={selectedSong}
@@ -403,8 +409,13 @@ export default function JazzKillerModule() {
                             <LeadSheet song={selectedSong} />
                         </div>
 
-                        {/* Mixer Panel */}
-                        {showMixer && (
+                        {/* Practice Exercise Panel (New Teaching Machine) - RIGHT */}
+                        {showPracticePanel && detectedPatterns.length > 0 && (
+                            <PracticeExercisePanel />
+                        )}
+
+                        {/* Mixer Panel - RIGHT */}
+                        {showMixer && !showPracticePanel && (
                             <div className="w-64 bg-neutral-900/40 backdrop-blur-md border-l border-white/5 p-6 flex flex-col gap-8 animate-in slide-in-from-right duration-300">
                                 <div className="flex items-center justify-between">
                                     <h3 className="text-sm font-black uppercase tracking-widest text-neutral-400 flex items-center gap-2">

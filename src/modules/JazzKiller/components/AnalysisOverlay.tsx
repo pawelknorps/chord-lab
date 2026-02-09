@@ -50,16 +50,31 @@ export function AnalysisOverlay({
         return null;
     }
 
-    // Calculate bracket positions (assuming equal-width measures)
-    const measureWidth = 100 / measureCount;
+    // Grid layout: 4 columns
+    const COLS = 4;
+    const getGridPosition = (measureIndex: number) => {
+        const row = Math.floor(measureIndex / COLS);
+        const col = measureIndex % COLS;
+        return { row, col };
+    };
 
     return (
-        <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute inset-0 pointer-events-none z-30">
             {concepts.map((concept, index) => {
                 const colorScheme = CONCEPT_COLORS[concept.type] || CONCEPT_COLORS['MajorII-V-I'];
-                const startPos = concept.startIndex * measureWidth;
-                const width = (concept.endIndex - concept.startIndex + 1) * measureWidth;
                 const isActive = activeFocusIndex === index;
+
+                const startPos = getGridPosition(concept.startIndex);
+                const endPos = getGridPosition(concept.endIndex);
+
+                // Calculate if pattern spans multiple rows
+                const spanRows = endPos.row - startPos.row + 1;
+                const isSingleRow = spanRows === 1;
+
+                // For single row, calculate width
+                const startCol = startPos.col;
+                const endCol = endPos.col;
+                const colSpan = endCol - startCol + 1;
 
                 return (
                     <button
@@ -70,68 +85,44 @@ export function AnalysisOverlay({
               border-2 rounded-xl
               transition-all duration-300
               ${colorScheme.bg} ${colorScheme.border}
-              ${isActive ? 'ring-4 ring-white/30 scale-105' : 'hover:scale-102'}
+              ${isActive ? 'ring-4 ring-amber-500/50 scale-[1.02] z-40' : 'hover:scale-[1.01] z-30'}
               cursor-pointer group
             `}
                         style={{
-                            left: `${startPos}%`,
-                            width: `${width}%`,
-                            top: `${10 + (index % 3) * 25}px`,
-                            height: '60px',
+                            // Position based on grid
+                            top: `${startPos.row * 25}%`,
+                            left: isSingleRow ? `${(startCol / COLS) * 100}%` : '0%',
+                            width: isSingleRow ? `${(colSpan / COLS) * 100}%` : '100%',
+                            height: `${spanRows * 25}%`,
+                            minHeight: '80px',
                         }}
                     >
                         {/* Label */}
                         <div
                             className={`
-                absolute -top-6 left-2
-                px-2 py-0.5 rounded-md
-                text-[10px] font-black uppercase tracking-wider
+                absolute -top-7 left-2
+                px-2 py-1 rounded-md
+                text-[11px] font-black uppercase tracking-wider
                 ${colorScheme.bg} ${colorScheme.text}
-                border ${colorScheme.border}
-                shadow-lg
+                border-2 ${colorScheme.border}
+                shadow-lg backdrop-blur-sm
                 ${isActive ? 'animate-pulse' : ''}
               `}
                         >
                             {colorScheme.label}
                         </div>
 
-                        {/* Bracket visualization */}
-                        <svg
-                            className="absolute inset-0 w-full h-full"
-                            style={{ overflow: 'visible' }}
-                        >
-                            {/* Top bracket */}
-                            <path
-                                d={`M 5 0 L 0 0 L 0 10`}
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                className={colorScheme.text}
-                            />
-                            <path
-                                d={`M calc(100% - 5px) 0 L 100% 0 L 100% 10`}
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                className={colorScheme.text}
-                            />
-
-                            {/* Bottom bracket */}
-                            <path
-                                d={`M 5 100% L 0 100% L 0 calc(100% - 10px)`}
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                className={colorScheme.text}
-                            />
-                            <path
-                                d={`M calc(100% - 5px) 100% L 100% 100% L 100% calc(100% - 10px)`}
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                className={colorScheme.text}
-                            />
-                        </svg>
+                        {/* Corner brackets */}
+                        <div className={`absolute inset-0 ${colorScheme.text}`}>
+                            {/* Top-left */}
+                            <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-current" />
+                            {/* Top-right */}
+                            <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-current" />
+                            {/* Bottom-left */}
+                            <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-current" />
+                            {/* Bottom-right */}
+                            <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-current" />
+                        </div>
 
                         {/* Info on hover */}
                         <div
@@ -145,7 +136,7 @@ export function AnalysisOverlay({
                 transition-opacity duration-200
               `}
                         >
-                            <div className="font-bold mb-1">{concept.type}</div>
+                            <div className="font-bold mb-1 text-white">{concept.type}</div>
                             {concept.metadata.key && (
                                 <div className="text-neutral-400">Key: {concept.metadata.key}</div>
                             )}

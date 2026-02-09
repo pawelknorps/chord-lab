@@ -134,7 +134,18 @@ export function PracticeExercisePanel() {
 
                             {/* Action button */}
                             <button
-                                onClick={() => isActive ? clearFocus() : focusOnPattern(index)}
+                                onClick={async () => {
+                                    if (isActive) {
+                                        clearFocus();
+                                    } else {
+                                        focusOnPattern(index);
+                                        // Auto-start playback when focusing on a pattern
+                                        const { isPlaying, togglePlayback } = usePracticeStore.getState();
+                                        if (!isPlaying) {
+                                            await togglePlayback();
+                                        }
+                                    }
+                                }}
                                 className={`
                   w-full mt-3 px-4 py-2 rounded-lg
                   flex items-center justify-center gap-2
