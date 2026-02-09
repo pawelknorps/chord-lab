@@ -493,6 +493,25 @@ export default function SubdivisionPyramid() {
                                 className="w-full h-2 bg-black/40 rounded-lg appearance-none cursor-pointer accent-amber-500"
                             />
                         </div>
+
+                        {/* Target Reps Control (Random Mode) */}
+                        {isRandomMode && (
+                            <div className="space-y-2">
+                                <div className="flex justify-between items-center">
+                                    <label className="text-xs text-purple-300 uppercase tracking-widest font-bold">Practice Measures</label>
+                                    <span className="text-lg font-mono text-white">{targetReps}</span>
+                                </div>
+                                <input
+                                    type="range"
+                                    min="4"
+                                    max="16"
+                                    step="1"
+                                    value={targetReps}
+                                    onChange={(e) => setTargetReps(Number(e.target.value))}
+                                    className="w-full h-2 bg-black/40 rounded-lg appearance-none cursor-pointer accent-purple-500"
+                                />
+                            </div>
+                        )}
                     </div>
 
                     {/* Subdivision Selector - Practice Mode */}

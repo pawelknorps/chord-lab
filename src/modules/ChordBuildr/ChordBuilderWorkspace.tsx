@@ -29,22 +29,38 @@ function detectChord(notes: Note[]): { name: string; formula: string; intervals:
     const intervals = sorted.map(n => (n.midi - root.midi) % 12);
 
     const has = (int: number) => intervals.includes(int);
-    let name = root.name;
+    const rootName = root.name.replace(/[0-9-]/g, ''); // Remove octave numbers
     let quality = '';
 
-    // Basic chord detection logic (can be expanded)
-    if (has(4) && has(7)) { // Major triad
-        quality = has(11) ? 'maj7' : has(10) ? '7' : '';
-    } else if (has(3) && has(7)) { // Minor triad
-        quality = has(10) ? 'm7' : 'm';
-    } else if (has(3) && has(6)) { // Diminished triad
-        quality = 'dim';
-    } else if (has(4) && has(8)) { // Augmented triad
+    // Improved chord detection
+    if (has(4) && has(7)) {
+        // Major triad base
+        if (has(11)) quality = 'maj7';
+        else if (has(10)) quality = '7';
+        else if (has(2) && has(10)) quality = '9';
+        else quality = '';
+    } else if (has(3) && has(7)) {
+        // Minor triad base
+        if (has(10)) quality = 'm7';
+        else if (has(11)) quality = 'm(maj7)';
+        else quality = 'm';
+    } else if (has(3) && has(6)) {
+        // Diminished
+        if (has(9)) quality = 'dim7';
+        else if (has(10)) quality = 'm7♭5';
+        else quality = 'dim';
+    } else if (has(4) && has(8)) {
         quality = 'aug';
+    } else if (has(5) && has(7)) {
+        quality = 'sus4';
+    } else if (has(2) && has(7)) {
+        quality = 'sus2';
+    } else {
+        quality = '?';
     }
 
-    const formula = intervals.map(i => INTERVAL_NAMES[i]).filter(Boolean).join('-');
-    return { name: name + quality, formula, intervals };
+    const formula = intervals.map(i => INTERVAL_NAMES[i] || '?').join('-');
+    return { name: rootName + quality, formula, intervals };
 }
 
 export default function ChordBuilderWorkspace() {
@@ -97,56 +113,64 @@ export default function ChordBuilderWorkspace() {
         return CHORD_TONE_COLORS[name] || 'bg-gray-500';
     };
 
-    // Render piano keyboard
     const renderPiano = () => {
-        const octaves = [3, 4, 5]; // C3 to B5
+        const startOctave = 3;
+        const numOctaves = 3;
         const whiteKeys = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
-        const blackKeyPositions = [1, 2, 4, 5, 6]; // After C, D, F, G, A
+        const blackKeyMap: Record<string, string> = {
+            'C': 'C#', 'D': 'D#', 'F': 'F#', 'G': 'G#', 'A': 'A#'
+        };
 
         return (
             <div className="relative flex justify-center py-8">
                 <div className="relative inline-flex">
-                    {octaves.map(octave => (
-                        <div key={octave} className="relative flex">
-                            {whiteKeys.map((note, idx) => {
-                                const midiNote = 12 * (octave + 1) + [0, 2, 4, 5, 7, 9, 11][idx];
-                                const isActive = notes.some(n => n.midi === midiNote) || Array.from(activeNotes).includes(midiNote);
+                    {Array.from({ length: numOctaves }, (_, octIdx) => {
+                        const octave = startOctave + octIdx;
+                        return (
+                            <div key={octave} className="relative flex">
+                                {whiteKeys.map((noteName, idx) => {
+                                    const noteOffset = [0, 2, 4, 5, 7, 9, 11][idx];
+                                    const midiNote = (octave + 1) * 12 + noteOffset;
+                                    const isActive = notes.some(n => n.midi === midiNote) || Array.from(activeNotes).includes(midiNote);
+                                    const hasBlack = blackKeyMap[noteName];
 
-                                return (
-                                    <div key={`${note}${octave}`} className="relative">
-                                        <button
-                                            onClick={() => handleNoteClick(midiNote)}
-                                            className={`
-                        w-12 h-40 border-2 border-[var(--border-subtle)] rounded-b-lg transition-all
-                        ${isActive
-                                                    ? 'bg-[var(--accent)] border-[var(--accent)] shadow-[0_0_20px_var(--accent-glow)]'
-                                                    : 'bg-white hover:bg-gray-100'
-                                                }
-                      `}
-                                        >
-                                            <span className="absolute bottom-2 left-1/2 -translate-x-1/2 text-[9px] font-mono text-gray-400">
-                                                {note}{octave}
-                                            </span>
-                                        </button>
-
-                                        {/* Black key */}
-                                        {blackKeyPositions.includes(idx) && (
+                                    return (
+                                        <div key={`${noteName}${octave}`} className="relative">
+                                            {/* White key */}
                                             <button
-                                                onClick={() => handleNoteClick(midiNote + 1)}
+                                                onClick={() => handleNoteClick(midiNote)}
                                                 className={`
-                          absolute top-0 -right-4 w-8 h-24 z-10 rounded-b-lg border-2 border-[var(--border-subtle)] transition-all
-                          ${notes.some(n => n.midi === midiNote + 1) || Array.from(activeNotes).includes(midiNote + 1)
+                                                    w-12 h-40 border-2 border-[var(--border-subtle)] rounded-b-lg transition-all
+                                                    ${isActive
                                                         ? 'bg-[var(--accent)] border-[var(--accent)] shadow-[0_0_20px_var(--accent-glow)]'
-                                                        : 'bg-gray-900 hover:bg-gray-700'
+                                                        : 'bg-white hover:bg-gray-100'
                                                     }
-                        `}
-                                            />
-                                        )}
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    ))}
+                                                `}
+                                            >
+                                                <span className="absolute bottom-2 left-1/2 -translate-x-1/2 text-[9px] font-mono text-gray-400">
+                                                    {noteName}{octave}
+                                                </span>
+                                            </button>
+
+                                            {/* Black key */}
+                                            {hasBlack && (
+                                                <button
+                                                    onClick={() => handleNoteClick(midiNote + 1)}
+                                                    className={`
+                                                        absolute top-0 -right-4 w-8 h-24 z-10 rounded-b-lg border-2 border-[var(--border-subtle)] transition-all
+                                                        ${notes.some(n => n.midi === midiNote + 1) || Array.from(activeNotes).includes(midiNote + 1)
+                                                            ? 'bg-[var(--accent)] border-[var(--accent)] shadow-[0_0_20px_var(--accent-glow)]'
+                                                            : 'bg-gray-900 hover:bg-gray-700'
+                                                        }
+                                                    `}
+                                                />
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        );
+                    })}
                 </div>
             </div>
         );
