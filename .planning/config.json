@@ -1,6 +1,7 @@
 {
-    "mode": "auto",
-    "depth": "standard",
-    "parallelization": "sequential",
-    "commit_docs": false
+    "mode": "YOLO",
+    "depth": "Standard",
+    "parallelization": "Sequential",
+    "commit_docs": true,
+    "milestone_name": "Jazz Education Expansion"
 }

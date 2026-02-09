@@ -1,33 +1,30 @@
-# Requirements
+# Requirements: Jazz Education Expansion
 
-## Core Infrastructure
-| ID | Requirement | Priority | Status |
-| :--- | :--- | :--- | :--- |
-| **CORE-01** | **Global Audio Manager**: Ensure all audio engines (Metronome, Polyrhythm) stop immediately when switching tabs or navigating away. | P0 | Pending |
-| **CORE-02** | **Design System Application**: Apply "Swiss/Minimalist" design tokens (glassmorphism, typography, colors) to all Rhythm components. | P1 | Pending |
+## V1 Requirements (Must-Haves)
 
-## Syncopation Module
-| ID | Requirement | Priority | Status |
-| :--- | :--- | :--- | :--- |
-| **SYNC-01** | **Fix Ghost Notes**: Ensure ghost notes are audible (fix `triggerAttackRelease` call). | P0 | Pending |
-| **SYNC-02** | **Gamified Mode**: Create "Dictation" mode for syncopation (hear pattern -> write pattern). | P1 | Pending |
-| **SYNC-03** | **Progressive Difficulty**: Add levels (Easy 4-beat -> complex 16-beat with rests/ghosts). | P1 | Pending |
-| **SYNC-04** | **Export**: Allow exporting created grooves to MIDI. | P2 | Pending |
+### Concept Highlighting
+- **REQ-HL-01**: System identifies and visually brackets **ii-V-I** progressions (Major and Minor) in any loaded standard.
+- **REQ-HL-02**: System identifies **Secondary Dominants** (V of V, V of ii, etc.).
+- **REQ-HL-03**: Users can toggle highlighters on/off via a "Theory Layer" menu.
 
-## Polyrhythm Module
-| ID | Requirement | Priority | Status |
-| :--- | :--- | :--- | :--- |
-| **POLY-01** | **Visualizer Fix**: Ensure visualizer updates when parameters change during playback. | P0 | Pending |
-| **POLY-02** | **Tap Challenge**: Add interactive mode where user taps one rhythm against a reference beat. | P1 | Pending |
-| **POLY-03** | **Progression**: Unlock harder polyrhythms as user masters simple ones (e.g., 3:2 -> 5:4). | P1 | Pending |
+### Learn Panels
+- **REQ-LP-01**: A collapsible sidebar component (`LearnPanel`) available in the main Jazz view.
+- **REQ-LP-02**: Panel displays text content relevant to the currently selected chord or highlighted block.
+- **REQ-LP-03**: "What is this?" feature: Clicking a chord/concept populates the panel with a definition and usage examples.
 
-## Subdivision Module
-| ID | Requirement | Priority | Status |
-| :--- | :--- | :--- | :--- |
-| **SUB-01** | **Interactive Pyramid**: Make the subdivision pyramid clickable to mute/unmute specific partials. | P1 | Pending |
-| **SUB-02** | **Drills**: Add "Switch" exercises (e.g., maintain pulse, switch from triplets to 16ths). | P2 | Pending |
+### Guided Practice
+- **REQ-GP-01**: A "Practice Mode" toggle that simplifies the UI.
+- **REQ-GP-02**: **Bassline Routine**: Highlights root notes, mutes other tracks, prompts user to play roots.
+- **REQ-GP-03**: **Shell Routine**: Highlights 3rd and 7th, prompts user to play shells.
+- **REQ-GP-04**: Progression tracking: Simple "Next" button to advance through chords in the song at user's pace.
 
-## General Gamification
-| ID | Requirement | Priority | Status |
-| :--- | :--- | :--- | :--- |
-| **GAME-01** | **Universal Scoring**: Ensure all correct answers award XP and update global streak. | P1 | Pending |
+## V2 Requirements (Nice-to-Haves)
+- **REQ-HL-04**: Analysis of Tritone Substitutions.
+- **REQ-HL-05**: Analysis of Coltrane Changes.
+- **REQ-GP-05**: MIDI Input Validation (Listen to user playing and auto-advance).
+- **REQ-GP-06**: Rhythmic specific exercises (Charleston rhythm etc.).
+- **REQ-LP-04**: Interactive diagrams inside the Learn Panel (mini-fretboard/piano).
+
+## Out of Scope
+- Vocal comping.
+- Drum tracks generation beyond basic metronome.
