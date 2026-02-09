@@ -9,23 +9,21 @@ export class MetronomeEngine {
 
     // Synths
     private clickSynth: Tone.MembraneSynth;
-    private subSynth: Tone.MetalSynth;
+    private ghostSynth: Tone.MembraneSynth;
 
     constructor() {
         this.clickSynth = new Tone.MembraneSynth({
             pitchDecay: 0.008,
             octaves: 2,
-            envelope: { attack: 0.001, decay: 0.3, sustain: 0, release: 0.1 }
+            envelope: { attack: 0.001, decay: 0.2, sustain: 0, release: 0.1 }
         }).toDestination();
 
-        this.subSynth = new Tone.MetalSynth({
-            envelope: { attack: 0.001, decay: 0.1, release: 0.01 },
-            harmonicity: 5.1,
-            modulationIndex: 32,
-            resonance: 4000,
-            octaves: 1.5,
+        this.ghostSynth = new Tone.MembraneSynth({
+            pitchDecay: 0.002,
+            octaves: 1,
+            envelope: { attack: 0.001, decay: 0.1, sustain: 0, release: 0.05 }
         }).toDestination();
-        this.subSynth.volume.value = -12;
+        this.ghostSynth.volume.value = -15;
     }
 
     setBpm(bpm: number) {
@@ -99,9 +97,9 @@ export class MetronomeEngine {
                 if (type === 2) {
                     this.clickSynth.triggerAttackRelease("C2", "32n", time, 1.0);
                 } else if (type === 1) {
-                    this.subSynth.triggerAttackRelease("C2", "32n", time, 0.4); // Ghost (Increased velocity for audibility)
+                    this.ghostSynth.triggerAttackRelease("C2", "32n", time, 0.6); // Ghost (audible click)
                 } else if (type === 3) {
-                    this.subSynth.triggerAttackRelease("C2", "32n", time, 0.8); // Normal
+                    this.clickSynth.triggerAttackRelease("C2", "32n", time, 0.5); // Normal
                 }
 
                 step++;

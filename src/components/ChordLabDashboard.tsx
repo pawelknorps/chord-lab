@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Controls } from '../modules/ChordLab/components/Controls';
-import { PianoKeyboard } from '../modules/ChordLab/components/PianoKeyboard';
+import { UnifiedPiano } from './shared/UnifiedPiano';
+import { UnifiedFretboard } from './shared/UnifiedFretboard';
+import { SendToMenu } from './shared/SendToMenu';
 import { ProgressionBuilder } from '../modules/ChordLab/components/ProgressionBuilder';
 import { ConstantStructureTool } from '../modules/ChordLab/components/ConstantStructureTool';
 import { SmartLibrary } from '../modules/ChordLab/components/SoundLibrary/SmartLibrary';
@@ -8,6 +10,7 @@ import type { ChordInfo, Progression } from '../core/theory';
 import type { Style } from '../core/audio/globalAudio';
 import { Mixer } from '../modules/ChordLab/components/Mixer';
 import { PracticeTips } from '../modules/ChordLab/components/PracticeTips';
+import { useAudioCleanup } from '../hooks/useAudioManager';
 
 interface ChordLabDashboardProps {
     selectedKey: string;
@@ -62,40 +65,60 @@ export function ChordLabDashboard({
     userPresets, onSaveUserPreset
 }: ChordLabDashboardProps) {
 
+    useAudioCleanup('chordlab-dashboard');
     const [showMixer, setShowMixer] = useState(false);
     const [showPracticeTips, setShowPracticeTips] = useState(false);
 
     // Display Logic
     const displayedNotes = [...visualizedNotes, ...midiNotes];
 
+    // Prepare progression data for SendToMenu
+    const progressionData = useMemo(() => {
+        const validChords = progression.filter((c): c is ChordInfo => c !== null);
+        if (validChords.length === 0) return null;
+
+        return {
+            chords: validChords.map(c => c.root + (c.quality === 'maj' ? '' : c.quality)),
+            key: selectedKey,
+        };
+    }, [progression, selectedKey]);
+
     return (
         <div className="flex flex-col gap-6">
             {/* --- ROW 1: Controls --- */}
-            <div className="w-full">
-                <Controls
-                    selectedKey={selectedKey}
-                    selectedScale={selectedScale}
-                    selectedVoicing={selectedVoicing}
-                    selectedStyle={selectedStyle}
-                    bpm={bpm}
-                    isPlaying={isPlaying}
-                    onKeyChange={onKeyChange}
-                    onScaleChange={onScaleChange}
-                    onVoicingChange={onVoicingChange}
-                    onStyleChange={onStyleChange}
-                    onBpmChange={onBpmChange}
-                    onPlay={onPlay}
-                    onStop={onStop}
-                    onExportMidi={onExportMidi}
-                    isLooping={isLooping}
-                    onLoopToggle={onLoopToggle}
-                    transposeSettings={transposeSettings}
-                    onTransposeSettingsChange={onTransposeSettingsChange}
-                    showMixer={showMixer}
-                    onMixerToggle={() => setShowMixer(!showMixer)}
-                    showPracticeTips={showPracticeTips}
-                    onPracticeTipsToggle={() => setShowPracticeTips(!showPracticeTips)}
-                />
+            <div className="w-full flex items-start gap-3">
+                <div className="flex-1">
+                    <Controls
+                        selectedKey={selectedKey}
+                        selectedScale={selectedScale}
+                        selectedVoicing={selectedVoicing}
+                        selectedStyle={selectedStyle}
+                        bpm={bpm}
+                        isPlaying={isPlaying}
+                        onKeyChange={onKeyChange}
+                        onScaleChange={onScaleChange}
+                        onVoicingChange={onVoicingChange}
+                        onStyleChange={onStyleChange}
+                        onBpmChange={onBpmChange}
+                        onPlay={onPlay}
+                        onStop={onStop}
+                        onExportMidi={onExportMidi}
+                        isLooping={isLooping}
+                        onLoopToggle={onLoopToggle}
+                        transposeSettings={transposeSettings}
+                        onTransposeSettingsChange={onTransposeSettingsChange}
+                        showMixer={showMixer}
+                        onMixerToggle={() => setShowMixer(!showMixer)}
+                        showPracticeTips={showPracticeTips}
+                        onPracticeTipsToggle={() => setShowPracticeTips(!showPracticeTips)}
+                    />
+                </div>
+                {progressionData && (
+                    <SendToMenu
+                        progression={progressionData}
+                        sourceModule="chordlab"
+                    />
+                )}
             </div>
 
             {showMixer && <Mixer onClose={() => setShowMixer(false)} />}
@@ -115,13 +138,24 @@ export function ChordLabDashboard({
                             {selectedKey} {selectedScale}
                         </div>
                     </div>
-                    <div className="min-w-max mx-auto">
-                        <PianoKeyboard
+                    <div className="min-w-max mx-auto flex flex-col gap-6">
+                        <UnifiedPiano
+                            mode="highlight"
                             activeNotes={displayedNotes}
-                            onChordClick={onChordClick}
                             highlightedNotes={highlightedNotes}
-                            keySignature={selectedKey}
+                            showLabels="note-name"
                         />
+                        <div className="border-t border-[var(--border-subtle)] pt-6">
+                            <UnifiedFretboard
+                                mode="notes"
+                                activeNotes={displayedNotes}
+                                highlightedNotes={highlightedNotes}
+                                fretRange={[0, 15]}
+                                showFretNumbers={true}
+                                showStringNames={true}
+                                interactive={false}
+                            />
+                        </div>
                     </div>
                 </div>
             </div>

@@ -10,6 +10,7 @@ interface FETState {
     streak: number;
     currentKey: string;
     isPlaying: boolean;
+    externalData: any | null;
 
     // Actions
     setLevel: (level: FETLevel) => void;
@@ -18,6 +19,7 @@ interface FETState {
     resetScore: () => void;
     setKey: (key: string) => void;
     setPlaying: (playing: boolean) => void;
+    setExternalData: (data: any | null) => void;
 }
 
 export const useFunctionalEarTrainingStore = create<FETState>((set) => ({
@@ -27,6 +29,7 @@ export const useFunctionalEarTrainingStore = create<FETState>((set) => ({
     streak: 0,
     currentKey: 'C',
     isPlaying: false,
+    externalData: null,
 
     setLevel: (level) => set({ level }),
     setDifficulty: (difficulty) => set({ difficulty }),
@@ -37,4 +40,5 @@ export const useFunctionalEarTrainingStore = create<FETState>((set) => ({
     resetScore: () => set({ score: 0, streak: 0 }),
     setKey: (key) => set({ currentKey: key }),
     setPlaying: (playing) => set({ isPlaying: playing }),
+    setExternalData: (externalData) => set({ externalData }),
 }));

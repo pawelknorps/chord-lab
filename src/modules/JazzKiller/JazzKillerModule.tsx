@@ -12,10 +12,12 @@ import {
     pianoReverbSignal,
     reverbVolumeSignal
 } from './state/jazzSignals';
-// Unused redundant imports removed
 import { Search, Music, Play, StopCircle, X, ChevronUp, ChevronDown, Sliders, Volume2, Target as Targeted } from 'lucide-react';
+import { SendToMenu } from '../../components/shared/SendToMenu';
+import { useAudioCleanup } from '../../hooks/useAudioManager';
 
 export default function JazzKillerModule() {
+    useAudioCleanup('jazz-killer');
     useSignals();
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedStandard, setSelectedStandard] = useState<JazzStandard | null>(null);
@@ -81,6 +83,17 @@ export default function JazzKillerModule() {
             .sort(() => Math.random() - 0.5)
             .slice(0, 6);
     }, [selectedStandard, standards]);
+
+    const progressionData = useMemo(() => {
+        if (!selectedSong) return null;
+        const chords = selectedSong.music.measures
+            .flatMap(m => m.chords)
+            .filter(c => c && c !== "");
+        return {
+            chords,
+            key: selectedSong.key
+        };
+    }, [selectedSong]);
 
     return (
         <div className="h-full w-full bg-[#0a0a0a] text-white p-4 md:p-8 flex flex-col gap-6 overflow-hidden relative">
@@ -195,8 +208,6 @@ export default function JazzKillerModule() {
 
                         <div className="h-10 w-px bg-white/10 mx-1"></div>
 
-                        <div className="h-10 w-px bg-white/10 mx-1"></div>
-
                         {/* Quick Search in Header */}
                         <div className="flex items-center gap-2 group px-2">
                             <Search className="text-neutral-500 group-focus-within:text-amber-400 transition-colors" size={18} />
@@ -225,6 +236,15 @@ export default function JazzKillerModule() {
                                 </div>
                             )}
                         </div>
+
+                        <div className="h-10 w-px bg-white/10 mx-1"></div>
+
+                        {progressionData && (
+                            <SendToMenu
+                                progression={progressionData}
+                                sourceModule="jazz-killer"
+                            />
+                        )}
 
                         <div className="h-10 w-px bg-white/10 mx-1"></div>
 

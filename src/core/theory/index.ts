@@ -170,11 +170,10 @@ export function midiToNoteName(midi: number, context?: string | boolean): string
     if (pc === 8 && !['A', 'E', 'B'].includes(tonic)) prefersFlats = true;
 
     // Db (1) vs C#
-    // Db is common (Db Major, Ab Major). C# is common (D Major, A Major).
-    // Here we respect the 'tonic' if it's D or A.
-    // But if neutral 'C', C# is slightly more standard as an accidental usually? 
-    // Actually Db is bII (Neapolitan) or tritone sub root. C# is.. C#.
-    // Let's leave Db/C# to the general 'FLAT_KEYS' check unless we want to force something.
+    // User requested explicitly: Flats circle is F -> Gb. This includes Db.
+    // C# is only diatonic in D Major, A Major, E Major, B Major, F# Major.
+    // So unless we are explicitly in D/A/E/B/F#, it should be Db.
+    if (pc === 1 && !['D', 'A', 'E', 'B', 'F#', 'C#'].includes(tonic)) prefersFlats = true;
   }
 
   const noteName = prefersFlats ? NOTE_NAMES_FLAT[pc] : NOTE_NAMES[pc];

@@ -5,9 +5,10 @@ import { Midi } from '@tonejs/midi';
 import * as Tone from 'tone';
 import { Play, Check, X, ArrowRight, Music, AudioWaveform } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { audioManager } from '../../../../core/services';
 
 export const ProgressionsLevel: React.FC = () => {
-    const { addScore, setPlaying, difficulty, streak } = useFunctionalEarTrainingStore();
+    const { addScore, setPlaying, difficulty, streak, externalData, setExternalData } = useFunctionalEarTrainingStore();
     const { files } = useMidiLibrary();
     const [currentProgression, setCurrentProgression] = useState<any>(null);
     const [options, setOptions] = useState<string[]>([]);
@@ -16,15 +17,16 @@ export const ProgressionsLevel: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [history, setHistory] = useState<string[]>([]);
 
-    // Filter valid progressions
     const validFiles = files.filter(f => f.progression && f.progression.length > 0);
 
     const loadNewProgression = useCallback(() => {
-        if (validFiles.length === 0) return;
+        if (externalData) {
+            setExternalData(null);
+        }
 
+        if (validFiles.length === 0) return;
         setLoading(true);
 
-        // Try to pick a file that hasn't been used recently
         let randomFile = validFiles[Math.floor(Math.random() * validFiles.length)];
         let attempts = 0;
         while (history.includes(randomFile.name) && attempts < 5 && validFiles.length > 5) {
@@ -35,11 +37,9 @@ export const ProgressionsLevel: React.FC = () => {
         setCurrentProgression(randomFile);
         setHistory(prev => [randomFile.name, ...prev].slice(0, 10));
 
-        // Generate options (1 correct, 3 distractors)
         const correct = randomFile.progression!;
         const distractors = new Set<string>();
 
-        // Try to find distractors that are different
         let distractorAttempts = 0;
         while (distractors.size < 3 && distractorAttempts < 20) {
             const randomDistractor = validFiles[Math.floor(Math.random() * validFiles.length)].progression!;
@@ -50,7 +50,6 @@ export const ProgressionsLevel: React.FC = () => {
         }
 
         const allOptions = [correct, ...Array.from(distractors)];
-        // Shuffle options
         for (let i = allOptions.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [allOptions[i], allOptions[j]] = [allOptions[j], allOptions[i]];
@@ -60,11 +59,36 @@ export const ProgressionsLevel: React.FC = () => {
         setSelectedOption(null);
         setResult(null);
         setLoading(false);
-    }, [validFiles, history]);
+    }, [validFiles, history, externalData, setExternalData]);
 
     useEffect(() => {
-        if (files.length > 0 && !currentProgression) loadNewProgression();
-    }, [files, currentProgression, loadNewProgression]);
+        if (externalData && externalData.chords) {
+            const correctProg = externalData.chords.join(', ');
+            setCurrentProgression({
+                name: "Integration Exercise",
+                key: externalData.key || "Unknown",
+                progression: correctProg,
+                isExternal: true,
+                data: externalData
+            });
+
+            const distractors = ["I IV V I", "ii V I", "I vi ii V", "IV V iii vi"];
+            const allOptions = [correctProg, ...distractors.filter(d => d !== correctProg).slice(0, 3)];
+
+            for (let i = allOptions.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [allOptions[i], allOptions[j]] = [allOptions[j], allOptions[i]];
+            }
+
+            setOptions(allOptions);
+            setSelectedOption(null);
+            setResult(null);
+        }
+    }, [externalData]);
+
+    useEffect(() => {
+        if (!externalData && files.length > 0 && !currentProgression) loadNewProgression();
+    }, [files, currentProgression, loadNewProgression, externalData]);
 
     const playAudio = async () => {
         if (!currentProgression) return;
@@ -72,6 +96,13 @@ export const ProgressionsLevel: React.FC = () => {
 
         try {
             await Tone.start();
+
+            if (currentProgression.isExternal && currentProgression.data.notes) {
+                audioManager.playChord(currentProgression.data.notes, '1n', 0.8);
+                setTimeout(() => setPlaying(false), 2000);
+                return;
+            }
+
             const url = await currentProgression.loadUrl();
             const midi = await Midi.fromUrl(url);
 
@@ -81,26 +112,15 @@ export const ProgressionsLevel: React.FC = () => {
             midi.tracks.forEach(track => {
                 const synth = new Tone.PolySynth(Tone.Synth, {
                     oscillator: { type: 'triangle' },
-                    envelope: {
-                        attack: 0.05,
-                        decay: 0.2,
-                        sustain: 0.4,
-                        release: 1
-                    }
+                    envelope: { attack: 0.05, decay: 0.2, sustain: 0.4, release: 1 }
                 }).toDestination();
                 synths.push(synth);
 
                 track.notes.forEach(note => {
-                    synth.triggerAttackRelease(
-                        note.name,
-                        note.duration,
-                        now + note.time,
-                        note.velocity
-                    );
+                    synth.triggerAttackRelease(note.name, note.duration, now + note.time, note.velocity);
                 });
             });
 
-            // Auto-stop after duration
             setTimeout(() => {
                 synths.forEach(s => s.dispose());
                 setPlaying(false);
@@ -127,7 +147,7 @@ export const ProgressionsLevel: React.FC = () => {
         }
     };
 
-    if (validFiles.length === 0) {
+    if (validFiles.length === 0 && !externalData) {
         return (
             <div className="flex flex-col items-center gap-4 text-white/40 font-black uppercase tracking-widest text-sm">
                 <Music className="w-12 h-12 opacity-20 mb-2" />
@@ -159,10 +179,7 @@ export const ProgressionsLevel: React.FC = () => {
             <div className="flex flex-col items-center gap-8">
                 <div className="relative group">
                     <motion.div
-                        animate={{
-                            scale: [1, 1.1, 1],
-                            opacity: [0.1, 0.3, 0.1]
-                        }}
+                        animate={{ scale: [1, 1.1, 1], opacity: [0.1, 0.3, 0.1] }}
                         transition={{ duration: 5, repeat: Infinity }}
                         className="absolute -inset-10 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 rounded-full blur-3xl"
                     ></motion.div>

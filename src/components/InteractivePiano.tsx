@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import * as Tone from 'tone';
-import { PianoKeyboard } from '../modules/ChordLab/components/PianoKeyboard';
+import { UnifiedPiano } from './shared/UnifiedPiano';
 import { useMidi } from '../context/MidiContext';
 import { useAudio } from '../context/AudioContext';
 
@@ -83,27 +83,31 @@ export function InteractivePiano({
 
     }, [lastNote, showInput, enableSound, isReady, onNoteOn, onNoteOff]);
 
-    // Handle mouse clicks on keyboard (Mirror MIDI behavior)
-    // PianoKeyboard currently uses chords, but we can pass a dummy handler if we want simple note triggers?
-    // The current PianoKeyboard handles "ChordInfo" clicks. 
-    // We might need to upgrade PianoKeyboard to handle single note clicks if we want mouse to play single notes.
-    // For now, let's just focus on MIDI INPUT visualization.
+    const handleNoteClick = (note: number) => {
+        if (enableSound && synthRef.current && isReady) {
+            synthRef.current.triggerAttackRelease(Tone.Frequency(note, "midi").toNote(), "8n");
+        }
+        onNoteOn?.(note);
+        setTimeout(() => onNoteOff?.(note), 200);
+    };
 
     return (
-        <div className="relative">
+        <div className="relative w-full flex justify-center">
             {!selectedInput && showInput && (
                 <div className="absolute -top-6 left-0 text-xs text-red-400 animate-pulse">
                     ⚠️ No MIDI Device Selected
                 </div>
             )}
-            <PianoKeyboard
-                startOctave={startOctave}
-                endOctave={endOctave}
-                highlightedNotes={[...Array.from(activeNotes), ...highlightedNotes]}
-                // We pass empty chords/handler for now as this is a "Visualizer/Player" mostly
-                chords={[]}
-                onChordClick={() => { }}
-            />
+            <div className="w-full max-w-4xl overflow-hidden rounded-xl border border-white/10 bg-black/20 shadow-xl">
+                <UnifiedPiano
+                    mode="input"
+                    octaveRange={[startOctave, endOctave]}
+                    activeNotes={Array.from(activeNotes)}
+                    highlightedNotes={highlightedNotes}
+                    onNoteClick={handleNoteClick}
+                    showLabels="note-name"
+                />
+            </div>
         </div>
     );
 }

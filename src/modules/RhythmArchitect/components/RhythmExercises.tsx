@@ -227,23 +227,23 @@ export default function RhythmExercises() {
     return (
         <div className="w-full h-full p-6 pb-20 fade-in flex flex-col max-w-7xl mx-auto space-y-6">
             {/* Header / Stats */}
-            <header className="flex flex-col md:flex-row justify-between items-center bg-white/5 backdrop-blur-xl p-6 rounded-3xl border border-white/10 shrink-0 shadow-lg gap-6 md:gap-0">
+            <header className="flex flex-col md:flex-row justify-between items-center bg-[var(--bg-panel)] p-8 rounded-[2rem] border border-[var(--border-subtle)] shadow-2xl gap-8">
                 <div className="flex items-center gap-6">
-                    <div className="p-4 bg-indigo-500/20 text-indigo-400 rounded-2xl ring-1 ring-indigo-500/20 shadow-inner">
-                        <Trophy size={32} />
+                    <div className="p-5 bg-indigo-500/20 text-indigo-400 rounded-2xl ring-1 ring-indigo-500/20 shadow-inner">
+                        <Trophy size={36} />
                     </div>
                     <div>
-                        <h2 className="text-3xl font-bold text-white tracking-tight">Rhythm Arena</h2>
-                        <div className="flex gap-2 mt-2">
+                        <h2 className="text-3xl font-black text-white tracking-tight">Rhythm Arena</h2>
+                        <div className="flex gap-2 mt-3">
                             {(['Novice', 'Advanced', 'Pro'] as Difficulty[]).map(d => (
                                 <button
                                     key={d}
                                     onClick={() => setDifficulty(d)}
                                     className={`
-                                        text-[10px] uppercase tracking-widest font-bold px-3 py-1 rounded-full transition-all
+                                        text-[10px] uppercase tracking-widest font-black px-4 py-1.5 rounded-full transition-all border
                                         ${difficulty === d
-                                            ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20'
-                                            : 'bg-white/5 text-white/30 hover:bg-white/10 hover:text-white'}
+                                            ? 'bg-indigo-500 text-white border-indigo-400 shadow-lg shadow-indigo-900/40'
+                                            : 'bg-white/5 text-[var(--text-muted)] border-white/5 hover:bg-white/10 hover:text-white'}
                                     `}
                                 >
                                     {d}
@@ -253,18 +253,18 @@ export default function RhythmExercises() {
                     </div>
                 </div>
 
-                <div className="flex gap-8 md:gap-12">
+                <div className="flex gap-12">
                     <div className="text-right">
-                        <div className="text-[10px] text-white/30 uppercase tracking-widest font-bold mb-1">BPM</div>
-                        <div className="text-3xl font-mono text-white/80">{currentBpm}</div>
+                        <div className="text-[10px] text-[var(--accent)] uppercase tracking-widest font-black mb-1">Tempo</div>
+                        <div className="text-3xl font-black text-white font-mono">{currentBpm}</div>
                     </div>
                     <div className="text-right">
-                        <div className="text-[10px] text-white/30 uppercase tracking-widest font-bold mb-1">Score</div>
-                        <div className="text-3xl font-mono text-emerald-400 font-bold">{score}</div>
+                        <div className="text-[10px] text-emerald-400 uppercase tracking-widest font-black mb-1">Score</div>
+                        <div className="text-3xl font-black text-white font-mono">{score}</div>
                     </div>
                     <div className="text-right">
-                        <div className="text-[10px] text-white/30 uppercase tracking-widest font-bold mb-1">Streak</div>
-                        <div className="text-3xl font-mono text-amber-500 font-bold flex items-center gap-2 justify-end">
+                        <div className="text-[10px] text-amber-500 uppercase tracking-widest font-black mb-1">Streak</div>
+                        <div className="text-3xl font-black text-white font-mono flex items-center gap-2 justify-end">
                             {streak} <span className="text-lg">🔥</span>
                         </div>
                     </div>
@@ -282,25 +282,26 @@ export default function RhythmExercises() {
                         key={m.id}
                         onClick={() => setExerciseMode(m.id as ExerciseMode)}
                         className={`
-                            flex items-center gap-3 px-8 py-3 rounded-2xl transition-all duration-300 font-medium text-sm
+                            flex items-center gap-4 px-10 py-4 rounded-2xl transition-all duration-500 font-bold text-sm tracking-wide border
                             ${exerciseMode === m.id
-                                ? `bg-${m.color}-500/20 border-${m.color}-500 text-${m.color}-300 ring-1 ring-${m.color}-500/50 shadow-lg`
-                                : 'bg-white/5 text-white/40 border-transparent hover:bg-white/10 hover:text-white'}
-                            border
+                                ? `bg-${m.color}-500/20 border-${m.color}-500 text-${m.color}-300 shadow-xl shadow-${m.color}-500/10 scale-105`
+                                : 'bg-white/5 text-[var(--text-muted)] border-white/5 hover:bg-white/10 hover:text-white'}
                         `}
                     >
-                        <m.icon size={18} />
+                        <m.icon size={20} />
                         {m.id}
                     </button>
                 ))}
             </div>
 
             {/* Game Area */}
-            <div className="flex-1 bg-white/[0.02] backdrop-blur-sm p-8 rounded-[2.5rem] border border-white/5 relative overflow-hidden flex flex-col justify-center min-h-[500px]">
+            <div className="flex-1 bg-[var(--bg-panel)] rounded-[3rem] p-12 border border-[var(--border-subtle)] relative overflow-hidden flex flex-col justify-center min-h-[550px] shadow-2xl">
+                <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/[0.03] to-purple-500/[0.03] pointer-events-none" />
+
                 {/* Progress Bar */}
-                <div className="absolute top-0 left-0 w-full h-1.5 bg-white/5">
-                    <div className={`h-full bg-gradient-to-r from-indigo-500 to-emerald-500 transition-all duration-[1s] linear ${isPlaying ? 'w-full' : 'w-0'}`}
-                        style={{ transitionDuration: isPlaying ? '2s' : '0.2s' }} // Dynamic based on duration? Simplified for now 
+                <div className="absolute top-0 left-0 w-full h-2 bg-white/5">
+                    <div className={`h-full bg-gradient-to-r from-indigo-500 via-indigo-400 to-indigo-600 transition-all duration-[1s] linear shadow-[0_0_15px_rgba(99,102,241,0.5)] ${isPlaying ? 'w-full' : 'w-0'}`}
+                        style={{ transitionDuration: isPlaying ? '3s' : '0.3s' }}
                     />
                 </div>
 
@@ -341,35 +342,39 @@ export default function RhythmExercises() {
 
                 {feedback ? (
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className={`flex flex-col items-center gap-6 ${feedback.success ? 'text-emerald-400' : 'text-red-400'}`}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className={`flex flex-col items-center gap-8 ${feedback.success ? 'text-emerald-400' : 'text-red-400'}`}
                     >
-                        <div className="text-4xl font-black">{feedback.msg}</div>
-                        {!feedback.success && <button
-                            onClick={startNewQuestion}
-                            className="flex items-center gap-2 px-8 py-3 bg-white/10 hover:bg-white/20 rounded-full text-white font-bold transition-all hover:scale-105"
-                        >
-                            <RotateCcw size={18} />
-                            Next Question
-                        </button>}
+                        <div className="text-6xl font-black tracking-tighter drop-shadow-2xl">{feedback.msg}</div>
+                        {!feedback.success && (
+                            <button
+                                onClick={startNewQuestion}
+                                className="flex items-center gap-3 px-10 py-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl text-white font-bold transition-all hover:scale-105 active:scale-95 shadow-xl"
+                            >
+                                <RotateCcw size={20} />
+                                Try Next Question
+                            </button>
+                        )}
                     </motion.div>
                 ) : (
                     <div className="w-full max-w-6xl mx-auto">
                         {exerciseMode === 'Subdivision' && (
                             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].filter(n => difficulty === 'Novice' ? n <= 4 : difficulty === 'Advanced' ? n <= 8 : true).map((n) => (
-                                    <button
-                                        key={n}
-                                        onClick={() => handleAnswer(n)}
-                                        className="py-8 bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/20 rounded-2xl transition-all group"
-                                    >
-                                        <div className="text-4xl font-bold text-white group-hover:text-cyan-300">{n}</div>
-                                        <div className="text-[10px] uppercase tracking-widest text-white/30 mt-2">
-                                            {n === 4 ? '16ths' : n === 3 ? 'Triplets' : 'Notes'}
-                                        </div>
-                                    </button>
-                                ))}
+                                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+                                    .filter(n => difficulty === 'Novice' ? n <= 4 : difficulty === 'Advanced' ? n <= 8 : true)
+                                    .map((n) => (
+                                        <button
+                                            key={n}
+                                            onClick={() => handleAnswer(n)}
+                                            className="group relative flex flex-col items-center justify-center p-8 bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/20 rounded-3xl transition-all shadow-lg active:scale-95"
+                                        >
+                                            <div className="text-5xl font-black text-white group-hover:text-cyan-300 transition-colors drop-shadow-xl">{n}</div>
+                                            <div className="text-[10px] uppercase tracking-[0.2em] font-black text-white/20 group-hover:text-white/40 mt-3">
+                                                {n === 1 ? 'Whole' : n === 2 ? 'Halves' : n === 3 ? 'Triplets' : n === 4 ? '16ths' : 'Pattern'}
+                                            </div>
+                                        </button>
+                                    ))}
                             </div>
                         )}
 
@@ -379,20 +384,20 @@ export default function RhythmExercises() {
                                     <button
                                         key={`${opt.a}:${opt.b}`}
                                         onClick={() => handleAnswer(opt)}
-                                        className="py-10 bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/20 rounded-3xl transition-all group"
+                                        className="group relative flex flex-col items-center justify-center py-12 bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/20 rounded-[2.5rem] transition-all shadow-xl active:scale-95"
                                     >
-                                        <div className="text-5xl font-black text-white group-hover:text-purple-300 mb-2">{opt.a}:{opt.b}</div>
-                                        <div className="text-xs uppercase tracking-widest text-white/30">{opt.label}</div>
+                                        <div className="text-6xl font-black text-white group-hover:text-purple-300 transition-colors drop-shadow-2xl mb-2">{opt.a}:{opt.b}</div>
+                                        <div className="text-[10px] uppercase tracking-[0.2em] font-black text-white/20 group-hover:text-white/40">{opt.label}</div>
                                     </button>
                                 ))}
                             </div>
                         )}
 
                         {exerciseMode === 'Dictation' && (
-                            <div className="space-y-10">
-                                <div className="grid grid-cols-4 gap-2 md:gap-4 max-w-3xl mx-auto p-4 bg-black/20 rounded-3xl">
+                            <div className="space-y-12">
+                                <div className="grid grid-cols-4 gap-4 max-w-4xl mx-auto p-8 bg-black/40 rounded-[2.5rem] border border-white/5 shadow-2xl">
                                     {[0, 1, 2, 3].map(beat => (
-                                        <div key={beat} className="flex gap-1 md:gap-2">
+                                        <div key={beat} className="flex gap-2.5">
                                             {[0, 1, 2, 3].map(sub => {
                                                 const idx = beat * 4 + sub;
                                                 const val = userDictation[idx];
@@ -401,30 +406,32 @@ export default function RhythmExercises() {
                                                         key={idx}
                                                         onClick={() => toggleDictationStep(idx)}
                                                         className={`
-                                                            w-full aspect-square rounded-lg md:rounded-xl transition-all duration-200 border
+                                                            flex-1 aspect-[3/4] rounded-xl transition-all duration-300 border
                                                             ${val === 2
-                                                                ? 'bg-amber-500 border-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.5)]'
+                                                                ? 'bg-gradient-to-b from-amber-400 to-amber-600 border-amber-300 shadow-[0_0_20px_rgba(245,158,11,0.4)] scale-110 z-10'
                                                                 : val === 1
                                                                     ? 'bg-white/20 border-white/30'
-                                                                    : 'bg-white/5 border-white/5 hover:bg-white/10'}
+                                                                    : 'bg-white/[0.03] border-white/5 hover:border-white/20'}
                                                         `}
                                                     >
-                                                        {val === 2 && <div className="w-full h-full flex items-center justify-center"><div className="w-2 h-2 rounded-full bg-black/50" /></div>}
+                                                        {val === 2 && <div className="w-full h-full flex items-center justify-center"><div className="w-1.5 h-1.5 rounded-full bg-amber-950/40" /></div>}
                                                     </button>
                                                 )
                                             })}
                                         </div>
                                     ))}
                                 </div>
-                                <div className="flex justify-center">
+                                <div className="flex justify-center gap-6">
                                     <button
                                         onClick={() => handleAnswer(userDictation)}
-                                        className="px-12 py-4 bg-white text-black font-bold rounded-full hover:bg-gray-200 transition-all shadow-xl hover:scale-105"
+                                        className="px-16 py-5 bg-indigo-500 hover:bg-indigo-400 text-white font-black rounded-2xl transition-all shadow-[0_15px_40px_rgba(99,102,241,0.4)] hover:scale-105 active:scale-95 uppercase tracking-widest text-xs"
                                     >
-                                        Check Answer
+                                        Analyze Pattern
                                     </button>
                                 </div>
-                                <p className="text-center text-xs text-white/30 uppercase tracking-widest">Click to cycle: Accent (Amber) &rarr; Ghost (Grey) &rarr; Rest (Dark)</p>
+                                <p className="text-center text-[10px] text-[var(--text-muted)] uppercase tracking-[0.2em] font-black">
+                                    <span className="text-amber-500">Accent</span> &bull; <span className="text-white/40">Ghost</span> &bull; <span className="text-white/10">Rest</span>
+                                </p>
                             </div>
                         )}
                     </div>

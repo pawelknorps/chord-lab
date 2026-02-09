@@ -6,6 +6,7 @@ import ChordLab from './modules/ChordLab/ChordLab'; // Keep Core module eager fo
 import Dashboard from './components/layout/Dashboard';
 import { GlobalMidiHandler } from './components/GlobalMidiHandler';
 import { Loader2 } from 'lucide-react';
+import { SessionHUD } from './components/shared/SessionHUD';
 
 // Lazy Load Heavy Modules
 const BiTonalSandbox = lazy(() => import('./modules/BiTonalSandbox/BiTonalSandbox'));
@@ -29,12 +30,22 @@ const LoadingScreen = ({ label = "Loading Module..." }: { label?: string }) => (
     </div>
 );
 
+import { useSettingsStore } from './core/store/useSettingsStore';
+import { useEffect } from 'react';
+
 function App() {
+    const theme = useSettingsStore(state => state.theme);
+
+    useEffect(() => {
+        document.documentElement.setAttribute('data-theme', theme);
+    }, [theme]);
+
     return (
         <AudioProvider>
             <MidiProvider>
                 <GlobalMidiHandler />
                 <BrowserRouter>
+                    <SessionHUD />
                     <div className="h-screen w-screen bg-[var(--bg-app)] text-[var(--text-primary)] overflow-hidden font-sans">
                         <Routes>
                             <Route path="/" element={<Dashboard />}>

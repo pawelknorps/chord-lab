@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { useAudio } from '../../context/AudioContext';
 import { MidiSettings } from '../MidiSettings';
+import { GlobalSettings } from '../shared/GlobalSettings';
 
 const Dashboard: React.FC = () => {
     const [collapsed, setCollapsed] = useState(false);
@@ -153,7 +154,7 @@ const Dashboard: React.FC = () => {
 
             {/* Main Content */}
             <main className="flex-1 flex flex-col bg-[var(--bg-app)] relative overflow-hidden">
-                {/* Top Bar for Mobile - Optional or just keep clean */}
+                <GlobalSettings />
                 <div className="flex-1 overflow-auto p-0">
                     <Outlet />
                 </div>

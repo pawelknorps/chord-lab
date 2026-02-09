@@ -1,0 +1,174 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding: 1rem;
+    background: var(--bg-panel);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-subtle);
+    overflow-x: auto;
+    user-select: none;
+}
+
+.fretNumbers {
+    display: flex;
+    margin-bottom: 0.5rem;
+}
+
+.spacer {
+    width: 40px;
+    /* Matching stringName width */
+}
+
+.fretNumber {
+    flex: 1;
+    min-width: 60px;
+    text-align: center;
+    font-size: 10px;
+    font-weight: 900;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.fretboard {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    min-width: fit-content;
+}
+
+.stringRow {
+    display: flex;
+    align-items: center;
+    height: 48px;
+}
+
+.stringName {
+    width: 40px;
+    text-align: right;
+    padding-right: 12px;
+    font-size: 10px;
+    font-weight: 900;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+.stringFrets {
+    display: flex;
+    flex: 1;
+}
+
+.fret {
+    flex: 1;
+    min-width: 60px;
+    height: 100%;
+    border-right: 2px solid #333;
+    /* Darker, more realistic fret wire */
+    position: relative;
+    cursor: pointer;
+    background: #1a1a1a;
+    /* Wood-like dark color */
+    transition: background 0.2s ease;
+}
+
+.fret:hover {
+    background: #252525;
+}
+
+.nut {
+    border-right: 6px solid #e5e5e5;
+    background: #121212;
+}
+
+.stringLine {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    background: #888;
+    transform: translateY(-50%);
+    pointer-events: none;
+    z-index: 1;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.dot {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 8px;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+/* Double dots adjustment */
+.doubleDotTop {
+    top: 0% !important;
+}
+
+.doubleDotBottom {
+    top: 100% !important;
+}
+
+.noteCircle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 28px;
+    height: 28px;
+    background: var(--accent);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+    box-shadow: 0 0 15px var(--accent-glow);
+    animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.noteCircle.root {
+    background: #f59e0b;
+    /* Amber 500 for root */
+    box-shadow: 0 0 15px rgba(245, 158, 11, 0.3);
+}
+
+.noteCircle.active {
+    background: #ef4444;
+    /* Red 500 for active playing */
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
+    transform: translate(-50%, -50%) scale(1.15);
+}
+
+.label {
+    color: white;
+    font-size: 10px;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+@keyframes popIn {
+    from {
+        transform: translate(-50%, -50%) scale(0.5);
+        opacity: 0;
+    }
+
+    to {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+}
+
+/* Custom scrollbar for some browsers */
+.container::-webkit-scrollbar {
+    height: 4px;
+}
+
+.container::-webkit-scrollbar-thumb {
+    background: var(--bg-surface);
+    border-radius: 2px;
+}

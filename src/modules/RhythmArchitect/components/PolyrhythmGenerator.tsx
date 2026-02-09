@@ -3,6 +3,9 @@ import { PolyrhythmEngine } from '../../../utils/polyrhythmEngine';
 import { Play, Square, Shuffle, Trophy, Target, Zap } from 'lucide-react';
 import * as Tone from 'tone';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAudioCleanup } from '../../../hooks/useAudioManager';
+import { useMidiExport } from '../../../hooks/useMidiExport';
+import { useMasteryStore } from '../../../core/store/useMasteryStore';
 
 const engine = new PolyrhythmEngine();
 
@@ -31,6 +34,9 @@ const CHALLENGES = {
 };
 
 export default function PolyrhythmGenerator() {
+    useAudioCleanup('polyrhythm');
+    const { exportMidi } = useMidiExport();
+    const { addExperience } = useMasteryStore();
     const [mode, setMode] = useState<ExerciseMode>('Practice');
     const [difficulty, setDifficulty] = useState<Difficulty>('Novice');
     const [isPlaying, setIsPlaying] = useState(false);
@@ -42,6 +48,10 @@ export default function PolyrhythmGenerator() {
     const [currentChallenge, setCurrentChallenge] = useState(0);
     const [score, setScore] = useState(0);
     const [completedChallenges, setCompletedChallenges] = useState<Set<string>>(new Set());
+
+    // Tap Challenge State
+    const [lastTapResult, setLastTapResult] = useState<{ type: 'Perfect' | 'Good' | 'Fair' | 'Miss'; offset: number } | null>(null);
+    const [tapStats, setTapStats] = useState({ perfect: 0, good: 0, fair: 0, miss: 0 });
 
     // Animation refs
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -83,6 +93,7 @@ export default function PolyrhythmGenerator() {
     const handleUpdate = (newA: number, newB: number) => {
         setDivA(newA);
         setDivB(newB);
+        stateRef.current = { ...stateRef.current, divA: newA, divB: newB };
         // Update engine immediately if playing
         if (isPlaying) {
             engine.setDivisions(newA, newB);
@@ -115,9 +126,81 @@ export default function PolyrhythmGenerator() {
             setCompletedChallenges(new Set([...completedChallenges, key]));
             const points = difficulty === 'Novice' ? 50 : difficulty === 'Advanced' ? 100 : 200;
             setScore(prev => prev + points);
+            addExperience('Rhythm', points);
         }
         nextChallenge();
     };
+
+    const handleTap = (target: 'A' | 'B') => {
+        if (!isPlaying) return;
+
+        const { divA, divB, bpm } = stateRef.current;
+        const beatDur = 60 / bpm;
+        const duration = beatDur * 4;
+        const time = Tone.Transport.seconds;
+        const phase = (time % duration) / duration;
+
+        const currentDiv = target === 'A' ? divA : divB;
+
+        // Find closest hit phase
+        const stepPhases = Array.from({ length: currentDiv }, (_, i) => i / currentDiv);
+        let minDiff = 1.0;
+
+        stepPhases.forEach(p => {
+            let diff = Math.abs(phase - p);
+            if (diff > 0.5) diff = 1.0 - diff; // Wrap around
+            if (diff < minDiff) minDiff = diff;
+        });
+
+        // Convert phase diff to time diff (ms)
+        const msDiff = minDiff * duration * 1000;
+
+        let result: 'Perfect' | 'Good' | 'Fair' | 'Miss';
+        if (msDiff < 30) result = 'Perfect';
+        else if (msDiff < 70) result = 'Good';
+        else if (msDiff < 120) result = 'Fair';
+        else result = 'Miss';
+
+        setLastTapResult({ type: result, offset: msDiff });
+        setTapStats(prev => ({ ...prev, [result.toLowerCase()]: prev[result.toLowerCase() as keyof typeof prev] + 1 }));
+
+        // Visual flash logic could use state here
+        setTimeout(() => setLastTapResult(null), 500);
+    };
+
+    const handleExport = () => {
+        const { divA, divB, bpm } = stateRef.current;
+        const measureDur = (60 / bpm) * 4;
+
+        const notesA = Array.from({ length: divA }, (_, i) => ({
+            name: 'C4',
+            time: i * (measureDur / divA),
+            duration: 0.1,
+            velocity: 0.9
+        }));
+
+        const notesB = Array.from({ length: divB }, (_, i) => ({
+            name: 'E4',
+            time: i * (measureDur / divB),
+            duration: 0.1,
+            velocity: 0.9
+        }));
+
+        exportMidi([...notesA, ...notesB], { bpm, name: `Polyrhythm-${divA}-${divB}` });
+    };
+
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.code === 'KeyJ') handleTap('A');
+            if (e.code === 'KeyK') handleTap('B');
+            if (e.code === 'Space') {
+                e.preventDefault();
+                handleTap('B');
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isPlaying, divA, divB, bpm]);
 
     const draw = () => {
         const canvas = canvasRef.current;
@@ -274,15 +357,15 @@ export default function PolyrhythmGenerator() {
             <div className="flex items-end justify-between">
                 <div>
                     <h2 className="text-3xl font-bold text-white tracking-tight">Polyrhythm Lab</h2>
-                    <p className="text-white/40 mt-1">Master complex rhythmic relationships.</p>
+                    <p className="text-[var(--text-muted)] mt-1">Master complex rhythmic relationships.</p>
                 </div>
 
                 <div className="flex gap-2">
                     <button
                         onClick={() => setMode('Practice')}
                         className={`px-4 py-2 rounded-xl transition-all text-sm font-medium ${mode === 'Practice'
-                            ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/50'
-                            : 'bg-white/5 text-white/40 border border-white/10 hover:bg-white/10'
+                            ? 'bg-[var(--accent)] text-white shadow-lg shadow-[var(--accent)]/20'
+                            : 'bg-[var(--bg-panel)] text-[var(--text-muted)] border border-[var(--border-subtle)] hover:bg-white/5'
                             }`}
                     >
                         Practice
@@ -290,8 +373,8 @@ export default function PolyrhythmGenerator() {
                     <button
                         onClick={() => setMode('Challenge')}
                         className={`px-4 py-2 rounded-xl transition-all text-sm font-medium flex items-center gap-2 ${mode === 'Challenge'
-                            ? 'bg-amber-500/20 text-amber-300 border border-amber-500/50'
-                            : 'bg-white/5 text-white/40 border border-white/10 hover:bg-white/10'
+                            ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20'
+                            : 'bg-[var(--bg-panel)] text-[var(--text-muted)] border border-[var(--border-subtle)] hover:bg-white/5'
                             }`}
                     >
                         <Trophy size={14} />
@@ -307,7 +390,7 @@ export default function PolyrhythmGenerator() {
                         initial={{ opacity: 0, y: -20 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
-                        className="bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-2xl p-4 flex items-center justify-between"
+                        className="bg-[var(--bg-panel)] border border-[var(--border-subtle)] rounded-2xl p-4 flex items-center justify-between"
                     >
                         <div className="flex items-center gap-6">
                             <div className="flex gap-2">
@@ -317,24 +400,40 @@ export default function PolyrhythmGenerator() {
                                         onClick={() => { setDifficulty(d); setCurrentChallenge(0); loadChallenge(0); }}
                                         className={`text-[10px] uppercase tracking-widest font-bold px-3 py-1 rounded-full transition-all ${difficulty === d
                                             ? 'bg-amber-500 text-black shadow-lg'
-                                            : 'bg-white/5 text-white/30 hover:bg-white/10'
+                                            : 'bg-white/5 text-[var(--text-muted)] hover:bg-white/10'
                                             }`}
                                     >
                                         {d}
                                     </button>
                                 ))}
                             </div>
-                            <div className="text-sm text-white/60">
+                            <div className="text-sm text-[var(--text-secondary)]">
                                 Challenge {currentChallenge + 1} of {CHALLENGES[difficulty].length}
                             </div>
                         </div>
+
+                        <div className="flex gap-4 px-6 border-x border-[var(--border-subtle)]">
+                            <div className="text-center">
+                                <div className="text-[8px] uppercase tracking-tighter text-emerald-400 font-bold">Perfect</div>
+                                <div className="text-sm font-mono text-white">{tapStats.perfect}</div>
+                            </div>
+                            <div className="text-center">
+                                <div className="text-[8px] uppercase tracking-tighter text-blue-400 font-bold">Good</div>
+                                <div className="text-sm font-mono text-white">{tapStats.good}</div>
+                            </div>
+                            <div className="text-center text-red-400">
+                                <div className="text-[8px] uppercase tracking-tighter font-bold">Miss</div>
+                                <div className="text-sm font-mono text-white">{tapStats.miss}</div>
+                            </div>
+                        </div>
+
                         <div className="flex items-center gap-6">
                             <div className="text-right">
-                                <div className="text-[10px] text-white/30 uppercase tracking-widest font-bold">Score</div>
+                                <div className="text-[10px] text-[var(--text-muted)] uppercase tracking-widest font-bold">Score</div>
                                 <div className="text-2xl font-mono text-amber-400 font-bold">{score}</div>
                             </div>
                             <div className="text-right">
-                                <div className="text-[10px] text-white/30 uppercase tracking-widest font-bold">Completed</div>
+                                <div className="text-[10px] text-[var(--text-muted)] uppercase tracking-widest font-bold">Completed</div>
                                 <div className="text-2xl font-mono text-emerald-400 font-bold">{completedChallenges.size}</div>
                             </div>
                         </div>
@@ -344,40 +443,69 @@ export default function PolyrhythmGenerator() {
 
             <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Visualization */}
-                <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 flex flex-col items-center justify-center relative overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-purple-500/5" />
+                <div className="bg-[var(--bg-panel)] backdrop-blur-xl border border-[var(--border-subtle)] rounded-3xl p-8 flex flex-col items-center justify-center relative overflow-hidden shadow-2xl">
+                    <div className="absolute inset-0 bg-gradient-to-br from-[var(--accent)]/5 to-purple-500/5 pointer-events-none" />
+
+                    <AnimatePresence>
+                        {lastTapResult && (
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.5 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0 }}
+                                className={`absolute top-10 text-2xl font-black italic tracking-tighter z-20 ${lastTapResult.type === 'Perfect' ? 'text-emerald-400' :
+                                    lastTapResult.type === 'Good' ? 'text-blue-400' :
+                                        lastTapResult.type === 'Fair' ? 'text-amber-400' : 'text-red-500'
+                                    }`}
+                            >
+                                {lastTapResult.type.toUpperCase()}
+                                <div className="text-[10px] text-center not-italic font-mono opacity-50 mt-1">{Math.round(lastTapResult.offset)}ms</div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
 
                     <canvas
                         ref={canvasRef}
                         width={500}
                         height={500}
-                        className="w-full max-w-[500px] aspect-square relative z-10"
+                        className="w-full max-w-[400px] aspect-square relative z-10"
                     />
 
-                    {/* Legend */}
-                    <div className="flex gap-8 mt-6 relative z-10">
-                        <div className="flex items-center gap-2">
-                            <div className="w-4 h-4 rounded-full bg-emerald-400 shadow-lg shadow-emerald-400/50" />
-                            <span className="text-sm text-white/60 font-medium">Inner: {divA}</span>
+                    {/* Legend / Tap Help */}
+                    <div className="flex flex-col items-center gap-4 mt-6 relative z-10 w-full">
+                        <div className="flex gap-8">
+                            <div className="flex items-center gap-2">
+                                <div className="w-4 h-4 rounded-full bg-emerald-400 shadow-lg shadow-emerald-400/50" />
+                                <span className="text-sm text-[var(--text-secondary)] font-medium">Inner (J)</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <div className="w-4 h-4 rounded-full bg-purple-400 shadow-lg shadow-purple-400/50" />
+                                <span className="text-sm text-[var(--text-secondary)] font-medium">Outer (K)</span>
+                            </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <div className="w-4 h-4 rounded-full bg-purple-400 shadow-lg shadow-purple-400/50" />
-                            <span className="text-sm text-white/60 font-medium">Outer: {divB}</span>
-                        </div>
+
+                        {mode === 'Challenge' && (
+                            <button
+                                onMouseDown={() => handleTap('B')}
+                                className="w-full py-4 bg-white/5 border border-white/10 rounded-2xl text-[10px] uppercase tracking-widest font-bold text-[var(--text-muted)] hover:bg-white/10 hover:text-white transition-all flex items-center justify-center gap-3"
+                            >
+                                <Zap size={14} className="text-amber-500" />
+                                Tap Here or use [Space]
+                            </button>
+                        )}
                     </div>
                 </div>
 
                 {/* Controls */}
                 <div className="flex flex-col gap-6">
                     {/* Transport */}
-                    <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 flex items-center gap-8">
+                    <div className="bg-[var(--bg-panel)] backdrop-blur-xl border border-[var(--border-subtle)] rounded-3xl p-8 flex items-center gap-8 shadow-xl">
                         <button
                             onClick={togglePlay}
                             className={`
                                 w-24 h-24 rounded-full flex items-center justify-center transition-all duration-300 shadow-2xl
                                 ${isPlaying
                                     ? 'bg-gradient-to-br from-red-500 to-red-700 text-white shadow-red-900/40 scale-95'
-                                    : 'bg-gradient-to-br from-indigo-500 to-indigo-700 text-white shadow-indigo-900/40 hover:scale-105'
+                                    : 'bg-gradient-to-br from-[var(--accent)] to-indigo-700 text-white shadow-[var(--accent)]/40 hover:scale-105'
                                 }
                             `}
                         >
@@ -386,31 +514,36 @@ export default function PolyrhythmGenerator() {
 
                         <div className="flex-1 space-y-4">
                             <div className="flex justify-between items-center">
-                                <label className="text-xs text-indigo-300 uppercase tracking-widest font-bold">Tempo</label>
-                                <span className="text-xl font-mono text-white">{bpm} <span className="text-sm text-white/30">BPM</span></span>
+                                <label className="text-[10px] text-[var(--accent)] uppercase tracking-widest font-bold">Tempo</label>
+                                <span className="text-xl font-mono text-white">{bpm} <span className="text-sm text-[var(--text-muted)]">BPM</span></span>
                             </div>
                             <input
                                 type="range"
                                 min="30"
                                 max="180"
                                 value={bpm}
-                                onChange={(e) => { setBpm(Number(e.target.value)); if (isPlaying) engine.setBpm(Number(e.target.value)); }}
-                                className="w-full h-2 bg-black/40 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                                onChange={(e) => {
+                                    const val = Number(e.target.value);
+                                    setBpm(val);
+                                    stateRef.current = { ...stateRef.current, bpm: val };
+                                    if (isPlaying) engine.setBpm(val);
+                                }}
+                                className="w-full h-2 bg-black/40 rounded-lg appearance-none cursor-pointer accent-[var(--accent)]"
                             />
                         </div>
                     </div>
 
                     {/* Division Controls */}
                     {mode === 'Practice' && (
-                        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 space-y-6">
+                        <div className="bg-[var(--bg-panel)] backdrop-blur-xl border border-[var(--border-subtle)] rounded-3xl p-8 space-y-6 shadow-xl">
                             <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                                <Zap size={20} className="text-indigo-400" />
+                                <Zap size={20} className="text-[var(--accent)]" />
                                 Divisions
                             </h3>
 
                             <div className="space-y-4">
                                 <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold text-lg">
+                                    <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 font-bold text-lg border border-emerald-500/20">
                                         A
                                     </div>
                                     <input
@@ -425,7 +558,7 @@ export default function PolyrhythmGenerator() {
                                 </div>
 
                                 <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center text-purple-400 font-bold text-lg">
+                                    <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 font-bold text-lg border border-purple-500/20">
                                         B
                                     </div>
                                     <input
@@ -439,12 +572,20 @@ export default function PolyrhythmGenerator() {
                                     <span className="text-2xl font-mono text-white w-12 text-right">{divB}</span>
                                 </div>
                             </div>
+
+                            <button
+                                onClick={handleExport}
+                                className="w-full py-3 bg-[var(--bg-panel)] border border-[var(--border-subtle)] hover:bg-white/5 rounded-xl text-sm font-bold text-[var(--accent)] transition-all flex items-center justify-center gap-2"
+                            >
+                                <Play size={16} className="rotate-90" />
+                                Export MIDI Loop
+                            </button>
                         </div>
                     )}
 
                     {/* Challenge Presets */}
                     {mode === 'Challenge' && (
-                        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 space-y-6">
+                        <div className="bg-[var(--bg-panel)] backdrop-blur-xl border border-[var(--border-subtle)] rounded-3xl p-8 space-y-6 shadow-xl">
                             <div className="flex items-center justify-between">
                                 <h3 className="text-lg font-bold text-white flex items-center gap-2">
                                     <Target size={20} className="text-amber-400" />
@@ -454,7 +595,7 @@ export default function PolyrhythmGenerator() {
                                     onClick={randomChallenge}
                                     className="p-2 bg-white/5 hover:bg-white/10 rounded-xl transition-all"
                                 >
-                                    <Shuffle size={18} className="text-white/60" />
+                                    <Shuffle size={18} className="text-[var(--text-muted)]" />
                                 </button>
                             </div>
 
@@ -471,16 +612,16 @@ export default function PolyrhythmGenerator() {
                                             className={`
                                                 p-4 rounded-xl transition-all border text-left
                                                 ${isCurrent
-                                                    ? 'bg-amber-500/20 border-amber-500/50 text-white'
+                                                    ? 'bg-amber-500/20 border-amber-500/50 text-white shadow-inner'
                                                     : isCompleted
                                                         ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
-                                                        : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'
+                                                        : 'bg-white/5 border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-white/10'
                                                 }
                                             `}
                                         >
                                             <div className="text-2xl font-mono font-bold">{challenge.a}:{challenge.b}</div>
                                             <div className="text-xs mt-1 opacity-60">{challenge.name}</div>
-                                            {isCompleted && <div className="text-xs mt-1 text-emerald-400">✓ Completed</div>}
+                                            {isCompleted && <div className="text-[10px] mt-1 text-emerald-400 uppercase font-bold tracking-tighter">✓ Mastered</div>}
                                         </button>
                                     );
                                 })}
@@ -488,7 +629,7 @@ export default function PolyrhythmGenerator() {
 
                             <button
                                 onClick={completeChallenge}
-                                className="w-full py-4 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 rounded-xl text-white font-bold transition-all shadow-lg hover:scale-105"
+                                className="w-full py-4 bg-amber-500 hover:bg-amber-400 rounded-xl text-black font-black uppercase tracking-widest transition-all shadow-lg hover:scale-[1.02] active:scale-95"
                             >
                                 Complete & Next Challenge
                             </button>
@@ -496,6 +637,6 @@ export default function PolyrhythmGenerator() {
                     )}
                 </div>
             </div>
-        </div>
+        </div >
     );
 }

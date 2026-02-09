@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 :root {
+  /* theme-ready */
   /* Swiss/Minimalist Palette (Dark Mode) */
   --bg-app: #09090b;
   /* Zinc 950 */
@@ -34,6 +35,36 @@
   /* Typography */
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+[data-theme='light'] {
+  --bg-app: #fafafa;
+  --bg-panel: #f4f4f5;
+  --bg-surface: #e4e4e7;
+  --bg-hover: #d4d4d8;
+
+  --text-primary: #09090b;
+  --text-secondary: #3f3f46;
+  --text-muted: #71717a;
+
+  --border-subtle: #e4e4e7;
+  --border-active: #a1a1aa;
+
+  --accent: #2563eb;
+  --accent-glow: rgba(37, 99, 235, 0.1);
+}
+
+[data-theme='amoled'] {
+  --bg-app: #000000;
+  --bg-panel: #000000;
+  --bg-surface: #121212;
+  --bg-hover: #1e1e1e;
+
+  --text-primary: #f4f4f5;
+  --text-secondary: #a1a1aa;
+
+  --border-subtle: #121212;
+  --border-active: #333333;
 }
 
 body {

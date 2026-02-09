@@ -1,4 +1,8 @@
+import { useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { decodeProgression, decodeChord } from '../../core/routing/deepLinks';
 import { useFunctionalEarTrainingStore } from './state/useFunctionalEarTrainingStore';
+import { useMusicalClipboard } from '../../core/state/musicalClipboard';
 import { TendencyLevel } from './components/levels/TendencyLevel';
 import { ModulationLevel } from './components/levels/ModulationLevel';
 import { BassLevel } from './components/levels/BassLevel';
@@ -15,12 +19,49 @@ import { SecondaryDominantsLevel } from './components/levels/SecondaryDominantsL
 import { ModalInterchangeLevel } from './components/levels/ModalInterchangeLevel';
 import { HUD } from './components/HUD';
 import { useMasteryStore } from '../../core/store/useMasteryStore';
+import { useAudioCleanup } from '../../hooks/useAudioManager';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Activity, Repeat, Anchor, Layers, Music, Zap, Piano, Binary, Guitar, Box, Brain, Sparkles, Network, GitBranch, Pyramid } from 'lucide-react';
 
 export function FunctionalEarTraining() {
-    const { level, setLevel } = useFunctionalEarTrainingStore();
+    useAudioCleanup('functional-ear-training');
+    const { level, setLevel, setExternalData } = useFunctionalEarTrainingStore();
+    const [searchParams] = useSearchParams();
     const { globalLevel } = useMasteryStore();
+    const { pasteProgression, pasteChord, clear: clearClipboard } = useMusicalClipboard();
+
+    useEffect(() => {
+        // 1. Check SearchParams (Deep Linking)
+        const deepProg = decodeProgression(searchParams);
+        if (deepProg) {
+            setLevel('Progressions');
+            setExternalData(deepProg);
+            return;
+        }
+
+        const deepChord = decodeChord(searchParams);
+        if (deepChord) {
+            setLevel('ChordQualities');
+            setExternalData(deepChord);
+            return;
+        }
+
+        // 2. Check Musical Clipboard (Local session)
+        const inboundProg = pasteProgression();
+        if (inboundProg && inboundProg.source === 'navigation') {
+            setLevel('Progressions');
+            setExternalData(inboundProg);
+            clearClipboard();
+            return;
+        }
+
+        const inboundChord = pasteChord();
+        if (inboundChord && inboundChord.source === 'navigation') {
+            setLevel('ChordQualities');
+            setExternalData(inboundChord);
+            clearClipboard();
+        }
+    }, [searchParams, pasteProgression, pasteChord, setLevel, setExternalData, clearClipboard]);
 
     const levels = [
         { id: 'Tendency', label: 'Tendency Tones', icon: Activity },

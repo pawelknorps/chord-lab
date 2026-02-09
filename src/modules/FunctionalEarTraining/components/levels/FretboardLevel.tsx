@@ -1,38 +1,32 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useFunctionalEarTrainingStore } from '../../state/useFunctionalEarTrainingStore';
 import { useMasteryStore } from '../../../../core/store/useMasteryStore';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Play, Check, X, ArrowRight } from 'lucide-react';
 import * as Tone from 'tone';
-import { checkNotePosition, GUITAR_STRINGS, FRET_DOTS, DOUBLE_DOTS } from '../../utils/guitarUtils';
+import { UnifiedFretboard } from '../../../../components/shared/UnifiedFretboard';
+import { audioManager } from '../../../../core/services';
 
 export const FretboardLevel: React.FC = () => {
     const { addScore, setPlaying, difficulty, streak } = useFunctionalEarTrainingStore();
     const { addExperience, updateStreak } = useMasteryStore();
 
-    const [targetNote, setTargetNote] = useState<any>(null);
-    const [markedNotes, setMarkedNotes] = useState<any[]>([]);
+    const [targetNote, setTargetNote] = useState<{ noteName: string; octave: number; fullNote: string; midi: number } | null>(null);
+    const [markedNotes, setMarkedNotes] = useState<number[]>([]);
     const [result, setResult] = useState<'correct' | 'incorrect' | null>(null);
-    const [loading, setLoading] = useState(false);
-    const [highlightedNote, setHighlightedNote] = useState<any>(null);
 
     const NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 
     const loadNewChallenge = useCallback(() => {
         setResult(null);
         setMarkedNotes([]);
-        setHighlightedNote(null);
 
-        // Pick a random note
         const noteName = NOTES[Math.floor(Math.random() * NOTES.length)];
-        // Pick an octave based on guitar range (approx 2 to 4)
         const octave = Math.floor(Math.random() * 3) + 2;
+        const fullNote = `${noteName}${octave}`;
+        const midi = Tone.Frequency(fullNote).toMidi();
 
-        setTargetNote({
-            noteName,
-            octave,
-            fullNote: `${noteName}${octave}`
-        });
+        setTargetNote({ noteName, octave, fullNote, midi });
     }, []);
 
     useEffect(() => {
@@ -42,29 +36,18 @@ export const FretboardLevel: React.FC = () => {
     const playAudio = async () => {
         if (!targetNote) return;
         setPlaying(true);
-        await Tone.start();
-
-        const synth = new Tone.PolySynth(Tone.Synth, {
-            oscillator: { type: 'triangle' },
-            envelope: { release: 1 }
-        }).toDestination();
-
-        synth.triggerAttackRelease(targetNote.fullNote, "2n", Tone.now());
-
-        setTimeout(() => {
-            setPlaying(false);
-            synth.dispose();
-        }, 1000);
+        audioManager.playNote(targetNote.midi, "2n", 0.7);
+        setTimeout(() => setPlaying(false), 1000);
     };
 
-    const handleFretClick = (stringIndex: number, fret: number) => {
-        if (result === 'correct') return;
+    const handleFretClick = (note: number) => {
+        if (result === 'correct' || !targetNote) return;
 
-        const isCorrect = checkNotePosition(stringIndex, fret, targetNote);
+        const isCorrect = (note % 12) === (targetNote.midi % 12);
 
         if (isCorrect) {
             setResult('correct');
-            setMarkedNotes([{ string: stringIndex, fret }]);
+            setMarkedNotes([note]);
 
             const multiplier = difficulty === 'Novice' ? 1 : difficulty === 'Advanced' ? 1.5 : 3;
             const points = Math.floor(100 * multiplier) + streak * 10;
@@ -75,10 +58,12 @@ export const FretboardLevel: React.FC = () => {
             setTimeout(loadNewChallenge, 1500);
         } else {
             setResult('incorrect');
+            setMarkedNotes([note]);
             updateStreak('FET', 0);
-
-            // Re-play audio or show hint if needed
-            setTimeout(() => setResult(null), 1000);
+            setTimeout(() => {
+                setResult(null);
+                setMarkedNotes([]);
+            }, 1000);
         }
     };
 
@@ -119,75 +104,14 @@ export const FretboardLevel: React.FC = () => {
                 </button>
             </div>
 
-            {/* Fretboard Interface */}
             <div className="w-full glass-panel p-8 rounded-[32px] border border-white/10 overflow-x-auto no-scrollbar">
-                <div className="relative min-w-[800px]">
-                    {/* Fret Numbers */}
-                    <div className="flex ml-12 mb-2">
-                        {Array.from({ length: 13 }).map((_, i) => (
-                            <div key={i} className="flex-1 text-center text-[10px] font-black text-white/20 uppercase tracking-tighter">
-                                {i}
-                            </div>
-                        ))}
-                    </div>
-
-                    {/* Fretboard Grid */}
-                    <div className="flex flex-col gap-0 border-r border-white/10 relative">
-                        {/* String lines background */}
-                        <div className="absolute inset-0 flex flex-col justify-between pointer-events-none px-12 py-[11px]">
-                            {GUITAR_STRINGS.map((_, i) => (
-                                <div key={i} className="h-[1px] bg-white/10 w-full" />
-                            ))}
-                        </div>
-
-                        {GUITAR_STRINGS.map((string, sIdx) => (
-                            <div key={string.index} className="flex items-center h-6 relative z-10">
-                                {/* String Label */}
-                                <div className="w-12 text-xs font-black text-white/40 uppercase pr-4 text-right">
-                                    {string.name}
-                                </div>
-
-                                {/* Frets */}
-                                <div className="flex-1 flex">
-                                    {Array.from({ length: 13 }).map((_, fIdx) => {
-                                        const isMarked = markedNotes.some(m => m.string === string.index && m.fret === fIdx);
-                                        const isFretDot = FRET_DOTS.includes(fIdx);
-                                        const isDoubleDot = DOUBLE_DOTS.includes(fIdx);
-
-                                        return (
-                                            <button
-                                                key={fIdx}
-                                                onClick={() => handleFretClick(string.index, fIdx)}
-                                                className={`
-                                                    flex-1 h-10 border-l border-white/20 relative group transition-all
-                                                    ${fIdx === 0 ? 'bg-white/5' : 'hover:bg-white/10'}
-                                                `}
-                                            >
-                                                {/* Fret marker dot */}
-                                                {sIdx === 2 && isFretDot && !isDoubleDot && (
-                                                    <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-white/5 group-hover:bg-white/20" />
-                                                )}
-
-                                                {/* Note marker */}
-                                                <AnimatePresence>
-                                                    {isMarked && (
-                                                        <motion.div
-                                                            initial={{ scale: 0, opacity: 0 }}
-                                                            animate={{ scale: 1, opacity: 1 }}
-                                                            className={`absolute inset-0 flex items-center justify-center`}
-                                                        >
-                                                            <div className={`w-3 h-3 rounded-full ${result === 'correct' ? 'bg-emerald-400' : 'bg-red-400'} shadow-[0_0_15px_rgba(52,211,153,0.5)]`} />
-                                                        </motion.div>
-                                                    )}
-                                                </AnimatePresence>
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
+                <UnifiedFretboard
+                    mode="notes"
+                    highlightedNotes={markedNotes}
+                    onNoteClick={(note) => handleFretClick(note)}
+                    fretRange={[0, 12]}
+                    playSound={false} // We handle it in the level logic
+                />
             </div>
 
             <div className="h-12 flex items-center justify-center">

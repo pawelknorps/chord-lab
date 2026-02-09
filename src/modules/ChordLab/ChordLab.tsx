@@ -1,16 +1,13 @@
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
+import { decodeProgression } from '../../core/routing/deepLinks';
 import type { ChordInfo, Progression } from '../../core/theory';
 import { getScaleChords, applyVoicing, parseChord, getChordNotes, midiToNoteName, noteNameToMidi } from '../../core/theory';
 
 
 import type { Style } from '../../core/audio/globalAudio';
 import {
-  initAudio,
-  playChord,
   playProgression,
-  stop,
-  setVisualizationCallback,
   setBpm as setGlobalBpm
 } from '../../core/audio/globalAudio';
 import { bpmSignal } from '../../core/audio/audioSignals';
@@ -20,6 +17,9 @@ import { useMidi } from '../../context/MidiContext';
 import { QuickExerciseJump } from '../../components/widgets/QuickExerciseJump';
 import { ChordLabDashboard } from '../../components/ChordLabDashboard';
 import { useUserPresets } from '../../hooks/useUserPresets';
+import { useMusicalClipboard } from '../../core/state/musicalClipboard';
+import { audioManager } from '../../core/services';
+import { useAudioCleanup } from '../../hooks/useAudioManager';
 
 const MAX_PROGRESSION_LENGTH = 16;
 const DEFAULT_TRANSPOSE_SETTINGS = { enabled: false, interval: 1, step: 1 };
@@ -28,15 +28,17 @@ function ChordLab() {
   const { t } = useTranslation();
   const { userPresets, savePreset, deletePreset } = useUserPresets();
 
-  const location = useLocation();
+  const [searchParams] = useSearchParams();
 
   // Lab State
+  useAudioCleanup('chord-lab');
   const [selectedKey, setSelectedKey] = useState('C');
   const [selectedScale, setSelectedScale] = useState('Major');
   const [selectedVoicing, setSelectedVoicing] = useState('Root Position');
   const [selectedStyle, setSelectedStyle] = useState<Style>('Jazz');
   const [bpm, setBpm] = useState(120);
-  // Sync BPM signal
+
+  // Sync BPM
   useEffect(() => {
     bpmSignal.value = bpm;
     setGlobalBpm(bpm);
@@ -47,7 +49,6 @@ function ChordLab() {
   );
   const [isPlaying, setIsPlaying] = useState(false);
   const [playingIndex, setPlayingIndex] = useState<number | null>(null);
-  const [audioInitialized, setAudioInitialized] = useState(false);
   const [visualizedNotes, setVisualizedNotes] = useState<number[]>([]);
 
   // Looping & Auto-Transpose State
@@ -56,25 +57,14 @@ function ChordLab() {
   const [loopCount, setLoopCount] = useState(0);
 
   useEffect(() => {
-    setVisualizationCallback((notes) => {
+    audioManager.setVisualizationCallback((notes) => {
       setVisualizedNotes(notes);
     });
-    return () => setVisualizationCallback(null);
+    return () => audioManager.setVisualizationCallback(null);
   }, []);
 
-  const ensureAudio = useCallback(async () => {
-    if (!audioInitialized) {
-      await initAudio();
-      setAudioInitialized(true);
-    }
-  }, [audioInitialized]);
-
   // MIDI Input Visualization State
-  const { activeNotes, lastNote } = useMidi();
-
-  useEffect(() => {
-    if (lastNote) ensureAudio();
-  }, [lastNote, ensureAudio]);
+  const { activeNotes } = useMidi();
 
   const midiNotes = useMemo(() => Array.from(activeNotes), [activeNotes]);
 
@@ -83,9 +73,8 @@ function ChordLab() {
   // Handle chord click from keyboard
   const handleChordClick = useCallback(
     async (chord: ChordInfo) => {
-      await ensureAudio();
       const voicedNotes = applyVoicing(chord.midiNotes, selectedVoicing);
-      playChord(voicedNotes, '4n', selectedStyle);
+      audioManager.playChord(voicedNotes, '4n', 0.8);
 
       setProgression((prev) => {
         const firstEmpty = prev.findIndex((c) => c === null);
@@ -98,18 +87,17 @@ function ChordLab() {
         return newProg;
       });
     },
-    [ensureAudio, selectedVoicing]
+    [selectedVoicing]
   );
 
   const handleSlotClick = useCallback(
     async (index: number) => {
       const chord = progression[index];
       if (chord) {
-        await ensureAudio();
-        playChord(chord.midiNotes, '2n', selectedStyle);
+        audioManager.playChord(chord.midiNotes, '2n', 0.8);
       }
     },
-    [progression, ensureAudio]
+    [progression]
   );
 
   const handleRemoveChord = useCallback((index: number) => {
@@ -124,7 +112,7 @@ function ChordLab() {
     setProgression(Array(MAX_PROGRESSION_LENGTH).fill(null));
     setPlayingIndex(null);
     setVisualizedNotes([]);
-    stop();
+    audioManager.stopAll();
     setIsPlaying(false);
   }, []);
 
@@ -183,15 +171,7 @@ function ChordLab() {
     [selectedKey, selectedScale, selectedVoicing]
   );
 
-  const handlePlay = useCallback(async () => {
-    await ensureAudio();
-    const validChords = progression
-      .map((c, i) => ({ chord: c, index: i }))
-      .filter((item): item is { chord: ChordInfo, index: number } => item.chord !== null);
-
-    if (validChords.length === 0) return;
-
-    setIsPlaying(true);
+  const startPlayback = useCallback((validChords: { chord: ChordInfo, index: number }[]) => {
     const playData = validChords.map(({ chord }) => ({
       root: chord.root,
       quality: chord.quality,
@@ -203,53 +183,13 @@ function ChordLab() {
       playData,
       selectedStyle,
       bpm,
-      (playIndex) => {
+      (playIndex: number) => {
         const originalIndex = validChords[playIndex].index;
         setPlayingIndex(originalIndex);
       },
       () => {
-        setIsPlaying(false);
-        // On Finish Callback - Handle Looping and Transposition
         if (isLooping) {
-          setLoopCount(prev => {
-            const newCount = prev + 1;
-            // Handle Auto-Transpose
-            if (transposeSettings.enabled && newCount % transposeSettings.interval === 0) {
-              // Calculate shift
-              const shift = transposeSettings.step;
-
-              // Helper to shift a note name by semitones
-              const shiftNote = (note: string, semitones: number) => {
-                const midi = noteNameToMidi(note + '4');
-                const shiftedMidi = midi + semitones;
-                return midiToNoteName(shiftedMidi, selectedKey).replace(/[0-9-]/g, '');
-              };
-
-              // 1. Shift Key
-              const newKey = shiftNote(selectedKey, shift);
-              setSelectedKey(newKey);
-
-              // 2. Shift Progression (especially custom chords with degree -1)
-              setProgression(prevProg => prevProg.map(chord => {
-                if (!chord) return null;
-
-                // Calculate new root
-                const newRoot = shiftNote(chord.root, shift);
-
-                // Shift MIDI notes
-                const newMidiNotes = chord.midiNotes.map(n => n + shift);
-                const newNotes = newMidiNotes.map(n => midiToNoteName(n, selectedKey));
-
-                return {
-                  ...chord,
-                  root: newRoot,
-                  notes: newNotes,
-                  midiNotes: newMidiNotes
-                };
-              }));
-            }
-            return newCount;
-          });
+          setLoopCount(prev => prev + 1);
         } else {
           setIsPlaying(false);
           setPlayingIndex(null);
@@ -257,78 +197,63 @@ function ChordLab() {
           setLoopCount(0);
         }
       },
-      (activeNotes) => {
-        setVisualizedNotes(activeNotes);
+      (notes: number[]) => {
+        setVisualizedNotes(notes);
       }
     );
-  }, [progression, bpm, selectedStyle, ensureAudio, isLooping, transposeSettings, selectedKey]);
+  }, [selectedStyle, bpm, isLooping]);
 
-  // Handle Looping Effect separately to avoid recursion issues
+  const handlePlay = useCallback(async () => {
+    const validChords = progression
+      .map((c, i) => ({ chord: c, index: i }))
+      .filter((item): item is { chord: ChordInfo, index: number } => item.chord !== null);
+
+    if (validChords.length === 0) return;
+
+    setIsPlaying(true);
+    startPlayback(validChords);
+  }, [progression, startPlayback]);
+
+  // Handle Looping + Auto-Transpose Effect
   useEffect(() => {
     if (isLooping && isPlaying && loopCount > 0) {
-      // This effect triggers when loopCount increments (which happens in onFinish)
-      // and restarts playback.
+      // Handle Auto-Transpose logic
+      if (transposeSettings.enabled && loopCount % transposeSettings.interval === 0) {
+        const shift = transposeSettings.step;
+        const shiftNote = (note: string, semitones: number) => {
+          const midi = noteNameToMidi(note + '4');
+          const shiftedMidi = midi + semitones;
+          return midiToNoteName(shiftedMidi, selectedKey).replace(/[0-9-]/g, '');
+        };
 
-      // We need a slight delay or just call play again.
-      // However, we need to call the *logic* of handlePlay, but handlePlay itself toggles isPlaying.
-      // Let's refactor handlePlay to separate "start playback" from "user clicked play".
+        const newKey = shiftNote(selectedKey, shift);
+        setSelectedKey(newKey);
 
-      // Actually, simpler: just call the play logic directly here.
-      // But we need the *latest* progression and state.
+        setProgression(prevProg => prevProg.map(chord => {
+          if (!chord) return null;
+          const newRoot = shiftNote(chord.root, shift);
+          const newMidiNotes = chord.midiNotes.map(n => n + shift);
+          const newNotes = newMidiNotes.map(n => midiToNoteName(n, newKey));
+          return { ...chord, root: newRoot, notes: newNotes, midiNotes: newMidiNotes };
+        }));
+      }
 
-      // Re-implementing play logic here is safer than recursion.
+      // Restart playback with latest progression
+      // The state updates above will be reflected in the next tick or via dependency
+    }
+  }, [loopCount, isLooping, isPlaying, transposeSettings, selectedKey]);
+
+  // Re-start playback when progression changes during a loop
+  useEffect(() => {
+    if (isPlaying && isLooping && loopCount > 0) {
       const validChords = progression
         .map((c, i) => ({ chord: c, index: i }))
         .filter((item): item is { chord: ChordInfo, index: number } => item.chord !== null);
-
-      if (validChords.length === 0) return;
-
-      const playData = validChords.map(({ chord }) => ({
-        root: chord.root,
-        quality: chord.quality,
-        duration: 4,
-        notes: chord.midiNotes
-      }));
-
-      playProgression(
-        playData,
-        selectedStyle,
-        bpm,
-        (playIndex) => {
-          const originalIndex = validChords[playIndex].index;
-          setPlayingIndex(originalIndex);
-        },
-        () => {
-          // Loop Finished again
-          setLoopCount(prev => {
-            const newCount = prev + 1;
-            // Handle Auto-Transpose (duplicated logic, consider extracting)
-            if (transposeSettings.enabled && newCount % transposeSettings.interval === 0) {
-              const shift = transposeSettings.step;
-              const shiftNote = (note: string, semitones: number) => {
-                const midi = noteNameToMidi(note + '4');
-                const shiftedMidi = midi + semitones;
-                return midiToNoteName(shiftedMidi, selectedKey).replace(/[0-9-]/g, '');
-              };
-              setSelectedKey(shiftNote(selectedKey, shift));
-              setProgression(prevProg => prevProg.map(chord => {
-                if (!chord) return null;
-                const newRoot = shiftNote(chord.root, shift);
-                const newMidiNotes = chord.midiNotes.map(n => n + shift);
-                const newNotes = newMidiNotes.map(n => midiToNoteName(n, selectedKey));
-                return { ...chord, root: newRoot, notes: newNotes, midiNotes: newMidiNotes };
-              }));
-            }
-            return newCount;
-          });
-        },
-        (activeNotes) => {
-          setVisualizedNotes(activeNotes);
-        }
-      );
+      if (validChords.length > 0) {
+        startPlayback(validChords);
+      }
     }
-  }, [loopCount, isLooping, isPlaying, progression, bpm, selectedStyle, transposeSettings, selectedKey]); // dependency on loopCount triggers next loop
-
+  }, [loopCount, isLooping, isPlaying, progression, startPlayback]);
 
   // --- Transposition Logic: Hard-link Progression to Key ---
   // Store previous key to calculate shift
@@ -459,7 +384,7 @@ function ChordLab() {
   }, [progression, savePreset]);
 
   const handleStop = useCallback(() => {
-    stop();
+    audioManager.stopAll();
     setIsPlaying(false);
     setPlayingIndex(null);
     setVisualizedNotes([]);
@@ -622,13 +547,32 @@ function ChordLab() {
     // });
   }, [selectedKey, selectedVoicing, selectedScale]);
 
-  // Handle Imported Progression from Library (via Navigation)
+  // Handle clipboard data on mount
+  const { pasteProgression, clear: clearClipboard } = useMusicalClipboard();
+
   useEffect(() => {
-    if (location.state && location.state.importedProgression) {
-      handleLoadExternalMidi(location.state.importedProgression);
-      window.history.replaceState({}, document.title);
+    // Check for navigation data (from musical clipboard)
+    const incomingData = pasteProgression();
+    if (incomingData && incomingData.source === 'navigation') {
+      handleLoadExternalMidi(incomingData);
+      clearClipboard();
     }
-  }, [location.state, handleLoadExternalMidi]);
+  }, [handleLoadExternalMidi, pasteProgression, clearClipboard]);
+
+  // Handle SearchParams (Deep Linking) on mount
+  useEffect(() => {
+    const deepLinkData = decodeProgression(searchParams);
+    if (deepLinkData) {
+      handleLoadExternalMidi({
+        key: deepLinkData.key,
+        chords: deepLinkData.chords,
+        mode: deepLinkData.mode,
+        source: 'deeplink'
+      });
+    }
+  }, [searchParams, handleLoadExternalMidi]);
+
+  // Handle Imported Progression from Library (via Navigation state)
 
   const highlightedNotes = availableChords.flatMap((c) =>
     c.midiNotes.map((n) => n % 12)

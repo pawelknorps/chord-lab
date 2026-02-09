@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { noteNameToMidi } from '../../../core/theory';
 import { playChordPart, triggerAttack, triggerRelease } from '../../../core/audio/globalAudio';
-import { PianoKeyboard } from './PianoKeyboard';
+import { UnifiedPiano } from '../../../components/shared/UnifiedPiano';
 import { useMasteryStore } from '../../../core/store/useMasteryStore';
 import { useMidi } from '../../../context/MidiContext';
 
@@ -225,12 +225,13 @@ export function EarTrainingModule() {
 
                         {difficulty === 'Pro' && quizMode ? (
                             <div className="flex flex-col items-center gap-6 py-4">
-                                <PianoKeyboard
-                                    startOctave={4}
-                                    endOctave={5}
-                                    highlightedNotes={inputBuffer.map(i => noteNameToMidi(currentRoot + '4') + i)}
-                                    activeChordDegree={null}
-                                />
+                                <div className="w-full max-w-md rounded-xl overflow-hidden border border-white/10 bg-black/20">
+                                    <UnifiedPiano
+                                        mode="highlight"
+                                        octaveRange={[4, 5]}
+                                        activeNotes={inputBuffer.map(i => noteNameToMidi(currentRoot + '4') + i)}
+                                    />
+                                </div>
                                 <div className="text-[10px] text-white/20 font-mono uppercase tracking-widest">
                                     Playing: {inputBuffer.map(i => i === 0 ? 'R' : i).join(' - ')}
                                 </div>
