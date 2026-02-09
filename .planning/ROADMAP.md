@@ -3,8 +3,9 @@
 ## Milestone 1: Theory Foundations & Secondary Dominants
 Goal: Establish the theory engine corrections and implement the first advanced level.
 
-### Phase 1: Theory Engine & Spelling
+### Phase 1: Theory Engine & Spelling [✓ Complete]
 - Goal: Fix enharmonic spelling logic and prepare background theory utils.
+- Completed: 2026-02-09
 - Requirements: THEORY-04, INTEG-01
 - Success Criteria:
   - Centralized enharmonic utility returns correct spelling for all keys.
@@ -34,5 +35,5 @@ Goal: Complete the set of advanced functional exercises.
 
 ---
 ## State
-- **Current Phase**: 1
-- **Overall Progress**: 0%
+- **Current Phase**: 2
+- **Overall Progress**: 25%
