@@ -143,25 +143,38 @@ export function midiToNoteName(midi: number, context?: string | boolean): string
   const functionalOverride = getFunctionalPitchClassOverride(pc, tonic);
   if (functionalOverride) return `${functionalOverride}${octave}`;
 
+  // Determine flat preference based on tonic
   const FLAT_KEYS = ['F', 'Bb', 'Eb', 'Ab', 'Db', 'Gb', 'Cb', 'Dm', 'Gm', 'Cm', 'Fm', 'Bbm', 'Ebm', 'Abm'];
   let prefersFlats = FLAT_KEYS.includes(tonic) || tonic.includes('b');
 
-  // If no specific key context given, infer from the note itself if it is a black key
-  if (!context && [1, 3, 6, 8, 10].includes(pc)) {
-    // Default to sharp for ambiguous cases unless logic dictates otherwise
-    // But user complained about A#maj7 (Bbmaj7), so let's check common keys
-    // Actually, without context, we can't know. 
-    // But if we are in a Flat Key context, we should definitely return flats.
-  }
+  // Enharmonic Preference Logic for Neutral/Ambiguous Contexts
+  // If we are in 'C' (neutral) or unknown context, we prefer commonly used jazz/pop keys.
+  // Jazz heavily leans towards flats.
 
-  // FORCE FLAT override for specific problem chords if they appear in standard contexts
-  // e.g. Bb is clearer than A# in almost all jazz contexts except B major / F# major
-  if (pc === 10 && !['B', 'F#', 'C#', 'G#', 'D#', 'A#'].includes(tonic)) {
-    prefersFlats = true; // High preference for Bb over A#
-  }
-  if (pc === 3 && !['B', 'E', 'A', 'D', 'G', 'F#', 'C#'].includes(tonic)) {
-    // Eb vs D# - Eb is usually preferred unless B/E/F# major
-    if (!['B', 'E', 'F#', 'C#'].includes(tonic)) prefersFlats = true;
+  // Specific Pitch Class Overrides
+  const SHARP_HEAVY_KEYS = ['B', 'F#', 'C#', 'G#', 'D#', 'A#', 'E']; // Keys that MUST use sharps
+
+  const isSharpKey = SHARP_HEAVY_KEYS.includes(tonic);
+
+  if (!isSharpKey) {
+    // Bb (10) vs A#
+    // A# is only diatonic in B Major and F# Major.
+    if (pc === 10) prefersFlats = true;
+
+    // Eb (3) vs D#
+    // D# is only diatonic in E Major and B Major.
+    if (pc === 3 && !['E', 'B'].includes(tonic)) prefersFlats = true;
+
+    // Ab (8) vs G#
+    // G# is only diatonic in A Major and E Major.
+    if (pc === 8 && !['A', 'E', 'B'].includes(tonic)) prefersFlats = true;
+
+    // Db (1) vs C#
+    // Db is common (Db Major, Ab Major). C# is common (D Major, A Major).
+    // Here we respect the 'tonic' if it's D or A.
+    // But if neutral 'C', C# is slightly more standard as an accidental usually? 
+    // Actually Db is bII (Neapolitan) or tritone sub root. C# is.. C#.
+    // Let's leave Db/C# to the general 'FLAT_KEYS' check unless we want to force something.
   }
 
   const noteName = prefersFlats ? NOTE_NAMES_FLAT[pc] : NOTE_NAMES[pc];
