@@ -6,6 +6,7 @@ import {
 } from '../state/jazzSignals';
 import { usePracticeStore } from '../../../core/store/usePracticeStore';
 import { AnalysisOverlay } from './AnalysisOverlay';
+import { GuideToneOverlay } from './GuideToneOverlay';
 
 interface LeadSheetProps {
     song: any;
@@ -55,6 +56,7 @@ export const LeadSheet = ({ song }: LeadSheetProps) => {
 
                 {/* Analysis Overlay - Visual Brackets */}
                 <div className="relative">
+                    <GuideToneOverlay />
                     <AnalysisOverlay
                         concepts={detectedPatterns}
                         measureCount={song.music.measures.length}

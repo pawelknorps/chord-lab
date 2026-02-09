@@ -1,7 +1,9 @@
 import { create } from 'zustand';
 import * as Tone from 'tone';
 import { ConceptAnalyzer } from '../theory/ConceptAnalyzer';
+import { GuideToneCalculator } from '../theory/GuideToneCalculator';
 import type { AnalysisResult, Concept } from '../theory/AnalysisTypes';
+import type { GuideTone } from '../theory/GuideToneTypes';
 
 interface PracticeExercise {
     type: string;
@@ -28,24 +30,23 @@ interface PracticeState {
     detectedPatterns: Concept[];
     practiceExercises: PracticeExercise[];
     activeFocusIndex: number | null;
-    userLatency: number; // Calibrated offset in ms
-    performanceHeatmap: Record<number, number>; // measureIndex -> score
+    userLatency: number;
+    performanceHeatmap: Record<number, number>;
+
+    // --- Guide Tones ---
+    guideTones: Map<number, GuideTone>;
+    showGuideTones: boolean;
 
     // --- Actions ---
     loadSong: (song: JazzStandard) => void;
     togglePlayback: () => Promise<void>;
     setBpm: (newBpm: number) => void;
-
-    // --- Latency Calibration ---
     calibrateLatency: (measuredDelta: number) => void;
-
-    // --- Practice Drill Logic ---
     focusOnPattern: (patternIndex: number) => void;
     clearFocus: () => void;
     updateHeatmap: (measureIndex: number, successScore: number) => void;
-
-    // --- Auto-increment BPM on success ---
     incrementBpm: (step?: number) => void;
+    toggleGuideTones: () => void;
 }
 
 export const usePracticeStore = create<PracticeState>((set, get) => ({
@@ -60,24 +61,36 @@ export const usePracticeStore = create<PracticeState>((set, get) => ({
     activeFocusIndex: null,
     userLatency: 0,
     performanceHeatmap: {},
+    guideTones: new Map(),
+    showGuideTones: false,
 
     // --- Actions ---
     loadSong: (song: JazzStandard) => {
         console.log('🎵 Loading song:', song.title);
 
-        // Analyze the song for patterns
+        // Analyze patterns
         const analysisResult = ConceptAnalyzer.analyze(song.chords, song.key);
         const exercises = ConceptAnalyzer.generateExercises(analysisResult, song.chords);
 
-        console.log(`✨ Detected ${analysisResult.concepts.length} patterns:`, analysisResult.concepts);
-        console.log(`📚 Generated ${exercises.length} practice exercises`);
+        // Calculate guide tones
+        const guideTones = new Map<number, GuideTone>();
+        song.chords.forEach((chord, index) => {
+            if (chord && chord !== '') {
+                const gt = GuideToneCalculator.calculate(chord);
+                if (gt) guideTones.set(index, gt);
+            }
+        });
+
+        console.log(`✨ Detected ${analysisResult.concepts.length} patterns`);
+        console.log(`🎯 Calculated ${guideTones.size} guide tones`);
 
         set({
             currentSong: song,
             detectedPatterns: analysisResult.concepts,
             practiceExercises: exercises,
             activeFocusIndex: null,
-            performanceHeatmap: {}, // Reset heatmap for new song
+            performanceHeatmap: {},
+            guideTones,
         });
     },
 
@@ -170,5 +183,10 @@ export const usePracticeStore = create<PracticeState>((set, get) => ({
         const newBpm = Math.min(bpm + step, 300);
         get().setBpm(newBpm);
         console.log(`⬆️ BPM increased to ${newBpm}`);
+    },
+
+    toggleGuideTones: () => {
+        set((state) => ({ showGuideTones: !state.showGuideTones }));
+        console.log(`🎯 Guide tones ${get().showGuideTones ? 'ON' : 'OFF'}`);
     },
 }));

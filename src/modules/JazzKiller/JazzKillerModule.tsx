@@ -30,7 +30,7 @@ export default function JazzKillerModule() {
     const { standards, getSongAsIRealFormat } = useJazzLibrary();
 
     // Practice Store integration
-    const { loadSong, detectedPatterns, practiceExercises, activeFocusIndex } = usePracticeStore();
+    const { loadSong, detectedPatterns, practiceExercises, activeFocusIndex, showGuideTones, toggleGuideTones } = usePracticeStore();
 
     // Analysis filters
     const [analysisFilters, setAnalysisFilters] = useState<AnalysisFilters>({
@@ -232,11 +232,25 @@ export default function JazzKillerModule() {
                         <div className="h-10 w-px bg-white/10 mx-1"></div>
 
                         <button
-                            onClick={() => setShowMixer(!showMixer)}
-                            className={`p-2.5 rounded-xl transition-all ${showMixer ? 'bg-amber-500 text-black' : 'text-neutral-500 hover:text-white hover:bg-white/5'}`}
-                            title="Toggle Mixer"
+                            onClick={() => setShowPracticePanel(!showPracticePanel)}
+                            className={`px-4 py-2 rounded-xl transition-all ${showPracticePanel ? 'bg-amber-500 text-black' : 'bg-white/5 hover:bg-white/10 text-white'}`}
+                            title="Practice Drills"
                         >
-                            <Sliders size={20} />
+                            <Target size={18} />
+                        </button>
+                        <button
+                            onClick={toggleGuideTones}
+                            className={`px-4 py-2 rounded-xl transition-all ${showGuideTones ? 'bg-emerald-500 text-black' : 'bg-white/5 hover:bg-white/10 text-white'}`}
+                            title="Guide Tones (3rds & 7ths)"
+                        >
+                            🎯
+                        </button>
+                        <button
+                            onClick={() => setShowMixer(!showMixer)}
+                            className={`px-4 py-2 rounded-xl transition-all ${showMixer ? 'bg-amber-500 text-black' : 'bg-white/5 hover:bg-white/10 text-white'}`}
+                            title="Mixer"
+                        >
+                            <Volume2 size={18} />
                         </button>
 
                         <div className="h-10 w-px bg-white/10 mx-1"></div>
