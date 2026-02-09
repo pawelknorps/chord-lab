@@ -22,9 +22,10 @@ Goal: Establish the theory engine corrections and implement the first advanced l
   - `src/core/theory/index.ts` refactored to use `theoryEngine.ts`.
   - All modules using `midiToNoteName` or similar now follow the unified jazz rules.
 
-### Phase 2: Secondary Dominants
+### Phase 2: Secondary Dominants [✓ Complete]
 
 - Goal: Implement full ear training loop for secondary dominants.
+- Completed: 2026-02-09
 - Requirements: THEORY-01, UI-01, UI-04
 - Success Criteria:
   - User can hear a progression and identify the secondary dominant.
@@ -52,5 +53,5 @@ Goal: Complete the set of advanced functional exercises.
 
 ## State
 
-- **Current Phase**: 2
-- **Overall Progress**: 50%
+- **Current Phase**: 3
+- **Overall Progress**: 75%
