@@ -340,9 +340,9 @@ export const ChordInput: React.FC<ChordInputProps> = ({ pianoComponentId, classN
   }
 
   const getOptionText = (option: string): ReactNode => {
-    
+
     if (
-      isGuitar(state.format) && 
+      isGuitar(state.format) &&
       UNSUPPORTED_GUITAR_CHORDS.includes(option)
     ) {
       return (
@@ -356,195 +356,116 @@ export const ChordInput: React.FC<ChordInputProps> = ({ pianoComponentId, classN
   }
 
   return (
-    <form className={cn("h-[12em] w-[6em]", className)}>
-      <div className="items-center space-y-2 w-full">
-        <div className="chord-select-group space-y-2" >
-          {/* Key Selection */}
-          <div className="relative w-full">
-            <Select
-              value={getKeyRelativeLetter(chordRef.current.selectedChordKey) || 'C'}
-              onValueChange={(value: any) => handleKeySelectChange({ target: { value } } as any)}
-            >
-              <SelectTrigger className="">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {chordRef.current.noteArray
-                  .map((option, index) => {
-                    const relativeValue = getKeyRelativeLetter(option);
-                    return relativeValue ? (
-                      <SelectItem key={index} value={relativeValue}>
-                        {relativeValue}
-                      </SelectItem>
-                    ) : null;
-                  })
-                  .filter(Boolean)}
-              </SelectContent>
-            </Select>
-            <span className="absolute right-8 top-1/2 -translate-y-1/2 text-slate-400">
-              {getNumeralChord()}
-            </span>
+    <div className={cn("chord-controls", className)}>
+      <div className="space-y-4">
+        {/* Key Selection */}
+        <div className="space-y-1">
+          <div className="flex justify-between items-center">
+            <span className="text-[10px] uppercase tracking-wider text-white/40 font-semibold">Root</span>
+            <span className="numeral-badge">{getNumeralChord()}</span>
           </div>
-          {/* Chord Type Selection */}
-          <div className="type-select">
-
-            {/* <Combobox
-              items={chordTypeArray
-                .map((option) => (
-                  {
-                    value: option,
-                    label: option
-                  } as ComboboxItem
-                ))}
-              value={chordRef.current.type}
-              placeholder={chordRef.current.type}
-              searchPlaceholder="Search types..."
-              emptyMessage="No type found."
-              className="w-24"
-              onValueChange={(value: any) => handleTypeSelectChange({ target: { value } } as any)}
-            /> */}
-
-            <Select
-              value={chordRef.current.type || 'major'} // Fallback to 'major'
-              onValueChange={(value: any) => handleTypeSelectChange({ target: { value } } as any)}
-            >
-              <SelectTrigger className="w-24">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {chordTypeArray
-                  //.filter(option => option && option.trim()) // Remove empty strings
-                  .map((option, index) => (
-                    <SelectItem key={index} value={option}>
-                      {getOptionText(option)}
+          <Select
+            value={getKeyRelativeLetter(chordRef.current.selectedChordKey) || 'C'}
+            onValueChange={(value: any) => handleKeySelectChange({ target: { value } } as any)}
+          >
+            <SelectTrigger className="chord-select-trigger">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-slate-900 border-white/10 text-white">
+              {chordRef.current.noteArray
+                .map((option, index) => {
+                  const relativeValue = getKeyRelativeLetter(option);
+                  return relativeValue ? (
+                    <SelectItem key={index} value={relativeValue}>
+                      {relativeValue}
                     </SelectItem>
-                  ))}
-              </SelectContent>
-            </Select> 
-          </div>
+                  ) : null;
+                })
+                .filter(Boolean)}
+            </SelectContent>
+          </Select>
         </div>
-        {/* Checkboxes */}
-        <div className="flex-box space-x-2 text-slate-300">
-          <div className="flex space-x-4 mb-2">
-            <div className="space-x-2 keyCheckBox">
-              <Checkbox
-                id={`key-${chordRef.current.id}`}
-                className="pb-[0.1em]"
-                checked={chordRef.current.isProgKey}
-                onCheckedChange={(checked: any) =>
-                  handleIsKeyChecked({ target: { checked } } as any)
-                }
-              />
-              <label
-                htmlFor={`key-${chordRef.current.id}`}
-                className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                key
-              </label>
-            </div>
 
-            <div className="items-center space-x-2 flatCheckBox" data-format={isGuitar(state.format) ? 'g' : 'p'}>
-              <Checkbox
-                id={`flat-${chordRef.current.id}`}
-                className="pb-[0.1em]"
-                checked={chordRef.current.showFlats}
-                onCheckedChange={(checked: any) =>
-                  handleIsFlatKeyChecked({ target: { checked } } as any)
-                }
-              />
-              <label
-                htmlFor={`flat-${chordRef.current.id}`}
-                className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                b
-              </label>
-            </div>
+        {/* Chord Type Selection */}
+        <div className="space-y-1">
+          <span className="text-[10px] uppercase tracking-wider text-white/40 font-semibold">Quality</span>
+          <Select
+            value={chordRef.current.type || 'major'}
+            onValueChange={(value: any) => handleTypeSelectChange({ target: { value } } as any)}
+          >
+            <SelectTrigger className="chord-select-trigger">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-slate-900 border-white/10 text-white">
+              {chordTypeArray.map((option, index) => (
+                <SelectItem key={index} value={option}>
+                  {getOptionText(option)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Checkboxes */}
+        <div className="chord-checkbox-group">
+          <div className="chord-checkbox-item">
+            <Checkbox
+              id={`key-${chordRef.current.id}`}
+              checked={chordRef.current.isProgKey}
+              onCheckedChange={(checked: any) => handleIsKeyChecked({ target: { checked } } as any)}
+            />
+            <label htmlFor={`key-${chordRef.current.id}`} className="cursor-pointer">key</label>
+          </div>
+
+          <div className="chord-checkbox-item">
+            <Checkbox
+              id={`flat-${chordRef.current.id}`}
+              checked={chordRef.current.showFlats}
+              onCheckedChange={(checked: any) => handleIsFlatKeyChecked({ target: { checked } } as any)}
+            />
+            <label htmlFor={`flat-${chordRef.current.id}`} className="cursor-pointer">b</label>
           </div>
 
           {!isGuitar(state.format) && (
-            <div className="flex !ml-0 space-x-2 !mb-[0.7em] slashCheckBox">
+            <div className="chord-checkbox-item">
               <Checkbox
                 id={`slash-${chordRef.current.id}`}
-                className="pb-[0.1em]"
                 checked={chordRef.current.slashChord}
-                onCheckedChange={(checked) =>
-                  handleIsSlashChordChecked({ target: { checked } } as any)
-                }
+                onCheckedChange={(checked) => handleIsSlashChordChecked({ target: { checked } } as any)}
               />
-              <label
-                htmlFor={`slash-${chordRef.current.id}`}
-                className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                slash
-              </label>
+              <label htmlFor={`slash-${chordRef.current.id}`} className="cursor-pointer">slash</label>
             </div>
           )}
         </div>
 
         {/* Slash Chord Section */}
-        {!isGuitar(state.format) && (
-          <div className="flex items-center slash-container">
-            <span
-              className={cn(
-                "mx-1 text-lg",
-                !chordRef.current.slashChord && "invisible"
-              )}
+        {!isGuitar(state.format) && chordRef.current.slashChord && (
+          <div className="space-y-1 animate-in fade-in slide-in-from-top-1 duration-200">
+            <span className="text-[10px] uppercase tracking-wider text-white/40 font-semibold text-center block">/</span>
+            <Select
+              value={chordRef.current.slashNote || ""}
+              onValueChange={(value: string) => handleSlashChordNoteChange({ target: { value } } as any)}
             >
-              /
-            </span>
-            <div className={cn(
-              "transition-all ml-1",
-              !chordRef.current.slashChord && "invisible w-0",
-              chordRef.current.slashChord && "w-20"
-            )}>
-              <Select
-                defaultValue={chordRef.current.slashNote || "placeholder"}
-                onValueChange={(value: string) => {
-                  if (value !== "placeholder") {
-                    handleSlashChordNoteChange({ target: { value } } as any)
-                  }
-                }}
-                disabled={!chordRef.current.slashChord}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select">{chordRef.current.slashNote}</SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="placeholder" disabled>
-
-                  </SelectItem>
-                  {chordRef.current.noteArray
-                    .map((option, index) => {
-                      const value = option.trim()
-                      if (!value || !value?.length) return null // Skip empty values
-
-                      const keyRelativeValue = getKeyRelativeLetter(value)
-                      // Skip if the relative value is empty
-                      if (!keyRelativeValue) return null
-
-                      if (equalChroma(chordRef.current.slashNote, value)) {
-                        const slashNoteValue = getKeyRelativeLetter(chordRef.current.slashNote)
-                        // Only render if we have a valid slash note value
-                        return slashNoteValue ? (
-                          <SelectItem key={index} value={slashNoteValue}>
-                            {slashNoteValue}
-                          </SelectItem>
-                        ) : null
-                      }
-
-                      return (
-                        <SelectItem key={index} value={keyRelativeValue}>
-                          {keyRelativeValue}
-                        </SelectItem>
-                      )
-                    })
-                  }
-                </SelectContent>
-              </Select>
-            </div>
+              <SelectTrigger className="chord-select-trigger">
+                <SelectValue placeholder="Bass Note" />
+              </SelectTrigger>
+              <SelectContent className="bg-slate-900 border-white/10 text-white">
+                {chordRef.current.noteArray.map((option, index) => {
+                  const value = option.trim()
+                  if (!value) return null
+                  const keyRelativeValue = getKeyRelativeLetter(value)
+                  return (
+                    <SelectItem key={index} value={keyRelativeValue}>
+                      {keyRelativeValue}
+                    </SelectItem>
+                  )
+                })
+                }
+              </SelectContent>
+            </Select>
           </div>
         )}
       </div>
-    </form>
+    </div>
   )
 }

@@ -1,13 +1,10 @@
 import React, { useEffect, useRef } from 'react'
-import { useLocation } from 'react-router-dom'
 import '../styles/Piano.css'
 import { Key } from './Key'
 import { useAppContext, getPianoById } from './context/AppContext'
 import { getNoteLetter } from '../utils/noteManager'
 import { playChordById } from '../utils/synthPlayer'
-import { getStateParamsCode } from "../utils/chordCodeHandler"
 import { NoteKey } from '../utils/chordPianoHandler'
-import { ChordPianoComponent } from "../components/ChordPianoComponent"
 
 interface PianoComponentProps {
   pianoComponentId: number
@@ -63,12 +60,7 @@ export const PianoComponent: React.FC<PianoComponentProps> = ({
     })
   }
 
-  const handleClickRemovePiano = (): void => {
-    dispatch({
-      type: 'REMOVE_PIANO',
-      id: pianoId
-    })
-  }
+  // handleClickRemovePiano was unused and removed
 
   const handlePlayClick = (): void => {
     playChordById(dispatch, state, pianoId)
@@ -93,35 +85,16 @@ export const PianoComponent: React.FC<PianoComponentProps> = ({
   }
 
   return (
-    <>
-      <div className="flex relative h-[11.5em]">
-        <button
-          type="button"
-          className="piano-play-button"
-          onClick={handlePlayClick}
-        />
-        <div className="pianoBox">
-          <button
-            type="button"
-            className="relative mr-[-0.5em] top-[-0.6em] ml-[0.2em] !float-left !border-0 !border-none !outline-none"
-            aria-label="Close"
-            onClick={handleClickRemovePiano}
-          >
-            <span className="text-gray-400 hover:text-red-300/80 font-medium text-[1.6em] tracking-tighter" aria-hidden="true">&times;</span>
-          </button>
-          <ul className="set mt-3 mr-2">{renderPiano()}</ul>
-        </div>
-        <div className="closeContainer">
-          <button
-            type="button"
-            className="close pianoCloseButtonMobile"
-            aria-label="Close"
-            onClick={handleClickRemovePiano}
-          >
-            <span className="mobileClosedBtnText">&times;</span>
-          </button>
-        </div>
+    <div className="flex items-center gap-4 w-full justify-center">
+      <button
+        type="button"
+        className="piano-play-button shrunk-on-mobile"
+        onClick={handlePlayClick}
+        aria-label="Play Chord"
+      />
+      <div className="pianoBox flex-1">
+        <ul className="set !mt-0 !mb-0">{renderPiano()}</ul>
       </div>
-    </>
+    </div>
   );
 };

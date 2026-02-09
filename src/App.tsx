@@ -16,7 +16,10 @@ const RhythmArchitect = lazy(() => import('./modules/RhythmArchitect/RhythmArchi
 const FunctionalEarTraining = lazy(() => import('./modules/FunctionalEarTraining/FunctionalEarTraining').then(m => ({ default: m.FunctionalEarTraining })));
 const CircleChords = lazy(() => import('./modules/CircleChords/CircleChordsModule'));
 const MidiLibrary = lazy(() => import('./pages/MidiLibraryPage'));
+
 const ChordBuildr = lazy(() => import('./modules/ChordBuildr/ChordBuildrModule'));
+const ProgressionsPage = lazy(() => import('./pages/ProgressionsPage'));
+const JazzKiller = lazy(() => import('./modules/JazzKiller/JazzKillerModule'));
 
 function App() {
     return (
@@ -76,6 +79,16 @@ function App() {
                                 <Route path="chord-buildr" element={
                                     <Suspense fallback={<div className="p-10 text-white/50">Loading Chord Builder...</div>}>
                                         <ChordBuildr />
+                                    </Suspense>
+                                } />
+                                <Route path="progressions" element={
+                                    <Suspense fallback={<div className="p-10 text-white/50">Loading Progressions...</div>}>
+                                        <ProgressionsPage />
+                                    </Suspense>
+                                } />
+                                <Route path="jazz-standards" element={
+                                    <Suspense fallback={<div className="p-10 text-white/50">Loading Jazz Standards...</div>}>
+                                        <JazzKiller />
                                     </Suspense>
                                 } />
                             </Route>

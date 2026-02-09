@@ -9,8 +9,8 @@ export function NeoRiemannianWidget() {
 
     const playState = (root: string, quality: 'Major' | 'Minor') => {
         const rootMidi = noteNameToMidi(root + '4');
-        let intervals = quality === 'Major' ? [0, 4, 7] : [0, 3, 7];
-        let notes = intervals.map(i => rootMidi + i);
+        const intervals = quality === 'Major' ? [0, 4, 7] : [0, 3, 7];
+        const notes = intervals.map(i => rootMidi + i);
         playChord(notes, '1n');
     };
 
@@ -21,7 +21,7 @@ export function NeoRiemannianWidget() {
 
     const transform = (type: 'P' | 'L' | 'R') => {
         let newRoot = currentRoot;
-        let newQuality = currentQuality === 'Major' ? 'Minor' : 'Major';
+        const newQuality = currentQuality === 'Major' ? 'Minor' : 'Major';
         // Note: newQuality is the TARGET quality. P, L, R always flip quality.
 
         const rootMidi = noteNameToMidi(currentRoot + '4');

@@ -10,6 +10,7 @@ interface ConstantStructureToolProps {
 export function ConstantStructureTool({ onAddChord }: ConstantStructureToolProps) {
     const [baseRoot, setBaseRoot] = useState('C');
     const [lockedVoicing, setLockedVoicing] = useState<number[]>([0, 3, 7, 10, 14, 17]); // Relative intervals
+    const [selectedShapeName, setSelectedShapeName] = useState('Custom');
     const [isLocked, setIsLocked] = useState(false);
 
     // Define some "Modern" shapes to start with
@@ -22,6 +23,7 @@ export function ConstantStructureTool({ onAddChord }: ConstantStructureToolProps
 
     const handleShapeSelect = (shape: typeof SHAPES[0]) => {
         setLockedVoicing(shape.intervals);
+        setSelectedShapeName(shape.name);
         setIsLocked(true);
         // Play it
         playCurrentShape(baseRoot);
@@ -47,7 +49,7 @@ export function ConstantStructureTool({ onAddChord }: ConstantStructureToolProps
 
         const chord: ChordInfo = {
             root: baseRoot,
-            quality: 'constant', // Special type?
+            quality: selectedShapeName, // Use shape name
             roman: 'N.F.', // Non-functional
             degree: -1,
             notes: notes.map(n => midiToNoteName(n)),
@@ -83,8 +85,8 @@ export function ConstantStructureTool({ onAddChord }: ConstantStructureToolProps
                                 key={shape.name}
                                 onClick={() => handleShapeSelect(shape)}
                                 className={`p-3 rounded-xl text-left transition-colors ${lockedVoicing === shape.intervals
-                                        ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white'
-                                        : 'bg-white/5 hover:bg-white/10 text-white/70'
+                                    ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white'
+                                    : 'bg-white/5 hover:bg-white/10 text-white/70'
                                     }`}
                             >
                                 <div className="font-bold">{shape.name}</div>

@@ -1,23 +1,47 @@
 import * as Tone from 'tone';
 import { midiToNoteName, noteNameToMidi } from '../theory';
+import {
+  pianoVolumeSignal,
+  bassVolumeSignal,
+  drumsVolumeSignal,
+  reverbVolumeSignal,
+  pianoReverbSignal,
+  isPlayingSignal,
+  currentMeasureIndexSignal,
+  currentBeatSignal
+} from './audioSignals';
+import { effect } from '@preact/signals-react';
 
 // Instrument Types
-export type Style = 'Swing' | 'Bossa' | 'Ballad' | 'Guitar' | 'None';
+export type Style = 'Swing' | 'Jazz' | 'Bossa' | 'Ballad' | 'Guitar' | 'None';
 
-let piano: Tone.Sampler | null = null;
-let bass: Tone.MonoSynth | null = null;
-let drums: {
-  kick: Tone.MembraneSynth;
-  snare: Tone.NoiseSynth;
-  hihat: Tone.MetalSynth;
-  ride: Tone.MetalSynth;
+export let piano: Tone.Sampler | null = null;
+export let guitar: Tone.Sampler | null = null;
+let bass: Tone.Sampler | null = null;
+export let drums: {
+  kick: Tone.Sampler;
+  snare: Tone.Sampler;
+  hihat: Tone.Sampler;
+  ride: Tone.Sampler;
 } | null = null;
-let guitar: Tone.Sampler | null = null;
 
 let isInitialized = false;
 
+// Visualization Callback
+type VisualizationCallback = (notes: number[]) => void;
+let onVisualization: VisualizationCallback | null = null;
+
+export function setVisualizationCallback(cb: VisualizationCallback | null) {
+  onVisualization = cb;
+}
+
+function emitVisualization(notes: number[]) {
+  if (onVisualization) onVisualization(notes);
+}
+
 // Volume nodes & FX
 let reverb: Tone.Reverb;
+let pianoReverb: Tone.Reverb;
 let chorus: Tone.Chorus;
 let compressor: Tone.Compressor;
 let masterVol: Tone.Volume;
@@ -41,9 +65,16 @@ export async function initAudio(): Promise<void> {
   reverb = new Tone.Reverb({
     decay: 2.5,
     preDelay: 0.1,
-    wet: 0.3
+    wet: reverbVolumeSignal.value
   }).toDestination();
   await reverb.generate();
+
+  pianoReverb = new Tone.Reverb({
+    decay: 3.0,
+    preDelay: 0.15,
+    wet: pianoReverbSignal.value
+  }).toDestination();
+  await pianoReverb.generate();
 
   chorus = new Tone.Chorus({
     frequency: 1.5,
@@ -62,9 +93,26 @@ export async function initAudio(): Promise<void> {
   masterVol = new Tone.Volume(0).connect(compressor);
 
   // --- BUSSES ---
-  pianoVol = new Tone.Volume(-8).connect(masterVol);
-  bassVol = new Tone.Volume(-4).connect(masterVol);
-  drumsVol = new Tone.Volume(-12).connect(masterVol);
+  pianoVol = new Tone.Volume(pianoVolumeSignal.value).connect(pianoReverb);
+  bassVol = new Tone.Volume(bassVolumeSignal.value).connect(compressor);
+  drumsVol = new Tone.Volume(drumsVolumeSignal.value).connect(compressor);
+
+  // Bind signals to Tone nodes
+  effect(() => {
+    if (pianoVol) pianoVol.volume.rampTo(pianoVolumeSignal.value, 0.1);
+  });
+  effect(() => {
+    if (bassVol) bassVol.volume.rampTo(bassVolumeSignal.value, 0.1);
+  });
+  effect(() => {
+    if (drumsVol) drumsVol.volume.rampTo(drumsVolumeSignal.value, 0.1);
+  });
+  effect(() => {
+    if (reverb) reverb.wet.rampTo(reverbVolumeSignal.value, 0.1);
+  });
+  effect(() => {
+    if (pianoReverb) pianoReverb.wet.rampTo(pianoReverbSignal.value, 0.1);
+  });
 
   // --- SPLIT BRAIN BUSSES ---
   // Left Ear (Shells)
@@ -82,7 +130,6 @@ export async function initAudio(): Promise<void> {
   // 1. Main Piano (Center/Global) - REALISTIC SAMPLER
   piano = new Tone.Sampler({
     urls: {
-      "A0": "A0.mp3",
       "C1": "C1.mp3",
       "D#1": "Ds1.mp3",
       "F#1": "Fs1.mp3",
@@ -114,7 +161,7 @@ export async function initAudio(): Promise<void> {
       "C8": "C8.mp3"
     },
     release: 1,
-    baseUrl: "https://tonejs.github.io/audio/salamander/"
+    baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/piano/"
   }).connect(pianoVol);
 
   // 2. Shell Synth (Left - Warm)
@@ -136,7 +183,6 @@ export async function initAudio(): Promise<void> {
   guitar = new Tone.Sampler({
     urls: {
       "A2": "A2.mp3",
-      "C3": "C3.mp3",
       "E3": "E3.mp3",
       "G3": "G3.mp3",
     },
@@ -144,27 +190,71 @@ export async function initAudio(): Promise<void> {
     onload: () => console.log('Guitar loaded')
   }).connect(pianoVol);
 
-  // 5. Bass
-  bass = new Tone.MonoSynth({
-    oscillator: { type: "triangle" },
-    envelope: { attack: 0.02, decay: 0.3, sustain: 0.8, release: 0.5 },
-    filterEnvelope: { attack: 0.01, decay: 0.2, sustain: 0.3, baseFrequency: 80, octaves: 3, exponent: 2 }
+  // 5. Electric Bass Sampler
+  bass = new Tone.Sampler({
+    urls: {
+      "A#1": "As1.mp3",
+      "C#1": "Cs1.mp3",
+      "E1": "E1.mp3",
+      "G1": "G1.mp3",
+      "A#2": "As2.mp3",
+      "C#2": "Cs2.mp3",
+      "E2": "E2.mp3",
+      "G2": "G2.mp3",
+      "A#3": "As3.mp3",
+      "C#3": "Cs3.mp3",
+      "E3": "E3.mp3",
+      "G3": "G3.mp3",
+      "A#4": "As4.mp3",
+      "C#4": "Cs4.mp3",
+      "E4": "E4.mp3",
+      "G4": "G4.mp3",
+      "C#5": "Cs5.mp3"
+    },
+    baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/bass-electric/",
+    onload: () => console.log('Electric Bass loaded')
   }).connect(bassVol);
 
-  // 6. Drums
+  // 6. Drums (Nate Smith Local Samples - Multi-Sampled)
+  const drumBaseUrl = "/drum_samples/";
   drums = {
-    kick: new Tone.MembraneSynth({
-      pitchDecay: 0.05, octaves: 10, oscillator: { type: "sine" },
-      envelope: { attack: 0.001, decay: 0.4, sustain: 0.01, release: 1.4, attackCurve: "exponential" }
+    kick: new Tone.Sampler({
+      urls: {
+        "C1": "KickTight1_NateSmith.wav",
+        "D1": "KickTight2_NateSmith.wav",
+        "E1": "KickOpen1_NateSmith.wav"
+      },
+      baseUrl: drumBaseUrl,
+      onload: () => console.log('Kick sampler loaded (multi)')
     }).connect(drumsVol),
-    snare: new Tone.NoiseSynth({
-      noise: { type: "pink" }, envelope: { attack: 0.005, decay: 0.1, sustain: 0 }
+    snare: new Tone.Sampler({
+      urls: {
+        "C1": "SnareTight1_NateSmith.wav",
+        "D1": "SnareDeep1_NateSmith.wav",
+        "E1": "CrossStick1_NateSmith.wav"
+      },
+      baseUrl: drumBaseUrl,
+      onload: () => console.log('Snare sampler loaded (multi)')
     }).connect(drumsVol),
-    hihat: new Tone.MetalSynth({
-      envelope: { attack: 0.001, decay: 0.05, release: 0.01 }, harmonicity: 5.1, modulationIndex: 32, resonance: 4000, octaves: 1.5,
+    hihat: new Tone.Sampler({
+      urls: {
+        "C1": "HiHatClosed1_NateSmith.wav",
+        "D1": "HiHatClosed2_NateSmith.wav",
+        "E1": "HiHatClosed3_NateSmith.wav",
+        "F1": "HiHatOpen1_NateSmith.wav"
+      },
+      baseUrl: drumBaseUrl,
+      onload: () => console.log('HiHat sampler loaded (multi)')
     }).connect(drumsVol),
-    ride: new Tone.MetalSynth({
-      envelope: { attack: 0.001, decay: 1.5, release: 0.5 }, harmonicity: 5.1, modulationIndex: 20, resonance: 6000, octaves: 1.0,
+    ride: new Tone.Sampler({
+      urls: {
+        "C1": "Ride1_NateSmith.wav",
+        "D1": "Ride2_NateSmith.wav",
+        "E1": "RideBell_NateSmith.wav",
+        "F1": "CrashRide1_NateSmith.wav"
+      },
+      baseUrl: drumBaseUrl,
+      onload: () => console.log('Ride sampler loaded (multi)')
     }).connect(drumsVol)
   };
 
@@ -191,20 +281,25 @@ export function stop() {
   // Release all notes
   piano?.releaseAll();
   guitar?.releaseAll();
-  bass?.triggerRelease();
+  bass?.releaseAll();
+  emitVisualization([]);
 }
 
-// Play a single chord immediately
-export function playChord(midiNotes: number[], duration = '8n', style: Style = 'None'): void {
+// Play a single chord immediately or at a scheduled time
+export function playChord(midiNotes: number[], duration = '8n', style: Style = 'None', time: number | string = Tone.now()): void {
   if (!piano || !isInitialized) return;
   const validNotes = midiNotes.filter(n => !isNaN(n) && isFinite(n));
   const noteNames = validNotes.map(m => midiToNoteName(m));
   if (noteNames.length > 0) {
+    emitVisualization(validNotes);
     if (style === 'Guitar') {
-      guitar?.triggerAttackRelease(noteNames, duration);
+      guitar?.triggerAttackRelease(noteNames, duration, time);
     } else {
-      piano.triggerAttackRelease(noteNames, duration);
+      piano.triggerAttackRelease(noteNames, duration, time);
     }
+    // Clear visualization after duration
+    const durSec = Tone.Time(duration).toSeconds();
+    setTimeout(() => emitVisualization([]), durSec * 1000);
   }
 }
 
@@ -232,7 +327,10 @@ export function playChordPart(midiNotes: number[], duration = '2n', _type: 'shel
   const validNotes = midiNotes.filter(n => !isNaN(n) && isFinite(n));
   const noteNames = validNotes.map(m => midiToNoteName(m));
   if (noteNames.length > 0) {
+    emitVisualization(validNotes);
     piano.triggerAttackRelease(noteNames, duration);
+    const durSec = Tone.Time(duration).toSeconds();
+    setTimeout(() => emitVisualization([]), durSec * 1000);
   }
 }
 
@@ -244,9 +342,18 @@ export function playSplitBrain(shellNotes: string[] | number[], extensionNotes: 
   // Convert MIDI to note names if needed
   const toNames = (notes: string[] | number[]) =>
     notes.map(n => typeof n === 'number' ? midiToNoteName(n) : n);
+  const toMidi = (notes: string[] | number[]) =>
+    notes.map(n => typeof n === 'string' ? noteNameToMidi(n) : n);
 
   const shells = toNames(shellNotes);
   const extensions = toNames(extensionNotes);
+  const allMidi = [...toMidi(shellNotes), ...toMidi(extensionNotes)];
+
+  if (allMidi.length > 0) {
+    emitVisualization(allMidi);
+    const durSec = Tone.Time(duration).toSeconds();
+    setTimeout(() => emitVisualization([]), durSec * 1000);
+  }
 
   if (shells.length > 0 && shellSynth) {
     shellSynth.triggerAttackRelease(shells, duration);
@@ -282,6 +389,7 @@ export function playProgression(
 
   stop();
   Tone.Transport.bpm.value = bpm;
+  isPlayingSignal.value = true;
 
   let currentTime = 0; // in beats (quarter notes)
 
@@ -293,6 +401,7 @@ export function playProgression(
     Tone.Transport.schedule((time) => {
       Tone.Draw.schedule(() => {
         onChordStart?.(i);
+        currentMeasureIndexSignal.value = i;
       }, time);
     }, Tone.Time('4n').toSeconds() * currentTime + 0.05);
 
@@ -303,35 +412,91 @@ export function playProgression(
     let rootMidi = noteNameToMidi(chord.root + '2');
     if (rootMidi < 28) rootMidi += 12; // E1 is 28
 
-    // --- INSTRUMENT PART ---
-    if (style === 'Swing') {
+    // --- PIANO / COMPING ---
+    if (style === 'Swing' || style === 'Jazz') {
+      const isThreeFour = duration === 3;
       const velocity = 0.5 + Math.random() * 0.2;
-      Tone.Transport.schedule(t => {
-        piano?.triggerAttackRelease(noteNames, '4n', t, velocity);
-        Tone.Draw.schedule(() => onActiveNotesChange?.(chord.notes), t);
-      }, startSec);
+      const jitter = () => (Math.random() - 0.5) * 0.015;
 
-      Tone.Transport.schedule(t => {
-        Tone.Draw.schedule(() => onActiveNotesChange?.([]), t);
-      }, startSec + Tone.Time('4n').toSeconds());
+      // Decide on a rhythm pattern for this measure
+      const patternType = Math.floor(Math.random() * 5);
+      const beatsToPlay: { beat: number; dur: string; velMult: number }[] = [];
 
-      if (duration >= 2) {
-        const syncTime = startSec + Tone.Time('0:1:2').toSeconds();
-        Tone.Transport.schedule(t => {
-          piano?.triggerAttackRelease(noteNames, '8n', t, velocity * 0.8);
-          Tone.Draw.schedule(() => onActiveNotesChange?.(chord.notes), t);
-        }, syncTime);
-        Tone.Transport.schedule(t => {
-          Tone.Draw.schedule(() => onActiveNotesChange?.([]), t);
-        }, syncTime + Tone.Time('8n').toSeconds());
+      if (isThreeFour) {
+        // 3/4 Patterns
+        if (patternType === 0) beatsToPlay.push({ beat: 0, dur: '2.n', velMult: 1 });
+        else if (patternType === 1) {
+          beatsToPlay.push({ beat: 0, dur: '4n', velMult: 1 });
+          beatsToPlay.push({ beat: 1.66, dur: '8n', velMult: 0.8 });
+        } else {
+          beatsToPlay.push({ beat: 0, dur: '4n', velMult: 1 });
+          beatsToPlay.push({ beat: 2, dur: '4n', velMult: 0.7 });
+        }
+      } else {
+        // 4/4 Patterns
+        if (patternType === 0) {
+          // The Charleston
+          beatsToPlay.push({ beat: 0, dur: '4n.', velMult: 1 });
+          beatsToPlay.push({ beat: 1.5, dur: '8n', velMult: 0.8 });
+        } else if (patternType === 1) {
+          // Red Garland / Syncopated
+          beatsToPlay.push({ beat: 0, dur: '8n', velMult: 0.6 });
+          beatsToPlay.push({ beat: 1.66, dur: '4n', velMult: 1 });
+          beatsToPlay.push({ beat: 3.66, dur: '8n', velMult: 0.8 });
+        } else if (patternType === 2) {
+          // Sparse / Languid
+          beatsToPlay.push({ beat: 0, dur: '1n', velMult: 0.9 });
+        } else if (patternType === 3) {
+          // Offbeat clusters
+          beatsToPlay.push({ beat: 0.5, dur: '4n', velMult: 0.7 });
+          beatsToPlay.push({ beat: 2.5, dur: '4n', velMult: 1 });
+        } else {
+          // Anticipation
+          beatsToPlay.push({ beat: 0, dur: '2n', velMult: 1 });
+          beatsToPlay.push({ beat: 3.5, dur: '8n', velMult: 0.9 });
+        }
       }
+
+      beatsToPlay.forEach(config => {
+        const beatTime = startSec + config.beat * Tone.Time('4n').toSeconds();
+
+        Tone.Transport.schedule(t => {
+          const actualTime = t + jitter();
+          noteNames.forEach((name, idx) => {
+            const noteOffset = idx * (0.01 + Math.random() * 0.02);
+            const noteVel = (velocity * config.velMult) * (0.9 + Math.random() * 0.2);
+            piano?.triggerAttackRelease(name, config.dur, actualTime + noteOffset, noteVel);
+          });
+
+          Tone.Draw.schedule(() => {
+            onActiveNotesChange?.(chord.notes);
+            emitVisualization(chord.notes);
+          }, actualTime);
+        }, beatTime);
+
+        // Schedule visual cleanup
+        const cleanTime = beatTime + Tone.Time(config.dur).toSeconds();
+        Tone.Transport.schedule(t => {
+          Tone.Draw.schedule(() => {
+            onActiveNotesChange?.([]);
+            emitVisualization([]);
+          }, t);
+        }, cleanTime);
+      });
+
     } else if (style === 'Bossa') {
       Tone.Transport.schedule(t => {
         piano?.triggerAttackRelease(noteNames, '16n', t, 0.6);
-        Tone.Draw.schedule(() => onActiveNotesChange?.(chord.notes), t);
+        Tone.Draw.schedule(() => {
+          onActiveNotesChange?.(chord.notes);
+          emitVisualization(chord.notes);
+        }, t);
       }, startSec);
       Tone.Transport.schedule(t => {
-        Tone.Draw.schedule(() => onActiveNotesChange?.([]), t);
+        Tone.Draw.schedule(() => {
+          onActiveNotesChange?.([]);
+          emitVisualization([]);
+        }, t);
       }, startSec + Tone.Time('2n').toSeconds());
     } else if (style === 'Guitar') {
       const vel = 0.4 + Math.random() * 0.2;
@@ -339,90 +504,108 @@ export function playProgression(
         const strumOffset = idx * 0.03;
         Tone.Transport.schedule(t => {
           guitar?.triggerAttackRelease(name, '2n', t, vel);
-          if (idx === 0) Tone.Draw.schedule(() => onActiveNotesChange?.(chord.notes), t);
+          if (idx === 0) Tone.Draw.schedule(() => {
+            onActiveNotesChange?.(chord.notes);
+            emitVisualization(chord.notes);
+          }, t);
         }, startSec + strumOffset);
       });
       Tone.Transport.schedule(t => {
-        Tone.Draw.schedule(() => onActiveNotesChange?.([]), t);
+        Tone.Draw.schedule(() => {
+          onActiveNotesChange?.([]);
+          emitVisualization([]);
+        }, t);
       }, startSec + Tone.Time('2n').toSeconds());
     } else {
       Tone.Transport.schedule(t => {
         piano?.triggerAttackRelease(noteNames, duration * Tone.Time('4n').toSeconds(), t, 0.5);
-        Tone.Draw.schedule(() => onActiveNotesChange?.(chord.notes), t);
+        Tone.Draw.schedule(() => {
+          onActiveNotesChange?.(chord.notes);
+          emitVisualization(chord.notes);
+        }, t);
       }, startSec);
       Tone.Transport.schedule(t => {
-        Tone.Draw.schedule(() => onActiveNotesChange?.([]), t);
+        Tone.Draw.schedule(() => {
+          onActiveNotesChange?.([]);
+          emitVisualization([]);
+        }, t);
       }, startSec + duration * Tone.Time('4n').toSeconds());
     }
 
     // --- BASS ---
     if (style !== 'None') {
-      if (style === 'Swing') {
-        let nextRootMidi = noteNameToMidi(nextChord.root + '2');
-        if (nextRootMidi < 28) nextRootMidi += 12;
+      for (let b = 0; b < duration; b++) {
+        const beatTime = startSec + b * Tone.Time('4n').toSeconds();
 
-        for (let b = 0; b < duration; b++) {
-          const beatTime = startSec + b * Tone.Time('4n').toSeconds();
-          let target: number;
+        // Update current beat signal
+        Tone.Transport.schedule(t => {
+          Tone.Draw.schedule(() => {
+            currentBeatSignal.value = b;
+          }, t);
+        }, beatTime);
 
+        if (style === 'Swing' || style === 'Jazz') {
+          let targetMidi: number;
           if (b === 0) {
-            target = rootMidi;
+            targetMidi = rootMidi;
           } else if (b === duration - 1) {
-            const direction = Math.random() > 0.5 ? 1 : -1;
-            target = nextRootMidi - direction;
+            // Chromatic approach to next chord
+            const nextRootMidi = noteNameToMidi(nextChord.root + '2');
+            targetMidi = nextRootMidi + (Math.random() > 0.5 ? 1 : -1);
           } else {
-            const voicingNotes = chord.notes.map(n => (n % 12) + 36);
-            const candidates = voicingNotes.filter(n => n !== (rootMidi % 12) + 36);
-            target = candidates.length > 0 ? candidates[Math.floor(Math.random() * candidates.length)] : rootMidi + 7;
+            // Scale or arpeggio tones
+            const tones = chord.notes.map(n => noteNameToMidi(midiToNoteName(n).replace(/[0-9]/g, '') + '2'));
+            targetMidi = tones[Math.floor(Math.random() * tones.length)];
           }
 
-          let loopCount = 0;
-          while (target < 28 && loopCount < 5) { target += 12; loopCount++; }
-          while (target > 55 && loopCount < 5) { target -= 12; loopCount++; }
+          while (targetMidi < 28) targetMidi += 12;
+          while (targetMidi > 52) targetMidi -= 12;
 
-          const noteName = midiToNoteName(target);
-          if (noteName) {
-            Tone.Transport.schedule(t => {
-              bass?.triggerAttackRelease(noteName, '4n', t, 0.9);
-            }, beatTime);
-          }
-        }
-      } else if (style === 'Bossa') {
-        Tone.Transport.schedule(t => {
-          bass?.triggerAttackRelease(midiToNoteName(rootMidi), '4n.', t);
-        }, startSec);
-        if (duration >= 2) {
-          const fifth = rootMidi + 7;
+          const name = midiToNoteName(targetMidi);
           Tone.Transport.schedule(t => {
-            bass?.triggerAttackRelease(midiToNoteName(fifth), '4n', t);
-          }, startSec + Tone.Time('4n').toSeconds() * 2);
+            const vel = b === 0 ? 0.9 : 0.7 + Math.random() * 0.2;
+            bass?.triggerAttackRelease(name, '4n', t, vel);
+          }, beatTime);
+        } else if (style === 'Bossa') {
+          if (b === 0) {
+            Tone.Transport.schedule(t => bass?.triggerAttackRelease(midiToNoteName(rootMidi), '4n.', t), beatTime);
+          } else if (b === 2) {
+            const fifth = rootMidi + 7;
+            Tone.Transport.schedule(t => bass?.triggerAttackRelease(midiToNoteName(fifth), '4n', t), beatTime);
+          }
+        } else if (b === 0) {
+          Tone.Transport.schedule(t => bass?.triggerAttackRelease(midiToNoteName(rootMidi), '1n', t), beatTime);
         }
-      } else {
-        Tone.Transport.schedule(t => {
-          bass?.triggerAttackRelease(midiToNoteName(rootMidi), '1n', t);
-        }, startSec);
       }
     }
 
     // --- DRUMS ---
-    if (style === 'Swing' && drums) {
+    if ((style === 'Swing' || style === 'Jazz') && drums) {
+      // ... (existing drum logic)
       for (let b = 0; b < duration; b++) {
         const beatTime = startSec + b * Tone.Time('4n').toSeconds();
-        const vel = (b % 2 === 0) ? 0.6 : 0.4;
-        Tone.Transport.schedule(t => drums?.ride.triggerAttack(t, vel), beatTime);
-        if (b % 2 !== 0) {
-          Tone.Transport.schedule(t => drums?.ride.triggerAttack(t, 0.3), beatTime + Tone.Time('8t').toSeconds() * 2);
-          Tone.Transport.schedule(t => drums?.hihat.triggerAttack(t, 0.5), beatTime);
+        const jitter = () => (Math.random() - 0.5) * 0.015;
+
+        // 1. Ride cymbal (Classic spang-a-lang)
+        // const ridePattern = [1, 0, 0.5, 0]; // downbeat, skip, upbeat, skip
+        // basic swing ride
+        Tone.Transport.schedule(t => {
+          const vel = (b % 2 === 0 ? 0.7 : 0.5) + Math.random() * 0.1;
+          drums?.ride.triggerAttack("C1", t + jitter(), vel);
+        }, beatTime);
+
+        // 2 and 4 Hihat
+        if (b % 2 === 1) {
+          Tone.Transport.schedule(t => {
+            drums?.hihat.triggerAttack("C1", t + jitter(), 0.6);
+          }, beatTime);
         }
+
+        // Kick feathering (very soft on all beats)
+        Tone.Transport.schedule(t => {
+          drums?.kick.triggerAttack("C1", t + jitter(), 0.1);
+        }, beatTime);
       }
-    } else if (style === 'Bossa' && drums) {
-      for (let b = 0; b < duration * 4; b++) {
-        const time = startSec + b * Tone.Time('16n').toSeconds();
-        const vel = (b % 2 === 0) ? 0.1 : 0.05;
-        Tone.Transport.schedule(t => drums?.hihat.triggerAttack(t, vel), time);
-      }
-      Tone.Transport.schedule(t => drums?.snare.triggerAttack(t, 0.4), startSec);
-      Tone.Transport.schedule(t => drums?.snare.triggerAttack(t, 0.3), startSec + Tone.Time('0:2:2').toSeconds());
     }
 
     currentTime += duration;
@@ -431,6 +614,9 @@ export function playProgression(
   const totalDurationSec = Tone.Time('4n').toSeconds() * currentTime;
   Tone.Transport.schedule(() => {
     onFinish?.();
+    isPlayingSignal.value = false;
+    currentMeasureIndexSignal.value = -1;
+    currentBeatSignal.value = -1;
     stop();
     Tone.Draw.schedule(() => onActiveNotesChange?.([]), totalDurationSec);
   }, totalDurationSec);

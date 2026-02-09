@@ -9,6 +9,8 @@ export interface Grip {
     label: string;
     description: string;
     intervalsDown: number[]; // Intervals from top note in semitones
+    intervalsDownNames: string[]; // Academic interval names
+    theory: string; // Theoretical explanation
     color: string; // Hex color for UI
 }
 
@@ -16,65 +18,46 @@ export const GRIPS: Grip[] = [
     {
         name: 'Q1',
         label: 'Q1 (Quartal 1)',
-        description: 'm7 - 4 - 4 (e.g. C - G - D - A)',
-        intervalsDown: [0, 5, 10, 15], // From top: 0, 4th down, 4th down, 3rd down (m7)
-        // Wait, Miller's Q1 is usually stack of 4ths. Let's stick to standard Quartal:
-        // 3-note Quartal: 0, 5, 10.
-        // 4-note: 0, 5, 10, 15.
-        // Let's use strict intervals relative to TOP note.
-        // if Top is C(60).
-        // Quartal: G(55), D(50), A(45).
-        // Intervals down: 5, 10, 15.
+        description: 'Stack of perfect 4ths',
+        intervalsDown: [0, 5, 10, 15],
+        intervalsDownNames: ['Unison', 'P4 down', 'm7 down', 'P11 down'],
+        theory: 'A classic modern jazz sound. Built from 4th intervals, it avoids traditional major/minor third tensions, creating an "open" and versatile harmonic color.',
         color: '#3b82f6' // Blue
     },
     {
         name: 'Q2',
         label: 'Q2 (So What)',
-        description: 'Major 3rd + 4ths', // The "So What" chord inverted?
-        // Actually Q2 in some texts implies 3rd on top? 
-        // Let's use the standard "So What" voicing structure:
-        // Root, 5, b7, 11, 1? No that's the whole chord.
-        // We are planing "Grips" under a melody.
-        // Let's define a specific beautiful color.
-        // "Lydian Grip": Top note is #11. Below: 9, 5, 1.
-        // C (#11). Start C. Down to A(9) [min3/3semis], G(5) [maj2/2semis], C?
-        // Let's use generic intervallic structures that sound good planed.
-
-        // Structure: M3 down, then 4ths.
-        // Top C. Ab (M3 down). Eb (4th). Bb (4th).
+        description: 'M3 + Stacked 4ths',
         intervalsDown: [0, 4, 9, 14],
+        intervalsDownNames: ['Unison', 'M3 down', 'M6 down', 'M9 down'],
+        theory: 'Famous from Bill Evans and Miles Davis (e.g. "So What"). It contains a major third at the top, giving it a slightly more Lydian or Dorian characteristic than strict quartals.',
         color: '#8b5cf6' // Purple
     },
     {
         name: 'V7alt',
         label: 'Altered Dominant',
         description: 'Tritone + 4ths',
-        // Top C. F# (Tritone). C# (4th). G# (4th).
         intervalsDown: [0, 6, 11, 16],
+        intervalsDownNames: ['Unison', 'Tritone down', 'M7 down', 'P12 down'],
+        theory: 'A high-tension grip used over altered dominant chords. It captures the #11, b7, and tensions like b9 or #9 depending on the root.',
         color: '#ef4444' // Red
     },
     {
         name: 'Maj7',
-        label: 'Drop-2 Maj7',
-        description: 'Standard Drop 2',
-        // Top C. G (4th). E (min3). B (4th). -> C G E B (Cmaj7)
-        // C to G (5 down/7up). C to E (min6 down). C to B (min2/maj7 down).
-        // Intervals down: 0 (C), 5 (G), 8 (E), 13 (B-1oct) ? 
-        // Let's verify Drop 2 Cmaj7: C E G B.
-        // Close: C E G B.
-        // Drop 2: G C E B. (G in bass).
-        // Under a melody note C:
-        // The voicing is A minor 7? Or C major 6?
-        // Let's just use a fixed "Cluster" grip.
-        // Seconds: C, B, G, E.
+        label: 'Maj7 Cluster',
+        description: 'Tight chordal tone',
         intervalsDown: [0, 1, 5, 8],
+        intervalsDownNames: ['Unison', 'm2 down', 'P4 down', 'm6 down'],
+        theory: 'A dense voicing that emphasizes the "rub" between the 7th and the tonic note. Great for modern ballad endings.',
         color: '#10b981' // Emerald
     },
     {
         name: 'Dim7',
         label: 'Diminished',
-        description: 'Minor 3rds stacked',
+        description: 'Symmetric minor 3rd stack',
         intervalsDown: [0, 3, 6, 9],
+        intervalsDownNames: ['Unison', 'm3 down', 'Tritone down', 'm6 down'],
+        theory: 'Symmetric and highly unstable. Used as a passing structure or to create "dark" tension that wants to resolve in any direction.',
         color: '#f59e0b' // Amber
     }
 ];

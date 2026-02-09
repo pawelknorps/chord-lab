@@ -26,20 +26,36 @@ export function getReflectedNote(midi: number, axisAngle: number): number {
     if (reflectedAngle < 0) reflectedAngle += 360;
 
     // Round to nearest semitone (30 degrees)
-    // We use Math.round to handle minor floating point drift from UI sliders
     const reflectedPC = Math.round(reflectedAngle / 30) % 12;
 
     // Determine Octave preservation
-    // Simple strategy: Keep relatively close to original pitch
-    // We calculate the difference in semitones and apply it
-    // This allows C4 to map to something near C4, not C-1 or C9
-    const diff = reflectedPC - notePC;
+    // Strategy: We want the reflected note to maintain a similar "range" 
+    // but inverting the interval from the axis.
+    const axisMidi = (axisAngle / 30); // Semantic axis in semitones
 
-    // If the difference pushes us too far (e.g. > 6 semitones), we might want to adjust?
-    // Actually, simple reflection usually works best if we just apply the PC difference directly.
-    // Example: C (0) to G (7). Diff +7.
-    // Example: C (0) across C-Axis (0). Reflected = 0. Diff 0.
-    return midi + diff;
+    // Calculate reflection in absolute semitone space relative to a central octave
+    // We use a fixed reference to ensure consistency
+    const refMidi = 60 + (axisMidi % 12);
+    const diff = midi - refMidi;
+    const reflectedAbsolute = refMidi - diff;
+
+    // Round to nearest integer and ensure we have the correct pitch class
+    let finalMidi = Math.round(reflectedAbsolute);
+    while ((finalMidi % 12 + 12) % 12 !== reflectedPC) {
+        finalMidi++; // This is a bit hacky, let's refine
+    }
+
+    return finalMidi;
+}
+
+/**
+ * Standard Negative Harmony reflection across the Tonic/Dominant axis.
+ * For a given root (I), the axis is between the minor 3rd and major 3rd (Root + 3.5).
+ */
+export function getNegativeNote(midi: number, rootMidi: number): number {
+    const axis = rootMidi + 3.5;
+    const reflected = 2 * axis - midi;
+    return Math.round(reflected);
 }
 
 /**
@@ -47,4 +63,11 @@ export function getReflectedNote(midi: number, axisAngle: number): number {
  */
 export function getReflectedChord(notes: number[], axisAngle: number): number[] {
     return notes.map(n => getReflectedNote(n, axisAngle));
+}
+
+/**
+ * Get negative version of a chord based on a root
+ */
+export function getNegativeChord(notes: number[], rootMidi: number): number[] {
+    return notes.map(n => getNegativeNote(n, rootMidi));
 }

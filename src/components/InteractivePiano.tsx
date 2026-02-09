@@ -11,6 +11,7 @@ interface InteractivePianoProps {
     onNoteOff?: (midi: number) => void;
     showInput?: boolean; // Whether to show generic MIDI input
     enableSound?: boolean; // Whether to play generic piano sound
+    highlightedNotes?: number[]; // Externally controlled highlights
 }
 
 export function InteractivePiano({
@@ -19,7 +20,8 @@ export function InteractivePiano({
     onNoteOn,
     onNoteOff,
     showInput = true,
-    enableSound = true
+    enableSound = true,
+    highlightedNotes = []
 }: InteractivePianoProps) {
     const { lastNote, selectedInput } = useMidi();
     const { isReady } = useAudio();
@@ -57,28 +59,29 @@ export function InteractivePiano({
     useEffect(() => {
         if (!showInput || !lastNote) return;
 
-        // Update visual state
-        setActiveNotes(prev => {
-            const newSet = new Set(prev);
-            if (lastNote.type === 'noteon') {
-                newSet.add(lastNote.note);
-                // Trigger sound
-                if (enableSound && synthRef.current && isReady) {
-                    synthRef.current.triggerAttack(Tone.Frequency(lastNote.note, "midi").toNote(), Tone.now(), lastNote.velocity / 127);
-                }
-                onNoteOn?.(lastNote.note);
-            } else {
-                newSet.delete(lastNote.note);
-                // Release sound
-                if (enableSound && synthRef.current && isReady) {
-                    synthRef.current.triggerRelease(Tone.Frequency(lastNote.note, "midi").toNote());
-                }
-                onNoteOff?.(lastNote.note);
-            }
-            return newSet;
-        });
+        const { note, type, velocity } = lastNote;
 
-    }, [lastNote, showInput, enableSound, isReady]);
+        if (type === 'noteon') {
+            setActiveNotes(prev => new Set(prev).add(note));
+            // Trigger sound
+            if (enableSound && synthRef.current && isReady) {
+                synthRef.current.triggerAttack(Tone.Frequency(note, "midi").toNote(), Tone.now(), velocity / 127);
+            }
+            onNoteOn?.(note);
+        } else {
+            setActiveNotes(prev => {
+                const newSet = new Set(prev);
+                newSet.delete(note);
+                return newSet;
+            });
+            // Release sound
+            if (enableSound && synthRef.current && isReady) {
+                synthRef.current.triggerRelease(Tone.Frequency(note, "midi").toNote());
+            }
+            onNoteOff?.(note);
+        }
+
+    }, [lastNote, showInput, enableSound, isReady, onNoteOn, onNoteOff]);
 
     // Handle mouse clicks on keyboard (Mirror MIDI behavior)
     // PianoKeyboard currently uses chords, but we can pass a dummy handler if we want simple note triggers?
@@ -96,7 +99,7 @@ export function InteractivePiano({
             <PianoKeyboard
                 startOctave={startOctave}
                 endOctave={endOctave}
-                highlightedNotes={Array.from(activeNotes)}
+                highlightedNotes={[...Array.from(activeNotes), ...highlightedNotes]}
                 // We pass empty chords/handler for now as this is a "Visualizer/Player" mostly
                 chords={[]}
                 onChordClick={() => { }}

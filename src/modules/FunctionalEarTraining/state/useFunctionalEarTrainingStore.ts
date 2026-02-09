@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-export type FETLevel = 'Tendency' | 'Modulation' | 'Bass' | 'Interference' | 'Progressions' | 'MelodySteps';
+export type FETLevel = 'Tendency' | 'Modulation' | 'Bass' | 'Interference' | 'Progressions' | 'MelodySteps' | 'ChordQualities' | 'JazzStandards';
 export type FETDifficulty = 'Novice' | 'Advanced' | 'Pro';
 
 interface FETState {

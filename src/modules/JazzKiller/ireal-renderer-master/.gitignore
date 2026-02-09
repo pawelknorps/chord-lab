@@ -1,0 +1,5 @@
+electron/node_modules/
+node_modules/
+/src/irr-chords.html
+Gemfile*
+_site/**

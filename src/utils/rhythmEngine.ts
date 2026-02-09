@@ -144,17 +144,8 @@ export class MetronomeEngine {
 
                 for (let i = 0; i < this.subdivision; i++) {
                     const t = time + (i * subInterval);
-                    if (i === 0) {
-                        // Downbeat
-                        this.clickSynth.triggerAttackRelease("C2", "32n", t);
-                    } else {
-                        // Subdivision
-                        // MetalSynth (noise based) expects (duration, time, velocity) or (frequency, duration, time)?
-                        // Tone.MetalSynth extends Monophonic which has triggerAttackRelease(note, duration, time, velocity)
-                        // But it's inharmonic. Usually frequencies like 200Hz works.
-                        // Let's explicitly pass a frequency or note to be safe, e.g., "G2"
-                        this.subSynth.triggerAttackRelease("G2", "32n", t, 0.3);
-                    }
+                    // Uniform sound for all subdivisions as requested
+                    this.clickSynth.triggerAttackRelease("C2", "32n", t);
                 }
             }, '4n').start(0);
         }

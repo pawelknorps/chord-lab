@@ -5,9 +5,11 @@ interface PianoKeyboardProps {
   startOctave?: number;
   endOctave?: number;
   highlightedNotes?: number[];
+  activeNotes?: number[];
   chords?: ChordInfo[];
   onChordClick?: (chord: ChordInfo) => void;
   activeChordDegree?: number | null;
+  keySignature?: string;
 }
 
 const WHITE_KEY_INDICES = [0, 2, 4, 5, 7, 9, 11]; // C, D, E, F, G, A, B
@@ -24,9 +26,11 @@ export function PianoKeyboard({
   startOctave = 3,
   endOctave = 5,
   highlightedNotes = [],
+  activeNotes = [],
   chords = [],
   onChordClick,
   activeChordDegree,
+  keySignature
 }: PianoKeyboardProps) {
   const octaves = useMemo(() => {
     const result = [];
@@ -37,6 +41,7 @@ export function PianoKeyboard({
   }, [startOctave, endOctave]);
 
   const highlightedSet = useMemo(() => new Set(highlightedNotes), [highlightedNotes]);
+  const activeSet = useMemo(() => new Set(activeNotes), [activeNotes]);
 
   // Map chord roots to their position
   const chordPositions = useMemo(() => {
@@ -57,6 +62,10 @@ export function PianoKeyboard({
     return highlightedSet.has(midi);
   };
 
+  const isActive = (midi: number) => {
+    return activeSet.has(midi);
+  };
+
   const getChordForKey = (midi: number): ChordInfo | undefined => {
     return chordPositions.get(midi);
   };
@@ -71,6 +80,7 @@ export function PianoKeyboard({
               {WHITE_KEY_INDICES.map((noteIndex) => {
                 const midi = getMidiNote(octave, noteIndex);
                 const highlighted = isHighlighted(midi);
+                const active = isActive(midi);
                 const chord = getChordForKey(midi);
                 const isActiveChord = chord && chord.degree === activeChordDegree;
 
@@ -82,9 +92,13 @@ export function PianoKeyboard({
                       w-12 h-40 
                       border border-gray-300 rounded-b-lg
                       flex flex-col items-center justify-end pb-2
-                      cursor-pointer
-                      ${highlighted ? 'bg-gradient-to-b from-purple-200 to-purple-300' : 'bg-gradient-to-b from-white to-gray-100'}
-                      ${isActiveChord ? 'active' : ''}
+                      cursor-pointer transition-colors duration-100
+                      ${active
+                        ? 'bg-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.6)] z-10'
+                        : highlighted
+                          ? 'bg-gradient-to-b from-purple-200 to-purple-300'
+                          : 'bg-gradient-to-b from-white to-gray-100'}
+                      ${isActiveChord ? 'ring-2 ring-purple-500' : ''}
                     `}
                     onClick={() => chord && onChordClick?.(chord)}
                   >
@@ -111,6 +125,7 @@ export function PianoKeyboard({
               {BLACK_KEY_INDICES.map((noteIndex) => {
                 const midi = getMidiNote(octave, noteIndex);
                 const highlighted = isHighlighted(midi);
+                const active = isActive(midi);
                 const offset = BLACK_KEY_OFFSETS[noteIndex];
                 const chord = getChordForKey(midi);
                 const isActiveChord = chord && chord.degree === activeChordDegree;
@@ -123,9 +138,13 @@ export function PianoKeyboard({
                       w-8 h-24
                       rounded-b-lg
                       flex items-end justify-center pb-1
-                      cursor-pointer
-                      ${highlighted ? 'bg-gradient-to-b from-purple-600 to-purple-800' : 'bg-gradient-to-b from-gray-800 to-black'}
-                      ${isActiveChord ? 'active' : ''}
+                      cursor-pointer transition-colors duration-100
+                      ${active
+                        ? 'bg-cyan-600 shadow-[0_0_15px_rgba(34,211,238,0.6)] z-20'
+                        : highlighted
+                          ? 'bg-gradient-to-b from-purple-600 to-purple-800'
+                          : 'bg-gradient-to-b from-gray-800 to-black'}
+                      ${isActiveChord ? 'ring-2 ring-purple-500' : ''}
                     `}
                     style={{ left: `${offset * 48 + 4}px` }}
                     onClick={() => chord && onChordClick?.(chord)}

@@ -36,9 +36,8 @@ export class PolyrhythmEngine {
     setDivisions(a: number, b: number) {
         this.divisionsA = a;
         this.divisionsB = b;
-        if (this.isPlaying) {
-            this.restart();
-        }
+        // Don't restart, let the loop pick up the new value on the next measure cycle.
+        // This prevents stuttering when dragging sliders.
     }
 
     setBpm(bpm: number) {
@@ -58,14 +57,14 @@ export class PolyrhythmEngine {
         // Actually, let's use a Loop of '1m'.
 
         // Loop A
-        const measureSec = (60 / this.bpm) * 4;
-
+        // The loop is 1 measure long. Be rigorous with '1m' in Tonejs terms.
         this.loopA = new Tone.Loop((time) => {
-            // In this loop (which fires every measure), we schedule N beats
-            // We can't use Tone.Loop inside Tone.Loop easily for sub-divisions if we want them aligned.
-            // Better: Schedule events for the next measure.
+            // Calculate measure duration in seconds based on current BPM
+            // 1 measure = 4 beats usually
+            const beatDur = Tone.Time('4n').toSeconds();
+            const measureDur = beatDur * 4;
 
-            const interval = measureSec / this.divisionsA;
+            const interval = measureDur / this.divisionsA;
 
             for (let i = 0; i < this.divisionsA; i++) {
                 // Trigger Membrane
@@ -75,7 +74,10 @@ export class PolyrhythmEngine {
 
         // Loop B
         this.loopB = new Tone.Loop((time) => {
-            const interval = measureSec / this.divisionsB;
+            const beatDur = Tone.Time('4n').toSeconds();
+            const measureDur = beatDur * 4;
+
+            const interval = measureDur / this.divisionsB;
 
             for (let i = 0; i < this.divisionsB; i++) {
                 // Different sound/pitch

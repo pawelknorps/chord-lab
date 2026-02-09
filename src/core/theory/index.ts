@@ -1,6 +1,12 @@
-// All note names
+// All note names (Sharps)
 export const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] as const;
+// All note names (Flats)
 export const NOTE_NAMES_FLAT = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'] as const;
+
+// Comprehensive list of keys for UI
+export const ALL_KEYS = [
+  'C', 'C#', 'Db', 'D', 'Eb', 'E', 'F', 'F#', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B', 'Cb'
+] as const;
 
 export type NoteName = typeof NOTE_NAMES[number];
 
@@ -42,30 +48,163 @@ export const ROMAN_NUMERALS_MINOR = ['i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii'];
 
 // Chord intervals from root
 export const CHORD_INTERVALS: Record<string, number[]> = {
+  // Triads
   'maj': [0, 4, 7],
   'min': [0, 3, 7],
   'dim': [0, 3, 6],
   'aug': [0, 4, 8],
+  'sus2': [0, 2, 7],
+  'sus4': [0, 5, 7],
+
+  // 7th Chords
   'maj7': [0, 4, 7, 11],
   'min7': [0, 3, 7, 10],
   'dom7': [0, 4, 7, 10],
   'dim7': [0, 3, 6, 9],
   'm7b5': [0, 3, 6, 10], // Half-diminished
-  'sus2': [0, 2, 7],
-  'sus4': [0, 5, 7],
-  '7sus4': [0, 5, 7, 10],
-  'maj9': [0, 4, 7, 11, 14],
-  'min9': [0, 3, 7, 10, 14],
-  '9': [0, 4, 7, 10, 14],
-  '11': [0, 4, 7, 10, 14, 17],
-  'min11': [0, 3, 7, 10, 14, 17], // For "So What" chords
-  '13': [0, 4, 7, 10, 14, 21],
-  '13b9': [0, 4, 7, 10, 13, 21], // Bill Evans V chord
+  'aug7': [0, 4, 8, 10], // 7#5
+  'mM7': [0, 3, 7, 11], // Minor-Major 7
   '6': [0, 4, 7, 9],
   'm6': [0, 3, 7, 9],
-  '7alt': [0, 4, 10, 13, 20], // 1-3-b7-b9-#13 (Shell voicing style)
-  '9sus4': [0, 5, 7, 10, 14], // Maiden Voyage chord
+
+  // Extended / Altered Dom
+  '9': [0, 4, 7, 10, 14],
+  'maj9': [0, 4, 7, 11, 14],
+  'min9': [0, 3, 7, 10, 14],
+  '11': [0, 4, 7, 10, 14, 17],
+  'min11': [0, 3, 7, 10, 14, 17],
+  '13': [0, 4, 7, 10, 14, 21],
+  'maj13': [0, 4, 7, 11, 14, 21],
+  'min13': [0, 3, 7, 10, 14, 21],
+
+  // Alterations
+  '7b9': [0, 4, 7, 10, 13],
+  '7#9': [0, 4, 7, 10, 15],
+  '7b5': [0, 4, 6, 10],
+  '7#5': [0, 4, 8, 10], // Alias for aug7
+  '7alt': [0, 4, 10, 13, 20], // Simplified Alt (b9, b13)
+
+  // Sus variations
+  '7sus4': [0, 5, 7, 10],
+  '9sus4': [0, 5, 7, 10, 14],
+  'b9sus4': [0, 5, 7, 10, 13], // Phrygian chord
 };
+
+// Helper for enharmonic spelling
+const LETTERS = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+const BASE_MIDI: Record<string, number> = { 'C': 0, 'D': 2, 'E': 4, 'F': 5, 'G': 7, 'A': 9, 'B': 11 };
+
+/**
+ * Returns correctly spelled notes for a scale to ensure unique letter names.
+ */
+export function getSpelledScale(rootName: string, intervals: number[]): string[] {
+  const rootLetter = rootName[0];
+  let letterIndex = LETTERS.indexOf(rootLetter);
+  const rootMidi = noteNameToMidi(rootName + '0') % 12;
+
+  return intervals.map((interval) => {
+    const targetMidiNormalized = (rootMidi + interval) % 12;
+    const targetLetter = LETTERS[letterIndex];
+    letterIndex = (letterIndex + 1) % 7;
+
+    const baseMidi = BASE_MIDI[targetLetter];
+    let diff = targetMidiNormalized - baseMidi;
+
+    // Handle wrap around
+    while (diff > 6) diff -= 12;
+    while (diff < -6) diff += 12;
+
+    let accidental = '';
+    if (diff === 1) accidental = '#';
+    else if (diff === 2) accidental = '##';
+    else if (diff === -1) accidental = 'b';
+    else if (diff === -2) accidental = 'bb';
+
+    return `${targetLetter}${accidental}`;
+  });
+}
+
+// Get note name from MIDI number - now context aware and backward compatible
+export function midiToNoteName(midi: number, context?: string | boolean): string {
+  if (isNaN(midi) || !isFinite(midi)) return 'C4';
+  const octave = Math.floor(midi / 12) - 1;
+  const noteIndex = midi % 12;
+
+  let useFlats = false;
+  if (typeof context === 'boolean') {
+    useFlats = context;
+  } else if (typeof context === 'string') {
+    // Determine if we should use flats based on known flat keys
+    const FLAT_KEYS = ['F', 'Bb', 'Eb', 'Ab', 'Db', 'Gb', 'Cb', 'Dm', 'Gm', 'Cm', 'Fm', 'Bbm', 'Ebm', 'Abm'];
+    useFlats = FLAT_KEYS.includes(context) || context.includes('b');
+  }
+
+  const noteName = useFlats ? NOTE_NAMES_FLAT[noteIndex] : NOTE_NAMES[noteIndex];
+  return `${noteName}${octave}`;
+}
+
+// Get MIDI number from note name
+export function noteNameToMidi(noteName: string): number {
+  const match = noteName.match(/^([A-G][#b]*)(-?\d+)$/);
+  if (!match) return 60;
+
+  const notePart = match[1];
+  const octave = parseInt(match[2]);
+
+  const letter = notePart[0];
+  const accidentals = notePart.slice(1);
+
+  let midi = BASE_MIDI[letter];
+  for (const char of accidentals) {
+    if (char === '#') midi += 1;
+    if (char === 'b') midi -= 1;
+  }
+
+  return (octave + 1) * 12 + (midi % 12 + 12) % 12;
+}
+
+// Get all chords in a scale
+export function getScaleChords(root: string, scaleName: string, octave = 4): ChordInfo[] {
+  const scale = SCALES[scaleName];
+  if (!scale) return [];
+
+  // 1. Get correctly spelled scale notes
+  const spelledNotes = getSpelledScale(root, scale.intervals);
+
+  return scale.intervals.map((_, degree) => {
+    const quality = scale.chordQualities[degree];
+    const isMinor = quality === 'min' || quality === 'dim';
+
+    const roman = isMinor
+      ? ROMAN_NUMERALS_MINOR[degree]
+      : ROMAN_NUMERALS[degree];
+
+    const displayRoman = quality === 'dim'
+      ? `${roman}°`
+      : quality === 'aug'
+        ? `${ROMAN_NUMERALS[degree]}+`
+        : roman;
+
+    const chordIntervals = CHORD_INTERVALS[quality] || CHORD_INTERVALS['maj'];
+    const chordRootName = spelledNotes[degree];
+    const baseMidi = (octave + 1) * 12 + (noteNameToMidi(chordRootName + '0') % 12);
+
+    const midiNotes = chordIntervals.map(i => baseMidi + i);
+
+    // For chord member names, use the scale context for spelling if possible, 
+    // but for now simple context-aware midiToNoteName is good.
+    const notes = midiNotes.map(m => midiToNoteName(m, root));
+
+    return {
+      root: chordRootName,
+      quality,
+      roman: displayRoman,
+      degree,
+      notes,
+      midiNotes,
+    };
+  });
+}
 
 // Voicings - different ways to play chords
 export const VOICINGS: Record<string, (notes: number[]) => number[]> = {
@@ -85,6 +224,20 @@ export const VOICINGS: Record<string, (notes: number[]) => number[]> = {
   'Drop 2': (notes) => {
     if (notes.length < 4) return notes;
     return [notes[0], notes[2], notes[3], notes[1] + 12];
+  },
+  'Shell Voicing': (notes) => {
+    // Return 3rd and 7th (or 3rd and 5th for triads)
+    if (notes.length >= 4) return [notes[1], notes[3]]; // 3 + 7
+    if (notes.length >= 3) return [notes[1], notes[2]]; // 3 + 5
+    return notes;
+  },
+  'Jazz Rootless': (notes) => {
+    // Basic rootless 9th voicing (3, 5, 7, 9)
+    // If triad, return 3, 5 and add 9
+    if (notes.length >= 5) return [notes[1], notes[2], notes[3], notes[4]];
+    if (notes.length >= 4) return [notes[1], notes[2], notes[3], notes[0] + 14];
+    if (notes.length >= 3) return [notes[1], notes[2], notes[0] + 14];
+    return notes;
   },
 };
 
@@ -129,73 +282,6 @@ export const PRESETS: Progression[] = [
   { name: 'Andalusian Cadence', genre: 'Flamenco', degrees: [5, 4, 3, 0], description: 'vi - V - IV - I' },
 ];
 
-// Get note name from MIDI number
-export function midiToNoteName(midi: number, useFlats = false): string {
-  if (isNaN(midi) || !isFinite(midi)) return 'C4'; // Validation fallback
-  const octave = Math.floor(midi / 12) - 1;
-  const noteIndex = midi % 12;
-  const noteName = useFlats ? NOTE_NAMES_FLAT[noteIndex] : NOTE_NAMES[noteIndex];
-  return `${noteName}${octave}`;
-}
-
-// Get MIDI number from note name
-export function noteNameToMidi(noteName: string): number {
-  const match = noteName.match(/^([A-G][#b]?)(\d+)$/);
-  if (!match) return 60; // Default to middle C
-
-  let note = match[1];
-  const octave = parseInt(match[2]);
-
-  // Convert flat to sharp
-  if (note.includes('b')) {
-    const flatIndex = NOTE_NAMES_FLAT.indexOf(note as any);
-    note = NOTE_NAMES[flatIndex];
-  }
-
-  const noteIndex = NOTE_NAMES.indexOf(note as any);
-  return (octave + 1) * 12 + noteIndex;
-}
-
-// Get all chords in a scale
-export function getScaleChords(root: string, scaleName: string, octave = 4): ChordInfo[] {
-  const scale = SCALES[scaleName];
-  if (!scale) return [];
-
-  const rootIndex = NOTE_NAMES.indexOf(root as any) ?? NOTE_NAMES_FLAT.indexOf(root as any);
-  if (rootIndex === -1) return [];
-
-  return scale.intervals.map((interval, degree) => {
-    const chordRoot = (rootIndex + interval) % 12;
-    const quality = scale.chordQualities[degree];
-    const isMinor = quality === 'min' || quality === 'dim';
-
-    const roman = isMinor
-      ? ROMAN_NUMERALS_MINOR[degree]
-      : ROMAN_NUMERALS[degree];
-
-    const displayRoman = quality === 'dim'
-      ? `${roman}°`
-      : quality === 'aug'
-        ? `${ROMAN_NUMERALS[degree]}+`
-        : roman;
-
-    const chordIntervals = CHORD_INTERVALS[quality] || CHORD_INTERVALS['maj'];
-    const baseMidi = (octave + 1) * 12 + chordRoot;
-
-    const midiNotes = chordIntervals.map(i => baseMidi + i);
-    const notes = midiNotes.map(m => midiToNoteName(m));
-
-    return {
-      root: NOTE_NAMES[chordRoot],
-      quality,
-      roman: displayRoman,
-      degree,
-      notes,
-      midiNotes,
-    };
-  });
-}
-
 // Apply voicing to chord
 export function applyVoicing(midiNotes: number[], voicingName: string): number[] {
   const voicingFn = VOICINGS[voicingName];
@@ -239,11 +325,9 @@ export function getChordNotes(
   octave = 4,
   voicing = 'Root Position'
 ): number[] {
-  const rootIndex = NOTE_NAMES.indexOf(root as any) ?? NOTE_NAMES_FLAT.indexOf(root as any);
-  if (rootIndex === -1) return [];
-
+  const rootMidi = noteNameToMidi(root + '0') % 12;
   const intervals = CHORD_INTERVALS[quality] || CHORD_INTERVALS['maj'];
-  const baseMidi = (octave + 1) * 12 + rootIndex;
+  const baseMidi = (octave + 1) * 12 + rootMidi;
 
   const midiNotes = intervals.map(i => baseMidi + i);
   return applyVoicing(midiNotes, voicing);
@@ -251,28 +335,125 @@ export function getChordNotes(
 
 // Parse a complex chord string into components
 export function parseChord(chordName: string): { root: string; quality: string; bass?: string } {
+  if (!chordName) return { root: 'C', quality: 'maj' };
+
   // Handle slash chords (e.g., C/G)
   const parts = chordName.split('/') as [string] | [string, string];
   const base = parts[0];
   const bass = parts[1];
 
-  // Regex to separate root from quality
-  const match = base.match(/^([A-G][#b]?)(.*)$/);
+  // Robust Regex for Root + Quality
+  // Matches: Root (A-G, optional #/b), Quality (everything else)
+  const match = base.match(/^([A-G][b#]?)(.*)$/);
   if (!match) return { root: 'C', quality: 'maj', bass };
 
   const root = match[1];
   let quality = match[2];
 
-  // Normalize quality strings
-  if (!quality || quality === 'M' || quality === 'maj') quality = 'maj';
-  else if (quality === 'm' || quality === '-') quality = 'min';
-  else if (quality === '7') quality = 'dom7';
-  else if (quality === 'M7' || quality === 'maj7' || quality === 'Δ') quality = 'maj7';
-  else if (quality === 'm7' || quality === '-7') quality = 'min7';
-  else if (quality === 'm7b5' || quality === 'ø') quality = 'm7b5';
-  else if (quality === 'dim' || quality === '°') quality = 'dim';
-  else if (quality === 'dim7' || quality === '°7') quality = 'dim7';
+  // Strip parentheses/brackets
+  quality = quality.replace(/[()\[\]]/g, '');
 
-  // Return the best match or fallback (the audio engine needs to support these qualities)
+  // Normalize Logic
+  if (!quality) quality = 'maj';
+
+  // 1. Handle Diminished / Half-Diminished symbols first
+  if (quality === '°' || quality === 'dim') quality = 'dim';
+  else if (quality === '°7' || quality === 'dim7') quality = 'dim7';
+  else if (quality === 'ø' || quality === 'ø7' || quality === 'm7b5' || quality === '-7b5') quality = 'm7b5';
+
+  // 2. Handle Augmented
+  else if (quality === '+' || quality === 'aug') quality = 'aug';
+  else if (quality === '+7' || quality === 'aug7' || quality === '7#5') quality = 'aug7';
+
+  // 3. Handle Minor
+  else if ((quality.startsWith('m') && !quality.startsWith('maj')) || quality.startsWith('-')) {
+    // Remove the 'm' or '-' indicator
+    const rest = quality.substring(quality.startsWith('min') ? 3 : 1);
+
+    if (!rest) quality = 'min';
+    else if (rest === '7') quality = 'min7';
+    else if (rest === '9') quality = 'min9';
+    else if (rest === '11') quality = 'min11';
+    else if (rest === '6') quality = 'm6';
+    else if (rest === 'maj7' || rest === 'M7' || rest === 'Δ7') quality = 'mM7';
+    else quality = 'min' + rest; // Fallback e.g. min13
+  }
+
+  // 4. Handle Major
+  else if (quality.startsWith('M') || quality.startsWith('maj') || quality.startsWith('Δ')) {
+    const rest = quality.replace(/^(M|maj|Δ)/, '');
+    if (!rest) quality = 'maj';
+    else if (rest === '7') quality = 'maj7';
+    else if (rest === '9') quality = 'maj9';
+    else if (rest === '13') quality = 'maj13';
+    else quality = 'maj' + rest;
+  }
+
+  // 5. Handle Dominant / Numbers (Universal 7 is Dominant)
+  if (quality === '7' || quality === 'dom7' || quality === 'dom') quality = 'dom7';
+  else if (quality === '9') quality = '9';
+  else if (quality === '11') quality = '11';
+  else if (quality === '13') quality = '13';
+  else if (quality === 'add9') quality = 'maj9';
+
+  // 6. Handle Alterations
+  else if (quality === '7b9') quality = '7b9';
+  else if (quality === '7#9') quality = '7#9';
+  else if (quality === '7b5') quality = '7b5';
+  else if (quality === '7#5') quality = 'aug7';
+  else if (quality === 'alt' || quality === '7alt') quality = '7alt';
+  else if (quality === 'sus4' || quality === 'sus') quality = 'sus4';
+  else if (quality === 'sus2') quality = 'sus2';
+  else if (quality === '7sus4' || quality === '7sus') quality = '7sus4';
+  else if (quality.includes('sus4') && quality.includes('b9')) quality = 'b9sus4';
+
+  // Fallback map check to ensure we return a supported quality
+  if (!CHORD_INTERVALS[quality]) {
+    // Try to map to nearest known
+    if (quality.includes('7')) quality = 'dom7';
+    else if (quality.includes('min') || quality.includes('m')) quality = 'min';
+    else quality = 'maj';
+  }
+
   return { root, quality, bass };
+}
+// Transpose a chord symbol by a specified number of semitones
+export function transposeChordSymbol(chordSymbol: string, semitones: number, keyContext?: string): string {
+  if (semitones === 0 || !chordSymbol || chordSymbol === "") return chordSymbol;
+
+  // Handle slash chords
+  const parts = chordSymbol.split('/') as [string] | [string, string];
+  const base = parts[0];
+  const bass = parts[1];
+
+  // Regex to separate root from quality
+  const match = base.match(/^([A-G][#b]*)(.*)$/);
+  if (!match) return chordSymbol;
+
+  const root = match[1];
+  const quality = match[2];
+
+  // Shift root
+  const rootMidi = noteNameToMidi(root + '4');
+  const shiftedRootMidi = rootMidi + semitones;
+  const newRoot = midiToNoteName(shiftedRootMidi, keyContext).replace(/[0-9-]/g, '');
+
+  let transposedSymbol = newRoot + quality;
+
+  // Shift bass if present
+  if (bass) {
+    const bassMatch = bass.match(/^([A-G][#b]*)(.*)$/);
+    if (bassMatch) {
+      const bassRoot = bassMatch[1];
+      const bassQuality = bassMatch[2];
+      const bassMidi = noteNameToMidi(bassRoot + '4');
+      const shiftedBassMidi = bassMidi + semitones;
+      const newBassRoot = midiToNoteName(shiftedBassMidi, keyContext).replace(/[0-9-]/g, '');
+      transposedSymbol += '/' + newBassRoot + bassQuality;
+    } else {
+      transposedSymbol += '/' + bass;
+    }
+  }
+
+  return transposedSymbol;
 }

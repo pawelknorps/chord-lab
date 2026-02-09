@@ -4,8 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons"
 import { getPianoById, useAppContext } from "./context/AppContext"
 import { ChordPiano } from "../utils/chordPianoHandler"
-import { findChordPositions, getInstrumentByFormat, isGuitar } from "../utils/guitarUtil"
-import { MousePointerClick } from "lucide-react"
+import { findChordPositions, getInstrumentByFormat } from "../utils/guitarUtil"
 import { playChord } from "../utils/synthPlayer"
 import { Instrument } from "../utils/guitarUtil"
 
@@ -53,79 +52,53 @@ export const GuitarChord: React.FC<GuitarChordProps> = ({ pianoComponentId }) =>
       dispatch,
       state,
       chordPiano,
-      tabPositions
     );
-  }
-
-  const handleClickRemovePiano = (): void => {
-    dispatch({
-      type: 'REMOVE_PIANO',
-      id: pianoComponentId
-    })
-  }
+  };
 
   return (
     <div
       id={`piano-${pianoComponentId}`}
-      className="guitar-chord !min-w-[15em] ml-1 "
+      className="flex flex-col items-center gap-4 w-full"
     >
-      <div className="!w-[1.9em] !h-[2.3em] !left-[0.2em] pl-1">
-        <button
-          type="button"
-          className="guitar-tab-close-button flex items-center justify-center !left-0"
-          aria-label="Close"
-          onClick={handleClickRemovePiano}
-        >
-          <span className="text-2xl leading-none mt-[0.05em]" aria-hidden="true">&times;</span>
-        </button>
-        <button
-          type="button"
-          className="piano-play-button relative !h-[8em] !mt-[0.5em] !top-0 !left-0"
-          data-format={isGuitar(state.format) ? "g" : "p"}
-          onClick={handlePlayClick}
-        />
-      </div>
-      <div className={`chord-wrapper inline-block`} data-playing={chordPiano.isPlaying?.toString()} >
+      <div className={`chord-wrapper relative w-full flex flex-col items-center`} data-playing={chordPiano.isPlaying?.toString()} >
         {tabPositions?.length ? (
           <>
             <div
               onClick={handlePlayClick}
-              className="cursor-pointer mt-[0.7em] border-slate-400 hover:border-primary/80 border-[0.01em] rounded-[8px] shadow-lg"
+              className="cursor-pointer transition-all hover:brightness-110 active:scale-[0.98] w-full flex justify-center"
             >
               <Chord
                 chord={tabPositions[position]}
                 instrument={instrument as any}
               />
-              <MousePointerClick className="max-h-[1.6em] absolute -right-[0.2em] top-[9.5em]" color="red" />
             </div>
-            <div className="w-[11em]">
+
+            {/* Position Pagination */}
+            <div className="flex items-center gap-4 mt-2">
               <button
-                onClick={
-                  () => handleNewPosition(position === 0 ? tabPositions.length - 1 : position - 1)
-                }
-                className="guitar-pos-button"
+                onClick={() => handleNewPosition(position === 0 ? tabPositions.length - 1 : position - 1)}
+                className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-white/10 text-white/40 hover:text-white transition-all"
               >
-                <FontAwesomeIcon icon={faChevronLeft} className="guitar-pos-chev" />
+                <FontAwesomeIcon icon={faChevronLeft} size="xs" />
               </button>
-              <span className="guitar-pos-indicator">
-                {position + 1}/{tabPositions.length}
+              <span className="text-[10px] font-bold text-white/40 tracking-widest uppercase">
+                {position + 1} <span className="text-white/20 mx-1">/</span> {tabPositions.length}
               </span>
               <button
-                onClick={
-                  () => handleNewPosition(position === tabPositions.length - 1 ? 0 : position + 1)
-                }
-                className="guitar-pos-button"
+                onClick={() => handleNewPosition(position === tabPositions.length - 1 ? 0 : position + 1)}
+                className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-white/10 text-white/40 hover:text-white transition-all"
               >
-                <FontAwesomeIcon icon={faChevronRight} className="guitar-pos-chev" />
+                <FontAwesomeIcon icon={faChevronRight} size="xs" />
               </button>
             </div>
           </>
-        ) : <div className="mt-[4em] -ml-[1em]">
-          <div className="max-w-[7em] text-slate-400 text-sm">Chord type not supported</div>
-        </div>
-        }
+        ) : (
+          <div className="flex flex-col items-center justify-center min-h-[120px] text-white/30 text-xs italic">
+            Chord type not supported
+          </div>
+        )}
       </div>
     </div>
-  )
-}
+  );
+};
 

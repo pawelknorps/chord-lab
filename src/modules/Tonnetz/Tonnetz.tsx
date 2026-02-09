@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import type { RootState } from '@react-three/fiber';
 import { OrbitControls, Text } from '@react-three/drei';
@@ -7,6 +7,8 @@ import * as Tone from 'tone';
 import { useAudio } from '../../context/AudioContext';
 import { midiToNoteName } from '../../core/theory';
 import * as TonnetzLogic from './tonnetzLogic';
+import { useMidi } from '../../context/MidiContext';
+import { InteractivePiano } from '../../components/InteractivePiano';
 
 // Constants
 const GRID_SIZE = 4; // Render nodes from -4 to 4
@@ -21,7 +23,7 @@ const getPosition = (x: number, y: number): [number, number, number] => {
     return [xPos, yPos, 0];
 };
 
-const Node: React.FC<{ x: number; y: number; active: boolean; root: boolean }> = ({ x, y, active, root }) => {
+const Node: React.FC<{ x: number; y: number; active: boolean; root: boolean; isMidiActive: boolean }> = ({ x, y, active, root, isMidiActive }) => {
     const pitchClass = ((x * 7 + y * 4) % 12 + 120) % 12; // Ensure positive modulo
     const noteName = midiToNoteName(pitchClass + 60).slice(0, -1);
     const pos = getPosition(x, y);
@@ -31,9 +33,9 @@ const Node: React.FC<{ x: number; y: number; active: boolean; root: boolean }> =
             <mesh>
                 <sphereGeometry args={[0.4, 32, 32]} />
                 <meshStandardMaterial
-                    color={root ? '#ff0055' : active ? '#00ccff' : '#444'}
-                    emissive={active ? (root ? '#ff0055' : '#00ccff') : '#000'}
-                    emissiveIntensity={active ? 0.5 : 0}
+                    color={isMidiActive ? '#00ffaa' : root ? '#ff0055' : active ? '#00ccff' : '#444'}
+                    emissive={isMidiActive ? '#00ffaa' : active ? (root ? '#ff0055' : '#00ccff') : '#000'}
+                    emissiveIntensity={isMidiActive || active ? 0.6 : 0}
                 />
             </mesh>
             <Text
@@ -100,6 +102,10 @@ const Tonnetz: React.FC = () => {
         center: [0, 0]
     });
 
+    const { lastNote } = useMidi();
+    const [midiActiveNotes, setMidiActiveNotes] = useState<Set<number>>(new Set());
+    const [steerEnabled, setSteerEnabled] = useState(true);
+
     // Track the 'logical center' (x,y) of the current root note for rendering context
     // This avoids the 'infinite grid' problem by shifting the view or the grid logic
     // For simplicity, let's keep the root at logic (0,0) visually, OR 
@@ -132,58 +138,70 @@ const Tonnetz: React.FC = () => {
         synthRef.current.triggerAttackRelease(notes, '1n');
     };
 
-    const transform = (type: 'P' | 'L' | 'R') => {
+    const transform = useCallback((type: 'P' | 'L' | 'R') => {
         if (!isReady) startAudio();
 
-        let newTriad: TonnetzLogic.Triad;
-        if (type === 'P') newTriad = TonnetzLogic.transformP(currentTriad);
-        else if (type === 'L') newTriad = TonnetzLogic.transformL(currentTriad);
-        else newTriad = TonnetzLogic.transformR(currentTriad);
+        setCurrentTriad(prev => {
+            let newTriad: TonnetzLogic.Triad;
+            if (type === 'P') newTriad = TonnetzLogic.transformP(prev);
+            else if (type === 'L') newTriad = TonnetzLogic.transformL(prev);
+            else newTriad = TonnetzLogic.transformR(prev);
 
-        // Updating Logic Coordinates (Tricky part)
-        // We need to find the (x,y) of the new root relative to old root to keep the path continuous
-        // This is complex because P/L/R moves root specific intervals.
-        // Simply updating the triad pitch classes is enough for sound, 
-        // but for VISUAL continuity we want to know WHICH node is the new root.
-        //
-        // C Major (0,0). Notes: C(0,0), G(1,0), E(0,1).
-        // Transform P -> C Minor. Notes: C, G, Eb.
-        // New Root C is still (0,0).
-        // Transform L -> E Minor. Notes: E, G, B.
-        // New Root E is (0,1).
-        // Transform R -> A Minor. Notes: A, C, E.
-        // New Root A. A is ... down m3 from C (-3 semis).
-        // x axis = +7. y axis = +4.
-        // A = C - 3.
-        // 3 = 7 - 4? No.
-        // 9 (A) = 3 * 3? No.
-        // -3 = 1*(-7) + 1*(4) = -3? 
-        // -7 + 4 = -3.
-        // So A is (-1, 1) relative to C.
+            let delta: [number, number] = [0, 0];
+            if (type === 'P') {
+                delta = [0, 0];
+            } else if (type === 'L') {
+                if (prev.quality === 'Major') delta = [0, 1]; // Up 3rd
+                else delta = [0, -1]; // Down 3rd
+            } else if (type === 'R') {
+                if (prev.quality === 'Major') delta = [-1, 1]; // Down m3
+                else delta = [1, -1]; // Up m3
+            }
 
-        // Let's implement a 'find closest node for pitch class' function?
-        // Or just map P/L/R to coordinate deltas?
-        // P: Root doesn't move. (0,0).
-        // L: Major->Minor: Root moves +M3 (+4). Delta (0, 1).
-        //    Minor->Major: Root moves -M3 (-4). Delta (0, -1).
-        // R: Major->Minor: Root moves -m3 (-3 = -7+4). Delta (-1, 1).
-        //    Minor->Major: Root moves +m3 (+3 = 7-4). Delta (1, -1).
+            setRootCoord(old => [old[0] + delta[0], old[1] + delta[1]]);
+            playChord(newTriad);
+            return newTriad;
+        });
+    }, [isReady, startAudio]);
 
-        let delta: [number, number] = [0, 0];
-        if (type === 'P') {
-            delta = [0, 0];
-        } else if (type === 'L') {
-            if (currentTriad.quality === 'Major') delta = [0, 1]; // Up 3rd
-            else delta = [0, -1]; // Down 3rd
-        } else if (type === 'R') {
-            if (currentTriad.quality === 'Major') delta = [-1, 1]; // Down m3
-            else delta = [1, -1]; // Up m3
+    // MIDI Input Processing
+    useEffect(() => {
+        if (!lastNote) return;
+
+        const pitchClass = lastNote.note % 12;
+
+        if (lastNote.type === 'noteon') {
+            setMidiActiveNotes(prev => new Set(prev).add(pitchClass));
+
+            if (steerEnabled) {
+                // Logic to detect "Steer" note
+                // Based on parsominious voice leading (the one note that changes)
+                const { root, quality } = currentTriad;
+
+                let steerType: 'P' | 'L' | 'R' | null = null;
+
+                if (quality === 'Major') {
+                    if (pitchClass === (root + 3) % 12) steerType = 'P'; // Eb in C Maj
+                    else if (pitchClass === (root + 11) % 12) steerType = 'L'; // B in C Maj
+                    else if (pitchClass === (root + 9) % 12) steerType = 'R'; // A in C Maj
+                } else {
+                    if (pitchClass === (root + 4) % 12) steerType = 'P'; // E in C Min
+                    else if (pitchClass === (root + 8) % 12) steerType = 'L'; // Ab in C Min
+                    else if (pitchClass === (root + 10) % 12) steerType = 'R'; // Bb in C Min
+                }
+
+                if (steerType) {
+                    transform(steerType);
+                }
+            }
+        } else {
+            setMidiActiveNotes(prev => {
+                const updated = new Set(prev);
+                updated.delete(pitchClass);
+                return updated;
+            });
         }
-
-        setRootCoord(prev => [prev[0] + delta[0], prev[1] + delta[1]]);
-        setCurrentTriad(newTriad);
-        playChord(newTriad);
-    };
+    }, [lastNote, steerEnabled, currentTriad, transform]);
 
     // Generate grid nodes based on current root center
     const nodes = useMemo(() => {
@@ -203,8 +221,9 @@ const Tonnetz: React.FC = () => {
                 const pc = ((x * 7 + y * 4) % 12 + 120) % 12;
                 const inTriad = currentTriad.notes.includes(pc);
                 const isRoot = currentTriad.root === pc;
+                const isMidiActive = midiActiveNotes.has(pc);
 
-                list.push(<Node key={`${x}-${y}`} x={x} y={y} active={inTriad} root={isRoot} />);
+                list.push(<Node key={`${x}-${y}`} x={x} y={y} active={inTriad} root={isRoot} isMidiActive={isMidiActive} />);
             }
         }
         return list;
@@ -241,8 +260,18 @@ const Tonnetz: React.FC = () => {
 
             {/* Controls Overlay */}
             <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-4 pointer-events-none">
-                <div className="text-4xl font-bold neon-text drop-shadow-md bg-black/50 px-4 py-2 rounded-xl pointer-events-auto">
+                <div className="text-4xl font-bold neon-text drop-shadow-md bg-black/50 px-4 py-2 rounded-xl pointer-events-auto flex items-center gap-4">
                     {midiToNoteName(currentTriad.root + 60).slice(0, -1)} {currentTriad.quality}
+                    <div className="h-4 w-px bg-white/20"></div>
+                    <label className="flex items-center gap-2 cursor-pointer select-none">
+                        <input
+                            type="checkbox"
+                            checked={steerEnabled}
+                            onChange={(e) => setSteerEnabled(e.target.checked)}
+                            className="w-4 h-4 accent-green-500"
+                        />
+                        <span className="text-xs uppercase tracking-widest text-gray-400">MIDI Steering</span>
+                    </label>
                 </div>
 
                 <div className="flex gap-4 pointer-events-auto">
@@ -267,8 +296,18 @@ const Tonnetz: React.FC = () => {
                 </div>
 
                 <div className="text-sm bg-black/60 px-3 py-1 rounded text-gray-300 pointer-events-auto">
-                    Neo-Riemannian Navigator
+                    Play the "target notes" on your MIDI keyboard to steer the harmony.
                 </div>
+            </div>
+
+            {/* Keyboard for Interaction */}
+            <div className="bg-black/80 border-t border-white/10 p-4">
+                <InteractivePiano
+                    startOctave={3}
+                    endOctave={5}
+                    showInput={true}
+                    enableSound={false} // Don't double sound
+                />
             </div>
         </div>
     );
@@ -276,11 +315,13 @@ const Tonnetz: React.FC = () => {
 
 // Smooth Camera Helper
 const GridCamera: React.FC<{ target: THREE.Vector3 }> = ({ target }) => {
+    const tempVec = useRef(new THREE.Vector3());
+
     useFrame((state: RootState) => {
         // Smooth lerp camera to look at target
-        // state.camera.position.lerp(new THREE.Vector3(target.x, target.y, 10), 0.05);
-        // Let's just move x/y, keep z
-        state.camera.position.lerp(new THREE.Vector3(target.x, target.y, state.camera.position.z), 0.1);
+        // We use a persistent vector to avoid GC pressure
+        tempVec.current.set(target.x, target.y, state.camera.position.z);
+        state.camera.position.lerp(tempVec.current, 0.1);
         state.camera.lookAt(target.x, target.y, 0);
     });
     return null;

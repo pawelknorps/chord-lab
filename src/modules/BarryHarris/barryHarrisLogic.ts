@@ -66,20 +66,20 @@ export const getTargetVoicing = (melodyMidi: number): number[] => {
 
     // Calculate others downwards
     // Voice 3 (2nd from top)
-    let n3 = closeVoicing[2]; // PC
+    const n3 = closeVoicing[2]; // PC
     // Find closest note below melodyMidi with this PC
     let m3 = melodyMidi - 1;
     while (m3 % 12 !== n3) m3--;
     voicingMidi[2] = m3;
 
     // Voice 2
-    let n2 = closeVoicing[1];
+    const n2 = closeVoicing[1];
     let m2 = m3 - 1;
     while (m2 % 12 !== n2) m2--;
     voicingMidi[1] = m2;
 
     // Voice 1 (Bottom)
-    let n1 = closeVoicing[0];
+    const n1 = closeVoicing[0];
     let m1 = m2 - 1;
     while (m1 % 12 !== n1) m1--;
     voicingMidi[0] = m1;

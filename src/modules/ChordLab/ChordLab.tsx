@@ -1,58 +1,68 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import { PianoKeyboard } from './components/PianoKeyboard';
-import { ProgressionBuilder } from './components/ProgressionBuilder';
-import { PresetsPanel } from './components/PresetsPanel';
-import { Controls } from './components/Controls';
-import { EarTrainingModule } from './components/EarTrainingModule';
-import { ConstantStructureTool } from './components/ConstantStructureTool';
-import { LessonEngine } from './components/LessonEngine';
 import type { ChordInfo, Progression } from '../../core/theory';
-import { getScaleChords, applyVoicing, parseChord, getChordNotes, midiToNoteName } from '../../core/theory';
-import { JAZZ_STANDARDS } from '../../utils/standards';
-import { getProgress, LESSONS } from '../../core/store/session';
-import type { Lesson } from '../../core/store/session';
+import { getScaleChords, applyVoicing, parseChord, getChordNotes, midiToNoteName, noteNameToMidi } from '../../core/theory';
+
+
 import type { Style } from '../../core/audio/globalAudio';
 import {
   initAudio,
   playChord,
-  triggerAttack,
-  triggerRelease,
   playProgression,
-  stop
+  stop,
+  setVisualizationCallback,
+  setBpm as setGlobalBpm
 } from '../../core/audio/globalAudio';
+import { bpmSignal } from '../../core/audio/audioSignals';
 import { exportToMidi, downloadMidi } from '../../core/midi/export';
-import type { JazzStandard } from '../../utils/standards';
 import { useTranslation } from 'react-i18next';
 import { useMidi } from '../../context/MidiContext';
-import LanguageSelector from '../../circle-chords-0.1.0/src/components/LanguageSelector';
-import { setLanguage } from '../../circle-chords-0.1.0/src/i18n';
+// import LanguageSelector from '../../circle-chords-0.1.0/src/components/LanguageSelector';
+// import { setLanguage } from '../../circle-chords-0.1.0/src/i18n';
 import { QuickExerciseJump } from '../../components/widgets/QuickExerciseJump';
+import { ChordLabDashboard } from '../../components/ChordLabDashboard';
+import { useUserPresets } from '../../hooks/useUserPresets';
 
 const MAX_PROGRESSION_LENGTH = 16;
+const DEFAULT_TRANSPOSE_SETTINGS = { enabled: false, interval: 1, step: 1 };
 
 function ChordLab() {
   const { t, i18n } = useTranslation();
-  const location = useLocation();
+  const { userPresets, savePreset, deletePreset } = useUserPresets();
 
-  // Navigation State
-  const [activeTab, setActiveTab] = useState<'lab' | 'ear-training' | 'lessons'>('lab');
-  const [activeLesson, setActiveLesson] = useState<Lesson | null>(null);
+  const location = useLocation();
 
   // Lab State
   const [selectedKey, setSelectedKey] = useState('C');
   const [selectedScale, setSelectedScale] = useState('Major');
   const [selectedVoicing, setSelectedVoicing] = useState('Root Position');
-  const [selectedStyle, setSelectedStyle] = useState<Style>('None');
+  const [selectedStyle, setSelectedStyle] = useState<Style>('Jazz');
   const [bpm, setBpm] = useState(120);
+  // Sync BPM signal
+  useEffect(() => {
+    bpmSignal.value = bpm;
+    setGlobalBpm(bpm);
+  }, [bpm]);
+
   const [progression, setProgression] = useState<(ChordInfo | null)[]>(
     Array(MAX_PROGRESSION_LENGTH).fill(null)
   );
   const [isPlaying, setIsPlaying] = useState(false);
   const [playingIndex, setPlayingIndex] = useState<number | null>(null);
   const [audioInitialized, setAudioInitialized] = useState(false);
-  const [importedTrackInfo, setImportedTrackInfo] = useState<{ name: string; style?: string; mood?: string } | null>(null);
   const [visualizedNotes, setVisualizedNotes] = useState<number[]>([]);
+
+  // Looping & Auto-Transpose State
+  const [isLooping, setIsLooping] = useState(false);
+  const [transposeSettings, setTransposeSettings] = useState(DEFAULT_TRANSPOSE_SETTINGS);
+  const [loopCount, setLoopCount] = useState(0);
+
+  useEffect(() => {
+    setVisualizationCallback((notes) => {
+      setVisualizedNotes(notes);
+    });
+    return () => setVisualizationCallback(null);
+  }, []);
 
   const ensureAudio = useCallback(async () => {
     if (!audioInitialized) {
@@ -62,20 +72,13 @@ function ChordLab() {
   }, [audioInitialized]);
 
   // MIDI Input Visualization State
-  const { lastNote } = useMidi();
-  const [midiNotes, setMidiNotes] = useState<number[]>([]);
+  const { activeNotes, lastNote } = useMidi();
 
   useEffect(() => {
-    if (!lastNote) return;
-    ensureAudio();
-    if (lastNote.type === 'noteon') {
-      setMidiNotes(prev => prev.includes(lastNote.note) ? prev : [...prev, lastNote.note]);
-      triggerAttack(lastNote.note, lastNote.velocity / 127);
-    } else {
-      setMidiNotes(prev => prev.filter(n => n !== lastNote.note));
-      triggerRelease(lastNote.note);
-    }
+    if (lastNote) ensureAudio();
   }, [lastNote, ensureAudio]);
+
+  const midiNotes = useMemo(() => Array.from(activeNotes), [activeNotes]);
 
   const availableChords = getScaleChords(selectedKey, selectedScale, 4);
 
@@ -122,7 +125,6 @@ function ChordLab() {
   const handleClearProgression = useCallback(() => {
     setProgression(Array(MAX_PROGRESSION_LENGTH).fill(null));
     setPlayingIndex(null);
-    setImportedTrackInfo(null); // Clear track info
     setVisualizedNotes([]);
     stop();
     setIsPlaying(false);
@@ -130,15 +132,26 @@ function ChordLab() {
 
   const handleSelectPreset = useCallback(
     (preset: Progression) => {
-      setImportedTrackInfo(null); // Clear imported info when a preset is selected
-      let newProgression: (ChordInfo | null)[] = Array(MAX_PROGRESSION_LENGTH).fill(null);
+      // Check for Key metadata first to update context
+      if ((preset as any).key) {
+        const newKey = (preset as any).key;
+        setSelectedKey(newKey);
+        // data-bind: update ref to prevent auto-transpose effect from ruining the import
+        prevKeyRef.current = newKey;
+      }
+
+      // setImportedTrackInfo(null); // Clear imported info when a preset is selected
+      const newProgression: (ChordInfo | null)[] = Array(MAX_PROGRESSION_LENGTH).fill(null);
 
       if (preset.chords && preset.chords.length > 0) {
         preset.chords.forEach((chordName, index) => {
           if (index < MAX_PROGRESSION_LENGTH) {
             const { root, quality } = parseChord(chordName);
             const midiNotes = getChordNotes(root, quality, 4, selectedVoicing);
-            const notes = midiNotes.map(m => midiToNoteName(m));
+            // Use the key from preset if available, otherwise selectedKey
+            const contextKey = (preset as any).key || selectedKey;
+            const notes = midiNotes.map(m => midiToNoteName(m, contextKey));
+
             newProgression[index] = {
               root,
               quality,
@@ -168,7 +181,6 @@ function ChordLab() {
         });
       }
       setProgression(newProgression);
-      setActiveTab('lab'); // Switch back to lab on preset select
     },
     [selectedKey, selectedScale, selectedVoicing]
   );
@@ -199,14 +211,254 @@ function ChordLab() {
       },
       () => {
         setIsPlaying(false);
-        setPlayingIndex(null);
-        setVisualizedNotes([]);
+        // On Finish Callback - Handle Looping and Transposition
+        if (isLooping) {
+          setLoopCount(prev => {
+            const newCount = prev + 1;
+            // Handle Auto-Transpose
+            if (transposeSettings.enabled && newCount % transposeSettings.interval === 0) {
+              // Calculate shift
+              const shift = transposeSettings.step;
+
+              // Helper to shift a note name by semitones
+              const shiftNote = (note: string, semitones: number) => {
+                const midi = noteNameToMidi(note + '4');
+                const shiftedMidi = midi + semitones;
+                return midiToNoteName(shiftedMidi, selectedKey).replace(/[0-9-]/g, '');
+              };
+
+              // 1. Shift Key
+              const newKey = shiftNote(selectedKey, shift);
+              setSelectedKey(newKey);
+
+              // 2. Shift Progression (especially custom chords with degree -1)
+              setProgression(prevProg => prevProg.map(chord => {
+                if (!chord) return null;
+
+                // Calculate new root
+                const newRoot = shiftNote(chord.root, shift);
+
+                // Shift MIDI notes
+                const newMidiNotes = chord.midiNotes.map(n => n + shift);
+                const newNotes = newMidiNotes.map(n => midiToNoteName(n, selectedKey));
+
+                return {
+                  ...chord,
+                  root: newRoot,
+                  notes: newNotes,
+                  midiNotes: newMidiNotes
+                };
+              }));
+            }
+            return newCount;
+          });
+        } else {
+          setIsPlaying(false);
+          setPlayingIndex(null);
+          setVisualizedNotes([]);
+          setLoopCount(0);
+        }
       },
       (activeNotes) => {
         setVisualizedNotes(activeNotes);
       }
     );
-  }, [progression, bpm, selectedStyle, ensureAudio]);
+  }, [progression, bpm, selectedStyle, ensureAudio, isLooping, transposeSettings, selectedKey]);
+
+  // Handle Looping Effect separately to avoid recursion issues
+  useEffect(() => {
+    if (isLooping && isPlaying && loopCount > 0) {
+      // This effect triggers when loopCount increments (which happens in onFinish)
+      // and restarts playback.
+
+      // We need a slight delay or just call play again.
+      // However, we need to call the *logic* of handlePlay, but handlePlay itself toggles isPlaying.
+      // Let's refactor handlePlay to separate "start playback" from "user clicked play".
+
+      // Actually, simpler: just call the play logic directly here.
+      // But we need the *latest* progression and state.
+
+      // Re-implementing play logic here is safer than recursion.
+      const validChords = progression
+        .map((c, i) => ({ chord: c, index: i }))
+        .filter((item): item is { chord: ChordInfo, index: number } => item.chord !== null);
+
+      if (validChords.length === 0) return;
+
+      const playData = validChords.map(({ chord }) => ({
+        root: chord.root,
+        quality: chord.quality,
+        duration: 4,
+        notes: chord.midiNotes
+      }));
+
+      playProgression(
+        playData,
+        selectedStyle,
+        bpm,
+        (playIndex) => {
+          const originalIndex = validChords[playIndex].index;
+          setPlayingIndex(originalIndex);
+        },
+        () => {
+          // Loop Finished again
+          setLoopCount(prev => {
+            const newCount = prev + 1;
+            // Handle Auto-Transpose (duplicated logic, consider extracting)
+            if (transposeSettings.enabled && newCount % transposeSettings.interval === 0) {
+              const shift = transposeSettings.step;
+              const shiftNote = (note: string, semitones: number) => {
+                const midi = noteNameToMidi(note + '4');
+                const shiftedMidi = midi + semitones;
+                return midiToNoteName(shiftedMidi, selectedKey).replace(/[0-9-]/g, '');
+              };
+              setSelectedKey(shiftNote(selectedKey, shift));
+              setProgression(prevProg => prevProg.map(chord => {
+                if (!chord) return null;
+                const newRoot = shiftNote(chord.root, shift);
+                const newMidiNotes = chord.midiNotes.map(n => n + shift);
+                const newNotes = newMidiNotes.map(n => midiToNoteName(n, selectedKey));
+                return { ...chord, root: newRoot, notes: newNotes, midiNotes: newMidiNotes };
+              }));
+            }
+            return newCount;
+          });
+        },
+        (activeNotes) => {
+          setVisualizedNotes(activeNotes);
+        }
+      );
+    }
+  }, [loopCount, isLooping, isPlaying, progression, bpm, selectedStyle, transposeSettings, selectedKey]); // dependency on loopCount triggers next loop
+
+
+  // --- Transposition Logic: Hard-link Progression to Key ---
+  // Store previous key to calculate shift
+  const prevKeyRef = useRef(selectedKey);
+
+  useEffect(() => {
+    const prevKey = prevKeyRef.current;
+    if (prevKey !== selectedKey) {
+      // Calculate interval between prevKey and newKey
+      const prevRootMidi = noteNameToMidi(prevKey + '4');
+      const newRootMidi = noteNameToMidi(selectedKey + '4');
+      const semitoneShift = newRootMidi - prevRootMidi;
+
+      // Handle wrap-around for octaves to find shortest path
+      let shift = semitoneShift;
+      if (shift > 6) shift -= 12;
+      if (shift < -6) shift += 12;
+
+      // Determine accidental preference for new key (Now handled by midiToNoteName context)
+
+      if (shift !== 0) {
+        setProgression(prev => prev.map(chord => {
+          if (!chord) return null;
+          // Shift root
+          const currentRootMidi = noteNameToMidi(chord.root + '4');
+          const newChordRootMidi = currentRootMidi + shift;
+          // Use proper accidental spelling based on new key context
+          const newRoot = midiToNoteName(newChordRootMidi, selectedKey).replace(/[0-9-]/g, '');
+
+          // Shift MIDI notes
+          const newMidiNotes = chord.midiNotes.map(n => n + shift);
+          const newNotes = newMidiNotes.map(n => midiToNoteName(n, selectedKey));
+
+          return {
+            ...chord,
+            root: newRoot,
+            notes: newNotes,
+            midiNotes: newMidiNotes
+          };
+        }));
+      }
+      prevKeyRef.current = selectedKey;
+    }
+  }, [selectedKey, selectedScale]);
+
+
+  // --- MIDI Input Logic ---
+  // Detect chord from activeNotes when requested
+  const [detectedChord, setDetectedChord] = useState<ChordInfo | null>(null);
+
+  // Basic Chord Detection Helper (Move to theory later if complex)
+  const detectChordFromNotes = useCallback((notes: number[]): ChordInfo | null => {
+    if (notes.length < 3) return null;
+
+    const sorted = [...notes].sort((a, b) => a - b);
+    const rootMidi = sorted[0];
+    const rootName = midiToNoteName(rootMidi).replace(/[0-9-]/g, '');
+    const intervals = sorted.map(n => (n - rootMidi) % 12); // relative semitones
+
+    // Simple pattern matching
+    // 0, 4, 7 -> Maj
+    // 0, 3, 7 -> Min
+    // ...
+
+    let quality = 'Custom';
+    const has = (int: number) => intervals.includes(int);
+
+    if (has(4) && has(7)) quality = has(11) ? 'maj7' : has(10) ? 'dom7' : 'maj';
+    else if (has(3) && has(7)) quality = has(11) ? 'min(maj7)' : has(10) ? 'min7' : 'min';
+    else if (has(3) && has(6)) quality = has(9) ? 'dim7' : has(10) ? 'm7b5' : 'dim';
+    else if (has(4) && has(8)) quality = 'aug';
+    else if (has(2) && has(7)) quality = 'sus2';
+    else if (has(5) && has(7)) quality = 'sus4';
+
+    return {
+      root: rootName,
+      quality,
+      roman: quality, // Placeholder
+      degree: -1,
+      notes: sorted.map(n => midiToNoteName(n, selectedKey)),
+      midiNotes: sorted
+    };
+  }, [selectedKey]);
+
+  useEffect(() => {
+    if (midiNotes.length >= 3) {
+      setDetectedChord(detectChordFromNotes(midiNotes));
+    } else {
+      setDetectedChord(null);
+    }
+  }, [midiNotes, detectChordFromNotes]);
+
+  const handleAddDetectedChord = () => {
+    if (detectedChord) {
+      setProgression((prev) => {
+        const firstEmpty = prev.findIndex((c) => c === null);
+        if (firstEmpty === -1) {
+          return [...prev.slice(1), detectedChord];
+        }
+        const newProg = [...prev];
+        newProg[firstEmpty] = detectedChord;
+        return newProg;
+      });
+    }
+  };
+
+
+
+  const handleSaveUserPreset = useCallback(() => {
+    const validChords = progression.filter((c): c is ChordInfo => c !== null);
+    if (validChords.length === 0) return;
+
+    const name = prompt("Name your preset:", "My Jazz Tune");
+    if (!name) return;
+
+    const chords = validChords.map(c => {
+      let q = c.quality;
+      if (q === 'maj') q = '';
+      return c.root + q;
+    });
+
+    savePreset({
+      name,
+      genre: 'User',
+      description: `Custom User Preset • ${new Date().toLocaleDateString()}`,
+      chords
+    });
+  }, [progression, savePreset]);
 
   const handleStop = useCallback(() => {
     stop();
@@ -257,12 +509,12 @@ function ChordLab() {
     if (key) setSelectedKey(key);
     if (style) setSelectedStyle(style);
 
-    // Determine Scale
+    // Determine Scale (Simple heuristic)
     let targetScale = 'Major';
     if (chords && chords.length > 0) {
       const first = chords[0];
-      if (first === 'i' || first === 'im' || first === 'i7') {
-        targetScale = 'Natural Minor';
+      if (typeof first === 'string' && first.toLowerCase().startsWith('i') && (first === 'i' || first === 'im' || first === 'i7' || first === 'im7')) {
+        if (first === 'im' || first === 'im7') targetScale = 'Natural Minor';
       }
     }
     setSelectedScale(targetScale);
@@ -274,13 +526,10 @@ function ChordLab() {
     if (detailedChords && detailedChords.length > 0) {
       detailedChords.forEach((item: any, index: number) => {
         if (index >= MAX_PROGRESSION_LENGTH) return;
-
-        // Map MIDI notes to string names
-        const notes = item.notes.map((m: number) => midiToNoteName(m));
-
+        const notes = item.notes.map((m: number) => midiToNoteName(m, selectedKey));
         newProg[index] = {
           root: '?',
-          quality: 'Custom', // Flag to prevent auto-revoicing
+          quality: 'Custom',
           roman: item.label,
           degree: -1,
           notes: notes,
@@ -288,24 +537,92 @@ function ChordLab() {
         };
       });
     } else if (chords) {
-      // Fallback to old logic (Roman Numeral matching)
-      const scaleChords = getScaleChords(key, targetScale, 4);
-      chords.forEach((roman: string, index: number) => {
+      // Robust Roman Numeral Parsing
+      const ROMAN_MAP: Record<string, number> = {
+        'i': 0, 'ii': 1, 'iii': 2, 'iv': 3, 'v': 4, 'vi': 5, 'vii': 6,
+        'I': 0, 'II': 1, 'III': 2, 'IV': 3, 'V': 4, 'VI': 5, 'VII': 6
+      };
+
+      const scaleIntervals = targetScale === 'Natural Minor'
+        ? [0, 2, 3, 5, 7, 8, 10]
+        : [0, 2, 4, 5, 7, 9, 11]; // Major default
+
+      const rootMidi = noteNameToMidi(key + '4');
+      const rootIndex = (rootMidi % 12);
+
+      chords.forEach((romanStr: string, index: number) => {
         if (index >= MAX_PROGRESSION_LENGTH) return;
-        const found = scaleChords.find(c => c.roman === roman || roman.startsWith(c.roman));
-        if (found) {
-          newProg[index] = { ...found, roman: roman };
+        if (!romanStr) return;
+
+        // 1. Separate Root (Roman) from Suffix (Quality)
+        const match = romanStr.match(/^([b#]?)(VII|VI|V|IV|III|II|I|vii|vi|v|iv|iii|ii|i)(.*)$/);
+
+        if (match) {
+          const acc = match[1]; // b or #
+          const numeral = match[2];
+          const suffix = match[3];
+
+          // Determine Degree
+          const degree = ROMAN_MAP[numeral] !== undefined ? ROMAN_MAP[numeral] : 0;
+
+          // Determine Chromatic Root
+          let currentInterval = scaleIntervals[degree];
+          if (acc === 'b') currentInterval -= 1;
+          if (acc === '#') currentInterval += 1;
+
+          const chordRootIndex = (rootIndex + currentInterval + 12) % 12;
+          const chordRootName = midiToNoteName(60 + chordRootIndex).replace(/[0-9]/g, '');
+
+          let quality = 'maj';
+          const isLowerCase = numeral === numeral.toLowerCase();
+
+          if (!suffix) {
+            quality = isLowerCase ? 'min' : 'maj';
+          } else {
+            if (suffix === 'm' || suffix === '-') quality = 'min';
+            else if (suffix === '7') quality = isLowerCase ? 'min7' : 'dom7';
+            else if (suffix === 'maj7' || suffix === 'M7') quality = 'maj7';
+            else if (suffix === 'm7' || suffix === '-7') quality = 'min7';
+            else if (suffix === 'sus4') quality = 'sus4';
+            else if (suffix === 'sus2') quality = 'sus2';
+            else if (suffix === 'dim' || suffix === '°') quality = 'dim';
+            else if (suffix === 'dim7' || suffix === '°7') quality = 'dim7';
+            else if (suffix === 'm7b5' || suffix === 'ø') quality = 'm7b5';
+            else if (suffix === '6') quality = isLowerCase ? 'm6' : '6';
+            else if (suffix === '9') quality = isLowerCase ? 'min9' : '9';
+            else if (suffix === 'add9') quality = 'maj9';
+            else if (suffix.includes('M-5')) quality = 'maj';
+            else quality = isLowerCase ? 'min' : 'maj';
+          }
+
+          const midiNotes = getChordNotes(chordRootName, quality, 4, selectedVoicing);
+          const notes = midiNotes.map(m => midiToNoteName(m, selectedKey));
+
+          newProg[index] = {
+            root: chordRootName,
+            quality,
+            roman: romanStr,
+            degree: degree,
+            notes,
+            midiNotes
+          };
+        } else {
+          const scaleChords = getScaleChords(key, targetScale, 4);
+          const found = scaleChords.find(c => c.roman === romanStr);
+          if (found) {
+            newProg[index] = { ...found, roman: romanStr };
+          }
         }
       });
     }
 
     setProgression(newProg);
-    setImportedTrackInfo({
-      name: data.name || 'Unknown Track',
-      style: data.style,
-      mood: data.mood
-    });
-  }, [selectedKey]); // Dependencies might need tuning if logic uses others, but mostly it sets them.
+    // setImportedTrackInfo({
+    //   name: data.name || 'Unknown Track',
+    //   style: data.style,
+    //   mood: data.mood
+    // });
+  }, [selectedKey, selectedVoicing, selectedScale]);
 
   // Handle Imported Progression from Library (via Navigation)
   useEffect(() => {
@@ -319,7 +636,11 @@ function ChordLab() {
     c.midiNotes.map((n) => n % 12)
   );
 
-  const displayedNotes = [...visualizedNotes, ...midiNotes];
+
+  // const displayedNotes = [...visualizedNotes, ...midiNotes]; // Moved to Dashboard
+
+  // Create current chord display data
+  const currentChord = playingIndex !== null ? progression[playingIndex] : null;
 
   return (
     <div className="min-h-screen p-4 md:p-8 relative">
@@ -336,192 +657,79 @@ function ChordLab() {
             {/* Integration Footer */}
             <QuickExerciseJump currentModule="ChordLab" />
           </div>
-          <LanguageSelector value={i18n.language} onChange={setLanguage} />
+          {/* <LanguageSelector value={i18n.language} onChange={setLanguage} /> */}
         </header>
 
-        {/* Navigation Tabs */}
-        <div className="flex justify-center gap-4 mb-8">
-          <button
-            onClick={() => setActiveTab('lab')}
-            className={`px-6 py-2 rounded-full font-medium transition-all ${activeTab === 'lab'
-              ? 'bg-white text-black shadow-neon'
-              : 'bg-white/10 text-white hover:bg-white/20'
-              }`}
-          >
-            🎹 {t('ui.tabs.chords')}
-          </button>
-          <button
-            onClick={() => setActiveTab('ear-training')}
-            className={`px-6 py-2 rounded-full font-medium transition-all ${activeTab === 'ear-training'
-              ? 'bg-cyan-400 text-black shadow-neon-cyan'
-              : 'bg-white/10 text-white hover:bg-white/20'
-              }`}
-          >
-            👂 {t('earTraining.title')}
-          </button>
-          <button
-            onClick={() => setActiveTab('lessons')}
-            className={`px-6 py-2 rounded-full font-medium transition-all ${activeTab === 'lessons'
-              ? 'bg-amber-400 text-black shadow-neon-amber'
-              : 'bg-white/10 text-white hover:bg-white/20'
-              }`}
-          >
-            📚 {t('ui.tabs.progressions')}
-          </button>
-        </div>
-
-        {/* --- LAB VIEW --- */}
-        {activeTab === 'lab' && (
-          <div className="space-y-6 fade-in">
-            <Controls
-              selectedKey={selectedKey}
-              selectedScale={selectedScale}
-              selectedVoicing={selectedVoicing}
-              selectedStyle={selectedStyle}
-              bpm={bpm}
-              isPlaying={isPlaying}
-              onKeyChange={setSelectedKey}
-              onScaleChange={setSelectedScale}
-              onVoicingChange={setSelectedVoicing}
-              onStyleChange={setSelectedStyle}
-              onBpmChange={setBpm}
-              onPlay={handlePlay}
-              onStop={handleStop}
-              onExportMidi={handleExportMidi}
-            />
-
-            <div className="glass-panel rounded-2xl p-6 overflow-x-auto">
-              <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                <span className="text-pink-400">♪</span>
-                {selectedKey} {selectedScale} Scale
-              </h2>
-              <div className="flex justify-center">
-                <PianoKeyboard
-                  startOctave={4}
-                  endOctave={5}
-                  highlightedNotes={isPlaying || midiNotes.length > 0 ? displayedNotes : highlightedNotes}
-                  chords={availableChords}
-                  onChordClick={handleChordClick}
-                  activeChordDegree={playingIndex !== null ? progression[playingIndex]?.degree : undefined}
-                />
+        {/* MIDI Detection UI floating or integrated */}
+        {detectedChord && (
+          <div className="fixed bottom-8 right-8 z-50 animate-bounce-in">
+            <div className="glass-panel p-4 rounded-xl border border-cyan-500/50 shadow-[0_0_30px_rgba(34,211,238,0.2)] flex items-center gap-4">
+              <div className="text-center">
+                <div className="text-[10px] text-cyan-400 uppercase font-bold tracking-widest">Detected</div>
+                <div className="text-2xl font-black text-white">{detectedChord.root}<span className="text-lg font-normal">{detectedChord.quality}</span></div>
               </div>
+              <button
+                onClick={handleAddDetectedChord}
+                className="bg-cyan-500 text-black p-2 rounded-lg font-bold hover:bg-cyan-400 transition"
+              >
+                + Add
+              </button>
             </div>
-
-            {/* Progression Builder */}
-            <ProgressionBuilder
-              progression={progression}
-              playingIndex={playingIndex}
-              onRemoveChord={handleRemoveChord}
-              onChordClick={handleSlotClick}
-              onClear={handleClearProgression}
-            />
-
-            {/* Non-Functional Harmony Tool */}
-            <ConstantStructureTool
-              onAddChord={(chord) => {
-                setProgression((prev) => {
-                  const firstEmpty = prev.findIndex((c) => c === null);
-                  if (firstEmpty === -1) {
-                    const newProg = [...prev.slice(1), chord];
-                    return newProg;
-                  }
-                  const newProg = [...prev];
-                  newProg[firstEmpty] = chord;
-                  return newProg;
-                });
-              }}
-            />
-
-            <div className="glass-panel rounded-2xl p-6">
-              <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                <span className="text-amber-400">🎷</span>
-                Jazz Standards
-              </h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {JAZZ_STANDARDS.map((std: JazzStandard, i: number) => (
-                  <button
-                    key={i}
-                    onClick={() => handleSelectPreset(std)}
-                    className="bg-amber-900/20 hover:bg-amber-800/40 border border-amber-500/20 rounded-xl p-3 text-left transition-colors"
-                  >
-                    <div className="font-medium text-amber-200">{std.name}</div>
-                    <div className="text-xs text-white/40">{std.style} • {std.key}</div>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <PresetsPanel
-              onSelectPreset={handleSelectPreset}
-              onImportMidi={handleLoadExternalMidi}
-            />
           </div>
         )}
 
-        {/* --- EAR TRAINING VIEW --- */}
-        {activeTab === 'ear-training' && (
-          <div className="fade-in">
-            <EarTrainingModule />
-          </div>
-        )}
+        {/* --- LAB DASHBOARD --- */}
+        <ChordLabDashboard
+          selectedKey={selectedKey}
+          selectedScale={selectedScale}
+          selectedVoicing={selectedVoicing}
+          selectedStyle={selectedStyle}
+          bpm={bpm}
+          isPlaying={isPlaying}
+          progression={progression}
+          playingIndex={playingIndex}
+          currentChord={currentChord}
+          midiNotes={midiNotes}
+          visualizedNotes={visualizedNotes}
+          highlightedNotes={highlightedNotes}
+          availableChords={availableChords}
 
-        {/* --- LESSONS VIEW --- */}
-        {activeTab === 'lessons' && (
-          <div className="fade-in pb-20">
-            {activeLesson ? (
-              <LessonEngine
-                lesson={activeLesson}
-                onBack={() => setActiveLesson(null)}
-                onComplete={() => setActiveLesson(null)}
-              />
-            ) : (
-              <div className="space-y-4">
-                <h2 className="text-2xl font-bold text-white mb-6">The Architectonics of Advanced Jazz</h2>
-                {/* Active Track Info */}
-                {importedTrackInfo && (
-                  <div className="bg-white/5 border border-white/10 p-4 rounded-xl mb-6">
-                    <div className="text-xs text-white/40 uppercase tracking-widest mb-1">Now Playing</div>
-                    <div className="text-xl font-bold text-white">{importedTrackInfo.name}</div>
-                    {importedTrackInfo.style && <div className="text-sm text-cyan-400">{importedTrackInfo.style} • {importedTrackInfo.mood || 'Custom'}</div>}
-                  </div>
-                )}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {LESSONS.map((lesson: Lesson) => (
-                    <button
-                      key={lesson.id}
-                      onClick={() => setActiveLesson(lesson)}
-                      className="text-left p-6 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-cyan-500/30 transition group relative overflow-hidden"
-                    >
-                      <div className="absolute top-0 right-0 p-4 opacity-10 font-bold text-6xl group-hover:scale-110 transition transform">
-                        {lesson.concept.split(' ')[1]}
-                      </div>
-                      <div className="relative z-10">
-                        <div className="text-xs font-bold text-cyan-400 uppercase tracking-wider mb-2">
-                          {lesson.concept}
-                        </div>
-                        <h3 className="text-xl font-bold text-white mb-2">{lesson.title}</h3>
-                        <p className="text-sm text-white/50 mb-4 line-clamp-3">
-                          {lesson.description}
-                        </p>
-                        <div className="flex items-center gap-2">
-                          <span className={`px-2 py-1 rounded text-xs font-medium ${lesson.difficulty === 'Expert' ? 'bg-purple-500/20 text-purple-300' :
-                            lesson.difficulty === 'Advanced' ? 'bg-amber-500/20 text-amber-300' :
-                              'bg-emerald-500/20 text-emerald-300'
-                            }`}>
-                            {lesson.difficulty}
-                          </span>
-                          {getProgress().includes(lesson.id) && (
-                            <span className="text-emerald-400 text-xs">✓ Completed</span>
-                          )}
-                        </div>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
+          isLooping={isLooping}
+          onLoopToggle={() => setIsLooping(prev => !prev)}
+          transposeSettings={transposeSettings}
+          onTransposeSettingsChange={setTransposeSettings}
+
+          onKeyChange={setSelectedKey}
+          onScaleChange={setSelectedScale}
+          onVoicingChange={setSelectedVoicing}
+          onStyleChange={setSelectedStyle}
+          onBpmChange={setBpm}
+          onPlay={handlePlay}
+          onStop={handleStop}
+          onExportMidi={handleExportMidi}
+          onChordClick={handleChordClick}
+          onSlotClick={handleSlotClick}
+          onRemoveChord={handleRemoveChord}
+          onClearProgression={handleClearProgression}
+          onAddStructureChord={(chord) => {
+            setProgression((prev) => {
+              const firstEmpty = prev.findIndex((c) => c === null);
+              if (firstEmpty === -1) {
+                const newProg = [...prev.slice(1), chord];
+                return newProg;
+              }
+              const newProg = [...prev];
+              newProg[firstEmpty] = chord;
+              return newProg;
+            });
+          }}
+          onSelectPreset={handleSelectPreset}
+          onImportMidi={handleLoadExternalMidi}
+
+          userPresets={userPresets}
+          onSaveUserPreset={handleSaveUserPreset}
+          onDeleteUserPreset={deletePreset}
+        />
 
         <footer className="text-center text-white/30 text-xs py-4">
           Built with React + Tone.js • iReal Pro Style Player + Educational Suite

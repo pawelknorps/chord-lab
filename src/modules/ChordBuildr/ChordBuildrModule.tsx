@@ -8,13 +8,10 @@ import './styles/Piano.css'
 
 export default function ChordBuildrModule() {
   return (
-    <div className="chord-buildr-module min-h-screen text-white bg-black">
+    <div className="chord-buildr-module min-h-screen">
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
         <AppProvider>
-          {/* Header/Footer optional, but keeping core func */}
-          <div className="p-4 md:p-8">
-            <PianoBoardComponent />
-          </div>
+          <PianoBoardComponent />
         </AppProvider>
       </ThemeProvider>
     </div>

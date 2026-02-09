@@ -152,3 +152,15 @@ body {
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
+
+@font-face {
+  font-family: 'iRealFont';
+  src: url('/fonts/iRealFont.woff') format('woff'),
+    url('/fonts/iRealFont.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+.font-jazz {
+  font-family: 'Marker Felt', 'Comic Sans MS', cursive;
+}

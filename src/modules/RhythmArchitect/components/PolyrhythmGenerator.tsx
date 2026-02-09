@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { PolyrhythmEngine } from '../../../utils/polyrhythmEngine';
 import { Play, Square } from 'lucide-react';
+import * as Tone from 'tone';
 
 const engine = new PolyrhythmEngine();
 
@@ -48,16 +49,20 @@ export default function PolyrhythmGenerator() {
         if (!ctx) return;
 
         // Visuals based on time
-        // We simulate the loops. 
-        // 1 measure = 240 / bpm seconds * 4 (Actually '1m' is 4 beats).
-        // Time = (Date.now() / 1000)
-        // We need phase.
+        // We synchronize precisely with Tone.Transport
 
-        const now = performance.now() / 1000;
-        // Approximation of phase (0-1) over 1 measure loop
         // Duration of 1 measure at BPM: (60/BPM) * 4
-        const duration = (60 / bpm) * 4;
-        const phase = (now % duration) / duration;
+        // Be consistent with engine logic (1m = 4 beats)
+        const beatDur = 60 / bpm;
+        const duration = beatDur * 4;
+
+        // Tone.Transport.seconds gives current audio time
+        // We use modulo to wrap around the measure
+        const time = Tone.Transport.seconds;
+
+        // Ensure phase is 0-1
+        // Floating point modulo can be tricky, but JS % operator works
+        const phase = (time % duration) / duration;
 
         // Clear
         ctx.clearRect(0, 0, canvas.width, canvas.height);

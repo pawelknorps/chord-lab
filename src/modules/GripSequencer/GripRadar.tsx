@@ -11,15 +11,18 @@ const GripRadar: React.FC<GripRadarProps> = ({ gripName, color, isActive }) => {
     // Map grip names to "shapes" or radar data
     // For now, let's use a simple abstract shape that morphs
 
-    const getPath = (name: string) => {
+    const getPath = (name: string | undefined | null): string => {
         if (!name || name === 'undefined') return "M 50 10 L 90 90 L 10 90 Z"; // Fallback Triangle
+
         switch (name) {
             case 'Q1': return "M 50 10 L 90 50 L 50 90 L 10 50 Z"; // Diamond
             case 'Q2': return "M 50 5 L 95 30 L 95 80 L 50 95 L 5 80 L 5 30 Z"; // Hexagon
             case 'V7alt': return "M 50 0 L 100 0 L 80 100 L 20 100 L 0 0 Z"; // Trapezoid/Aggressive
             case 'Maj7': return "M 10 10 L 90 10 L 90 90 L 10 90 Z"; // Square / Stable
             case 'Dim7': return "M 50 50 m -40, 0 a 40,40 0 1,0 80,0 a 40,40 0 1,0 -80,0"; // Circle
-            default: return "M 50 10 L 90 90 L 10 90 Z"; // Triangle
+            default:
+                console.warn(`GripRadar: Unknown grip name "${name}", using fallback path.`);
+                return "M 50 10 L 90 90 L 10 90 Z"; // Triangle
         }
     };
 

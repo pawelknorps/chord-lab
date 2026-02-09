@@ -1,10 +1,10 @@
-import { useMemo } from 'react';
+
+import { useState, useEffect, useMemo } from 'react';
 
 // Structure the data (Shared Interface)
 export interface MidiFile {
     name: string;
     path: string;
-    // url is now loaded on demand
     loadUrl: () => Promise<string>;
     category: string; // Major, Minor, Modal
     style?: string;   // pop, soul, etc.
@@ -13,53 +13,85 @@ export interface MidiFile {
     mood?: string;    // Joyful, Triumphant, etc.
 }
 
-// Import all midi files locally (Lazy Load)
-const midiModules = import.meta.glob('../midi_progressions/**/*.mid', {
-    eager: false, // Don't load everything on startup
-    query: '?url',
-    import: 'default'
-});
+export interface GroupedProgression {
+    id: string;
+    progression: string;
+    category: string;
+    style: string;
+    mood: string;
+    availableKeys: string[];
+    keyMap: Record<string, MidiFile>;
+}
+
+// Global cache
+let globalFilesCache: MidiFile[] | null = null;
+let fetchPromise: Promise<MidiFile[]> | null = null;
 
 export function useMidiLibrary() {
-    // Parse paths into metadata
-    const files: MidiFile[] = useMemo(() => {
-        // midiModules keys are paths
-        return Object.keys(midiModules).map((path) => {
-            const parts = path.split('/');
-            const filename = parts[parts.length - 1];
-            const category = parts[parts.length - 2];
+    const [files, setFiles] = useState<MidiFile[]>(globalFilesCache || []);
+    const [loading, setLoading] = useState(!globalFilesCache);
 
-            const nameParts = filename.replace('.mid', '').split(' - ');
-            let key = nameParts[0];
-            // Fix sharp keys (e.g. Cs -> C#)
-            key = key.replace('s', '#');
+    useEffect(() => {
+        if (globalFilesCache) {
+            setFiles(globalFilesCache);
+            setLoading(false);
+            return;
+        }
 
-            const progression = nameParts[1];
-            const mood = nameParts.length > 2 ? nameParts[2] : '';
+        if (!fetchPromise) {
+            fetchPromise = fetch('/midi_index.json')
+                .then(res => res.json())
+                .then((data: any[]) => {
+                    const processed = data.map((item: any) => ({
+                        ...item,
+                        loadUrl: async () => item.path
+                    }));
+                    globalFilesCache = processed;
+                    return processed;
+                })
+                .catch(err => {
+                    console.error("Failed to load MIDI index", err);
+                    return [];
+                });
+        }
 
-            let finalCategory = category;
-            let style = 'Classic';
-
-            if (category.includes('style')) {
-                style = category.replace(' style', '');
-                finalCategory = parts[parts.length - 3] || 'Unknown';
-            }
-
-            return {
-                name: filename,
-                path,
-                loadUrl: async () => {
-                    const module = await midiModules[path]();
-                    return module as string;
-                },
-                category: finalCategory,
-                style,
-                key,
-                progression,
-                mood
-            };
+        fetchPromise.then(loadedFiles => {
+            setFiles(loadedFiles);
+            setLoading(false);
         });
     }, []);
+
+    const groupedProgressions = useMemo(() => {
+        if (!files.length) return [];
+
+        const groups: Record<string, GroupedProgression> = {};
+
+        files.forEach(file => {
+            const id = `${file.category}-${file.style}-${file.progression}-${file.mood}`;
+            if (!groups[id]) {
+                groups[id] = {
+                    id,
+                    progression: file.progression || 'Unknown',
+                    category: file.category,
+                    style: file.style || 'Classic',
+                    mood: file.mood || '',
+                    availableKeys: [],
+                    keyMap: {}
+                };
+            }
+            if (file.key) {
+                groups[id].availableKeys.push(file.key);
+                groups[id].keyMap[file.key] = file;
+            }
+        });
+
+        // Sort keys for each group
+        Object.values(groups).forEach(group => {
+            group.availableKeys.sort();
+        });
+
+        return Object.values(groups);
+    }, [files]);
 
     const categories = useMemo(() => Array.from(new Set(files.map(f => f.category))), [files]);
     const styles = useMemo(() => Array.from(new Set(files.map(f => f.style))), [files]);
@@ -67,8 +99,11 @@ export function useMidiLibrary() {
 
     return {
         files,
+        groupedProgressions,
         categories,
         styles,
-        keys
+        keys,
+        loading
     };
 }
+

@@ -14,6 +14,7 @@ import {
     Library
 } from 'lucide-react';
 import { useAudio } from '../../context/AudioContext';
+import { MidiSettings } from '../MidiSettings';
 
 const Dashboard: React.FC = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -34,6 +35,8 @@ const Dashboard: React.FC = () => {
         { to: "/midi-library", icon: Library, label: "MIDI Library" },
         { to: "/rhythm-architect", icon: Activity, label: "Rhythm Architect" },
         { to: "/functional-ear-training", icon: Activity, label: "Ear Training" },
+        { to: "/progressions", icon: Music, label: "Progressions Lab" },
+        { to: "/jazz-standards", icon: Music, label: "Jazz Standards" },
     ];
 
     return (
@@ -82,18 +85,20 @@ const Dashboard: React.FC = () => {
                     })}
                 </nav>
 
-                {/* Audio Context Status / Switch */}
-                <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-white/10 bg-black/20">
+                {/* Context Status / Switch */}
+                <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-white/10 bg-black/20 space-y-3">
+                    <MidiSettings />
+
                     {!isReady ? (
                         <button
                             onClick={() => startAudio()}
-                            className="w-full py-2 px-4 bg-red-500/20 text-red-400 border border-red-500/50 rounded-lg hover:bg-red-500/30 transition-colors flex items-center justify-center gap-2"
+                            className="w-full py-2 px-4 bg-red-500/20 text-red-400 border border-red-500/50 rounded-lg hover:bg-red-500/30 transition-colors flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider"
                         >
                             <span>Start Audio Engine</span>
                         </button>
                     ) : (
-                        <div className="w-full py-2 px-4 bg-green-500/20 text-green-400 border border-green-500/50 rounded-lg flex items-center justify-center gap-2">
-                            <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+                        <div className="w-full py-2 px-4 bg-green-500/10 text-green-400 border border-green-500/30 rounded-lg flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider">
+                            <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.5)]"></span>
                             <span>Audio Active</span>
                         </div>
                     )}

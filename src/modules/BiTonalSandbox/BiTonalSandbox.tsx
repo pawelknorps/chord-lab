@@ -52,23 +52,23 @@ const BiTonalSandbox: React.FC = () => {
     };
 
     // MIDI Logic handled via InteractivePiano callbacks
-    const handleMidiNoteOn = (midi: number) => {
+    const handleMidiNoteOn = useCallback((midi: number) => {
         if (mode !== 'keyboard' || !exercise) return;
         setActiveNotes(prev => {
             const newSet = new Set(prev);
             newSet.add(midi);
             return newSet;
         });
-    };
+    }, [mode, exercise]);
 
-    const handleMidiNoteOff = (midi: number) => {
+    const handleMidiNoteOff = useCallback((midi: number) => {
         if (mode !== 'keyboard' || !exercise) return;
         setActiveNotes(prev => {
             const newSet = new Set(prev);
             newSet.delete(midi);
             return newSet;
         });
-    };
+    }, [mode, exercise]);
 
     // Check active notes against target
     useEffect(() => {

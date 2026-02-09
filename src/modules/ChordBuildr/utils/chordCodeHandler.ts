@@ -35,7 +35,7 @@ export function extractOctave(chordCode: string): number {
 
 export
   function getChordFromCode(chordCode: string): SelectedChord | undefined {
-  let chord: SelectedChord = {}
+  const chord: SelectedChord = {}
 
   try {
     chordCode = chordCode.replace("(", "");
@@ -69,7 +69,7 @@ export
 
     chordCode = processSlashChord(chordCode, chord)
 
-    let indexOfType = getIndexOfType(chordCode);
+    const indexOfType = getIndexOfType(chordCode);
 
     chord.noteLetter = capitalizeFirstLetter(
       chordCode.substring(1, indexOfType)
@@ -112,7 +112,7 @@ function logInvalidChordCodeError(chordCode: string, chord: SelectedChord): void
  * @returns 
  */
 function getIndexOfType(chordCode: string): number {
-  let startIndex = isNumeric(chordCode[0]) ? 2 : 1;
+  const startIndex = isNumeric(chordCode[0]) ? 2 : 1;
   for (let i = startIndex; i < chordCode.length; i++) {
     if (chordCode[i] !== '#' && chordCode[i] !== 'b') {
       return i;
@@ -130,7 +130,7 @@ function isNumeric(value: string): boolean {
  */
 function removeFbclid(chordCode: string): string {
   const startIndex = chordCode.indexOf("&fbclid")
-  let fbCode = chordCode.substring(startIndex, startIndex + 69)
+  const fbCode = chordCode.substring(startIndex, startIndex + 69)
   chordCode = chordCode.replace(fbCode, "")
   console.log("fbCode removed: " + fbCode)
   return chordCode
@@ -138,7 +138,7 @@ function removeFbclid(chordCode: string): string {
 
 function processSlashChord(chordCode: string, chord: SelectedChord): string {
   if (chordCode.includes(":")) {
-    var slashNote = chordCode.split(":").pop() as string
+    const slashNote = chordCode.split(":").pop() as string
 
     chord.slashNote = slashNote
     chord.slash = true
@@ -166,8 +166,8 @@ export function getProgressionString(chordPianoSet: ChordPiano[]): string {
   if (!chordPianoSet) return code;
 
   for (let i = 0; i < chordPianoSet.length; i++) {
-    let chordPiano = chordPianoSet[i]
-    let selectedChord = chordPiano.selectedChord
+    const chordPiano = chordPianoSet[i]
+    const selectedChord = chordPiano.selectedChord
 
     if (!selectedChord) continue
 
@@ -212,7 +212,7 @@ function capitalizeFirstLetter(string: string): string {
  * set to show sharps
  */
 export function updateFlatOrSharpLetter(showFlats: boolean | undefined, noteLetter: string): string {
-  var noteNumber = getNoteNumber(noteLetter)
+  const noteNumber = getNoteNumber(noteLetter)
 
   if (showFlats) {
     if (noteLetter?.includes("#")) {
@@ -240,18 +240,18 @@ function isValidVol(volume: number): boolean {
 export function getChordPianoSetFromProgCode(progCode: string | null): ChordPiano[] {
   if (progCode == null) return []
 
-  var chordArray = progCode.split(")")
+  const chordArray = progCode.split(")")
 
-  var chordPianoSet: ChordPiano[] = []
+  const chordPianoSet: ChordPiano[] = []
 
-  var progKeySet = false
+  let progKeySet = false
 
   for (let i = 0; i < chordArray.length; i++) {
-    var chordCode = chordArray[i]
+    const chordCode = chordArray[i]
 
     if (chordCode === "") continue
 
-    var chordPiano = createChordPiano(i, chordCode)
+    const chordPiano = createChordPiano(i, chordCode)
 
     if (!chordPiano) continue
 
@@ -322,7 +322,7 @@ export function buildProgFromCode(state: AppState, code: string): AppState {
 export function parseSynthCode(synthCode: string | null): SynthSettings {
 
   // default synth values
-  let defaultSettings: SynthSettings = {
+  const defaultSettings: SynthSettings = {
     volume: 80,
     type: "p",
     format: "p",
@@ -336,7 +336,7 @@ export function parseSynthCode(synthCode: string | null): SynthSettings {
   const [type, volumeStr, format, eq] = synthCode.split(":")
   const volume = parseInt(volumeStr)
 
-  let eqSettings: EQSettings = DEFAULT_EQ;
+  const eqSettings: EQSettings = DEFAULT_EQ;
 
   if (eq) {
     const [low, mid, high] = eq.split(".");
@@ -433,7 +433,7 @@ export function updateUrlProgressionCode(state: AppState): void {
     return
   }
 
-  let progressionCode = getStateParamsCode(state)
+  const progressionCode = getStateParamsCode(state)
 
   loadProgressionCode(state, progressionCode)
 }
@@ -473,8 +473,8 @@ export function convertProgressionStrToCode(submittedProgressionStr: string): st
     .trim()
     .replace(/\s\s+/g, ' ') // convert multiple spaces to one
 
-  for (let chordStr of submittedProgressionStr.split(' ')) {
-    let chordCode = convertChordStrToCode(chordStr)
+  for (const chordStr of submittedProgressionStr.split(' ')) {
+    const chordCode = convertChordStrToCode(chordStr)
     newProgressionString += `(${chordCode})`
   }
 
@@ -482,7 +482,7 @@ export function convertProgressionStrToCode(submittedProgressionStr: string): st
 }
 
 export function convertChordStrToCode(chordStr: string): string {
-  let octave = getOctave(chordStr)
+  const octave = getOctave(chordStr)
 
   // extract position if present
   let position = ''
@@ -492,10 +492,10 @@ export function convertChordStrToCode(chordStr: string): string {
     chordStr = chordStr.replace(/\.\d+$/, '')
   }
 
-  let chord = chordStr.replace(/(^\d+)(.+$)/i, '$2')
-  let letter = getLetter(chord)
+  const chord = chordStr.replace(/(^\d+)(.+$)/i, '$2')
+  const letter = getLetter(chord)
 
-  let { type, slash } = getTypeAndSlash(chord, letter)
+  const { type, slash } = getTypeAndSlash(chord, letter)
 
   return `${octave}${letter}${type}${slash}${position}`;
 }
@@ -506,7 +506,7 @@ function getTypeAndSlash(chord: string, letter: string): { type: string; slash: 
 
   try {
     if (type.includes('/') && !type.endsWith('6/9')) {
-      var lastSlashPos = type.lastIndexOf('/');
+      const lastSlashPos = type.lastIndexOf('/');
       slash = type.substring(lastSlashPos + 1);
       slash = ':' + upperCaseFirst(slash);
       type = type
