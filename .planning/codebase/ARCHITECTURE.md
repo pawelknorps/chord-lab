@@ -1,23 +1,33 @@
-# System Architecture
+# Architecture
 
-## 🏛️ Design Pattern
-- **Modular Monolith**: The application is organized into independent "Modules" under `src/modules/`. Each module encapsulates its own logic, state, and UI.
-- **Shell & Dashboard**: `src/components/layout/Dashboard.tsx` serves as the main navigation shell, hosting individual modules within a router-based layout.
+## High-Level Pattern
+The application follows a **Modular Monolith** architecture within a React frontend.
+- **Modules**: Features are encapsulated in `src/modules/` (e.g., `ChordBuildr`, `JazzKiller`, `Tonnetz`).
+- **Core**: Shared business logic, state, and services reside in `src/core/`.
+- **UI**: Components are split between module-specific components and shared primitives.
 
-## 🔄 Data Flow
-- **Global Context Providers**: `AudioProvider` and `MidiProvider` (in `src/context/`) wrap the entire application to provide shared access to the Web Audio engine (Tone.js) and MIDI input/output devices.
-- **Module-specific Stores**: Most modules use **Zustand** stores (`use...Store.ts`) to manage their internal state and side effects.
-- **Lazy Loading**: Heavy modules are lazily loaded in `App.tsx` using `React.lazy` to optimize initial bundle size and LCP.
+## Layers
+1. **Presentation Layer**: React Components (`.tsx`).
+   - `pages/`: Top-level route views.
+   - `modules/*/components/`: Feature-specific UI.
+   - `shared/components/` & `src/components/`: Reusable UI bricks.
+2. **State Management Layer**:
+   - `src/core/store/`: Global Zustand stores (Session, Mastery, Settings).
+   - Component-level `useState` / `useReducer`.
+   - `signals`: For high-frequency audio parameters (e.g. current playback time, volume).
+3. **Domain/Logic Layer**:
+   - `src/core/theory/`: Music theory engines (Harmony, Scales).
+   - `src/core/audio/`: Global audio context and signal chains.
+   - `src/modules/*/utils/` or `logic.ts`: Module-specific calculators.
+4. **Service/Integration Layer**:
+   - `src/core/services/`: Bridges to external libs (Tone.js wrapper, MIDI handlers).
 
-## 🌊 Audio Engine
-- **Tone.js Centralization**: Many modules utilize a central `AudioProvider` to ensure single-instance audio context management, though some specialized modules manage their own Tone.js instances for complex scheduling.
-- **Rhythm Engine**: A shared utility `src/utils/rhythmEngine.ts` provides timing logic used by sequencers and ear training exercises.
+## Data Flow
+- **Unidirectional**: React props for UI state.
+- **Global Actions**: Components dispatch actions to Zustand stores.
+- **Reactive Signals**: Audio engine updates signals; UI subscribes directly to signals to update visuals (e.g. piano key press) without full component re-renders.
 
-## 🎹 MIDI Integration
-- **Global MIDI Handler**: `src/components/GlobalMidiHandler.tsx` listens for system-wide MIDI events and broadcasts them to the active module.
-- **Context-Aware Mapping**: Modules detect active keys and scales to translate raw MIDI notes into musically relevant notations (using `Tonal.js`).
-
-## 🗺️ High-Level Entry Points
-- `src/main.tsx`: Application bootstrap.
-- `src/App.tsx`: Routing and Global Providers.
-- `src/modules/ChordLab/ChordLab.tsx`: The primary entry module for chord exploration.
+## Key Entry Points
+- **Application Boot**: `src/main.tsx` -> `src/App.tsx`.
+- **Routing**: `src/App.tsx` (likely defines `Routes`).
+- **Audio Init**: `src/core/services/AudioManager.ts` (initialized on user interaction).

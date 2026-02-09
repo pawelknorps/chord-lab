@@ -1,16 +1,17 @@
 # Testing Strategy
 
-## 🧪 Framework
-- **Vitest**: The project uses Vitest for unit and integration testing.
+## Framework
+- **Runner**: `vitest`
+- **Frontend**: Likely `react-testing-library` (implied by typical Vitest usage, though explicit dependency check needed).
 
-## 📁 Structure
-- Tests are typically located alongside the source code with `.test.ts` or `.spec.ts` extensions (WIP).
+## Test Locations
+- **Co-located**: Some tests are found near the code (`src/utils/theoryEngine.test.ts`).
+- **Module Tests**: `src/modules/ChordBuildr/test/` suggests some modules have dedicated test folders.
 
-## 🎯 Current Status
-- **Music Theory Logic**: Core utilities in `src/utils/` are the primary candidates for unit tests.
-- **Chord Parsing**: `test_chord_parsing.ts` exists in the root for validating chord detection logic.
-- **Audio Testing**: Tone.js testing requires a mocked AudioContext or specialized headless testing environment.
+## Coverage
+- **Unit Tests**: Logic in `utils` and `core/theory` is the primary target.
+- **Component Tests**: Sparse. Focusing on logic engines seems to be the current pattern.
+- **E2E**: No Playwright/Cypress config found in root, suggesting no E2E tests currently.
 
-## 🛠️ Commands
-- `npm test`: Run all tests (WIP).
-- `npm run coverage`: Generate coverage reports.
+## Mocking
+- **Audio**: `tone` often needs mocking in CI environments. `setup.ts` likely handles this.

@@ -1,34 +1,45 @@
-# Technology Stack
+# Tech Stack
 
-## 🖼️ Frontend Framework
-- **React 19**: Core UI library.
-- **react-router-dom 7**: Handle routing between modules.
-- **react-device-detect**: Responsive logic based on device type.
+## Core Framework
+- **Runtime**: Node.js (Version defined by environment, likely >=20 for recent tools)
+- **Language**: TypeScript (`~5.9.3`)
+- **Framework**: React (`^19.2.0`)
+- **Bundler**: Vite (`^7.2.4`)
 
-## 🏗️ Build & Runtime
-- **Vite 7**: Fast build tool and dev server.
-- **TypeScript 5.9**: Type safety across the codebase.
-- **Node.js**: Scripting and local automation.
+## Styling
+- **CSS Engine**: Tailwind CSS 4 (`@tailwindcss/vite`, `^4.1.18`)
+- **Animation**: Framer Motion (`framer-motion`, `^12.33.0`)
+- **Icons**: FontAwesome (`@fortawesome/*`), Lucide React (`lucide-react`)
+- **UI Components**: Radix UI primitives (`@radix-ui/react-*`), custom components in `components/ui` (shadcn/ui style).
 
-## 🎨 Styling & UI
-- **Tailwind CSS 4**: Functional styling.
-- **Framer Motion 12**: Smooth UI transitions and animations.
-- **Lucide React**: Icon system.
-- **Radix UI**: Accessible primitives (Checkbox, Dialog, Select, etc.).
+## State Management
+- **Global Store**: Zustand (`zustand`, `^5.0.11`)
+- **Fine-grained Reactivity**: Preact Signals (`@preact/signals-react`, `^3.8.0`)
 
-## 🎵 Music & Audio
-- **Tone.js 15**: Web Audio synthesis and scheduling.
-- **Tonal.js**: Comprehensive music theory library (Notes, Scales, Progressions).
-- **VexFlow 5**: Standard music notation rendering.
-- **soundfont-player**: MIDI playback using SoundFonts.
-- **@tonejs/midi**: MIDI file parsing and generation.
-- **ireal-reader**: Parsing iReal book formats.
-- **@techies23/react-chords**: Chord diagram visualization.
+## Audio & Music Theory
+- **Audio Engine**: Tone.js (`tone`, `^15.1.22`)
+- **Music Theory**: Tonal.js (`@tonaljs/*`)
+- **Notation**: VexFlow (`vexflow`, `^5.0.0`)
+- **Instruments**: `soundfont-player`, `tonejs-instrument-*` (Guitar, Harp)
+- **MIDI**: `@tonejs/midi`, `@types/webmidi`
 
-## 💾 State Management
-- **Zustand 5**: Main state management library for modular and global state.
-- **Context API**: High-level providers for Audio and MIDI.
+## 3D & Visualization
+- **3D Engine**: Three.js (`three`, `^0.182.0`)
+- **React Bindings**: React Three Fiber (`@react-three/fiber`, `@react-three/drei`)
 
-## 🕹️ Other
-- **Three.js / React Three Fiber**: 3D visualizations (used in modules like Tonnetz).
-- **ml5**: Vision/Machine learning (potential experimental features).
+## Utilities
+- **Machine Learning**: `ml5` (`^1.0.1`) - Likely for pitch detection or gesture recognition?
+- **Routing**: React Router DOM (`^7.13.0`)
+- **Internationalization**: i18next (`i18next`, `react-i18next`)
+- **File Parsing**: `ireal-reader` (iReal Pro files)
+
+## Testing & Linting
+- **Test Runner**: Vitest (`vitest`, `^4.0.18`)
+- **Linter**: ESLint (`eslint`, `^9.39.1`)
+- **Formatter**: Prettier (implied, not in dependencies but standard)
+
+## Rationale
+The stack leans heavily on modern, performance-oriented libraries.
+- **React 19 & Tailwind 4**: Bleeding edge, implying a desire for the latest features and performance optimizations.
+- **Zustand + Signals**: A sophisticated hybrid approach. Zustand for coarse global state, Signals for high-frequency updates (critical for audio/music apps to avoid re-renders).
+- **Three.js**: Used for visualizations, likely the Tonnetz or specific 3D chord representations.

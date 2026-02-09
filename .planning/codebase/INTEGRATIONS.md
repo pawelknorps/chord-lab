@@ -1,16 +1,18 @@
-# External Integrations
+# Integrations
 
-## 🔌 Hardware
-- **Web MIDI API**: Integration with external MIDI keyboards and controllers via `src/context/MidiContext.tsx`.
+## External Services & APIs
+- **None detected**: No explicit AWS, Firebase, Supabase, or other cloud service SDKs found in `package.json`.
+- **Local/Browser APIs**: Heavy usage of Web Audio API (via Tone.js) and Web MIDI API.
 
-## 🌐 External APIs
-- **None currently documented**: The app is designed to be fully functional offline using local assets.
+## Data formats
+- **iReal Pro**: `ireal-reader` integration to parse charts locally.
+- **MIDI**: `@tonejs/midi` for parsing/generating MIDI files.
 
-## 📦 Data Formats
-- **MIDI (.mid)**: Standard format for progression export and library import.
-- **iReal Book**: Parsing support for jazz lead sheets.
-- **JSON**: Used for local asset indexing and configuration.
-- **SoundFonts (.sf2)**: Used for high-quality instrument playback.
+## Internationalization
+- **i18next**: Local translation files (`src/utils/languages.json`) handle content localization.
 
-## 🚀 Deployment
-- **Vite/SPA**: Static site hosting (Vercel, Netlify, or similar).
+## Machine Learning
+- **ml5.js**: Browser-based ML, likely accessing webcam or microphone for input.
+
+## Instruments
+- **ToneJS Instruments**: Uses hosted or local sample libraries for playback (Piano, Guitar, Harp).

@@ -1,20 +1,20 @@
-# Technical Concerns & Debt
+# Concerns & Technical Debt
 
-## ⚖️ Scalability
-- **Large Assets**: The `public` directory contains thousands of files (MIDI recordings). Managing the index (`midi_index.json`) is critical for performance.
-- **Lazy Loading**: While route-based lazy loading is implemented, some modules are still heavy due to large theoretical dictionaries or 3D assets.
+## Dependencies
+- **Bleeding Edge**: React 19 and Tailwind 4 are very new. Documentation and community patterns might be scarce or changing.
+- **Direct Tone.js Access**: Components might be accessing Tone.js directly instead of through a managed service, leading to potential timing or cleanup issues.
 
-## 🎵 Audio Latency & Scheduling
-- **Tone.js scheduling**: There are known issues with scheduling events inside scheduled callbacks. Centralizing the transport management could alleviate this.
-- **Instrument Loading**: Loading multiple high-quality SoundFonts can cause initial UI jank.
+## Architecture
+- **Duplication**: `src/modules` contain their own component libraries (`ChordBuildr/components/ui`) which might duplicate `src/components/ui`. This fragmentation makes consistent design updates harder.
+- **State Complexity**: Mixing Signals and Zustand is powerful but increases cognitive load. Developers need to know when to use which.
 
-## 🎹 MIDI & Theory
-- **Enharmonic Complexity**: Correctly identifying whether to use flats or sharps across various keys and secondary dominants is a complex logic that needs robust testing.
-- **Web MIDI Access**: Handling brownout/permissions for Web MIDI in different browsers.
+## Performance
+- **3D & Audio**: Combining Three.js (WebGL) with Tone.js (WebAudio) on the main thread can cause jank if not careful.
+- **Bundle Size**: `soundfont-player` and `tonejs-instrument-*` can be heavy if large samples are bundled.
 
-## 🧩 Architectural Debt
-- **Module Isolation**: Some modules share logic via `src/utils` which is good, but they sometimes have redundant state that could be simplified via a shared store.
-- **Legacy Projects**: The `legacy_projects` folder contains unrelated codebases that increase the project's disk footprint and could lead to path confusion if not explicitly ignored.
+## Maintenance
+- **Legacy Structure**: Presence of `src/legacy` (mentioned in conversations) indicates incomplete refactors.
+- **Component Bloat**: Some components like `ChordPianoComponent` or `Tonnetz` might be becoming "God Components" with too much responsibility.
 
-## 🛠️ Infrastructure
-- **CommonJS vs ESM**: The project is strictly ESM, but some library dependencies or local tools (like GSD) might require `require()` workarounds (`.cjs`).
+## Missing Tests
+- **Coverage**: Core logic seems tested, but complex UI interactions in modules (like dragging notes in ChordBuildr) likely lack automated tests.
