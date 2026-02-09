@@ -28,6 +28,7 @@
     "@techies23/react-chords": "^1.0.7",
     "@tombatossals/chords-db": "^0.5.1",
     "@tonaljs/chord": "^6.1.2",
+    "@tonaljs/core": "^5.0.2",
     "@tonaljs/key": "^4.11.2",
     "@tonaljs/note": "^4.12.1",
     "@tonaljs/progression": "^4.9.2",

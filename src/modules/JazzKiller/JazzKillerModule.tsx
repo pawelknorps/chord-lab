@@ -16,6 +16,8 @@ import { Search, Music, Play, StopCircle, X, ChevronUp, ChevronDown, Sliders, Vo
 import { SendToMenu } from '../../components/shared/SendToMenu';
 import { useAudioCleanup } from '../../hooks/useAudioManager';
 import { usePracticeStore } from '../../core/store/usePracticeStore';
+import { AnalysisToolbar, AnalysisFilters } from './components/AnalysisToolbar';
+import { PracticeExercisePanel } from './components/PracticeExercisePanel';
 
 export default function JazzKillerModule() {
     useAudioCleanup('jazz-killer');
@@ -24,10 +26,20 @@ export default function JazzKillerModule() {
     const [selectedStandard, setSelectedStandard] = useState<JazzStandard | null>(null);
     const [showMixer, setShowMixer] = useState(false);
     const [showPracticeTips, setShowPracticeTips] = useState(true);
+    const [showPracticePanel, setShowPracticePanel] = useState(false);
     const { standards, getSongAsIRealFormat } = useJazzLibrary();
 
     // Practice Store integration
-    const { loadSong, detectedPatterns, practiceExercises } = usePracticeStore();
+    const { loadSong, detectedPatterns, practiceExercises, activeFocusIndex } = usePracticeStore();
+
+    // Analysis filters
+    const [analysisFilters, setAnalysisFilters] = useState<AnalysisFilters>({
+        showMajorTwoFiveOne: true,
+        showMinorTwoFiveOne: true,
+        showSecondaryDominants: true,
+        showTritoneSubstitutions: true,
+        showColtraneChanges: true,
+    });
 
     const selectedSong = useMemo(() => {
         if (!selectedStandard) return null;
@@ -219,9 +231,15 @@ export default function JazzKillerModule() {
                         <div className="h-10 w-px bg-white/10 mx-1"></div>
 
                         <button
-                            onClick={() => setShowPracticeTips(!showPracticeTips)}
-                            className={`p-2.5 rounded-xl transition-all ${showPracticeTips ? 'bg-amber-500 text-black' : 'text-neutral-500 hover:text-white hover:bg-white/5'}`}
-                            title="Toggle Practice Tips"
+                            onClick={() => {
+                                if (detectedPatterns.length > 0) {
+                                    setShowPracticePanel(!showPracticePanel);
+                                } else {
+                                    setShowPracticeTips(!showPracticeTips);
+                                }
+                            }}
+                            className={`p-2.5 rounded-xl transition-all ${(showPracticeTips || showPracticePanel) ? 'bg-amber-500 text-black' : 'text-neutral-500 hover:text-white hover:bg-white/5'}`}
+                            title={detectedPatterns.length > 0 ? "Toggle Practice Drills" : "Toggle Practice Tips"}
                         >
                             <Targeted size={20} />
                         </button>
@@ -350,6 +368,15 @@ export default function JazzKillerModule() {
 
             {selectedSong && (
                 <div className="flex-1 overflow-hidden flex flex-col p-2 bg-white/5 rounded-[40px] border border-white/5">
+                    {/* Analysis Toolbar */}
+                    {detectedPatterns.length > 0 && (
+                        <AnalysisToolbar
+                            filters={analysisFilters}
+                            onFiltersChange={setAnalysisFilters}
+                            totalPatterns={detectedPatterns.length}
+                        />
+                    )}
+
                     <div className="px-8 py-6 flex flex-col">
                         <div className="flex items-center gap-2 mb-1">
                             <span className="text-[10px] font-black bg-amber-500 text-black px-2 py-0.5 rounded shadow-[0_0_10px_rgba(245,158,11,0.4)]">LIVE SESSION</span>
@@ -359,8 +386,13 @@ export default function JazzKillerModule() {
                     </div>
 
                     <div className="flex-1 overflow-hidden flex flex-row p-6 gap-6">
-                        {/* Guided Practice Sidebar */}
-                        {showPracticeTips && (
+                        {/* Practice Exercise Panel (New Teaching Machine) */}
+                        {showPracticePanel && detectedPatterns.length > 0 && (
+                            <PracticeExercisePanel />
+                        )}
+
+                        {/* Guided Practice Sidebar (Original) */}
+                        {showPracticeTips && !showPracticePanel && (
                             <PracticeTips
                                 song={selectedSong}
                                 onClose={() => setShowPracticeTips(false)}

@@ -1,6 +1,7 @@
 import { AnalysisResult, Concept } from './AnalysisTypes';
-import { Chord } from '@tonaljs/chord';
-import { Key } from '@tonaljs/key';
+import * as Chord from '@tonaljs/chord';
+import * as Key from '@tonaljs/key';
+import * as Distance from '@tonaljs/core';
 
 export class ConceptAnalyzer {
     /**
@@ -25,6 +26,12 @@ export class ConceptAnalyzer {
 
             // Detect Secondary Dominants
             this.detectSecondaryDominants(chords, keySignature, concepts);
+
+            // Detect Tritone Substitutions
+            this.detectTritoneSubstitutions(chords, keySignature, concepts);
+
+            // Detect Coltrane Changes
+            this.detectColtraneChanges(chords, concepts);
 
         } catch (error) {
             console.warn('Analysis error:', error);
@@ -55,7 +62,7 @@ export class ConceptAnalyzer {
 
                 // ii: minor 7th (or variations)
                 const isMinorTwo = chord1.quality === 'm7' || chord1.quality === 'min7' || chord1.aliases.includes('m7');
-                //V: dominant 7th
+                // V: dominant 7th
                 const isDominantFive = chord2.quality === '7' || chord2.quality === 'dom7' || chord2.aliases.includes('7');
                 // I: major 7th or major triad
                 const isMajorOne = chord3.quality === 'M7' || chord3.quality === 'maj7' || chord3.quality === '' || chord3.quality === 'M' || chord3.aliases.includes('maj7');
@@ -92,7 +99,7 @@ export class ConceptAnalyzer {
             try {
                 const chord1 = Chord.get(window[0]);
                 const chord2 = Chord.get(window[1]);
-                const chord3 = Chord.get(window[3]);
+                const chord3 = Chord.get(window[2]);
 
                 if (!chord1.tonic || !chord2.tonic || !chord3.tonic) continue;
 
@@ -165,6 +172,117 @@ export class ConceptAnalyzer {
     }
 
     /**
+     * Detect Tritone Substitutions
+     * A dominant chord can be replaced with another dominant chord a tritone (augmented 4th) away.
+     * E.g., in C Major: G7 can be substituted with Db7
+     */
+    private static detectTritoneSubstitutions(
+        chords: string[],
+        _keySignature: string,
+        concepts: Concept[]
+    ): void {
+        for (let i = 0; i < chords.length - 1; i++) {
+            try {
+                const current = Chord.get(chords[i]);
+                const next = Chord.get(chords[i + 1]);
+
+                if (!current.tonic || !next.tonic) continue;
+
+                // Check if current chord is a dominant 7th
+                const isDominant = current.quality === '7' || current.quality === 'dom7' || current.aliases.includes('7');
+
+                if (isDominant) {
+                    // Calculate the tritone (augmented 4th) from the next chord's root
+                    const tritoneFromNext = Distance.transpose(next.tonic, 'A4');
+
+                    if (current.tonic === tritoneFromNext) {
+                        // This is a tritone substitution!
+                        const originalDominant = Distance.transpose(next.tonic, 'P5'); // The "normal" V
+
+                        concepts.push({
+                            type: 'TritoneSubstitution',
+                            startIndex: i,
+                            endIndex: i + 1,
+                            metadata: {
+                                key: next.tonic,
+                                substitutes: `${originalDominant}7`,
+                                romanNumerals: ['subV', 'I'],
+                            },
+                        });
+                    }
+                }
+            } catch (e) {
+                continue;
+            }
+        }
+    }
+
+    /**
+     * Detect Coltrane Changes (Giant Steps pattern)
+     * Cycles of major thirds with ii-V-I in each key
+     * Classic pattern: Bmaj7 -> D7 -> Gmaj7 -> Bb7 -> Ebmaj7 -> F#7 (then back to Bmaj7)
+     */
+    private static detectColtraneChanges(
+        chords: string[],
+        concepts: Concept[]
+    ): void {
+        // We need at least 6 chords to detect a full cycle
+        if (chords.length < 6) return;
+
+        for (let i = 0; i < chords.length - 5; i++) {
+            try {
+                const window = chords.slice(i, i + 6);
+                const parsedChords = window.map((c) => Chord.get(c));
+
+                // Check if all chords are valid
+                if (parsedChords.some((c) => !c.tonic)) continue;
+
+                // Extract tonics
+                const tonics = parsedChords.map((c) => c.tonic!);
+
+                // Giant Steps pattern: Major 3rd cycles
+                // Pattern: Imaj7 -> V7/IVmaj7 -> IVmaj7 -> V7/bVIImaj7 -> bVIImaj7 -> V7/Imaj7
+                // Example: Bmaj7 -> D7 -> Gmaj7 -> Bb7 -> Ebmaj7 -> F#7
+
+                const isMajorThirdCycle =
+                    this.isMajorThirdInterval(tonics[0], tonics[2]) && // I -> IV (major third)
+                    this.isMajorThirdInterval(tonics[2], tonics[4]); // IV -> bVII (major third)
+
+                const hasDominantConnections =
+                    (parsedChords[1].quality === '7' || parsedChords[1].aliases.includes('7')) &&
+                    (parsedChords[3].quality === '7' || parsedChords[3].aliases.includes('7')) &&
+                    (parsedChords[5].quality === '7' || parsedChords[5].aliases.includes('7'));
+
+                if (isMajorThirdCycle && hasDominantConnections) {
+                    concepts.push({
+                        type: 'ColtraneChanges',
+                        startIndex: i,
+                        endIndex: i + 5,
+                        metadata: {
+                            key: tonics[0],
+                            romanNumerals: ['Imaj7', 'V7/IV', 'IVmaj7', 'V7/bVII', 'bVIImaj7', 'V7/I'],
+                        },
+                    });
+                }
+            } catch (e) {
+                continue;
+            }
+        }
+    }
+
+    /**
+     * Helper: Check if two notes are a major third apart
+     */
+    private static isMajorThirdInterval(note1: string, note2: string): boolean {
+        try {
+            const interval = Distance.distance(note1, note2);
+            return interval === '3M' || interval === 'M3';
+        } catch {
+            return false;
+        }
+    }
+
+    /**
      * Generate practice exercises from detected patterns
      */
     static generateExercises(analysisResult: AnalysisResult, chords: string[]) {
@@ -195,6 +313,16 @@ export class ConceptAnalyzer {
                 } catch (e) {
                     // Skip if chord parsing fails
                 }
+            }
+
+            if (concept.type === 'ColtraneChanges') {
+                exercises.push({
+                    type: concept.type,
+                    startIndex: concept.startIndex,
+                    chords: conceptChords,
+                    practiceScale: 'Major third cycles',
+                    practiceArpeggio: 'Practice each tonal center separately',
+                });
             }
         }
 
