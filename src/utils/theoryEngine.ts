@@ -1,3 +1,4 @@
+import * as Note from '@tonaljs/note';
 import * as Scale from 'tonal-scale';
 import { midiToNoteName as coreMidiToNoteName } from '../core/theory';
 
@@ -77,5 +78,21 @@ export function getSecondaryDominants(tonic: string) {
         { label: 'V/IV', root: scale[0], quality: 'dom7' }, // I7 (1st degree)
         { label: 'V/V', root: scale[1], quality: 'dom7' },  // II7 (2nd degree)
         { label: 'V/vi', root: scale[2], quality: 'dom7' }, // III7 (3rd degree)
+    ];
+}
+
+/**
+ * Get common Modal Interchange (borrowed) chords for a key.
+ */
+export function getModalInterchangeChords(tonic: string) {
+    const scale = Scale.notes(tonic, 'major');
+    // Borrowed from Aeolian/Parallel Minor
+    return [
+        { label: 'iv', root: scale[3], quality: 'min' },        // iv m (Fm in C)
+        { label: 'bVI', root: Note.transpose(scale[5], 'b2'), quality: 'maj' },  // bVI (Ab in C)
+        { label: 'bVII', root: Note.transpose(scale[6], 'b2'), quality: 'maj' }, // bVII (Bb in C)
+        { label: 'ii7b5', root: scale[1], quality: 'm7b5' },   // iiø7 (Dm7b5 in C)
+        { label: 'bII', root: Note.transpose(scale[0], 'm2'), quality: 'maj' },  // bII (Db in C - Neapolitan)
+        { label: 'v7', root: scale[4], quality: 'min7' },      // v (Gm7 in C)
     ];
 }
