@@ -1,9 +1,7 @@
 import { useState } from 'react';
-import { Controls } from '../modules/ChordLab/components/Controls';
 import { PianoKeyboard } from '../modules/ChordLab/components/PianoKeyboard';
 import { ProgressionBuilder } from '../modules/ChordLab/components/ProgressionBuilder';
 import { ConstantStructureTool } from '../modules/ChordLab/components/ConstantStructureTool';
-import { SmartLibrary } from '../modules/ChordLab/components/SoundLibrary/SmartLibrary';
 import type { ChordInfo, Progression } from '../core/theory';
 import type { Style } from '../core/audio/globalAudio';
 import { Mixer } from '../modules/ChordLab/components/Mixer';
@@ -24,7 +22,7 @@ interface ChordLabDashboardProps {
     highlightedNotes: number[];
     availableChords: ChordInfo[];
 
-    // Looping & Auto-Transpose
+    // Looping & Auto-Transpose (Passed down for context if needed, but controlled by HUD)
     isLooping: boolean;
     onLoopToggle: () => void;
     transposeSettings: { enabled: boolean; interval: number; step: number };
@@ -51,6 +49,12 @@ interface ChordLabDashboardProps {
     userPresets: Progression[];
     onSaveUserPreset: () => void;
     onDeleteUserPreset: (index: number) => void;
+
+    // View Toggles (Passed from parent)
+    showMixer: boolean;
+    onMixerToggle: () => void;
+    showPracticeTips: boolean;
+    onPracticeTipsToggle: () => void;
 }
 
 export function ChordLabDashboard({
@@ -59,78 +63,30 @@ export function ChordLabDashboard({
     isLooping, onLoopToggle, transposeSettings, onTransposeSettingsChange,
     onKeyChange, onScaleChange, onVoicingChange, onStyleChange, onBpmChange, onPlay, onStop, onExportMidi,
     onChordClick, onSlotClick, onRemoveChord, onClearProgression, onAddStructureChord, onSelectPreset, onImportMidi,
-    userPresets, onSaveUserPreset
+    userPresets, onSaveUserPreset,
+    showMixer, onMixerToggle, showPracticeTips, onPracticeTipsToggle
 }: ChordLabDashboardProps) {
-
-    const [showMixer, setShowMixer] = useState(false);
-    const [showPracticeTips, setShowPracticeTips] = useState(false);
 
     // Display Logic
     const displayedNotes = [...visualizedNotes, ...midiNotes];
 
     return (
-        <div className="flex flex-col gap-8">
-            {/* --- ROW 1: Controls (Clean, Full Width) --- */}
-            <div className="w-full">
-                <Controls
-                    selectedKey={selectedKey}
-                    selectedScale={selectedScale}
-                    selectedVoicing={selectedVoicing}
-                    selectedStyle={selectedStyle}
-                    bpm={bpm}
-                    isPlaying={isPlaying}
-                    onKeyChange={onKeyChange}
-                    onScaleChange={onScaleChange}
-                    onVoicingChange={onVoicingChange}
-                    onStyleChange={onStyleChange}
-                    onBpmChange={onBpmChange}
-                    onPlay={onPlay}
-                    onStop={onStop}
-                    onExportMidi={onExportMidi}
-                    isLooping={isLooping}
-                    onLoopToggle={onLoopToggle}
-                    transposeSettings={transposeSettings}
-                    onTransposeSettingsChange={onTransposeSettingsChange}
-                    showMixer={showMixer}
-                    onMixerToggle={() => setShowMixer(!showMixer)}
-                    showPracticeTips={showPracticeTips}
-                    onPracticeTipsToggle={() => setShowPracticeTips(!showPracticeTips)}
-                />
-            </div>
-
-            {showMixer && <Mixer onClose={() => setShowMixer(false)} />}
+        <div className="flex flex-col h-full relative">
+            {/* Overlays */}
+            {showMixer && <Mixer onClose={onMixerToggle} />}
             {showPracticeTips && (
                 <PracticeTips
                     progression={progression}
                     selectedKey={selectedKey}
-                    onClose={() => setShowPracticeTips(false)}
+                    onClose={onPracticeTipsToggle}
                 />
             )}
 
-            {/* --- ROW 2: Piano (Full Width) --- */}
-            <div className="w-full">
-                <div className="glass-panel rounded-2xl p-6 relative overflow-hidden flex flex-col justify-center min-h-[200px]">
-                    <div className="absolute top-4 left-6 flex items-center gap-2 pointer-events-none z-10">
-                        <span className="text-pink-400 font-bold">♪</span>
-                        <span className="text-xs uppercase tracking-widest text-white/50 font-bold">{selectedKey} {selectedScale} Scale</span>
-                    </div>
-                    <PianoKeyboard
-                        activeNotes={displayedNotes}
-                        onChordClick={onChordClick}
-                        highlightedNotes={highlightedNotes}
-                        keySignature={selectedKey}
-                    />
-                </div>
-            </div>
-
-            {/* --- ROW 3: Workspace (Builder + Library) --- */}
-            <div className="flex flex-col gap-8 w-full">
-                {/* Progression Builder Section */}
-                <div className="flex flex-col gap-6 w-full">
-                    <h3 className="text-white/50 font-bold uppercase tracking-widest text-xs flex items-center gap-2">
-                        <span>🎹</span> Progression Builder
-                    </h3>
-                    <div className="w-full">
+            {/* Main Workspace: Builder */}
+            <div className="flex-1 overflow-y-auto p-8 relative">
+                <div className="max-w-6xl mx-auto space-y-8">
+                    {/* Progression Builder */}
+                    <div className="bg-[var(--bg-app)]">
                         <ProgressionBuilder
                             progression={progression}
                             playingIndex={playingIndex}
@@ -142,27 +98,30 @@ export function ChordLabDashboard({
                     </div>
 
                     {/* Experimental Tool */}
-                    <div className="space-y-4">
-                        <h3 className="text-xs uppercase tracking-widest text-white/40 font-bold ml-2 flex items-center gap-2">
-                            <span>🧪</span> Experimental Structure
-                        </h3>
-                        <div className="glass-panel rounded-2xl p-6">
-                            <ConstantStructureTool
-                                onAddChord={onAddStructureChord}
-                            />
-                        </div>
+                    <div className="bg-[var(--bg-panel)] border border-[var(--border-subtle)] rounded-lg p-6">
+                        <h3 className="text-[10px] uppercase font-bold text-[var(--text-muted)] tracking-wider mb-4">Experimental Structure</h3>
+                        <ConstantStructureTool
+                            onAddChord={onAddStructureChord}
+                        />
+                    </div>
+                </div>
+            </div>
+
+            {/* Bottom Panel: Piano */}
+            <div className="h-48 border-t border-[var(--border-subtle)] bg-[var(--bg-panel)] relative flex-none">
+                <div className="absolute top-2 left-4 z-10">
+                    <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Active: </span>
+                        <span className="text-xs font-mono text-[var(--text-primary)]">{selectedKey} {selectedScale}</span>
                     </div>
                 </div>
 
-                {/* Library Section (Full Width) */}
-                <div className="flex flex-col gap-6 w-full h-[600px] xl:h-[700px]">
-                    <h3 className="text-white/50 font-bold uppercase tracking-widest text-xs flex items-center gap-2">
-                        <span>📚</span> Sound Library & Standards
-                    </h3>
-                    <SmartLibrary
-                        onSelectPreset={onSelectPreset}
-                        onImportMidi={onImportMidi}
-                        userPresets={userPresets}
+                <div className="w-full h-full flex items-center justify-center overflow-x-auto px-4">
+                    <PianoKeyboard
+                        activeNotes={displayedNotes}
+                        onChordClick={onChordClick}
+                        highlightedNotes={highlightedNotes}
+                        keySignature={selectedKey}
                     />
                 </div>
             </div>
