@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { MetronomeEngine } from '../../../utils/rhythmEngine';
 import { PolyrhythmEngine } from '../../../utils/polyrhythmEngine';
-import { Play, RotateCcw, CheckCircle2, XCircle, Target, Layers, Activity, Repeat, Wind } from 'lucide-react';
+import { Play, RotateCcw, Layers, Activity, Repeat, Trophy, Wind } from 'lucide-react';
 import { useMasteryStore } from '../../../core/store/useMasteryStore';
+import { motion } from 'framer-motion';
 
 const engine = new MetronomeEngine();
 const polyEngine = new PolyrhythmEngine();
@@ -42,17 +43,20 @@ export default function RhythmExercises() {
     const [isPlaying, setIsPlaying] = useState(false);
     const [targetSub, setTargetSub] = useState<number | null>(null);
     const [targetPoly, setTargetPoly] = useState<{ a: number, b: number } | null>(null);
-    const [targetDictation, setTargetDictation] = useState<boolean[]>(new Array(16).fill(false));
-    const [userDictation, setUserDictation] = useState<boolean[]>(new Array(16).fill(false));
+
+    // Dictation state: 0=Rest, 1=Ghost, 2=Accent
+    const [targetDictation, setTargetDictation] = useState<number[]>(new Array(16).fill(0));
+    const [userDictation, setUserDictation] = useState<number[]>(new Array(16).fill(0));
+
     const [hasSwing, setHasSwing] = useState(false);
     const [feedback, setFeedback] = useState<{ success: boolean; msg: string } | null>(null);
     const [score, setScore] = useState(0);
     const [streak, setStreak] = useState(0);
-    const [currentBpm, setCurrentBpm] = useState(50); // Default Novice
+    const [currentBpm, setCurrentBpm] = useState(60);
 
     useEffect(() => {
         // Reset BPM when difficulty or mode changes
-        if (difficulty === 'Novice') setCurrentBpm(50);
+        if (difficulty === 'Novice') setCurrentBpm(60);
         else if (difficulty === 'Advanced') setCurrentBpm(80);
         else setCurrentBpm(100);
     }, [difficulty, exerciseMode]);
@@ -63,7 +67,8 @@ export default function RhythmExercises() {
         engine.stop();
         polyEngine.stop();
 
-        if (difficulty === 'Pro') {
+        // Swing Logic
+        if (difficulty === 'Pro' && exerciseMode !== 'Polyrhythm') {
             setHasSwing(Math.random() > 0.6);
         } else {
             setHasSwing(false);
@@ -80,20 +85,36 @@ export default function RhythmExercises() {
             setTargetPoly({ a: pick.a, b: pick.b });
             setTargetSub(null);
         } else if (exerciseMode === 'Dictation') {
-            const newPattern = new Array(16).fill(false);
+            const newPattern = new Array(16).fill(0);
+            // Difficulty logic for pattern generation
             const density = difficulty === 'Novice' ? 0.3 : difficulty === 'Advanced' ? 0.5 : 0.65;
+
             for (let i = 0; i < 16; i++) {
+                // Always accent the downbeat (index 0) slightly more likely
                 if (i === 0) {
-                    newPattern[i] = true;
+                    newPattern[i] = 2; // Accent
                     continue;
                 }
-                const probability = i % 4 === 0 ? density : (i % 2 === 0 ? density - 0.2 : density - 0.4);
-                if (Math.random() < Math.max(0.1, probability)) {
-                    newPattern[i] = true;
+
+                // On beats (0, 4, 8, 12)
+                const isBeat = i % 4 === 0;
+
+                const roll = Math.random();
+
+                if (roll < density) {
+                    // Decide if Accent (2) or Ghost (1)
+                    // Novice uses mostly Accents. Advanced uses Ghosts.
+                    let ghostProb = difficulty === 'Novice' ? 0.0 : difficulty === 'Advanced' ? 0.3 : 0.5;
+
+                    if (Math.random() < ghostProb && !isBeat) {
+                        newPattern[i] = 1; // Ghost
+                    } else {
+                        newPattern[i] = 2; // Accent
+                    }
                 }
             }
             setTargetDictation(newPattern);
-            setUserDictation(new Array(16).fill(false));
+            setUserDictation(new Array(16).fill(0));
             setTargetSub(null);
             setTargetPoly(null);
         }
@@ -109,23 +130,16 @@ export default function RhythmExercises() {
 
     const playQuestion = () => {
         setIsPlaying(true);
-        // User requested: Subdivisions entry level slow - 50 BPM
-        // We will store current BPM in state to allow it to increase
         engine.setSwing(hasSwing ? 0.5 : 0);
 
         if (exerciseMode === 'Subdivision' && targetSub) {
             engine.setBpm(currentBpm);
             engine.setSubdivision(targetSub);
             engine.start();
-            setTimeout(() => {
-                engine.stop();
-                setIsPlaying(false);
-            }, 2400); // 2.4s is roughly 2 bars at 50bpm (60/50 * 4 * 2 = 9.6s)... wait 2.4s is too short for 50bpm.
-            // 50 BPM = 1.2s per beat. 4 beats = 4.8s. 2 bars = 9.6s.
-            // Let's make it play for 1 bar + 1 beat at least.
-            // Fixed duration might be an issue. Let's calculate duration.
+
+            // Calculate play duration: 2 bars
             const beatDur = 60 / currentBpm;
-            const playDur = beatDur * 4 * 1.5; // 1.5 bars
+            const playDur = beatDur * 4 * 2;
 
             setTimeout(() => {
                 engine.stop();
@@ -133,7 +147,6 @@ export default function RhythmExercises() {
             }, playDur * 1000);
 
         } else if (exerciseMode === 'Polyrhythm' && targetPoly) {
-            // Polyrhythm usually needs slower BPM to hear interaction
             polyEngine.setBpm(currentBpm);
             polyEngine.setDivisions(targetPoly.a, targetPoly.b);
             polyEngine.start();
@@ -142,19 +155,20 @@ export default function RhythmExercises() {
             setTimeout(() => {
                 polyEngine.stop();
                 setIsPlaying(false);
-            }, measureDur * 2 * 1000); // 2 measures
+            }, measureDur * 2 * 1000);
 
         } else if (exerciseMode === 'Dictation' && targetDictation) {
             engine.setBpm(currentBpm);
-            engine.setSubdivision(4);
-            const patternData = targetDictation.map(h => h ? 2 : 0);
-            engine.setPattern(patternData);
+            engine.setSubdivision(4); // 16th grid
+            engine.setPattern(targetDictation);
             engine.start();
+
+            const measureDur = (60 / currentBpm) * 4;
             setTimeout(() => {
                 engine.stop();
-                engine.setPattern([]);
+                // engine.setPattern([]); // Don't verify pattern immediately 
                 setIsPlaying(false);
-            }, (60000 / currentBpm) * 4 + 100);
+            }, measureDur * 2 * 1000);
         }
     };
 
@@ -172,56 +186,65 @@ export default function RhythmExercises() {
             isCorrect = val.a === targetPoly?.a && val.b === targetPoly?.b;
             correctMsg = `It was ${targetPoly?.a} : ${targetPoly?.b}`;
         } else if (exerciseMode === 'Dictation') {
+            // Compare arrays exactly
             isCorrect = targetDictation.every((v, i) => v === userDictation[i]);
             correctMsg = isCorrect ? "Spot on!" : "Pattern mismatch.";
         }
 
         if (isCorrect) {
-            const multiplier = difficulty === 'Novice' ? 1 : difficulty === 'Advanced' ? 2 : 5;
-            const points = (exerciseMode === 'Subdivision' ? 10 : 25) * multiplier;
+            const multiplier = difficulty === 'Novice' ? 1 : difficulty === 'Advanced' ? 3 : 5;
+            const points = (exerciseMode === 'Subdivision' ? 20 : 50) * multiplier;
             setFeedback({ success: true, msg: 'Perfect! 🎉' });
             setScore(prev => prev + points);
             setStreak(prev => prev + 1);
 
-            // "make is little faster after finishing a level" -> Increase BPM on success
-            // Cap at 200
-            setCurrentBpm(prev => Math.min(prev + 5, 200));
+            // Adaptive difficulty: Slightly increase BPM on success to keep it challenging
+            if (currentBpm < 200) setCurrentBpm(prev => prev + 2);
 
-            addExperience('Rhythm', points * 2);
+            addExperience('Rhythm', points);
             updateGlobalStreak('Rhythm', streak + 1);
             setTimeout(startNewQuestion, 2000);
         } else {
             setFeedback({ success: false, msg: `Not quite! ${correctMsg}` });
             setStreak(0);
             updateGlobalStreak('Rhythm', 0);
-            // Reset BPM on failure? Or keep it? keeping it is more "roguelike", resetting might be frustrating.
-            // Let's purely increment for now as requested.
         }
     };
 
-    const toggleStep = (idx: number) => {
+    const toggleDictationStep = (idx: number) => {
         if (feedback) return;
         const newD = [...userDictation];
-        newD[idx] = !newD[idx];
+        // Cycle: 0 -> 2 (Accent) -> 1 (Ghost) -> 0
+        let nextVal = 0;
+        if (newD[idx] === 0) nextVal = 2; // Default to Accent first for easier input
+        else if (newD[idx] === 2) nextVal = 1;
+        else nextVal = 0;
+
+        newD[idx] = nextVal;
         setUserDictation(newD);
     };
 
     return (
-        <div className="w-full h-full p-2 md:p-4 space-y-4 fade-in flex flex-col">
+        <div className="w-full h-full p-6 pb-20 fade-in flex flex-col max-w-7xl mx-auto space-y-6">
             {/* Header / Stats */}
-            <div className="flex justify-between items-center bg-white/5 p-4 rounded-2xl border border-white/10 shrink-0">
-                <div className="flex items-center gap-4">
-                    <div className="p-3 bg-emerald-500/20 text-emerald-400 rounded-xl">
-                        <Target size={28} />
+            <header className="flex flex-col md:flex-row justify-between items-center bg-white/5 backdrop-blur-xl p-6 rounded-3xl border border-white/10 shrink-0 shadow-lg gap-6 md:gap-0">
+                <div className="flex items-center gap-6">
+                    <div className="p-4 bg-indigo-500/20 text-indigo-400 rounded-2xl ring-1 ring-indigo-500/20 shadow-inner">
+                        <Trophy size={32} />
                     </div>
                     <div>
-                        <h2 className="text-2xl font-bold text-white">Rhythm Training</h2>
-                        <div className="flex gap-2 mt-1">
+                        <h2 className="text-3xl font-bold text-white tracking-tight">Rhythm Arena</h2>
+                        <div className="flex gap-2 mt-2">
                             {(['Novice', 'Advanced', 'Pro'] as Difficulty[]).map(d => (
                                 <button
                                     key={d}
                                     onClick={() => setDifficulty(d)}
-                                    className={`text-[10px] uppercase tracking-tighter font-bold px-2 py-0.5 rounded ${difficulty === d ? 'bg-emerald-500 text-black' : 'bg-white/5 text-white/40 hover:text-white'}`}
+                                    className={`
+                                        text-[10px] uppercase tracking-widest font-bold px-3 py-1 rounded-full transition-all
+                                        ${difficulty === d
+                                            ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20'
+                                            : 'bg-white/5 text-white/30 hover:bg-white/10 hover:text-white'}
+                                    `}
                                 >
                                     {d}
                                 </button>
@@ -229,164 +252,184 @@ export default function RhythmExercises() {
                         </div>
                     </div>
                 </div>
-                <div className="flex gap-6">
+
+                <div className="flex gap-8 md:gap-12">
                     <div className="text-right">
-                        <div className="text-xs text-white/40 uppercase tracking-widest font-bold">BPM</div>
-                        <div className="text-2xl font-mono text-blue-400">{currentBpm}</div>
+                        <div className="text-[10px] text-white/30 uppercase tracking-widest font-bold mb-1">BPM</div>
+                        <div className="text-3xl font-mono text-white/80">{currentBpm}</div>
                     </div>
                     <div className="text-right">
-                        <div className="text-xs text-white/40 uppercase tracking-widest font-bold">Score</div>
-                        <div className="text-2xl font-mono text-emerald-400">{score}</div>
+                        <div className="text-[10px] text-white/30 uppercase tracking-widest font-bold mb-1">Score</div>
+                        <div className="text-3xl font-mono text-emerald-400 font-bold">{score}</div>
                     </div>
                     <div className="text-right">
-                        <div className="text-xs text-white/40 uppercase tracking-widest font-bold">Streak</div>
-                        <div className="text-2xl font-mono text-orange-400">🔥 {streak}</div>
+                        <div className="text-[10px] text-white/30 uppercase tracking-widest font-bold mb-1">Streak</div>
+                        <div className="text-3xl font-mono text-amber-500 font-bold flex items-center gap-2 justify-end">
+                            {streak} <span className="text-lg">🔥</span>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </header>
 
             {/* Mode Selector */}
-            <div className="flex justify-center flex-wrap gap-4">
-                <button
-                    onClick={() => setExerciseMode('Subdivision')}
-                    className={`flex items-center gap-2 px-6 py-2 rounded-full transition-all border ${exerciseMode === 'Subdivision' ? 'bg-cyan-500 text-black border-cyan-400' : 'bg-white/5 text-white/50 border-white/10'}`}
-                >
-                    <Layers size={18} />
-                    Subdivisions
-                </button>
-                <button
-                    onClick={() => setExerciseMode('Polyrhythm')}
-                    className={`flex items-center gap-2 px-6 py-2 rounded-full transition-all border ${exerciseMode === 'Polyrhythm' ? 'bg-purple-500 text-white border-purple-400' : 'bg-white/5 text-white/50 border-white/10'}`}
-                >
-                    <Activity size={18} />
-                    Polyrhythms
-                </button>
-                <button
-                    onClick={() => setExerciseMode('Dictation')}
-                    className={`flex items-center gap-2 px-6 py-2 rounded-full transition-all border ${exerciseMode === 'Dictation' ? 'bg-amber-500 text-white border-amber-400' : 'bg-white/5 text-white/50 border-white/10'}`}
-                >
-                    <Repeat size={18} />
-                    Dictation
-                </button>
+            <div className="flex justify-center gap-4">
+                {[
+                    { id: 'Subdivision', icon: Layers, color: 'cyan' },
+                    { id: 'Polyrhythm', icon: Activity, color: 'purple' },
+                    { id: 'Dictation', icon: Repeat, color: 'amber' }
+                ].map((m: any) => (
+                    <button
+                        key={m.id}
+                        onClick={() => setExerciseMode(m.id as ExerciseMode)}
+                        className={`
+                            flex items-center gap-3 px-8 py-3 rounded-2xl transition-all duration-300 font-medium text-sm
+                            ${exerciseMode === m.id
+                                ? `bg-${m.color}-500/20 border-${m.color}-500 text-${m.color}-300 ring-1 ring-${m.color}-500/50 shadow-lg`
+                                : 'bg-white/5 text-white/40 border-transparent hover:bg-white/10 hover:text-white'}
+                            border
+                        `}
+                    >
+                        <m.icon size={18} />
+                        {m.id}
+                    </button>
+                ))}
             </div>
 
             {/* Game Area */}
-            <div className="flex-1 glass-panel p-4 md:p-8 rounded-3xl border border-white/10 text-center space-y-4 md:space-y-10 relative overflow-hidden min-h-0 flex flex-col justify-center">
-                <div className="absolute top-0 left-0 w-full h-1 bg-white/5">
-                    <div className={`h-full ${exerciseMode === 'Dictation' ? 'bg-amber-400' : exerciseMode === 'Polyrhythm' ? 'bg-purple-400' : 'bg-cyan-400'} transition-all duration-[2.4s] ${isPlaying ? 'w-full' : 'w-0'}`} />
+            <div className="flex-1 bg-white/[0.02] backdrop-blur-sm p-8 rounded-[2.5rem] border border-white/5 relative overflow-hidden flex flex-col justify-center min-h-[500px]">
+                {/* Progress Bar */}
+                <div className="absolute top-0 left-0 w-full h-1.5 bg-white/5">
+                    <div className={`h-full bg-gradient-to-r from-indigo-500 to-emerald-500 transition-all duration-[1s] linear ${isPlaying ? 'w-full' : 'w-0'}`}
+                        style={{ transitionDuration: isPlaying ? '2s' : '0.2s' }} // Dynamic based on duration? Simplified for now 
+                    />
                 </div>
 
-                <div className="space-y-2 md:space-y-4 shrink-0">
-                    <h3 className="text-2xl md:text-3xl font-bold text-white flex items-center justify-center gap-3">
-                        <Target className={exerciseMode === 'Polyrhythm' ? 'text-purple-400' : exerciseMode === 'Dictation' ? 'text-amber-400' : 'text-cyan-400'} size={32} />
+                <div className="space-y-6 shrink-0 mb-10 text-center">
+                    <h3 className="text-3xl md:text-5xl font-black text-white/90 tracking-tight flex flex-col items-center gap-4 justify-center">
+                        <span className="text-lg font-medium text-white/30 uppercase tracking-widest">Target</span>
                         {exerciseMode === 'Subdivision' ? 'Identify the Grid' : exerciseMode === 'Polyrhythm' ? 'Identify the Polyrhythm' : 'Transcribe the Pattern'}
                     </h3>
-                    <div className="flex justify-center gap-4">
-                        {difficulty === 'Pro' && <span className="text-xs bg-red-500/20 text-red-400 px-3 py-1 rounded-full border border-red-500/30 font-black">PRO LEVEL</span>}
-                        {hasSwing && <span className="flex items-center gap-1 text-xs bg-cyan-500/20 text-cyan-400 px-3 py-1 rounded-full border border-cyan-500/30 font-black tracking-widest leading-none"><Wind size={12} /> SWING FEEL ACTIVE</span>}
+
+                    <div className="flex justify-center">
+                        {hasSwing && (
+                            <div className="flex items-center gap-2 text-xs bg-amber-500/10 text-amber-400 px-4 py-2 rounded-full border border-amber-500/20 font-bold uppercase tracking-widest">
+                                <Wind size={14} /> Swing Feel
+                            </div>
+                        )}
                     </div>
                 </div>
 
-                <div className="flex justify-center shrink-0">
+                <div className="flex justify-center mb-16">
                     <button
                         onClick={playQuestion}
                         disabled={isPlaying}
                         className={`
-                            group w-24 h-24 md:w-32 md:h-32 rounded-full flex items-center justify-center transition-all duration-300
+                            group w-32 h-32 rounded-full flex items-center justify-center transition-all duration-500
                             ${isPlaying
-                                ? 'bg-white/20 shadow-[0_0_40px_rgba(255,255,255,0.1)]'
-                                : exerciseMode === 'Dictation' ? 'bg-amber-600 hover:bg-amber-500 shadow-amber-900/40' :
-                                    exerciseMode === 'Polyrhythm' ? 'bg-purple-600 hover:bg-purple-500 shadow-purple-900/40' :
-                                        'bg-cyan-600 hover:bg-cyan-500 shadow-cyan-900/40'}
-                            shadow-xl scale-125
+                                ? 'bg-white/10 scale-95 shadow-inner'
+                                : 'bg-gradient-to-br from-indigo-500 to-indigo-600 hover:scale-110 shadow-[0_20px_50px_rgba(79,70,229,0.3)] hover:shadow-[0_20px_60px_rgba(79,70,229,0.5)]'
+                            }
                         `}
                     >
                         {isPlaying ? (
-                            <div className="flex items-end gap-1.5 h-10">
-                                <div className="w-2.5 bg-white/60 rounded-t-full animate-music-bar-1" />
-                                <div className="w-2.5 bg-white/60 rounded-t-full animate-music-bar-2" />
-                                <div className="w-2.5 bg-white/60 rounded-t-full animate-music-bar-3" />
-                                <div className="w-2.5 bg-white/60 rounded-t-full animate-music-bar-4" />
-                            </div>
+                            <Activity className="text-white animate-pulse" size={48} />
                         ) : (
                             <Play fill="currentColor" size={48} className="text-white ml-2" />
                         )}
                     </button>
                 </div>
 
-                {feedback && (
-                    <div className={`text-2xl font-bold flex items-center justify-center gap-3 animate-bounce ${feedback.success ? 'text-emerald-400' : 'text-red-400'} shrink-0`}>
-                        {feedback.success ? <CheckCircle2 size={32} /> : <XCircle size={32} />}
-                        {feedback.msg}
-                    </div>
-                )}
-
-                {!feedback && (
-                    <div className="w-full flex-1 flex flex-col justify-center min-h-0 overflow-y-auto">
-                        {exerciseMode === 'Subdivision' ? (
-                            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 max-w-5xl mx-auto w-full">
+                {feedback ? (
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className={`flex flex-col items-center gap-6 ${feedback.success ? 'text-emerald-400' : 'text-red-400'}`}
+                    >
+                        <div className="text-4xl font-black">{feedback.msg}</div>
+                        {!feedback.success && <button
+                            onClick={startNewQuestion}
+                            className="flex items-center gap-2 px-8 py-3 bg-white/10 hover:bg-white/20 rounded-full text-white font-bold transition-all hover:scale-105"
+                        >
+                            <RotateCcw size={18} />
+                            Next Question
+                        </button>}
+                    </motion.div>
+                ) : (
+                    <div className="w-full max-w-6xl mx-auto">
+                        {exerciseMode === 'Subdivision' && (
+                            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
                                 {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].filter(n => difficulty === 'Novice' ? n <= 4 : difficulty === 'Advanced' ? n <= 8 : true).map((n) => (
                                     <button
                                         key={n}
                                         onClick={() => handleAnswer(n)}
-                                        className="group glass-panel p-6 rounded-2xl border border-white/5 hover:border-cyan-500/50 hover:bg-white/10 transition-all text-center flex flex-col items-center justify-center min-h-[120px]"
+                                        className="py-8 bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/20 rounded-2xl transition-all group"
                                     >
-                                        <div className="text-4xl md:text-5xl font-black text-white mb-2 group-hover:text-cyan-400 transition-colors">{n}</div>
-                                        <div className="text-[10px] md:text-xs uppercase text-white/40 tracking-widest font-bold">
-                                            {n === 1 ? 'Quarters' : n === 2 ? 'Eighths' : n === 3 ? 'Triplets' : n === 4 ? '16ths' : n + '-lets'}
+                                        <div className="text-4xl font-bold text-white group-hover:text-cyan-300">{n}</div>
+                                        <div className="text-[10px] uppercase tracking-widest text-white/30 mt-2">
+                                            {n === 4 ? '16ths' : n === 3 ? 'Triplets' : 'Notes'}
                                         </div>
                                     </button>
                                 ))}
                             </div>
-                        ) : exerciseMode === 'Polyrhythm' ? (
-                            <div className="grid grid-cols-2 md:grid-cols-3 gap-6 max-w-4xl mx-auto w-full">
+                        )}
+
+                        {exerciseMode === 'Polyrhythm' && (
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
                                 {POLY_OPTIONS[difficulty].map((opt: any) => (
                                     <button
                                         key={`${opt.a}:${opt.b}`}
                                         onClick={() => handleAnswer(opt)}
-                                        className="group glass-panel p-8 rounded-3xl border border-white/5 hover:border-purple-500/50 hover:bg-white/10 transition-all text-center min-h-[140px] flex flex-col justify-center"
+                                        className="py-10 bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/20 rounded-3xl transition-all group"
                                     >
-                                        <div className="text-4xl md:text-5xl font-black text-white mb-2 group-hover:text-purple-400 transition-colors">{opt.a}:{opt.b}</div>
-                                        <div className="text-xs uppercase text-white/40 tracking-widest font-bold">
-                                            {opt.label}
-                                        </div>
+                                        <div className="text-5xl font-black text-white group-hover:text-purple-300 mb-2">{opt.a}:{opt.b}</div>
+                                        <div className="text-xs uppercase tracking-widest text-white/30">{opt.label}</div>
                                     </button>
                                 ))}
                             </div>
-                        ) : (
-                            <div className="space-y-8 max-w-2xl mx-auto w-full">
-                                <div className="grid grid-cols-4 gap-3">
-                                    {userDictation.map((step, idx) => (
-                                        <button
-                                            key={idx}
-                                            onClick={() => toggleStep(idx)}
-                                            className={`w-full h-20 md:h-24 rounded-xl border transition-all ${step ? 'bg-amber-500 border-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.4)]' : 'bg-white/5 border-white/10 hover:bg-white/10'}`}
-                                        />
+                        )}
+
+                        {exerciseMode === 'Dictation' && (
+                            <div className="space-y-10">
+                                <div className="grid grid-cols-4 gap-2 md:gap-4 max-w-3xl mx-auto p-4 bg-black/20 rounded-3xl">
+                                    {[0, 1, 2, 3].map(beat => (
+                                        <div key={beat} className="flex gap-1 md:gap-2">
+                                            {[0, 1, 2, 3].map(sub => {
+                                                const idx = beat * 4 + sub;
+                                                const val = userDictation[idx];
+                                                return (
+                                                    <button
+                                                        key={idx}
+                                                        onClick={() => toggleDictationStep(idx)}
+                                                        className={`
+                                                            w-full aspect-square rounded-lg md:rounded-xl transition-all duration-200 border
+                                                            ${val === 2
+                                                                ? 'bg-amber-500 border-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.5)]'
+                                                                : val === 1
+                                                                    ? 'bg-white/20 border-white/30'
+                                                                    : 'bg-white/5 border-white/5 hover:bg-white/10'}
+                                                        `}
+                                                    >
+                                                        {val === 2 && <div className="w-full h-full flex items-center justify-center"><div className="w-2 h-2 rounded-full bg-black/50" /></div>}
+                                                    </button>
+                                                )
+                                            })}
+                                        </div>
                                     ))}
                                 </div>
-                                <button
-                                    onClick={() => handleAnswer(userDictation)}
-                                    className="flex items-center gap-3 px-10 py-4 bg-amber-600 hover:bg-amber-500 rounded-full text-white font-bold text-lg mx-auto transition shadow-lg hover:scale-105"
-                                >
-                                    Check Answer
-                                </button>
+                                <div className="flex justify-center">
+                                    <button
+                                        onClick={() => handleAnswer(userDictation)}
+                                        className="px-12 py-4 bg-white text-black font-bold rounded-full hover:bg-gray-200 transition-all shadow-xl hover:scale-105"
+                                    >
+                                        Check Answer
+                                    </button>
+                                </div>
+                                <p className="text-center text-xs text-white/30 uppercase tracking-widest">Click to cycle: Accent (Amber) &rarr; Ghost (Grey) &rarr; Rest (Dark)</p>
                             </div>
                         )}
                     </div>
                 )}
-
-                {feedback && !feedback.success && (
-                    <button
-                        onClick={startNewQuestion}
-                        className="flex items-center gap-2 px-8 py-3 bg-white/10 hover:bg-white/20 rounded-full text-white font-bold mx-auto transition shrink-0"
-                    >
-                        <RotateCcw size={18} />
-                        Next Question
-                    </button>
-                )}
             </div>
-
-
         </div>
     );
 }

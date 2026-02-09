@@ -16,7 +16,7 @@ export function Mixer({ onClose }: MixerProps) {
     useSignals();
 
     return (
-        <div className="w-64 bg-neutral-900/80 backdrop-blur-xl border-l border-white/10 p-6 flex flex-col gap-8 animate-in slide-in-from-right duration-300 shadow-2xl h-full fixed right-0 top-0 z-50">
+        <div className="w-full max-w-xs bg-neutral-900/80 backdrop-blur-xl border-l border-white/10 p-6 flex flex-col gap-8 animate-in slide-in-from-right duration-300 shadow-2xl h-full fixed right-0 top-0 z-50">
             <div className="flex items-center justify-between">
                 <h3 className="text-sm font-black uppercase tracking-widest text-neutral-400 flex items-center gap-2">
                     <Volume2 size={16} className="text-amber-500" /> MIXER

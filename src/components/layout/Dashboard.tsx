@@ -7,126 +7,157 @@ import {
     Share2,
     RefreshCw,
     Music,
-    Menu,
-    X,
     Activity,
+    ChevronLeft,
+    ChevronRight,
     Circle,
-    Library
+    Library,
+    Layout
 } from 'lucide-react';
 import { useAudio } from '../../context/AudioContext';
 import { MidiSettings } from '../MidiSettings';
 
 const Dashboard: React.FC = () => {
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [collapsed, setCollapsed] = useState(false);
     const location = useLocation();
     const { isReady, startAudio } = useAudio();
 
-    const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+    const toggleSidebar = () => setCollapsed(!collapsed);
 
-    const navItems = [
-        { to: "/", icon: Music, label: "Chord Lab" },
-        { to: "/bi-tonal", icon: AudioWaveform, label: "Bi-Tonal Sandbox" },
-        { to: "/grips", icon: Grid3X3, label: "Grip Sequencer" },
-        { to: "/tonnetz", icon: Share2, label: "Tonnetz Navigator" },
-        { to: "/circle-chords", icon: Circle, label: "Harmonic Circles" },
-        { to: "/negative-harmony", icon: RefreshCw, label: "Negative Mirror" },
-        { to: "/barry-harris", icon: Piano, label: "Barry Harris" },
-        { to: "/chord-buildr", icon: Grid3X3, label: "Chord Builder" },
-        { to: "/midi-library", icon: Library, label: "MIDI Library" },
-        { to: "/rhythm-architect", icon: Activity, label: "Rhythm Architect" },
-        { to: "/functional-ear-training", icon: Activity, label: "Ear Training" },
-        { to: "/progressions", icon: Music, label: "Progressions Lab" },
-        { to: "/jazz-standards", icon: Music, label: "Jazz Standards" },
+    const navGroups = [
+        {
+            title: "Studio",
+            items: [
+                { to: "/", icon: Layout, label: "Workbench" },
+                { to: "/chord-buildr", icon: Grid3X3, label: "Chord Builder" },
+                { to: "/progressions", icon: Music, label: "Progressions" },
+            ]
+        },
+        {
+            title: "Analysis",
+            items: [
+                { to: "/bi-tonal", icon: AudioWaveform, label: "Bi-Tonal" },
+                { to: "/tonnetz", icon: Share2, label: "Tonnetz" },
+                { to: "/negative-harmony", icon: RefreshCw, label: "Negative Mirror" },
+                { to: "/circle-chords", icon: Circle, label: "Harmonic Circles" },
+            ]
+        },
+        {
+            title: "Practice",
+            items: [
+                { to: "/functional-ear-training", icon: Activity, label: "Ear Training" },
+                { to: "/rhythm-architect", icon: Activity, label: "Rhythm" },
+                { to: "/jazz-standards", icon: Music, label: "Standards" },
+                { to: "/barry-harris", icon: Piano, label: "Barry Harris" },
+                { to: "/grips", icon: Grid3X3, label: "Grips" },
+            ]
+        },
+        {
+            title: "Library",
+            items: [
+                { to: "/midi-library", icon: Library, label: "MIDI Library" },
+            ]
+        }
     ];
 
     return (
-        <div className="flex h-screen bg-black text-white overflow-hidden font-sans">
+        <div className="flex h-screen bg-[var(--bg-app)] text-[var(--text-primary)] font-sans overflow-hidden">
             {/* Sidebar */}
             <aside
                 className={`
-          fixed z-30 inset-y-0 left-0 w-64 glass-panel transform transition-transform duration-300 ease-in-out
-          ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-          md:relative md:translate-x-0 ml-0
-          border-r border-white/10
-        `}
+                    relative z-20 flex flex-col border-r border-[var(--border-subtle)] bg-[var(--bg-panel)]
+                    transition-all duration-300 ease-in-out
+                    ${collapsed ? 'w-16' : 'w-64'}
+                `}
             >
-                <div className="flex items-center justify-between p-6">
-                    <h1 className="text-2xl font-bold tracking-tighter neon-text">
-                        Poly<span className="text-[var(--color-polyaural-accent)]">Aural</span>
-                    </h1>
+                {/* Header */}
+                <div className={`h-14 flex items-center ${collapsed ? 'justify-center' : 'justify-between px-4'} border-b border-[var(--border-subtle)]`}>
+                    {!collapsed && (
+                        <div className="font-bold tracking-tight text-lg">
+                            Chord<span className="text-[var(--text-muted)]">Lab</span>
+                        </div>
+                    )}
                     <button
                         onClick={toggleSidebar}
-                        className="md:hidden p-1 rounded-md hover:bg-white/10"
+                        className="p-1.5 rounded hover:bg-[var(--bg-hover)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
                     >
-                        <X size={20} />
+                        {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
                     </button>
                 </div>
 
-                <nav className="px-4 space-y-2 mt-4">
-                    {navItems.map((item) => {
-                        const isActive = location.pathname === item.to;
-                        return (
-                            <NavLink
-                                key={item.to}
-                                to={item.to}
-                                onClick={() => setIsSidebarOpen(false)}
-                                className={`
-                  flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200
-                  ${isActive
-                                        ? 'bg-white/10 text-[var(--color-polyaural-accent)] neon-border'
-                                        : 'text-gray-400 hover:text-white hover:bg-white/5'
-                                    }
-                `}
-                            >
-                                <item.icon size={20} />
-                                <span className="font-medium">{item.label}</span>
-                            </NavLink>
-                        );
-                    })}
+                {/* Navigation */}
+                <nav className="flex-1 overflow-y-auto py-4 space-y-6 custom-scrollbar">
+                    {navGroups.map((group, idx) => (
+                        <div key={idx} className="px-3">
+                            {!collapsed && (
+                                <h3 className="px-2 mb-2 text-[10px] uppercase font-bold tracking-wider text-[var(--text-muted)]">
+                                    {group.title}
+                                </h3>
+                            )}
+                            <div className="space-y-0.5">
+                                {group.items.map((item) => {
+                                    const isActive = location.pathname === item.to;
+                                    return (
+                                        <NavLink
+                                            key={item.to}
+                                            to={item.to}
+                                            title={collapsed ? item.label : undefined}
+                                            className={`
+                                                flex items-center gap-3 px-2 py-1.5 rounded-md text-sm transition-colors
+                                                ${isActive
+                                                    ? 'bg-[var(--bg-surface)] text-[var(--text-primary)] font-medium'
+                                                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)]'
+                                                }
+                                                ${collapsed ? 'justify-center' : ''}
+                                            `}
+                                        >
+                                            <item.icon size={18} className={isActive ? 'text-[var(--accent)]' : ''} />
+                                            {!collapsed && <span>{item.label}</span>}
+                                        </NavLink>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    ))}
                 </nav>
 
-                {/* Context Status / Switch */}
-                <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-white/10 bg-black/20 space-y-3">
-                    <MidiSettings />
+                {/* Footer Controls */}
+                <div className="p-3 border-t border-[var(--border-subtle)] bg-[var(--bg-panel)]">
+                    {!collapsed && <MidiSettings />}
 
-                    {!isReady ? (
-                        <button
-                            onClick={() => startAudio()}
-                            className="w-full py-2 px-4 bg-red-500/20 text-red-400 border border-red-500/50 rounded-lg hover:bg-red-500/30 transition-colors flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider"
-                        >
-                            <span>Start Audio Engine</span>
-                        </button>
-                    ) : (
-                        <div className="w-full py-2 px-4 bg-green-500/10 text-green-400 border border-green-500/30 rounded-lg flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider">
-                            <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.5)]"></span>
-                            <span>Audio Active</span>
+                    <button
+                        onClick={!isReady ? () => startAudio() : undefined}
+                        className={`
+                            mt-2 w-full flex items-center justify-center gap-2 py-2 rounded-md text-xs font-bold uppercase tracking-wider transition-all
+                            ${!isReady
+                                ? 'bg-red-500/10 text-red-500 hover:bg-red-500/20'
+                                : 'bg-transparent text-[var(--text-muted)] cursor-default'
+                            }
+                        `}
+                    >
+                        {isReady ? (
+                            <div className="w-2 h-2 rounded-full bg-green-500" title="Audio Engine Ready" />
+                        ) : (
+                            <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                        )}
+                        {!collapsed && <span>{isReady ? "Engine Active" : "Start Engine"}</span>}
+                    </button>
+
+                    {collapsed && (
+                        <div className={`mt-2 flex justify-center ${isReady ? 'opacity-50' : ''}`}>
+                            <div className={`w-2 h-2 rounded-full ${isReady ? 'bg-green-500' : 'bg-red-500 animate-pulse'}`} />
                         </div>
                     )}
                 </div>
             </aside>
 
             {/* Main Content */}
-            <main className="flex-1 flex flex-col overflow-hidden relative">
-                {/* Mobile Header */}
-                <header className="md:hidden flex items-center p-4 glass-panel border-b border-white/10">
-                    <button
-                        onClick={toggleSidebar}
-                        className="p-2 rounded-md hover:bg-white/10 mr-4"
-                    >
-                        <Menu size={24} />
-                    </button>
-                    <h1 className="text-xl font-bold neon-text">
-                        Poly<span className="text-[var(--color-polyaural-accent)]">Aural</span>
-                    </h1>
-                </header>
-
-                <div className="flex-1 overflow-auto p-4 md:p-8">
+            <main className="flex-1 flex flex-col bg-[var(--bg-app)] relative overflow-hidden">
+                {/* Top Bar for Mobile - Optional or just keep clean */}
+                <div className="flex-1 overflow-auto p-0">
                     <Outlet />
                 </div>
             </main>
-
-            {/* Background Ambience */}
-            <div className="fixed inset-0 pointer-events-none -z-10 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-indigo-900/20 via-black to-black"></div>
         </div>
     );
 };

@@ -35,7 +35,7 @@ export const PracticeTips = ({ progression, selectedKey, onClose }: PracticeTips
     if (tips.length === 0) return null;
 
     return (
-        <div className="w-80 flex flex-col gap-4 overflow-y-auto custom-scrollbar pr-4 animate-in slide-in-from-left duration-500 bg-black/40 backdrop-blur-md border-r border-white/5 h-full fixed left-0 top-0 z-50 pt-20">
+        <div className="w-full max-w-xs md:max-w-sm flex flex-col gap-4 overflow-y-auto custom-scrollbar pr-4 animate-in slide-in-from-left duration-500 bg-black/40 backdrop-blur-md border-r border-white/5 h-full fixed left-0 top-0 z-50 pt-20">
             <div className="flex items-center justify-between px-6 py-4 border-b border-white/5">
                 <div className="flex items-center gap-2">
                     <Target className="text-amber-500" size={20} />

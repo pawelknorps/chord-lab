@@ -64,37 +64,41 @@ export function PresetsPanel({ onSelectPreset, onImportMidi, userPresets, onDele
   }, [jazzStandards, searchTerm, activeTab]);
 
   const handleMidiClick = async (file: MidiFile) => {
-    // Fetch and Parse
-    const url = await file.loadUrl();
-    const midi = await Midi.fromUrl(url);
+    let detailedChords: any[] = [];
 
-    // Extract Chords logic
-    const timeSlots: { [time: string]: any[] } = {};
-    midi.tracks.forEach(track => {
-      track.notes.forEach(note => {
-        const time = note.time.toFixed(2);
-        if (!timeSlots[time]) timeSlots[time] = [];
-        timeSlots[time].push(note);
+    // Fetch and Parse only if loadUrl is available
+    if (file.loadUrl) {
+      const url = await file.loadUrl();
+      const midi = await Midi.fromUrl(url);
+
+      // Extract Chords logic
+      const timeSlots: { [time: string]: any[] } = {};
+      midi.tracks.forEach(track => {
+        track.notes.forEach(note => {
+          const time = note.time.toFixed(2);
+          if (!timeSlots[time]) timeSlots[time] = [];
+          timeSlots[time].push(note);
+        });
       });
-    });
 
-    const times = Object.keys(timeSlots).sort((a, b) => parseFloat(a) - parseFloat(b));
+      const times = Object.keys(timeSlots).sort((a, b) => parseFloat(a) - parseFloat(b));
 
-    const detailedChords = times.map(time => {
-      const notes = timeSlots[time];
-      notes.sort((a, b) => a.midi - b.midi);
-      const root = notes[0];
-      return {
-        time: parseFloat(time),
-        notes: notes.map(n => n.midi),
-        root: root.name,
-        label: '?'
-      };
-    });
+      detailedChords = times.map(time => {
+        const notes = timeSlots[time];
+        notes.sort((a, b) => a.midi - b.midi);
+        const root = notes[0];
+        return {
+          time: parseFloat(time),
+          notes: notes.map(n => n.midi),
+          root: root.name,
+          label: '?'
+        };
+      });
+    }
 
     onImportMidi?.({
-      key: file.key,
-      chords: file.progression?.split(' ') || [],
+      key: file.key || 'C', // Default to C if no key
+      chords: file.progression?.split(' - ') || file.progression?.split(' ') || [],
       detailedChords,
       name: file.name,
       style: file.style,
@@ -291,7 +295,7 @@ export function PresetsPanel({ onSelectPreset, onImportMidi, userPresets, onDele
                 >
                   <div className="flex items-center gap-2 mb-1">
                     <FileMusic className="w-3 h-3 text-purple-400 group-hover:scale-110 transition-transform" />
-                    <span className="text-sm font-medium text-white truncate w-full">{file.key} Play</span>
+                    <span className="text-sm font-medium text-white truncate w-full">{file.key ? `${file.key} Play` : file.category}</span>
                   </div>
                   <div className="text-xs text-white/60 truncate" title={file.progression}>
                     {file.progression}

@@ -30,7 +30,7 @@ export function PianoKeyboard({
   chords = [],
   onChordClick,
   activeChordDegree,
-  keySignature
+  // keySignature
 }: PianoKeyboardProps) {
   const octaves = useMemo(() => {
     const result = [];
@@ -71,7 +71,7 @@ export function PianoKeyboard({
   };
 
   return (
-    <div className="relative select-none">
+    <div className="relative select-none [--k-w:32px] md:[--k-w:40px] lg:[--k-w:48px]">
       <div className="flex">
         {octaves.map((octave) => (
           <div key={octave} className="relative">
@@ -89,7 +89,7 @@ export function PianoKeyboard({
                     key={`${octave}-${noteIndex}`}
                     className={`
                       piano-key white relative
-                      w-12 h-40 
+                      h-28 md:h-32 lg:h-40
                       border border-gray-300 rounded-b-lg
                       flex flex-col items-center justify-end pb-2
                       cursor-pointer transition-colors duration-100
@@ -100,13 +100,14 @@ export function PianoKeyboard({
                           : 'bg-gradient-to-b from-white to-gray-100'}
                       ${isActiveChord ? 'ring-2 ring-purple-500' : ''}
                     `}
+                    style={{ width: 'var(--k-w)' }}
                     onClick={() => chord && onChordClick?.(chord)}
                   >
                     {chord && (
                       <div className={`
                         absolute bottom-2 
-                        text-xs font-bold 
-                        px-1.5 py-0.5 
+                        text-[0.6rem] md:text-xs font-bold 
+                        px-1 md:px-1.5 py-0.5 
                         rounded
                         ${isActiveChord
                           ? 'bg-purple-500 text-white'
@@ -135,7 +136,7 @@ export function PianoKeyboard({
                     key={`${octave}-${noteIndex}`}
                     className={`
                       piano-key black absolute
-                      w-8 h-24
+                      h-16 md:h-20 lg:h-24
                       rounded-b-lg
                       flex items-end justify-center pb-1
                       cursor-pointer transition-colors duration-100
@@ -146,13 +147,16 @@ export function PianoKeyboard({
                           : 'bg-gradient-to-b from-gray-800 to-black'}
                       ${isActiveChord ? 'ring-2 ring-purple-500' : ''}
                     `}
-                    style={{ left: `${offset * 48 + 4}px` }}
+                    style={{
+                      left: `calc(var(--k-w) * ${offset} + var(--k-w) * 0.1)`,
+                      width: 'calc(var(--k-w) * 0.6)'
+                    }}
                     onClick={() => chord && onChordClick?.(chord)}
                   >
                     {chord && (
                       <div className={`
-                        text-[10px] font-bold 
-                        px-1 py-0.5 
+                        text-[8px] md:text-[10px] font-bold 
+                        px-0.5 md:px-1 py-0.5 
                         rounded
                         ${isActiveChord
                           ? 'bg-purple-400 text-white'

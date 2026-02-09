@@ -4,8 +4,8 @@ import { useState, useEffect, useMemo } from 'react';
 // Structure the data (Shared Interface)
 export interface MidiFile {
     name: string;
-    path: string;
-    loadUrl: () => Promise<string>;
+    path?: string;
+    loadUrl?: () => Promise<string>;
     category: string; // Major, Minor, Modal
     style?: string;   // pop, soul, etc.
     key?: string;     // C, Db, D...
@@ -39,12 +39,12 @@ export function useMidiLibrary() {
         }
 
         if (!fetchPromise) {
-            fetchPromise = fetch('/midi_index.json')
+            fetchPromise = fetch('/midi_library.json')
                 .then(res => res.json())
                 .then((data: any[]) => {
                     const processed = data.map((item: any) => ({
                         ...item,
-                        loadUrl: async () => item.path
+                        loadUrl: item.path ? (async () => item.path) : undefined
                     }));
                     globalFilesCache = processed;
                     return processed;
@@ -65,9 +65,10 @@ export function useMidiLibrary() {
         if (!files.length) return [];
 
         const groups: Record<string, GroupedProgression> = {};
+        const ALL_KEYS = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
 
         files.forEach(file => {
-            const id = `${file.category}-${file.style}-${file.progression}-${file.mood}`;
+            const id = `${file.category}-${file.style}-${file.progression}`;
             if (!groups[id]) {
                 groups[id] = {
                     id,
@@ -75,13 +76,19 @@ export function useMidiLibrary() {
                     category: file.category,
                     style: file.style || 'Classic',
                     mood: file.mood || '',
-                    availableKeys: [],
+                    availableKeys: file.key ? [] : [...ALL_KEYS],
                     keyMap: {}
                 };
             }
+
             if (file.key) {
                 groups[id].availableKeys.push(file.key);
                 groups[id].keyMap[file.key] = file;
+            } else {
+                // For optimized progressions, every key in keyMap points to the same file data
+                ALL_KEYS.forEach(k => {
+                    groups[id].keyMap[k] = { ...file, key: k };
+                });
             }
         });
 

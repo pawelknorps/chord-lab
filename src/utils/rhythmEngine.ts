@@ -99,9 +99,9 @@ export class MetronomeEngine {
                 if (type === 2) {
                     this.clickSynth.triggerAttackRelease("C2", "32n", time, 1.0);
                 } else if (type === 1) {
-                    this.subSynth.triggerAttackRelease("32n", time, 0.2); // Ghost
+                    this.subSynth.triggerAttackRelease("C2", "32n", time, 0.4); // Ghost (Increased velocity for audibility)
                 } else if (type === 3) {
-                    this.subSynth.triggerAttackRelease("32n", time, 0.6); // Normal
+                    this.subSynth.triggerAttackRelease("C2", "32n", time, 0.8); // Normal
                 }
 
                 step++;

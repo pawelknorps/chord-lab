@@ -69,13 +69,13 @@ export default function InteractiveCircle({
             <div className="flex justify-center gap-2 mb-4">
                 <button
                     onClick={() => setInteractionMode('key')}
-                    className={`px-3 py-1 text-xs rounded-full transition ${interactionMode === 'key' ? 'bg-cyan-500 text-black shadow-neon' : 'bg-white/10 text-white'}`}
+                    className={`px-3 py-1 text-xs rounded-full transition font-medium border ${interactionMode === 'key' ? 'bg-[var(--accent)] text-white border-transparent' : 'bg-[var(--bg-surface)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:text-[var(--text-primary)]'}`}
                 >
                     Change Key
                 </button>
                 <button
                     onClick={() => setInteractionMode('workshop')}
-                    className={`px-3 py-1 text-xs rounded-full transition ${interactionMode === 'workshop' ? 'bg-purple-500 text-white shadow-neon-purple' : 'bg-white/10 text-white'}`}
+                    className={`px-3 py-1 text-xs rounded-full transition font-medium border ${interactionMode === 'workshop' ? 'bg-[var(--accent)] text-white border-transparent' : 'bg-[var(--bg-surface)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:text-[var(--text-primary)]'}`}
                 >
                     Add to Workshop
                 </button>
@@ -88,7 +88,7 @@ export default function InteractiveCircle({
                     role="img"
                     aria-label="Click to interact"
                 >
-                    <circle cx={cx} cy={cy} r={outer + 5} fill="transparent" stroke="#dee2e6" strokeWidth="2" strokeOpacity={0.1} />
+                    <circle cx={cx} cy={cy} r={outer + 5} fill="transparent" stroke="var(--border-subtle)" strokeWidth="2" strokeOpacity={1} />
                     {angles.map((a, i) => {
                         const a1 = a - Math.PI / 12
                         const a2 = a + Math.PI / 12
@@ -102,8 +102,11 @@ export default function InteractiveCircle({
                         const majInScale = scaleChords.includes(maj)
                         const minInScale = scaleChords.includes(minChord)
 
-                        const majorFillHex = isMajCurrent ? '#06b6d4' : majInScale ? '#ffffff30' : '#ffffff05'
-                        const minorFillHex = isMinCurrent ? '#06b6d4' : minInScale ? '#ffffff30' : '#ffffff05'
+                        // Visual Logic for Swiss/Minimalist
+                        const majorFillHex = isMajCurrent ? '#3b82f6' : majInScale ? '#3f3f46' : '#18181b'
+                        const minorFillHex = isMinCurrent ? '#3b82f6' : minInScale ? '#3f3f46' : '#18181b'
+
+                        const strokeColor = '#27272a' // var(--border-subtle)
 
                         const majorPath = ringSectorPath(cx, cy, outer, mid, a1, a2)
                         const minorPath = ringSectorPath(cx, cy, mid, inner, a1, a2)
@@ -113,36 +116,34 @@ export default function InteractiveCircle({
 
                         return (
                             <g key={i}>
-                                <path d={majorPath} fill={majorFillHex} stroke="#000000" strokeWidth={1} strokeOpacity={0.2}
-                                    style={{ cursor: 'pointer' }}
+                                <path d={majorPath} fill={majorFillHex} stroke={strokeColor} strokeWidth={1}
+                                    style={{ cursor: 'pointer', transition: 'fill 0.2s' }}
                                     onClick={() => handleClick(maj, 'major', maj)} />
-                                <path d={minorPath} fill={minorFillHex} stroke="#000000" strokeWidth={1} strokeOpacity={0.2}
-                                    style={{ cursor: 'pointer' }}
+                                <path d={minorPath} fill={minorFillHex} stroke={strokeColor} strokeWidth={1}
+                                    style={{ cursor: 'pointer', transition: 'fill 0.2s' }}
                                     onClick={() => handleClick(minNote, 'minor', minChord)} />
                                 <text x={majorTextPos[0]} y={majorTextPos[1]} textAnchor="middle"
                                     dominantBaseline="middle"
-                                    fontFamily="Arial, sans-serif" fontSize={11} fontWeight="bold"
-                                    fill={isMajCurrent ? 'white' : '#e5e5e5'}
-                                    style={{ cursor: 'pointer' }}
-                                    onClick={() => handleClick(maj, 'major', maj)}>{maj}</text>
+                                    fontFamily="Inter, sans-serif" fontSize={10} fontWeight="600"
+                                    fill={isMajCurrent ? 'white' : '#e4e4e7'}
+                                    style={{ cursor: 'pointer', pointerEvents: 'none' }}>{maj}</text>
                                 <text x={minorTextPos[0]} y={minorTextPos[1]} textAnchor="middle"
                                     dominantBaseline="middle"
-                                    fontFamily="Arial, sans-serif" fontSize={9}
-                                    fill={isMinCurrent ? 'white' : '#a3a3a3'}
-                                    style={{ cursor: 'pointer' }}
-                                    onClick={() => handleClick(minNote, 'minor', minChord)}>{minChord}</text>
+                                    fontFamily="Inter, sans-serif" fontSize={9}
+                                    fill={isMinCurrent ? 'white' : '#a1a1aa'}
+                                    style={{ cursor: 'pointer', pointerEvents: 'none' }}>{minChord}</text>
                             </g>
                         )
                     })}
                     <text x={cx} y={cy - 5} textAnchor="middle" dominantBaseline="middle"
-                        fontFamily="Arial, sans-serif" fontSize={13} fontWeight="bold" fill="#ffffff">{keySig}</text>
+                        fontFamily="Inter, sans-serif" fontSize={14} fontWeight="bold" fill="#f4f4f5">{keySig}</text>
                     <text x={cx} y={cy + 8} textAnchor="middle" dominantBaseline="middle"
-                        fontFamily="Arial, sans-serif" fontSize={9}
-                        fill="#a3a3a3">{mode}</text>
+                        fontFamily="Inter, sans-serif" fontSize={9}
+                        fill="#a1a1aa">{mode}</text>
                 </svg>
             </div>
 
-            <p className="mt-4 text-[10px] text-center text-white/30 uppercase tracking-widest">
+            <p className="mt-4 text-[10px] text-center text-[var(--text-muted)] uppercase tracking-widest font-medium">
                 {interactionMode === 'workshop' ? '✨ Mode: Click chords to build sequence' : '🔍 Mode: Click sectors to change master key'}
             </p>
         </div>

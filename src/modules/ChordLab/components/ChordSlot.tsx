@@ -1,6 +1,7 @@
 import { ChordInfo } from '../../../core/theory';
 import { useSignals } from "@preact/signals-react/runtime";
 import { currentBeatSignal, currentMeasureIndexSignal } from '../../../core/audio/audioSignals';
+import { X } from 'lucide-react';
 
 interface ChordSlotProps {
   chord: ChordInfo | null;
@@ -22,7 +23,7 @@ export function ChordSlot({ chord, index, isPlaying, onRemove, onClick }: ChordS
   const currentBeat = currentBeatSignal.value;
 
   const getNotesDisplay = (notes: string[]) => {
-    return notes.map(n => n.replace(/\d+/, '')).join(' • ');
+    return notes.map(n => n.replace(/\d+/, '')).join(' ');
   };
 
   if (!chord) {
@@ -30,18 +31,19 @@ export function ChordSlot({ chord, index, isPlaying, onRemove, onClick }: ChordS
       <button
         onClick={onClick}
         className="
-          group relative w-32 h-40 
-          rounded-2xl border-2 border-dashed border-white/10 
-          hover:border-cyan-400/50 hover:bg-cyan-400/5 
-          transition-all duration-300
+          group relative w-full h-32
+          rounded-sm border border-dashed border-[var(--border-subtle)]
+          hover:border-[var(--text-muted)] hover:bg-[var(--bg-surface)]
+          transition-all duration-200
           flex flex-col items-center justify-center gap-2
+          bg-[var(--bg-panel)]
         "
       >
-        <div className="w-10 h-10 rounded-full bg-white/5 group-hover:bg-cyan-400/20 flex items-center justify-center transition-colors">
-          <span className="text-xl text-white/30 group-hover:text-cyan-400">+</span>
+        <div className="w-8 h-8 rounded-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] flex items-center justify-center transition-colors group-hover:border-[var(--text-muted)]">
+          <span className="text-lg text-[var(--text-muted)] group-hover:text-[var(--text-primary)] font-light">+</span>
         </div>
-        <span className="text-xs font-medium text-white/30 group-hover:text-cyan-200">Add Chord</span>
-        <div className="absolute bottom-3 right-3 text-[10px] font-bold text-white/10 group-hover:text-cyan-400/40">
+        <span className="text-cap text-[var(--text-muted)] group-hover:text-[var(--text-primary)]">Add Chord</span>
+        <div className="absolute top-2 left-2 text-[10px] font-mono text-[var(--text-muted)] opacity-50">
           {index + 1}
         </div>
       </button>
@@ -52,21 +54,20 @@ export function ChordSlot({ chord, index, isPlaying, onRemove, onClick }: ChordS
     <div
       onClick={onClick}
       className={`
-        group relative w-32 h-40
-        rounded-2xl backdrop-blur-md transition-all duration-300 cursor-pointer
-        border border-white/10 hover:-translate-y-1 hover:shadow-xl
-        flex flex-col overflow-hidden
+        group relative w-full h-32
+        rounded-sm transition-all duration-200 cursor-pointer
+        border flex flex-col overflow-hidden
         ${isActuallyPlaying
-          ? 'bg-gradient-to-br from-indigo-600/80 to-purple-600/80 ring-2 ring-cyan-400 shadow-[0_0_30px_rgba(34,211,238,0.3)]'
-          : 'bg-gradient-to-br from-white/10 to-white/5 hover:bg-white/15 hover:border-white/20'
+          ? 'bg-[var(--bg-surface)] border-[var(--accent)] ring-1 ring-[var(--accent)]'
+          : 'bg-[var(--bg-panel)] border-[var(--border-subtle)] hover:border-[var(--text-muted)] hover:bg-[var(--bg-surface)]'
         }
       `}
     >
       {/* Playhead Progress Bar - Only visible when playing this slot */}
       {isActuallyPlaying && (
-        <div className="absolute top-0 left-0 w-full h-1 bg-black/20">
+        <div className="absolute top-0 left-0 w-full h-0.5 bg-[var(--bg-app)]">
           <div
-            className="h-full bg-cyan-400 shadow-[0_0_10px_#22d3ee]"
+            className="h-full bg-[var(--accent)]"
             style={{ width: `${((currentBeat + 1) / 4) * 100}%`, transition: 'width 0.1s linear' }}
           />
         </div>
@@ -79,56 +80,50 @@ export function ChordSlot({ chord, index, isPlaying, onRemove, onClick }: ChordS
           onRemove?.();
         }}
         className="
-          absolute top-2 right-2 w-6 h-6 
-          rounded-full bg-black/40 hover:bg-red-500/80 
-          text-white/70 hover:text-white 
-          flex items-center justify-center 
-          opacity-0 group-hover:opacity-100 
+          absolute top-1 right-1 w-5 h-5
+          rounded-sm bg-[var(--bg-app)] border border-[var(--border-subtle)]
+          text-[var(--text-muted)] hover:text-red-500 hover:border-red-500/50
+          flex items-center justify-center
+          opacity-0 group-hover:opacity-100
           transition-all duration-200 z-20
-          scale-75 hover:scale-100
         "
       >
-        <span className="text-xs font-bold leading-none mb-[1px]">×</span>
+        <X size={12} />
       </button>
 
       {/* Card Content */}
-      <div className="flex-1 flex flex-col p-4 relative z-10">
+      <div className="flex-1 flex flex-col p-3 relative z-10">
+
+        {/* Index Badge */}
+        <div className="absolute top-2 left-2 text-[10px] font-mono text-[var(--text-muted)]">
+          {index + 1}
+        </div>
 
         {/* Roman Numeral (Primary) */}
-        <div className="flex-1 flex items-center justify-center">
+        <div className="flex-1 flex items-center justify-center mt-2">
           <span className={`
-            font-serif text-3xl font-bold tracking-tight
-            ${isActuallyPlaying ? 'text-white' : 'text-transparent bg-clip-text bg-gradient-to-br from-cyan-100 to-blue-200 group-hover:from-white group-hover:to-white'}
+            font-serif text-2xl font-bold tracking-tight text-center
+            ${isActuallyPlaying ? 'text-[var(--text-primary)]' : 'text-[var(--text-primary)] opacity-90'}
           `}>
             {chord.roman}
           </span>
         </div>
 
-        {/* Chord Symbol (Secondary) */}
-        <div className="text-center mb-3">
-          <div className="inline-flex items-baseline gap-[1px]">
-            <span className="text-lg font-bold text-white">{chord.root}</span>
-            <span className="text-xs font-medium text-white/60 uppercase tracking-wider">
-              {chord.quality === 'maj' ? '' : chord.quality}
-            </span>
-          </div>
-        </div>
-
-        {/* Notes (Tertiary) */}
-        <div className="border-t border-white/10 pt-2 mt-auto">
-          <div className="text-[10px] text-center text-white/40 font-mono tracking-tight truncate">
-            {getNotesDisplay(chord.notes)}
+        {/* Chord Symbol Details */}
+        <div className="mt-auto pt-2 border-t border-[var(--border-subtle)]">
+          <div className="flex justify-between items-baseline">
+            <div className="flex items-baseline gap-1">
+              <span className="text-sm font-bold text-[var(--text-primary)]">{chord.root}</span>
+              <span className="text-[10px] font-medium text-[var(--text-muted)] uppercase tracking-wide">
+                {chord.quality === 'maj' ? '' : chord.quality}
+              </span>
+            </div>
+            <div className="text-[9px] font-mono text-[var(--text-muted)] tracking-tighter opacity-70">
+              {getNotesDisplay(chord.notes)}
+            </div>
           </div>
         </div>
       </div>
-
-      {/* Index Badge */}
-      <div className="absolute bottom-2 left-3 text-[9px] font-bold text-white/20">
-        {index + 1}
-      </div>
-
-      {/* Hover Overlay "Play" Hint */}
-      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors pointer-events-none" />
     </div>
   );
 }

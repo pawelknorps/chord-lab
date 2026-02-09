@@ -48,22 +48,27 @@ export function QuickExerciseJump({ currentModule }: QuickExerciseJumpProps) {
     const filteredJumps = jumps.filter(j => j.id !== currentModule);
 
     return (
-        <div className="mt-12 pt-8 border-t border-white/10">
-            <h3 className="text-sm font-semibold text-white/40 uppercase tracking-widest mb-6">Continue your Training</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="flex items-center gap-3 mt-4 overflow-x-auto no-scrollbar py-1">
+            <div className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest whitespace-nowrap hidden sm:block">
+                Quick Jump
+            </div>
+            <div className="flex items-center gap-2">
                 {filteredJumps.map((jump) => (
                     <Link
                         key={jump.id}
                         to={jump.to}
-                        className="group glass-panel p-4 rounded-xl border border-white/5 hover:border-white/20 transition-all flex items-center gap-4"
+                        title={`${jump.label} - ${jump.desc}`}
+                        className="
+                            group flex items-center gap-2 px-3 py-1.5 rounded-full 
+                            bg-[var(--bg-surface)] border border-[var(--border-subtle)] 
+                            hover:border-[var(--text-muted)] hover:bg-[var(--bg-hover)] 
+                            transition-all duration-200 whitespace-nowrap
+                        "
                     >
-                        <div className={`p-3 rounded-lg ${jump.bg} ${jump.color} group-hover:scale-110 transition-transform`}>
-                            <jump.icon size={20} />
-                        </div>
-                        <div>
-                            <div className="text-sm font-bold text-white group-hover:text-cyan-400 transition-colors">{jump.label}</div>
-                            <div className="text-[10px] text-white/40 uppercase tracking-tighter">{jump.desc}</div>
-                        </div>
+                        <jump.icon size={12} className={`text-[var(--text-muted)] group-hover:${jump.color} transition-colors`} />
+                        <span className="text-[11px] font-medium text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">
+                            {jump.label}
+                        </span>
                     </Link>
                 ))}
             </div>

@@ -1,0 +1,5282 @@
+[
+  {
+    "category": "Major",
+    "style": "Major",
+    "progression": "I I IM-5 IM-5 IV IV V Vsus2 - Joyful Triumphant",
+    "name": "I I IM-5 IM-5 IV IV V Vsus2 - Joyful Triumphant"
+  },
+  {
+    "category": "Major",
+    "style": "Major",
+    "progression": "I I IV iii - Hopeful Nostalgic",
+    "name": "I I IV iii - Hopeful Nostalgic"
+  },
+  {
+    "category": "Major",
+    "style": "Major",
+    "progression": "I I7 Idom7 I7 - Relaxed Playful",
+    "name": "I I7 Idom7 I7 - Relaxed Playful"
+  },
+  {
+    "category": "Major",
+    "style": "Major",
+    "progression": "I I7 Idom7 IV - Relaxed Nostalgic",
+    "name": "I I7 Idom7 IV - Relaxed Nostalgic"
+  },
+  {
+    "category": "Major",
+    "style": "Major",
+    "progression": "I IV Isus2 IV - Peaceful Hopeful",
+    "name": "I IV Isus2 IV - Peaceful Hopeful"
+  },
+  {
+    "category": "Major",
+    "style": "Major",
+    "progression": "I IV V IV - Joyful Triumphant",
+    "name": "I IV V IV - Joyful Triumphant"
+  },
+  {
+    "category": "Major",
+    "style": "Major",
+    "progression": "I IV V V - Joyful Excited",
+    "name": "I IV V V - Joyful Excited"
+  },
+  {
+    "category": "Major",
+    "style": "Major",
+    "progression": "I IV ii V - Joyful Triumphant",
+    "name": "I IV ii V - Joyful Triumphant"
+  },
+  {
+    "category": "Major",
+    "style": "Major",
+    "progression": "I IV vi V - Joyful Hopeful",
+    "name": "I IV vi V - Joyful Hopeful"
+  },
+  {
+    "category": "Major",
+    "style": "Major",
+    "progression": "I IV vii iii vi ii V I - Romantic Triumphant",
+    "name": "I IV vii iii vi ii V I - Romantic Triumphant"
+  },
+  {
+    "category": "Major",
+    "style": "Major",
+    "progression": "I V I IV - Joyful Playful",
+    "name": "I V I IV - Joyful Playful"
+  },
+  {
+    "category": "Major",
+    "style": "Major",
+    "progression": "I V IV vi - Romantic Hopeful",
+    "name": "I V IV vi - Romantic Hopeful"
+  },
+  {
+    "category": "Major",
+    "style": "Major",
+    "progression": "I V vi IV - Hopeful Romantic",
+    "name": "I V vi IV - Hopeful Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "Major",
+    "progression": "I V vi V - Hopeful Romantic",
+    "name": "I V vi V - Hopeful Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "Major",
+    "progression": "I V vi ii - Hopeful Romantic",
+    "name": "I V vi ii - Hopeful Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "Major",
+    "progression": "I V vi iii IV - Hopeful Joyful",
+    "name": "I V vi iii IV - Hopeful Joyful"
+  },
+  {
+    "category": "Major",
+    "style": "Major",
+    "progression": "I V vi iii IV I IV V - Hopeful Joyful",
+    "name": "I V vi iii IV I IV V - Hopeful Joyful"
+  },
+  {
+    "category": "Major",
+    "style": "Major",
+    "progression": "I iii IV vi - Romantic Nostalgic",
+    "name": "I iii IV vi - Romantic Nostalgic"
+  },
+  {
+    "category": "Major",
+    "style": "Major",
+    "progression": "I iii vi IV - Romantic Hopeful",
+    "name": "I iii vi IV - Romantic Hopeful"
+  },
+  {
+    "category": "Major",
+    "style": "Major",
+    "progression": "I iii vi Isus4 - Tender Spiritual",
+    "name": "I iii vi Isus4 - Tender Spiritual"
+  },
+  {
+    "category": "Major",
+    "style": "Major",
+    "progression": "I vi I IV - Tender Nostalgic",
+    "name": "I vi I IV - Tender Nostalgic"
+  },
+  {
+    "category": "Major",
+    "style": "Major",
+    "progression": "I vi IV V - Romantic Hopeful",
+    "name": "I vi IV V - Romantic Hopeful"
+  },
+  {
+    "category": "Major",
+    "style": "Major",
+    "progression": "I vi IV iii - Nostalgic Romantic",
+    "name": "I vi IV iii - Nostalgic Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "Major",
+    "progression": "I vi ii IV - Tender Nostalgic",
+    "name": "I vi ii IV - Tender Nostalgic"
+  },
+  {
+    "category": "Major",
+    "style": "Major",
+    "progression": "I vi ii V - Nostalgic Romantic",
+    "name": "I vi ii V - Nostalgic Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "Major",
+    "progression": "I7 V7 viadd9 IV7 - Playful Joyful",
+    "name": "I7 V7 viadd9 IV7 - Playful Joyful"
+  },
+  {
+    "category": "Major",
+    "style": "Major",
+    "progression": "IV I IV6 Iadd9 - Relaxed Joyful",
+    "name": "IV I IV6 Iadd9 - Relaxed Joyful"
+  },
+  {
+    "category": "Major",
+    "style": "Major",
+    "progression": "IV I V vi - Joyful Romantic",
+    "name": "IV I V vi - Joyful Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "Major",
+    "progression": "IV I ii vi - Nostalgic Peaceful",
+    "name": "IV I ii vi - Nostalgic Peaceful"
+  },
+  {
+    "category": "Major",
+    "style": "Major",
+    "progression": "IV I iii IV - Playful Joyful",
+    "name": "IV I iii IV - Playful Joyful"
+  },
+  {
+    "category": "Major",
+    "style": "Major",
+    "progression": "IV IV I V - Joyful Hopeful",
+    "name": "IV IV I V - Joyful Hopeful"
+  },
+  {
+    "category": "Major",
+    "style": "Major",
+    "progression": "IV vi I V - Hopeful Romantic",
+    "name": "IV vi I V - Hopeful Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "Major",
+    "progression": "IV vi IV vi - Nostalgic",
+    "name": "IV vi IV vi - Nostalgic"
+  },
+  {
+    "category": "Major",
+    "style": "Major",
+    "progression": "IV vi iii I - Nostalgic Playful",
+    "name": "IV vi iii I - Nostalgic Playful"
+  },
+  {
+    "category": "Major",
+    "style": "Major",
+    "progression": "Isus2 I vi7 visus4 - Playful Romantic",
+    "name": "Isus2 I vi7 visus4 - Playful Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "Major",
+    "progression": "V I vi V - Hopeful Romantic",
+    "name": "V I vi V - Hopeful Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "Major",
+    "progression": "V IV vi I - Hopeful Triumphant",
+    "name": "V IV vi I - Hopeful Triumphant"
+  },
+  {
+    "category": "Major",
+    "style": "Major",
+    "progression": "V vi IV I - Hopeful Romantic",
+    "name": "V vi IV I - Hopeful Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "Major",
+    "progression": "ii IV V V - Hopeful",
+    "name": "ii IV V V - Hopeful"
+  },
+  {
+    "category": "Major",
+    "style": "Major",
+    "progression": "ii IV vi V - Romantic",
+    "name": "ii IV vi V - Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "Major",
+    "progression": "ii V I I - Triumphant",
+    "name": "ii V I I - Triumphant"
+  },
+  {
+    "category": "Major",
+    "style": "Major",
+    "progression": "ii V I IV - Hopeful Triumphant",
+    "name": "ii V I IV - Hopeful Triumphant"
+  },
+  {
+    "category": "Major",
+    "style": "Major",
+    "progression": "ii7 Vadd9 I7 I7 - Triumphant",
+    "name": "ii7 Vadd9 I7 I7 - Triumphant"
+  },
+  {
+    "category": "Major",
+    "style": "Major",
+    "progression": "iii vi IV I - Romantic Nostalgic",
+    "name": "iii vi IV I - Romantic Nostalgic"
+  },
+  {
+    "category": "Major",
+    "style": "Major",
+    "progression": "iim7 V7 iiim7 vi7 iim7 V7 - Romantic Nostalgic",
+    "name": "iim7 V7 iiim7 vi7 iim7 V7 - Romantic Nostalgic"
+  },
+  {
+    "category": "Major",
+    "style": "Major",
+    "progression": "vi IV I V - Hopeful Romantic",
+    "name": "vi IV I V - Hopeful Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "Major",
+    "progression": "vi V IV V - Romantic Hopeful",
+    "name": "vi V IV V - Romantic Hopeful"
+  },
+  {
+    "category": "Major",
+    "style": "Major",
+    "progression": "vi V IV V ii V I I - Triumphant Hopeful",
+    "name": "vi V IV V ii V I I - Triumphant Hopeful"
+  },
+  {
+    "category": "Major",
+    "style": "Major",
+    "progression": "vi ii V I - Hopeful Romantic",
+    "name": "vi ii V I - Hopeful Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "hiphop2",
+    "progression": "I I IM-5 IM-5 IV IV V Vsus2 - Joyful Triumphant",
+    "name": "I I IM-5 IM-5 IV IV V Vsus2 - Joyful Triumphant"
+  },
+  {
+    "category": "Major",
+    "style": "hiphop2",
+    "progression": "I I IV iii - Hopeful Nostalgic",
+    "name": "I I IV iii - Hopeful Nostalgic"
+  },
+  {
+    "category": "Major",
+    "style": "hiphop2",
+    "progression": "I I7 Idom7 I7 - Relaxed Playful",
+    "name": "I I7 Idom7 I7 - Relaxed Playful"
+  },
+  {
+    "category": "Major",
+    "style": "hiphop2",
+    "progression": "I I7 Idom7 IV - Relaxed Nostalgic",
+    "name": "I I7 Idom7 IV - Relaxed Nostalgic"
+  },
+  {
+    "category": "Major",
+    "style": "hiphop2",
+    "progression": "I IV Isus2 IV - Peaceful Hopeful",
+    "name": "I IV Isus2 IV - Peaceful Hopeful"
+  },
+  {
+    "category": "Major",
+    "style": "hiphop2",
+    "progression": "I IV V IV - Joyful Triumphant",
+    "name": "I IV V IV - Joyful Triumphant"
+  },
+  {
+    "category": "Major",
+    "style": "hiphop2",
+    "progression": "I IV V V - Joyful Excited",
+    "name": "I IV V V - Joyful Excited"
+  },
+  {
+    "category": "Major",
+    "style": "hiphop2",
+    "progression": "I IV ii V - Joyful Triumphant",
+    "name": "I IV ii V - Joyful Triumphant"
+  },
+  {
+    "category": "Major",
+    "style": "hiphop2",
+    "progression": "I IV vi V - Joyful Hopeful",
+    "name": "I IV vi V - Joyful Hopeful"
+  },
+  {
+    "category": "Major",
+    "style": "hiphop2",
+    "progression": "I IV vii iii vi ii V I - Romantic Triumphant",
+    "name": "I IV vii iii vi ii V I - Romantic Triumphant"
+  },
+  {
+    "category": "Major",
+    "style": "hiphop2",
+    "progression": "I V I IV - Joyful Playful",
+    "name": "I V I IV - Joyful Playful"
+  },
+  {
+    "category": "Major",
+    "style": "hiphop2",
+    "progression": "I V IV vi - Romantic Hopeful",
+    "name": "I V IV vi - Romantic Hopeful"
+  },
+  {
+    "category": "Major",
+    "style": "hiphop2",
+    "progression": "I V vi IV - Hopeful Romantic",
+    "name": "I V vi IV - Hopeful Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "hiphop2",
+    "progression": "I V vi V - Hopeful Romantic",
+    "name": "I V vi V - Hopeful Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "hiphop2",
+    "progression": "I V vi ii - Hopeful Romantic",
+    "name": "I V vi ii - Hopeful Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "hiphop2",
+    "progression": "I V vi iii IV - Hopeful Joyful",
+    "name": "I V vi iii IV - Hopeful Joyful"
+  },
+  {
+    "category": "Major",
+    "style": "hiphop2",
+    "progression": "I V vi iii IV I IV V - Hopeful Joyful",
+    "name": "I V vi iii IV I IV V - Hopeful Joyful"
+  },
+  {
+    "category": "Major",
+    "style": "hiphop2",
+    "progression": "I iii IV vi - Romantic Nostalgic",
+    "name": "I iii IV vi - Romantic Nostalgic"
+  },
+  {
+    "category": "Major",
+    "style": "hiphop2",
+    "progression": "I iii vi IV - Romantic Hopeful",
+    "name": "I iii vi IV - Romantic Hopeful"
+  },
+  {
+    "category": "Major",
+    "style": "hiphop2",
+    "progression": "I iii vi Isus4 - Tender Spiritual",
+    "name": "I iii vi Isus4 - Tender Spiritual"
+  },
+  {
+    "category": "Major",
+    "style": "hiphop2",
+    "progression": "I vi I IV - Tender Nostalgic",
+    "name": "I vi I IV - Tender Nostalgic"
+  },
+  {
+    "category": "Major",
+    "style": "hiphop2",
+    "progression": "I vi IV V - Romantic Hopeful",
+    "name": "I vi IV V - Romantic Hopeful"
+  },
+  {
+    "category": "Major",
+    "style": "hiphop2",
+    "progression": "I vi IV iii - Nostalgic Romantic",
+    "name": "I vi IV iii - Nostalgic Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "hiphop2",
+    "progression": "I vi ii IV - Tender Nostalgic",
+    "name": "I vi ii IV - Tender Nostalgic"
+  },
+  {
+    "category": "Major",
+    "style": "hiphop2",
+    "progression": "I vi ii V - Nostalgic Romantic",
+    "name": "I vi ii V - Nostalgic Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "hiphop2",
+    "progression": "I7 V7 viadd9 IV7 - Playful Joyful",
+    "name": "I7 V7 viadd9 IV7 - Playful Joyful"
+  },
+  {
+    "category": "Major",
+    "style": "hiphop2",
+    "progression": "IV I IV6 Iadd9 - Relaxed Joyful",
+    "name": "IV I IV6 Iadd9 - Relaxed Joyful"
+  },
+  {
+    "category": "Major",
+    "style": "hiphop2",
+    "progression": "IV I V vi - Joyful Romantic",
+    "name": "IV I V vi - Joyful Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "hiphop2",
+    "progression": "IV I ii vi - Nostalgic Peaceful",
+    "name": "IV I ii vi - Nostalgic Peaceful"
+  },
+  {
+    "category": "Major",
+    "style": "hiphop2",
+    "progression": "IV I iii IV - Playful Joyful",
+    "name": "IV I iii IV - Playful Joyful"
+  },
+  {
+    "category": "Major",
+    "style": "hiphop2",
+    "progression": "IV IV I V - Joyful Hopeful",
+    "name": "IV IV I V - Joyful Hopeful"
+  },
+  {
+    "category": "Major",
+    "style": "hiphop2",
+    "progression": "IV vi I V - Hopeful Romantic",
+    "name": "IV vi I V - Hopeful Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "hiphop2",
+    "progression": "IV vi IV vi - Nostalgic",
+    "name": "IV vi IV vi - Nostalgic"
+  },
+  {
+    "category": "Major",
+    "style": "hiphop2",
+    "progression": "IV vi iii I - Nostalgic Playful",
+    "name": "IV vi iii I - Nostalgic Playful"
+  },
+  {
+    "category": "Major",
+    "style": "hiphop2",
+    "progression": "Isus2 I vi7 visus4 - Playful Romantic",
+    "name": "Isus2 I vi7 visus4 - Playful Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "hiphop2",
+    "progression": "V I vi V - Hopeful Romantic",
+    "name": "V I vi V - Hopeful Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "hiphop2",
+    "progression": "V IV vi I - Hopeful Triumphant",
+    "name": "V IV vi I - Hopeful Triumphant"
+  },
+  {
+    "category": "Major",
+    "style": "hiphop2",
+    "progression": "V vi IV I - Hopeful Romantic",
+    "name": "V vi IV I - Hopeful Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "hiphop2",
+    "progression": "ii IV V V - Hopeful",
+    "name": "ii IV V V - Hopeful"
+  },
+  {
+    "category": "Major",
+    "style": "hiphop2",
+    "progression": "ii IV vi V - Romantic",
+    "name": "ii IV vi V - Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "hiphop2",
+    "progression": "ii V I I - Triumphant",
+    "name": "ii V I I - Triumphant"
+  },
+  {
+    "category": "Major",
+    "style": "hiphop2",
+    "progression": "ii V I IV - Hopeful Triumphant",
+    "name": "ii V I IV - Hopeful Triumphant"
+  },
+  {
+    "category": "Major",
+    "style": "hiphop2",
+    "progression": "ii7 Vadd9 I7 I7 - Triumphant",
+    "name": "ii7 Vadd9 I7 I7 - Triumphant"
+  },
+  {
+    "category": "Major",
+    "style": "hiphop2",
+    "progression": "iii vi IV I - Romantic Nostalgic",
+    "name": "iii vi IV I - Romantic Nostalgic"
+  },
+  {
+    "category": "Major",
+    "style": "hiphop2",
+    "progression": "iim7 V7 iiim7 vi7 iim7 V7 - Romantic Nostalgic",
+    "name": "iim7 V7 iiim7 vi7 iim7 V7 - Romantic Nostalgic"
+  },
+  {
+    "category": "Major",
+    "style": "hiphop2",
+    "progression": "vi IV I V - Hopeful Romantic",
+    "name": "vi IV I V - Hopeful Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "hiphop2",
+    "progression": "vi V IV V - Romantic Hopeful",
+    "name": "vi V IV V - Romantic Hopeful"
+  },
+  {
+    "category": "Major",
+    "style": "hiphop2",
+    "progression": "vi V IV V ii V I I - Triumphant Hopeful",
+    "name": "vi V IV V ii V I I - Triumphant Hopeful"
+  },
+  {
+    "category": "Major",
+    "style": "hiphop2",
+    "progression": "vi ii V I - Hopeful Romantic",
+    "name": "vi ii V I - Hopeful Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "pop",
+    "progression": "I I IM-5 IM-5 IV IV V Vsus2 - Joyful Triumphant",
+    "name": "I I IM-5 IM-5 IV IV V Vsus2 - Joyful Triumphant"
+  },
+  {
+    "category": "Major",
+    "style": "pop",
+    "progression": "I I IV iii - Hopeful Nostalgic",
+    "name": "I I IV iii - Hopeful Nostalgic"
+  },
+  {
+    "category": "Major",
+    "style": "pop",
+    "progression": "I I7 Idom7 I7 - Relaxed Playful",
+    "name": "I I7 Idom7 I7 - Relaxed Playful"
+  },
+  {
+    "category": "Major",
+    "style": "pop",
+    "progression": "I I7 Idom7 IV - Relaxed Nostalgic",
+    "name": "I I7 Idom7 IV - Relaxed Nostalgic"
+  },
+  {
+    "category": "Major",
+    "style": "pop",
+    "progression": "I IV Isus2 IV - Peaceful Hopeful",
+    "name": "I IV Isus2 IV - Peaceful Hopeful"
+  },
+  {
+    "category": "Major",
+    "style": "pop",
+    "progression": "I IV V IV - Joyful Triumphant",
+    "name": "I IV V IV - Joyful Triumphant"
+  },
+  {
+    "category": "Major",
+    "style": "pop",
+    "progression": "I IV V V - Joyful Excited",
+    "name": "I IV V V - Joyful Excited"
+  },
+  {
+    "category": "Major",
+    "style": "pop",
+    "progression": "I IV ii V - Joyful Triumphant",
+    "name": "I IV ii V - Joyful Triumphant"
+  },
+  {
+    "category": "Major",
+    "style": "pop",
+    "progression": "I IV vi V - Joyful Hopeful",
+    "name": "I IV vi V - Joyful Hopeful"
+  },
+  {
+    "category": "Major",
+    "style": "pop",
+    "progression": "I IV vii iii vi ii V I - Romantic Triumphant",
+    "name": "I IV vii iii vi ii V I - Romantic Triumphant"
+  },
+  {
+    "category": "Major",
+    "style": "pop",
+    "progression": "I V I IV - Joyful Playful",
+    "name": "I V I IV - Joyful Playful"
+  },
+  {
+    "category": "Major",
+    "style": "pop",
+    "progression": "I V IV vi - Romantic Hopeful",
+    "name": "I V IV vi - Romantic Hopeful"
+  },
+  {
+    "category": "Major",
+    "style": "pop",
+    "progression": "I V vi IV - Hopeful Romantic",
+    "name": "I V vi IV - Hopeful Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "pop",
+    "progression": "I V vi V - Hopeful Romantic",
+    "name": "I V vi V - Hopeful Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "pop",
+    "progression": "I V vi ii - Hopeful Romantic",
+    "name": "I V vi ii - Hopeful Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "pop",
+    "progression": "I V vi iii IV - Hopeful Joyful",
+    "name": "I V vi iii IV - Hopeful Joyful"
+  },
+  {
+    "category": "Major",
+    "style": "pop",
+    "progression": "I V vi iii IV I IV V - Hopeful Joyful",
+    "name": "I V vi iii IV I IV V - Hopeful Joyful"
+  },
+  {
+    "category": "Major",
+    "style": "pop",
+    "progression": "I iii IV vi - Romantic Nostalgic",
+    "name": "I iii IV vi - Romantic Nostalgic"
+  },
+  {
+    "category": "Major",
+    "style": "pop",
+    "progression": "I iii vi IV - Romantic Hopeful",
+    "name": "I iii vi IV - Romantic Hopeful"
+  },
+  {
+    "category": "Major",
+    "style": "pop",
+    "progression": "I iii vi Isus4 - Tender Spiritual",
+    "name": "I iii vi Isus4 - Tender Spiritual"
+  },
+  {
+    "category": "Major",
+    "style": "pop",
+    "progression": "I vi I IV - Tender Nostalgic",
+    "name": "I vi I IV - Tender Nostalgic"
+  },
+  {
+    "category": "Major",
+    "style": "pop",
+    "progression": "I vi IV V - Romantic Hopeful",
+    "name": "I vi IV V - Romantic Hopeful"
+  },
+  {
+    "category": "Major",
+    "style": "pop",
+    "progression": "I vi IV iii - Nostalgic Romantic",
+    "name": "I vi IV iii - Nostalgic Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "pop",
+    "progression": "I vi ii IV - Tender Nostalgic",
+    "name": "I vi ii IV - Tender Nostalgic"
+  },
+  {
+    "category": "Major",
+    "style": "pop",
+    "progression": "I vi ii V - Nostalgic Romantic",
+    "name": "I vi ii V - Nostalgic Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "pop",
+    "progression": "I7 V7 viadd9 IV7 - Playful Joyful",
+    "name": "I7 V7 viadd9 IV7 - Playful Joyful"
+  },
+  {
+    "category": "Major",
+    "style": "pop",
+    "progression": "IV I IV6 Iadd9 - Relaxed Joyful",
+    "name": "IV I IV6 Iadd9 - Relaxed Joyful"
+  },
+  {
+    "category": "Major",
+    "style": "pop",
+    "progression": "IV I V vi - Joyful Romantic",
+    "name": "IV I V vi - Joyful Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "pop",
+    "progression": "IV I ii vi - Nostalgic Peaceful",
+    "name": "IV I ii vi - Nostalgic Peaceful"
+  },
+  {
+    "category": "Major",
+    "style": "pop",
+    "progression": "IV I iii IV - Playful Joyful",
+    "name": "IV I iii IV - Playful Joyful"
+  },
+  {
+    "category": "Major",
+    "style": "pop",
+    "progression": "IV IV I V - Joyful Hopeful",
+    "name": "IV IV I V - Joyful Hopeful"
+  },
+  {
+    "category": "Major",
+    "style": "pop",
+    "progression": "IV vi I V - Hopeful Romantic",
+    "name": "IV vi I V - Hopeful Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "pop",
+    "progression": "IV vi IV vi - Nostalgic",
+    "name": "IV vi IV vi - Nostalgic"
+  },
+  {
+    "category": "Major",
+    "style": "pop",
+    "progression": "IV vi iii I - Nostalgic Playful",
+    "name": "IV vi iii I - Nostalgic Playful"
+  },
+  {
+    "category": "Major",
+    "style": "pop",
+    "progression": "Isus2 I vi7 visus4 - Playful Romantic",
+    "name": "Isus2 I vi7 visus4 - Playful Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "pop",
+    "progression": "V I vi V - Hopeful Romantic",
+    "name": "V I vi V - Hopeful Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "pop",
+    "progression": "V IV vi I - Hopeful Triumphant",
+    "name": "V IV vi I - Hopeful Triumphant"
+  },
+  {
+    "category": "Major",
+    "style": "pop",
+    "progression": "V vi IV I - Hopeful Romantic",
+    "name": "V vi IV I - Hopeful Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "pop",
+    "progression": "ii IV V V - Hopeful",
+    "name": "ii IV V V - Hopeful"
+  },
+  {
+    "category": "Major",
+    "style": "pop",
+    "progression": "ii IV vi V - Romantic",
+    "name": "ii IV vi V - Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "pop",
+    "progression": "ii V I I - Triumphant",
+    "name": "ii V I I - Triumphant"
+  },
+  {
+    "category": "Major",
+    "style": "pop",
+    "progression": "ii V I IV - Hopeful Triumphant",
+    "name": "ii V I IV - Hopeful Triumphant"
+  },
+  {
+    "category": "Major",
+    "style": "pop",
+    "progression": "ii7 Vadd9 I7 I7 - Triumphant",
+    "name": "ii7 Vadd9 I7 I7 - Triumphant"
+  },
+  {
+    "category": "Major",
+    "style": "pop",
+    "progression": "iii vi IV I - Romantic Nostalgic",
+    "name": "iii vi IV I - Romantic Nostalgic"
+  },
+  {
+    "category": "Major",
+    "style": "pop",
+    "progression": "iim7 V7 iiim7 vi7 iim7 V7 - Romantic Nostalgic",
+    "name": "iim7 V7 iiim7 vi7 iim7 V7 - Romantic Nostalgic"
+  },
+  {
+    "category": "Major",
+    "style": "pop",
+    "progression": "vi IV I V - Hopeful Romantic",
+    "name": "vi IV I V - Hopeful Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "pop",
+    "progression": "vi V IV V - Romantic Hopeful",
+    "name": "vi V IV V - Romantic Hopeful"
+  },
+  {
+    "category": "Major",
+    "style": "pop",
+    "progression": "vi V IV V ii V I I - Triumphant Hopeful",
+    "name": "vi V IV V ii V I I - Triumphant Hopeful"
+  },
+  {
+    "category": "Major",
+    "style": "pop",
+    "progression": "vi ii V I - Hopeful Romantic",
+    "name": "vi ii V I - Hopeful Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "pop2",
+    "progression": "I I IM-5 IM-5 IV IV V Vsus2 - Joyful Triumphant",
+    "name": "I I IM-5 IM-5 IV IV V Vsus2 - Joyful Triumphant"
+  },
+  {
+    "category": "Major",
+    "style": "pop2",
+    "progression": "I I IV iii - Hopeful Nostalgic",
+    "name": "I I IV iii - Hopeful Nostalgic"
+  },
+  {
+    "category": "Major",
+    "style": "pop2",
+    "progression": "I I7 Idom7 I7 - Relaxed Playful",
+    "name": "I I7 Idom7 I7 - Relaxed Playful"
+  },
+  {
+    "category": "Major",
+    "style": "pop2",
+    "progression": "I I7 Idom7 IV - Relaxed Nostalgic",
+    "name": "I I7 Idom7 IV - Relaxed Nostalgic"
+  },
+  {
+    "category": "Major",
+    "style": "pop2",
+    "progression": "I IV Isus2 IV - Peaceful Hopeful",
+    "name": "I IV Isus2 IV - Peaceful Hopeful"
+  },
+  {
+    "category": "Major",
+    "style": "pop2",
+    "progression": "I IV V IV - Joyful Triumphant",
+    "name": "I IV V IV - Joyful Triumphant"
+  },
+  {
+    "category": "Major",
+    "style": "pop2",
+    "progression": "I IV V V - Joyful Excited",
+    "name": "I IV V V - Joyful Excited"
+  },
+  {
+    "category": "Major",
+    "style": "pop2",
+    "progression": "I IV ii V - Joyful Triumphant",
+    "name": "I IV ii V - Joyful Triumphant"
+  },
+  {
+    "category": "Major",
+    "style": "pop2",
+    "progression": "I IV vi V - Joyful Hopeful",
+    "name": "I IV vi V - Joyful Hopeful"
+  },
+  {
+    "category": "Major",
+    "style": "pop2",
+    "progression": "I IV vii iii vi ii V I - Romantic Triumphant",
+    "name": "I IV vii iii vi ii V I - Romantic Triumphant"
+  },
+  {
+    "category": "Major",
+    "style": "pop2",
+    "progression": "I V I IV - Joyful Playful",
+    "name": "I V I IV - Joyful Playful"
+  },
+  {
+    "category": "Major",
+    "style": "pop2",
+    "progression": "I V IV vi - Romantic Hopeful",
+    "name": "I V IV vi - Romantic Hopeful"
+  },
+  {
+    "category": "Major",
+    "style": "pop2",
+    "progression": "I V vi IV - Hopeful Romantic",
+    "name": "I V vi IV - Hopeful Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "pop2",
+    "progression": "I V vi V - Hopeful Romantic",
+    "name": "I V vi V - Hopeful Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "pop2",
+    "progression": "I V vi ii - Hopeful Romantic",
+    "name": "I V vi ii - Hopeful Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "pop2",
+    "progression": "I V vi iii IV - Hopeful Joyful",
+    "name": "I V vi iii IV - Hopeful Joyful"
+  },
+  {
+    "category": "Major",
+    "style": "pop2",
+    "progression": "I V vi iii IV I IV V - Hopeful Joyful",
+    "name": "I V vi iii IV I IV V - Hopeful Joyful"
+  },
+  {
+    "category": "Major",
+    "style": "pop2",
+    "progression": "I iii IV vi - Romantic Nostalgic",
+    "name": "I iii IV vi - Romantic Nostalgic"
+  },
+  {
+    "category": "Major",
+    "style": "pop2",
+    "progression": "I iii vi IV - Romantic Hopeful",
+    "name": "I iii vi IV - Romantic Hopeful"
+  },
+  {
+    "category": "Major",
+    "style": "pop2",
+    "progression": "I iii vi Isus4 - Tender Spiritual",
+    "name": "I iii vi Isus4 - Tender Spiritual"
+  },
+  {
+    "category": "Major",
+    "style": "pop2",
+    "progression": "I vi I IV - Tender Nostalgic",
+    "name": "I vi I IV - Tender Nostalgic"
+  },
+  {
+    "category": "Major",
+    "style": "pop2",
+    "progression": "I vi IV V - Romantic Hopeful",
+    "name": "I vi IV V - Romantic Hopeful"
+  },
+  {
+    "category": "Major",
+    "style": "pop2",
+    "progression": "I vi IV iii - Nostalgic Romantic",
+    "name": "I vi IV iii - Nostalgic Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "pop2",
+    "progression": "I vi ii IV - Tender Nostalgic",
+    "name": "I vi ii IV - Tender Nostalgic"
+  },
+  {
+    "category": "Major",
+    "style": "pop2",
+    "progression": "I vi ii V - Nostalgic Romantic",
+    "name": "I vi ii V - Nostalgic Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "pop2",
+    "progression": "I7 V7 viadd9 IV7 - Playful Joyful",
+    "name": "I7 V7 viadd9 IV7 - Playful Joyful"
+  },
+  {
+    "category": "Major",
+    "style": "pop2",
+    "progression": "IV I IV6 Iadd9 - Relaxed Joyful",
+    "name": "IV I IV6 Iadd9 - Relaxed Joyful"
+  },
+  {
+    "category": "Major",
+    "style": "pop2",
+    "progression": "IV I V vi - Joyful Romantic",
+    "name": "IV I V vi - Joyful Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "pop2",
+    "progression": "IV I ii vi - Nostalgic Peaceful",
+    "name": "IV I ii vi - Nostalgic Peaceful"
+  },
+  {
+    "category": "Major",
+    "style": "pop2",
+    "progression": "IV I iii IV - Playful Joyful",
+    "name": "IV I iii IV - Playful Joyful"
+  },
+  {
+    "category": "Major",
+    "style": "pop2",
+    "progression": "IV IV I V - Joyful Hopeful",
+    "name": "IV IV I V - Joyful Hopeful"
+  },
+  {
+    "category": "Major",
+    "style": "pop2",
+    "progression": "IV vi I V - Hopeful Romantic",
+    "name": "IV vi I V - Hopeful Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "pop2",
+    "progression": "IV vi IV vi - Nostalgic",
+    "name": "IV vi IV vi - Nostalgic"
+  },
+  {
+    "category": "Major",
+    "style": "pop2",
+    "progression": "IV vi iii I - Nostalgic Playful",
+    "name": "IV vi iii I - Nostalgic Playful"
+  },
+  {
+    "category": "Major",
+    "style": "pop2",
+    "progression": "Isus2 I vi7 visus4 - Playful Romantic",
+    "name": "Isus2 I vi7 visus4 - Playful Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "pop2",
+    "progression": "V I vi V - Hopeful Romantic",
+    "name": "V I vi V - Hopeful Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "pop2",
+    "progression": "V IV vi I - Hopeful Triumphant",
+    "name": "V IV vi I - Hopeful Triumphant"
+  },
+  {
+    "category": "Major",
+    "style": "pop2",
+    "progression": "V vi IV I - Hopeful Romantic",
+    "name": "V vi IV I - Hopeful Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "pop2",
+    "progression": "ii IV V V - Hopeful",
+    "name": "ii IV V V - Hopeful"
+  },
+  {
+    "category": "Major",
+    "style": "pop2",
+    "progression": "ii IV vi V - Romantic",
+    "name": "ii IV vi V - Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "pop2",
+    "progression": "ii V I I - Triumphant",
+    "name": "ii V I I - Triumphant"
+  },
+  {
+    "category": "Major",
+    "style": "pop2",
+    "progression": "ii V I IV - Hopeful Triumphant",
+    "name": "ii V I IV - Hopeful Triumphant"
+  },
+  {
+    "category": "Major",
+    "style": "pop2",
+    "progression": "ii7 Vadd9 I7 I7 - Triumphant",
+    "name": "ii7 Vadd9 I7 I7 - Triumphant"
+  },
+  {
+    "category": "Major",
+    "style": "pop2",
+    "progression": "iii vi IV I - Romantic Nostalgic",
+    "name": "iii vi IV I - Romantic Nostalgic"
+  },
+  {
+    "category": "Major",
+    "style": "pop2",
+    "progression": "iim7 V7 iiim7 vi7 iim7 V7 - Romantic Nostalgic",
+    "name": "iim7 V7 iiim7 vi7 iim7 V7 - Romantic Nostalgic"
+  },
+  {
+    "category": "Major",
+    "style": "pop2",
+    "progression": "vi IV I V - Hopeful Romantic",
+    "name": "vi IV I V - Hopeful Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "pop2",
+    "progression": "vi V IV V - Romantic Hopeful",
+    "name": "vi V IV V - Romantic Hopeful"
+  },
+  {
+    "category": "Major",
+    "style": "pop2",
+    "progression": "vi V IV V ii V I I - Triumphant Hopeful",
+    "name": "vi V IV V ii V I I - Triumphant Hopeful"
+  },
+  {
+    "category": "Major",
+    "style": "pop2",
+    "progression": "vi ii V I - Hopeful Romantic",
+    "name": "vi ii V I - Hopeful Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "soul",
+    "progression": "I I IM-5 IM-5 IV IV V Vsus2 - Joyful Triumphant",
+    "name": "I I IM-5 IM-5 IV IV V Vsus2 - Joyful Triumphant"
+  },
+  {
+    "category": "Major",
+    "style": "soul",
+    "progression": "I I IV iii - Hopeful Nostalgic",
+    "name": "I I IV iii - Hopeful Nostalgic"
+  },
+  {
+    "category": "Major",
+    "style": "soul",
+    "progression": "I I7 Idom7 I7 - Relaxed Playful",
+    "name": "I I7 Idom7 I7 - Relaxed Playful"
+  },
+  {
+    "category": "Major",
+    "style": "soul",
+    "progression": "I I7 Idom7 IV - Relaxed Nostalgic",
+    "name": "I I7 Idom7 IV - Relaxed Nostalgic"
+  },
+  {
+    "category": "Major",
+    "style": "soul",
+    "progression": "I IV Isus2 IV - Peaceful Hopeful",
+    "name": "I IV Isus2 IV - Peaceful Hopeful"
+  },
+  {
+    "category": "Major",
+    "style": "soul",
+    "progression": "I IV V IV - Joyful Triumphant",
+    "name": "I IV V IV - Joyful Triumphant"
+  },
+  {
+    "category": "Major",
+    "style": "soul",
+    "progression": "I IV V V - Joyful Excited",
+    "name": "I IV V V - Joyful Excited"
+  },
+  {
+    "category": "Major",
+    "style": "soul",
+    "progression": "I IV ii V - Joyful Triumphant",
+    "name": "I IV ii V - Joyful Triumphant"
+  },
+  {
+    "category": "Major",
+    "style": "soul",
+    "progression": "I IV vi V - Joyful Hopeful",
+    "name": "I IV vi V - Joyful Hopeful"
+  },
+  {
+    "category": "Major",
+    "style": "soul",
+    "progression": "I IV vii iii vi ii V I - Romantic Triumphant",
+    "name": "I IV vii iii vi ii V I - Romantic Triumphant"
+  },
+  {
+    "category": "Major",
+    "style": "soul",
+    "progression": "I V I IV - Joyful Playful",
+    "name": "I V I IV - Joyful Playful"
+  },
+  {
+    "category": "Major",
+    "style": "soul",
+    "progression": "I V IV vi - Romantic Hopeful",
+    "name": "I V IV vi - Romantic Hopeful"
+  },
+  {
+    "category": "Major",
+    "style": "soul",
+    "progression": "I V vi IV - Hopeful Romantic",
+    "name": "I V vi IV - Hopeful Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "soul",
+    "progression": "I V vi V - Hopeful Romantic",
+    "name": "I V vi V - Hopeful Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "soul",
+    "progression": "I V vi ii - Hopeful Romantic",
+    "name": "I V vi ii - Hopeful Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "soul",
+    "progression": "I V vi iii IV - Hopeful Joyful",
+    "name": "I V vi iii IV - Hopeful Joyful"
+  },
+  {
+    "category": "Major",
+    "style": "soul",
+    "progression": "I V vi iii IV I IV V - Hopeful Joyful",
+    "name": "I V vi iii IV I IV V - Hopeful Joyful"
+  },
+  {
+    "category": "Major",
+    "style": "soul",
+    "progression": "I iii IV vi - Romantic Nostalgic",
+    "name": "I iii IV vi - Romantic Nostalgic"
+  },
+  {
+    "category": "Major",
+    "style": "soul",
+    "progression": "I iii vi IV - Romantic Hopeful",
+    "name": "I iii vi IV - Romantic Hopeful"
+  },
+  {
+    "category": "Major",
+    "style": "soul",
+    "progression": "I iii vi Isus4 - Tender Spiritual",
+    "name": "I iii vi Isus4 - Tender Spiritual"
+  },
+  {
+    "category": "Major",
+    "style": "soul",
+    "progression": "I vi I IV - Tender Nostalgic",
+    "name": "I vi I IV - Tender Nostalgic"
+  },
+  {
+    "category": "Major",
+    "style": "soul",
+    "progression": "I vi IV V - Romantic Hopeful",
+    "name": "I vi IV V - Romantic Hopeful"
+  },
+  {
+    "category": "Major",
+    "style": "soul",
+    "progression": "I vi IV iii - Nostalgic Romantic",
+    "name": "I vi IV iii - Nostalgic Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "soul",
+    "progression": "I vi ii IV - Tender Nostalgic",
+    "name": "I vi ii IV - Tender Nostalgic"
+  },
+  {
+    "category": "Major",
+    "style": "soul",
+    "progression": "I vi ii V - Nostalgic Romantic",
+    "name": "I vi ii V - Nostalgic Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "soul",
+    "progression": "I7 V7 viadd9 IV7 - Playful Joyful",
+    "name": "I7 V7 viadd9 IV7 - Playful Joyful"
+  },
+  {
+    "category": "Major",
+    "style": "soul",
+    "progression": "IV I IV6 Iadd9 - Relaxed Joyful",
+    "name": "IV I IV6 Iadd9 - Relaxed Joyful"
+  },
+  {
+    "category": "Major",
+    "style": "soul",
+    "progression": "IV I V vi - Joyful Romantic",
+    "name": "IV I V vi - Joyful Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "soul",
+    "progression": "IV I ii vi - Nostalgic Peaceful",
+    "name": "IV I ii vi - Nostalgic Peaceful"
+  },
+  {
+    "category": "Major",
+    "style": "soul",
+    "progression": "IV I iii IV - Playful Joyful",
+    "name": "IV I iii IV - Playful Joyful"
+  },
+  {
+    "category": "Major",
+    "style": "soul",
+    "progression": "IV IV I V - Joyful Hopeful",
+    "name": "IV IV I V - Joyful Hopeful"
+  },
+  {
+    "category": "Major",
+    "style": "soul",
+    "progression": "IV vi I V - Hopeful Romantic",
+    "name": "IV vi I V - Hopeful Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "soul",
+    "progression": "IV vi IV vi - Nostalgic",
+    "name": "IV vi IV vi - Nostalgic"
+  },
+  {
+    "category": "Major",
+    "style": "soul",
+    "progression": "IV vi iii I - Nostalgic Playful",
+    "name": "IV vi iii I - Nostalgic Playful"
+  },
+  {
+    "category": "Major",
+    "style": "soul",
+    "progression": "Isus2 I vi7 visus4 - Playful Romantic",
+    "name": "Isus2 I vi7 visus4 - Playful Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "soul",
+    "progression": "V I vi V - Hopeful Romantic",
+    "name": "V I vi V - Hopeful Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "soul",
+    "progression": "V IV vi I - Hopeful Triumphant",
+    "name": "V IV vi I - Hopeful Triumphant"
+  },
+  {
+    "category": "Major",
+    "style": "soul",
+    "progression": "V vi IV I - Hopeful Romantic",
+    "name": "V vi IV I - Hopeful Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "soul",
+    "progression": "ii IV V V - Hopeful",
+    "name": "ii IV V V - Hopeful"
+  },
+  {
+    "category": "Major",
+    "style": "soul",
+    "progression": "ii IV vi V - Romantic",
+    "name": "ii IV vi V - Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "soul",
+    "progression": "ii V I I - Triumphant",
+    "name": "ii V I I - Triumphant"
+  },
+  {
+    "category": "Major",
+    "style": "soul",
+    "progression": "ii V I IV - Hopeful Triumphant",
+    "name": "ii V I IV - Hopeful Triumphant"
+  },
+  {
+    "category": "Major",
+    "style": "soul",
+    "progression": "ii7 Vadd9 I7 I7 - Triumphant",
+    "name": "ii7 Vadd9 I7 I7 - Triumphant"
+  },
+  {
+    "category": "Major",
+    "style": "soul",
+    "progression": "iii vi IV I - Romantic Nostalgic",
+    "name": "iii vi IV I - Romantic Nostalgic"
+  },
+  {
+    "category": "Major",
+    "style": "soul",
+    "progression": "iim7 V7 iiim7 vi7 iim7 V7 - Romantic Nostalgic",
+    "name": "iim7 V7 iiim7 vi7 iim7 V7 - Romantic Nostalgic"
+  },
+  {
+    "category": "Major",
+    "style": "soul",
+    "progression": "vi IV I V - Hopeful Romantic",
+    "name": "vi IV I V - Hopeful Romantic"
+  },
+  {
+    "category": "Major",
+    "style": "soul",
+    "progression": "vi V IV V - Romantic Hopeful",
+    "name": "vi V IV V - Romantic Hopeful"
+  },
+  {
+    "category": "Major",
+    "style": "soul",
+    "progression": "vi V IV V ii V I I - Triumphant Hopeful",
+    "name": "vi V IV V ii V I I - Triumphant Hopeful"
+  },
+  {
+    "category": "Major",
+    "style": "soul",
+    "progression": "vi ii V I - Hopeful Romantic",
+    "name": "vi ii V I - Hopeful Romantic"
+  },
+  {
+    "category": "Minor",
+    "style": "Minor",
+    "progression": "VI III i v - Nostalgic Dark",
+    "name": "VI III i v - Nostalgic Dark"
+  },
+  {
+    "category": "Minor",
+    "style": "Minor",
+    "progression": "VI VI i VII - Empowered",
+    "name": "VI VI i VII - Empowered"
+  },
+  {
+    "category": "Minor",
+    "style": "Minor",
+    "progression": "VI VII i III - Triumphant Nostalgic",
+    "name": "VI VII i III - Triumphant Nostalgic"
+  },
+  {
+    "category": "Minor",
+    "style": "Minor",
+    "progression": "VI VII v III - Rebellious Nostalgic",
+    "name": "VI VII v III - Rebellious Nostalgic"
+  },
+  {
+    "category": "Minor",
+    "style": "Minor",
+    "progression": "VI i v III - Hopeful Nostalgic",
+    "name": "VI i v III - Hopeful Nostalgic"
+  },
+  {
+    "category": "Minor",
+    "style": "Minor",
+    "progression": "VI i v v - Sad",
+    "name": "VI i v v - Sad"
+  },
+  {
+    "category": "Minor",
+    "style": "Minor",
+    "progression": "VI iv i v - Hopeful Tender",
+    "name": "VI iv i v - Hopeful Tender"
+  },
+  {
+    "category": "Minor",
+    "style": "Minor",
+    "progression": "VII iv VII i - Spiritual",
+    "name": "VII iv VII i - Spiritual"
+  },
+  {
+    "category": "Minor",
+    "style": "Minor",
+    "progression": "VII iv v i - Mysterious Dark",
+    "name": "VII iv v i - Mysterious Dark"
+  },
+  {
+    "category": "Minor",
+    "style": "Minor",
+    "progression": "i III VII VI - Nostalgic Romantic",
+    "name": "i III VII VI - Nostalgic Romantic"
+  },
+  {
+    "category": "Minor",
+    "style": "Minor",
+    "progression": "i III iv VI - Nostalgic Romantic",
+    "name": "i III iv VI - Nostalgic Romantic"
+  },
+  {
+    "category": "Minor",
+    "style": "Minor",
+    "progression": "i VI III VII - Nostalgic Hopeful",
+    "name": "i VI III VII - Nostalgic Hopeful"
+  },
+  {
+    "category": "Minor",
+    "style": "Minor",
+    "progression": "i VI III VII i VI69 III7 VII - Mysterious Spiritual",
+    "name": "i VI III VII i VI69 III7 VII - Mysterious Spiritual"
+  },
+  {
+    "category": "Minor",
+    "style": "Minor",
+    "progression": "i VI VII VII - Triumphant Rebellious",
+    "name": "i VI VII VII - Triumphant Rebellious"
+  },
+  {
+    "category": "Minor",
+    "style": "Minor",
+    "progression": "i VI VII iv - Mysterious Nostalgic",
+    "name": "i VI VII iv - Mysterious Nostalgic"
+  },
+  {
+    "category": "Minor",
+    "style": "Minor",
+    "progression": "i VI VII v - Mysterious Rebellious",
+    "name": "i VI VII v - Mysterious Rebellious"
+  },
+  {
+    "category": "Minor",
+    "style": "Minor",
+    "progression": "i VI iv III - Sad Nostalgic",
+    "name": "i VI iv III - Sad Nostalgic"
+  },
+  {
+    "category": "Minor",
+    "style": "Minor",
+    "progression": "i VI iv ii - Sad Tender",
+    "name": "i VI iv ii - Sad Tender"
+  },
+  {
+    "category": "Minor",
+    "style": "Minor",
+    "progression": "i VI iv v - Sad Hopeful",
+    "name": "i VI iv v - Sad Hopeful"
+  },
+  {
+    "category": "Minor",
+    "style": "Minor",
+    "progression": "i VII III VI - Rebellious Triumphant",
+    "name": "i VII III VI - Rebellious Triumphant"
+  },
+  {
+    "category": "Minor",
+    "style": "Minor",
+    "progression": "i VII VI III - Nostalgic Hopeful",
+    "name": "i VII VI III - Nostalgic Hopeful"
+  },
+  {
+    "category": "Minor",
+    "style": "Minor",
+    "progression": "i VII VI III iv VI VII i - Mysterious Surprised",
+    "name": "i VII VI III iv VI VII i - Mysterious Surprised"
+  },
+  {
+    "category": "Minor",
+    "style": "Minor",
+    "progression": "i VII VI VII - Rebellious Triumphant",
+    "name": "i VII VI VII - Rebellious Triumphant"
+  },
+  {
+    "category": "Minor",
+    "style": "Minor",
+    "progression": "i VII VI iv - Sad Romantic",
+    "name": "i VII VI iv - Sad Romantic"
+  },
+  {
+    "category": "Minor",
+    "style": "Minor",
+    "progression": "i VII i v - Mysterious Nostalgic",
+    "name": "i VII i v - Mysterious Nostalgic"
+  },
+  {
+    "category": "Minor",
+    "style": "Minor",
+    "progression": "i VII i v III VII i v i - Mysterious Surprised",
+    "name": "i VII i v III VII i v i - Mysterious Surprised"
+  },
+  {
+    "category": "Minor",
+    "style": "Minor",
+    "progression": "i VII v VI - Mysterious Hopeful",
+    "name": "i VII v VI - Mysterious Hopeful"
+  },
+  {
+    "category": "Minor",
+    "style": "Minor",
+    "progression": "i i iv iv v7 ii5 v v7 - Dark Mysterious",
+    "name": "i i iv iv v7 ii5 v v7 - Dark Mysterious"
+  },
+  {
+    "category": "Minor",
+    "style": "Minor",
+    "progression": "i ii v III i ii v VII - Mysterious Dramatic",
+    "name": "i ii v III i ii v VII - Mysterious Dramatic"
+  },
+  {
+    "category": "Minor",
+    "style": "Minor",
+    "progression": "i ii v i - Mysterious Triumphant",
+    "name": "i ii v i - Mysterious Triumphant"
+  },
+  {
+    "category": "Minor",
+    "style": "Minor",
+    "progression": "i iv III VI - Nostalgic Romantic",
+    "name": "i iv III VI - Nostalgic Romantic"
+  },
+  {
+    "category": "Minor",
+    "style": "Minor",
+    "progression": "i iv VI v - Sad Hopeful",
+    "name": "i iv VI v - Sad Hopeful"
+  },
+  {
+    "category": "Minor",
+    "style": "Minor",
+    "progression": "i iv VII i - Sad Nostalgic",
+    "name": "i iv VII i - Sad Nostalgic"
+  },
+  {
+    "category": "Minor",
+    "style": "Minor",
+    "progression": "i iv VII v i i ii V - Mysterious Surprised",
+    "name": "i iv VII v i i ii V - Mysterious Surprised"
+  },
+  {
+    "category": "Minor",
+    "style": "Minor",
+    "progression": "i iv v iv - Mysterious Sad",
+    "name": "i iv v iv - Mysterious Sad"
+  },
+  {
+    "category": "Minor",
+    "style": "Minor",
+    "progression": "i iv v v - Sad Lonely",
+    "name": "i iv v v - Sad Lonely"
+  },
+  {
+    "category": "Minor",
+    "style": "Minor",
+    "progression": "i v iv VII - Sad Rebellious",
+    "name": "i v iv VII - Sad Rebellious"
+  },
+  {
+    "category": "Minor",
+    "style": "Minor",
+    "progression": "i vdim iv VI - Dark Nostalgic",
+    "name": "i vdim iv VI - Dark Nostalgic"
+  },
+  {
+    "category": "Minor",
+    "style": "Minor",
+    "progression": "i7 VI III7 VII6 i i7 III7 iv7 - Dark Nostalgic",
+    "name": "i7 VI III7 VII6 i i7 III7 iv7 - Dark Nostalgic"
+  },
+  {
+    "category": "Minor",
+    "style": "Minor",
+    "progression": "i7 VII VI7 iv7 - Nostalgic Romantic",
+    "name": "i7 VII VI7 iv7 - Nostalgic Romantic"
+  },
+  {
+    "category": "Minor",
+    "style": "Minor",
+    "progression": "ii VI i iv - Sad Hopeful",
+    "name": "ii VI i iv - Sad Hopeful"
+  },
+  {
+    "category": "Minor",
+    "style": "Minor",
+    "progression": "ii v i i - Peaceful Hopeful",
+    "name": "ii v i i - Peaceful Hopeful"
+  },
+  {
+    "category": "Minor",
+    "style": "Minor",
+    "progression": "ii v i iv - Peaceful Nostalgic",
+    "name": "ii v i iv - Peaceful Nostalgic"
+  },
+  {
+    "category": "Minor",
+    "style": "Minor",
+    "progression": "im7 ivsus4 v7 isus4 - Mysterious Tender",
+    "name": "im7 ivsus4 v7 isus4 - Mysterious Tender"
+  },
+  {
+    "category": "Minor",
+    "style": "Minor",
+    "progression": "iv III VII i - Nostalgic Mysterious",
+    "name": "iv III VII i - Nostalgic Mysterious"
+  },
+  {
+    "category": "Minor",
+    "style": "Minor",
+    "progression": "iv III vsus4 VI iv i III VI - Nostalgic Mysterious",
+    "name": "iv III vsus4 VI iv i III VI - Nostalgic Mysterious"
+  },
+  {
+    "category": "Minor",
+    "style": "Minor",
+    "progression": "iv VI VII i - Triumphant",
+    "name": "iv VI VII i - Triumphant"
+  },
+  {
+    "category": "Minor",
+    "style": "Minor",
+    "progression": "iv VI v VII - Mysterious Hopeful",
+    "name": "iv VI v VII - Mysterious Hopeful"
+  },
+  {
+    "category": "Minor",
+    "style": "Minor",
+    "progression": "iv i v VI - Nostalgic Hopeful",
+    "name": "iv i v VI - Nostalgic Hopeful"
+  },
+  {
+    "category": "Minor",
+    "style": "Minor",
+    "progression": "iv v VI VII - Mysterious Rebellious",
+    "name": "iv v VI VII - Mysterious Rebellious"
+  },
+  {
+    "category": "Minor",
+    "style": "Minor",
+    "progression": "v VI III i - Hopeful Nostalgic",
+    "name": "v VI III i - Hopeful Nostalgic"
+  },
+  {
+    "category": "Minor",
+    "style": "Minor",
+    "progression": "v VI v i - Sad",
+    "name": "v VI v i - Sad"
+  },
+  {
+    "category": "Minor",
+    "style": "Minor",
+    "progression": "v i iv VII - Dark Rebellious",
+    "name": "v i iv VII - Dark Rebellious"
+  },
+  {
+    "category": "Minor",
+    "style": "Minor",
+    "progression": "v iv i i - Lonely",
+    "name": "v iv i i - Lonely"
+  },
+  {
+    "category": "Minor",
+    "style": "hiphop2",
+    "progression": "VI III i v - Nostalgic Dark",
+    "name": "VI III i v - Nostalgic Dark"
+  },
+  {
+    "category": "Minor",
+    "style": "hiphop2",
+    "progression": "VI VI i VII - Empowered",
+    "name": "VI VI i VII - Empowered"
+  },
+  {
+    "category": "Minor",
+    "style": "hiphop2",
+    "progression": "VI VII i III - Triumphant Nostalgic",
+    "name": "VI VII i III - Triumphant Nostalgic"
+  },
+  {
+    "category": "Minor",
+    "style": "hiphop2",
+    "progression": "VI VII v III - Rebellious Nostalgic",
+    "name": "VI VII v III - Rebellious Nostalgic"
+  },
+  {
+    "category": "Minor",
+    "style": "hiphop2",
+    "progression": "VI i v III - Hopeful Nostalgic",
+    "name": "VI i v III - Hopeful Nostalgic"
+  },
+  {
+    "category": "Minor",
+    "style": "hiphop2",
+    "progression": "VI i v v - Sad",
+    "name": "VI i v v - Sad"
+  },
+  {
+    "category": "Minor",
+    "style": "hiphop2",
+    "progression": "VI iv i v - Hopeful Tender",
+    "name": "VI iv i v - Hopeful Tender"
+  },
+  {
+    "category": "Minor",
+    "style": "hiphop2",
+    "progression": "VII iv VII i - Spiritual",
+    "name": "VII iv VII i - Spiritual"
+  },
+  {
+    "category": "Minor",
+    "style": "hiphop2",
+    "progression": "VII iv v i - Mysterious Dark",
+    "name": "VII iv v i - Mysterious Dark"
+  },
+  {
+    "category": "Minor",
+    "style": "hiphop2",
+    "progression": "i III VII VI - Nostalgic Romantic",
+    "name": "i III VII VI - Nostalgic Romantic"
+  },
+  {
+    "category": "Minor",
+    "style": "hiphop2",
+    "progression": "i III iv VI - Nostalgic Romantic",
+    "name": "i III iv VI - Nostalgic Romantic"
+  },
+  {
+    "category": "Minor",
+    "style": "hiphop2",
+    "progression": "i VI III VII - Nostalgic Hopeful",
+    "name": "i VI III VII - Nostalgic Hopeful"
+  },
+  {
+    "category": "Minor",
+    "style": "hiphop2",
+    "progression": "i VI III VII i VI69 III7 VII - Mysterious Spiritual",
+    "name": "i VI III VII i VI69 III7 VII - Mysterious Spiritual"
+  },
+  {
+    "category": "Minor",
+    "style": "hiphop2",
+    "progression": "i VI VII VII - Triumphant Rebellious",
+    "name": "i VI VII VII - Triumphant Rebellious"
+  },
+  {
+    "category": "Minor",
+    "style": "hiphop2",
+    "progression": "i VI VII iv - Mysterious Nostalgic",
+    "name": "i VI VII iv - Mysterious Nostalgic"
+  },
+  {
+    "category": "Minor",
+    "style": "hiphop2",
+    "progression": "i VI VII v - Mysterious Rebellious",
+    "name": "i VI VII v - Mysterious Rebellious"
+  },
+  {
+    "category": "Minor",
+    "style": "hiphop2",
+    "progression": "i VI iv III - Sad Nostalgic",
+    "name": "i VI iv III - Sad Nostalgic"
+  },
+  {
+    "category": "Minor",
+    "style": "hiphop2",
+    "progression": "i VI iv ii - Sad Tender",
+    "name": "i VI iv ii - Sad Tender"
+  },
+  {
+    "category": "Minor",
+    "style": "hiphop2",
+    "progression": "i VI iv v - Sad Hopeful",
+    "name": "i VI iv v - Sad Hopeful"
+  },
+  {
+    "category": "Minor",
+    "style": "hiphop2",
+    "progression": "i VII III VI - Rebellious Triumphant",
+    "name": "i VII III VI - Rebellious Triumphant"
+  },
+  {
+    "category": "Minor",
+    "style": "hiphop2",
+    "progression": "i VII VI III - Nostalgic Hopeful",
+    "name": "i VII VI III - Nostalgic Hopeful"
+  },
+  {
+    "category": "Minor",
+    "style": "hiphop2",
+    "progression": "i VII VI III iv VI VII i - Mysterious Surprised",
+    "name": "i VII VI III iv VI VII i - Mysterious Surprised"
+  },
+  {
+    "category": "Minor",
+    "style": "hiphop2",
+    "progression": "i VII VI VII - Rebellious Triumphant",
+    "name": "i VII VI VII - Rebellious Triumphant"
+  },
+  {
+    "category": "Minor",
+    "style": "hiphop2",
+    "progression": "i VII VI iv - Sad Romantic",
+    "name": "i VII VI iv - Sad Romantic"
+  },
+  {
+    "category": "Minor",
+    "style": "hiphop2",
+    "progression": "i VII i v - Mysterious Nostalgic",
+    "name": "i VII i v - Mysterious Nostalgic"
+  },
+  {
+    "category": "Minor",
+    "style": "hiphop2",
+    "progression": "i VII i v III VII i v i - Mysterious Surprised",
+    "name": "i VII i v III VII i v i - Mysterious Surprised"
+  },
+  {
+    "category": "Minor",
+    "style": "hiphop2",
+    "progression": "i VII v VI - Mysterious Hopeful",
+    "name": "i VII v VI - Mysterious Hopeful"
+  },
+  {
+    "category": "Minor",
+    "style": "hiphop2",
+    "progression": "i i iv iv v7 ii5 v v7 - Dark Mysterious",
+    "name": "i i iv iv v7 ii5 v v7 - Dark Mysterious"
+  },
+  {
+    "category": "Minor",
+    "style": "hiphop2",
+    "progression": "i ii v III i ii v VII - Mysterious Dramatic",
+    "name": "i ii v III i ii v VII - Mysterious Dramatic"
+  },
+  {
+    "category": "Minor",
+    "style": "hiphop2",
+    "progression": "i ii v i - Mysterious Triumphant",
+    "name": "i ii v i - Mysterious Triumphant"
+  },
+  {
+    "category": "Minor",
+    "style": "hiphop2",
+    "progression": "i iv III VI - Nostalgic Romantic",
+    "name": "i iv III VI - Nostalgic Romantic"
+  },
+  {
+    "category": "Minor",
+    "style": "hiphop2",
+    "progression": "i iv VI v - Sad Hopeful",
+    "name": "i iv VI v - Sad Hopeful"
+  },
+  {
+    "category": "Minor",
+    "style": "hiphop2",
+    "progression": "i iv VII i - Sad Nostalgic",
+    "name": "i iv VII i - Sad Nostalgic"
+  },
+  {
+    "category": "Minor",
+    "style": "hiphop2",
+    "progression": "i iv VII v i i ii V - Mysterious Surprised",
+    "name": "i iv VII v i i ii V - Mysterious Surprised"
+  },
+  {
+    "category": "Minor",
+    "style": "hiphop2",
+    "progression": "i iv v iv - Mysterious Sad",
+    "name": "i iv v iv - Mysterious Sad"
+  },
+  {
+    "category": "Minor",
+    "style": "hiphop2",
+    "progression": "i iv v v - Sad Lonely",
+    "name": "i iv v v - Sad Lonely"
+  },
+  {
+    "category": "Minor",
+    "style": "hiphop2",
+    "progression": "i v iv VII - Sad Rebellious",
+    "name": "i v iv VII - Sad Rebellious"
+  },
+  {
+    "category": "Minor",
+    "style": "hiphop2",
+    "progression": "i vdim iv VI - Dark Nostalgic",
+    "name": "i vdim iv VI - Dark Nostalgic"
+  },
+  {
+    "category": "Minor",
+    "style": "hiphop2",
+    "progression": "i7 VI III7 VII6 i i7 III7 iv7 - Dark Nostalgic",
+    "name": "i7 VI III7 VII6 i i7 III7 iv7 - Dark Nostalgic"
+  },
+  {
+    "category": "Minor",
+    "style": "hiphop2",
+    "progression": "i7 VII VI7 iv7 - Nostalgic Romantic",
+    "name": "i7 VII VI7 iv7 - Nostalgic Romantic"
+  },
+  {
+    "category": "Minor",
+    "style": "hiphop2",
+    "progression": "ii VI i iv - Sad Hopeful",
+    "name": "ii VI i iv - Sad Hopeful"
+  },
+  {
+    "category": "Minor",
+    "style": "hiphop2",
+    "progression": "ii v i i - Peaceful Hopeful",
+    "name": "ii v i i - Peaceful Hopeful"
+  },
+  {
+    "category": "Minor",
+    "style": "hiphop2",
+    "progression": "ii v i iv - Peaceful Nostalgic",
+    "name": "ii v i iv - Peaceful Nostalgic"
+  },
+  {
+    "category": "Minor",
+    "style": "hiphop2",
+    "progression": "im7 ivsus4 v7 isus4 - Mysterious Tender",
+    "name": "im7 ivsus4 v7 isus4 - Mysterious Tender"
+  },
+  {
+    "category": "Minor",
+    "style": "hiphop2",
+    "progression": "iv III VII i - Nostalgic Mysterious",
+    "name": "iv III VII i - Nostalgic Mysterious"
+  },
+  {
+    "category": "Minor",
+    "style": "hiphop2",
+    "progression": "iv III vsus4 VI iv i III VI - Nostalgic Mysterious",
+    "name": "iv III vsus4 VI iv i III VI - Nostalgic Mysterious"
+  },
+  {
+    "category": "Minor",
+    "style": "hiphop2",
+    "progression": "iv VI VII i - Triumphant",
+    "name": "iv VI VII i - Triumphant"
+  },
+  {
+    "category": "Minor",
+    "style": "hiphop2",
+    "progression": "iv VI v VII - Mysterious Hopeful",
+    "name": "iv VI v VII - Mysterious Hopeful"
+  },
+  {
+    "category": "Minor",
+    "style": "hiphop2",
+    "progression": "iv i v VI - Nostalgic Hopeful",
+    "name": "iv i v VI - Nostalgic Hopeful"
+  },
+  {
+    "category": "Minor",
+    "style": "hiphop2",
+    "progression": "iv v VI VII - Mysterious Rebellious",
+    "name": "iv v VI VII - Mysterious Rebellious"
+  },
+  {
+    "category": "Minor",
+    "style": "hiphop2",
+    "progression": "v VI III i - Hopeful Nostalgic",
+    "name": "v VI III i - Hopeful Nostalgic"
+  },
+  {
+    "category": "Minor",
+    "style": "hiphop2",
+    "progression": "v VI v i - Sad",
+    "name": "v VI v i - Sad"
+  },
+  {
+    "category": "Minor",
+    "style": "hiphop2",
+    "progression": "v i iv VII - Dark Rebellious",
+    "name": "v i iv VII - Dark Rebellious"
+  },
+  {
+    "category": "Minor",
+    "style": "hiphop2",
+    "progression": "v iv i i - Lonely",
+    "name": "v iv i i - Lonely"
+  },
+  {
+    "category": "Minor",
+    "style": "pop",
+    "progression": "VI III i v - Nostalgic Dark",
+    "name": "VI III i v - Nostalgic Dark"
+  },
+  {
+    "category": "Minor",
+    "style": "pop",
+    "progression": "VI VI i VII - Empowered",
+    "name": "VI VI i VII - Empowered"
+  },
+  {
+    "category": "Minor",
+    "style": "pop",
+    "progression": "VI VII i III - Triumphant Nostalgic",
+    "name": "VI VII i III - Triumphant Nostalgic"
+  },
+  {
+    "category": "Minor",
+    "style": "pop",
+    "progression": "VI VII v III - Rebellious Nostalgic",
+    "name": "VI VII v III - Rebellious Nostalgic"
+  },
+  {
+    "category": "Minor",
+    "style": "pop",
+    "progression": "VI i v III - Hopeful Nostalgic",
+    "name": "VI i v III - Hopeful Nostalgic"
+  },
+  {
+    "category": "Minor",
+    "style": "pop",
+    "progression": "VI i v v - Sad",
+    "name": "VI i v v - Sad"
+  },
+  {
+    "category": "Minor",
+    "style": "pop",
+    "progression": "VI iv i v - Hopeful Tender",
+    "name": "VI iv i v - Hopeful Tender"
+  },
+  {
+    "category": "Minor",
+    "style": "pop",
+    "progression": "VII iv VII i - Spiritual",
+    "name": "VII iv VII i - Spiritual"
+  },
+  {
+    "category": "Minor",
+    "style": "pop",
+    "progression": "VII iv v i - Mysterious Dark",
+    "name": "VII iv v i - Mysterious Dark"
+  },
+  {
+    "category": "Minor",
+    "style": "pop",
+    "progression": "i III VII VI - Nostalgic Romantic",
+    "name": "i III VII VI - Nostalgic Romantic"
+  },
+  {
+    "category": "Minor",
+    "style": "pop",
+    "progression": "i III iv VI - Nostalgic Romantic",
+    "name": "i III iv VI - Nostalgic Romantic"
+  },
+  {
+    "category": "Minor",
+    "style": "pop",
+    "progression": "i VI III VII - Nostalgic Hopeful",
+    "name": "i VI III VII - Nostalgic Hopeful"
+  },
+  {
+    "category": "Minor",
+    "style": "pop",
+    "progression": "i VI III VII i VI69 III7 VII - Mysterious Spiritual",
+    "name": "i VI III VII i VI69 III7 VII - Mysterious Spiritual"
+  },
+  {
+    "category": "Minor",
+    "style": "pop",
+    "progression": "i VI VII VII - Triumphant Rebellious",
+    "name": "i VI VII VII - Triumphant Rebellious"
+  },
+  {
+    "category": "Minor",
+    "style": "pop",
+    "progression": "i VI VII iv - Mysterious Nostalgic",
+    "name": "i VI VII iv - Mysterious Nostalgic"
+  },
+  {
+    "category": "Minor",
+    "style": "pop",
+    "progression": "i VI VII v - Mysterious Rebellious",
+    "name": "i VI VII v - Mysterious Rebellious"
+  },
+  {
+    "category": "Minor",
+    "style": "pop",
+    "progression": "i VI iv III - Sad Nostalgic",
+    "name": "i VI iv III - Sad Nostalgic"
+  },
+  {
+    "category": "Minor",
+    "style": "pop",
+    "progression": "i VI iv ii - Sad Tender",
+    "name": "i VI iv ii - Sad Tender"
+  },
+  {
+    "category": "Minor",
+    "style": "pop",
+    "progression": "i VI iv v - Sad Hopeful",
+    "name": "i VI iv v - Sad Hopeful"
+  },
+  {
+    "category": "Minor",
+    "style": "pop",
+    "progression": "i VII III VI - Rebellious Triumphant",
+    "name": "i VII III VI - Rebellious Triumphant"
+  },
+  {
+    "category": "Minor",
+    "style": "pop",
+    "progression": "i VII VI III - Nostalgic Hopeful",
+    "name": "i VII VI III - Nostalgic Hopeful"
+  },
+  {
+    "category": "Minor",
+    "style": "pop",
+    "progression": "i VII VI III iv VI VII i - Mysterious Surprised",
+    "name": "i VII VI III iv VI VII i - Mysterious Surprised"
+  },
+  {
+    "category": "Minor",
+    "style": "pop",
+    "progression": "i VII VI VII - Rebellious Triumphant",
+    "name": "i VII VI VII - Rebellious Triumphant"
+  },
+  {
+    "category": "Minor",
+    "style": "pop",
+    "progression": "i VII VI iv - Sad Romantic",
+    "name": "i VII VI iv - Sad Romantic"
+  },
+  {
+    "category": "Minor",
+    "style": "pop",
+    "progression": "i VII i v - Mysterious Nostalgic",
+    "name": "i VII i v - Mysterious Nostalgic"
+  },
+  {
+    "category": "Minor",
+    "style": "pop",
+    "progression": "i VII i v III VII i v i - Mysterious Surprised",
+    "name": "i VII i v III VII i v i - Mysterious Surprised"
+  },
+  {
+    "category": "Minor",
+    "style": "pop",
+    "progression": "i VII v VI - Mysterious Hopeful",
+    "name": "i VII v VI - Mysterious Hopeful"
+  },
+  {
+    "category": "Minor",
+    "style": "pop",
+    "progression": "i i iv iv v7 ii5 v v7 - Dark Mysterious",
+    "name": "i i iv iv v7 ii5 v v7 - Dark Mysterious"
+  },
+  {
+    "category": "Minor",
+    "style": "pop",
+    "progression": "i ii v III i ii v VII - Mysterious Dramatic",
+    "name": "i ii v III i ii v VII - Mysterious Dramatic"
+  },
+  {
+    "category": "Minor",
+    "style": "pop",
+    "progression": "i ii v i - Mysterious Triumphant",
+    "name": "i ii v i - Mysterious Triumphant"
+  },
+  {
+    "category": "Minor",
+    "style": "pop",
+    "progression": "i iv III VI - Nostalgic Romantic",
+    "name": "i iv III VI - Nostalgic Romantic"
+  },
+  {
+    "category": "Minor",
+    "style": "pop",
+    "progression": "i iv VI v - Sad Hopeful",
+    "name": "i iv VI v - Sad Hopeful"
+  },
+  {
+    "category": "Minor",
+    "style": "pop",
+    "progression": "i iv VII i - Sad Nostalgic",
+    "name": "i iv VII i - Sad Nostalgic"
+  },
+  {
+    "category": "Minor",
+    "style": "pop",
+    "progression": "i iv VII v i i ii V - Mysterious Surprised",
+    "name": "i iv VII v i i ii V - Mysterious Surprised"
+  },
+  {
+    "category": "Minor",
+    "style": "pop",
+    "progression": "i iv v iv - Mysterious Sad",
+    "name": "i iv v iv - Mysterious Sad"
+  },
+  {
+    "category": "Minor",
+    "style": "pop",
+    "progression": "i iv v v - Sad Lonely",
+    "name": "i iv v v - Sad Lonely"
+  },
+  {
+    "category": "Minor",
+    "style": "pop",
+    "progression": "i v iv VII - Sad Rebellious",
+    "name": "i v iv VII - Sad Rebellious"
+  },
+  {
+    "category": "Minor",
+    "style": "pop",
+    "progression": "i vdim iv VI - Dark Nostalgic",
+    "name": "i vdim iv VI - Dark Nostalgic"
+  },
+  {
+    "category": "Minor",
+    "style": "pop",
+    "progression": "i7 VI III7 VII6 i i7 III7 iv7 - Dark Nostalgic",
+    "name": "i7 VI III7 VII6 i i7 III7 iv7 - Dark Nostalgic"
+  },
+  {
+    "category": "Minor",
+    "style": "pop",
+    "progression": "i7 VII VI7 iv7 - Nostalgic Romantic",
+    "name": "i7 VII VI7 iv7 - Nostalgic Romantic"
+  },
+  {
+    "category": "Minor",
+    "style": "pop",
+    "progression": "ii VI i iv - Sad Hopeful",
+    "name": "ii VI i iv - Sad Hopeful"
+  },
+  {
+    "category": "Minor",
+    "style": "pop",
+    "progression": "ii v i i - Peaceful Hopeful",
+    "name": "ii v i i - Peaceful Hopeful"
+  },
+  {
+    "category": "Minor",
+    "style": "pop",
+    "progression": "ii v i iv - Peaceful Nostalgic",
+    "name": "ii v i iv - Peaceful Nostalgic"
+  },
+  {
+    "category": "Minor",
+    "style": "pop",
+    "progression": "im7 ivsus4 v7 isus4 - Mysterious Tender",
+    "name": "im7 ivsus4 v7 isus4 - Mysterious Tender"
+  },
+  {
+    "category": "Minor",
+    "style": "pop",
+    "progression": "iv III VII i - Nostalgic Mysterious",
+    "name": "iv III VII i - Nostalgic Mysterious"
+  },
+  {
+    "category": "Minor",
+    "style": "pop",
+    "progression": "iv III vsus4 VI iv i III VI - Nostalgic Mysterious",
+    "name": "iv III vsus4 VI iv i III VI - Nostalgic Mysterious"
+  },
+  {
+    "category": "Minor",
+    "style": "pop",
+    "progression": "iv VI VII i - Triumphant",
+    "name": "iv VI VII i - Triumphant"
+  },
+  {
+    "category": "Minor",
+    "style": "pop",
+    "progression": "iv VI v VII - Mysterious Hopeful",
+    "name": "iv VI v VII - Mysterious Hopeful"
+  },
+  {
+    "category": "Minor",
+    "style": "pop",
+    "progression": "iv i v VI - Nostalgic Hopeful",
+    "name": "iv i v VI - Nostalgic Hopeful"
+  },
+  {
+    "category": "Minor",
+    "style": "pop",
+    "progression": "iv v VI VII - Mysterious Rebellious",
+    "name": "iv v VI VII - Mysterious Rebellious"
+  },
+  {
+    "category": "Minor",
+    "style": "pop",
+    "progression": "v VI III i - Hopeful Nostalgic",
+    "name": "v VI III i - Hopeful Nostalgic"
+  },
+  {
+    "category": "Minor",
+    "style": "pop",
+    "progression": "v VI v i - Sad",
+    "name": "v VI v i - Sad"
+  },
+  {
+    "category": "Minor",
+    "style": "pop",
+    "progression": "v i iv VII - Dark Rebellious",
+    "name": "v i iv VII - Dark Rebellious"
+  },
+  {
+    "category": "Minor",
+    "style": "pop",
+    "progression": "v iv i i - Lonely",
+    "name": "v iv i i - Lonely"
+  },
+  {
+    "category": "Minor",
+    "style": "pop2",
+    "progression": "VI III i v - Nostalgic Dark",
+    "name": "VI III i v - Nostalgic Dark"
+  },
+  {
+    "category": "Minor",
+    "style": "pop2",
+    "progression": "VI VI i VII - Empowered",
+    "name": "VI VI i VII - Empowered"
+  },
+  {
+    "category": "Minor",
+    "style": "pop2",
+    "progression": "VI VII i III - Triumphant Nostalgic",
+    "name": "VI VII i III - Triumphant Nostalgic"
+  },
+  {
+    "category": "Minor",
+    "style": "pop2",
+    "progression": "VI VII v III - Rebellious Nostalgic",
+    "name": "VI VII v III - Rebellious Nostalgic"
+  },
+  {
+    "category": "Minor",
+    "style": "pop2",
+    "progression": "VI i v III - Hopeful Nostalgic",
+    "name": "VI i v III - Hopeful Nostalgic"
+  },
+  {
+    "category": "Minor",
+    "style": "pop2",
+    "progression": "VI i v v - Sad",
+    "name": "VI i v v - Sad"
+  },
+  {
+    "category": "Minor",
+    "style": "pop2",
+    "progression": "VI iv i v - Hopeful Tender",
+    "name": "VI iv i v - Hopeful Tender"
+  },
+  {
+    "category": "Minor",
+    "style": "pop2",
+    "progression": "VII iv VII i - Spiritual",
+    "name": "VII iv VII i - Spiritual"
+  },
+  {
+    "category": "Minor",
+    "style": "pop2",
+    "progression": "VII iv v i - Mysterious Dark",
+    "name": "VII iv v i - Mysterious Dark"
+  },
+  {
+    "category": "Minor",
+    "style": "pop2",
+    "progression": "i III VII VI - Nostalgic Romantic",
+    "name": "i III VII VI - Nostalgic Romantic"
+  },
+  {
+    "category": "Minor",
+    "style": "pop2",
+    "progression": "i III iv VI - Nostalgic Romantic",
+    "name": "i III iv VI - Nostalgic Romantic"
+  },
+  {
+    "category": "Minor",
+    "style": "pop2",
+    "progression": "i VI III VII - Nostalgic Hopeful",
+    "name": "i VI III VII - Nostalgic Hopeful"
+  },
+  {
+    "category": "Minor",
+    "style": "pop2",
+    "progression": "i VI III VII i VI69 III7 VII - Mysterious Spiritual",
+    "name": "i VI III VII i VI69 III7 VII - Mysterious Spiritual"
+  },
+  {
+    "category": "Minor",
+    "style": "pop2",
+    "progression": "i VI VII VII - Triumphant Rebellious",
+    "name": "i VI VII VII - Triumphant Rebellious"
+  },
+  {
+    "category": "Minor",
+    "style": "pop2",
+    "progression": "i VI VII iv - Mysterious Nostalgic",
+    "name": "i VI VII iv - Mysterious Nostalgic"
+  },
+  {
+    "category": "Minor",
+    "style": "pop2",
+    "progression": "i VI VII v - Mysterious Rebellious",
+    "name": "i VI VII v - Mysterious Rebellious"
+  },
+  {
+    "category": "Minor",
+    "style": "pop2",
+    "progression": "i VI iv III - Sad Nostalgic",
+    "name": "i VI iv III - Sad Nostalgic"
+  },
+  {
+    "category": "Minor",
+    "style": "pop2",
+    "progression": "i VI iv ii - Sad Tender",
+    "name": "i VI iv ii - Sad Tender"
+  },
+  {
+    "category": "Minor",
+    "style": "pop2",
+    "progression": "i VI iv v - Sad Hopeful",
+    "name": "i VI iv v - Sad Hopeful"
+  },
+  {
+    "category": "Minor",
+    "style": "pop2",
+    "progression": "i VII III VI - Rebellious Triumphant",
+    "name": "i VII III VI - Rebellious Triumphant"
+  },
+  {
+    "category": "Minor",
+    "style": "pop2",
+    "progression": "i VII VI III - Nostalgic Hopeful",
+    "name": "i VII VI III - Nostalgic Hopeful"
+  },
+  {
+    "category": "Minor",
+    "style": "pop2",
+    "progression": "i VII VI III iv VI VII i - Mysterious Surprised",
+    "name": "i VII VI III iv VI VII i - Mysterious Surprised"
+  },
+  {
+    "category": "Minor",
+    "style": "pop2",
+    "progression": "i VII VI VII - Rebellious Triumphant",
+    "name": "i VII VI VII - Rebellious Triumphant"
+  },
+  {
+    "category": "Minor",
+    "style": "pop2",
+    "progression": "i VII VI iv - Sad Romantic",
+    "name": "i VII VI iv - Sad Romantic"
+  },
+  {
+    "category": "Minor",
+    "style": "pop2",
+    "progression": "i VII i v - Mysterious Nostalgic",
+    "name": "i VII i v - Mysterious Nostalgic"
+  },
+  {
+    "category": "Minor",
+    "style": "pop2",
+    "progression": "i VII i v III VII i v i - Mysterious Surprised",
+    "name": "i VII i v III VII i v i - Mysterious Surprised"
+  },
+  {
+    "category": "Minor",
+    "style": "pop2",
+    "progression": "i VII v VI - Mysterious Hopeful",
+    "name": "i VII v VI - Mysterious Hopeful"
+  },
+  {
+    "category": "Minor",
+    "style": "pop2",
+    "progression": "i i iv iv v7 ii5 v v7 - Dark Mysterious",
+    "name": "i i iv iv v7 ii5 v v7 - Dark Mysterious"
+  },
+  {
+    "category": "Minor",
+    "style": "pop2",
+    "progression": "i ii v III i ii v VII - Mysterious Dramatic",
+    "name": "i ii v III i ii v VII - Mysterious Dramatic"
+  },
+  {
+    "category": "Minor",
+    "style": "pop2",
+    "progression": "i ii v i - Mysterious Triumphant",
+    "name": "i ii v i - Mysterious Triumphant"
+  },
+  {
+    "category": "Minor",
+    "style": "pop2",
+    "progression": "i iv III VI - Nostalgic Romantic",
+    "name": "i iv III VI - Nostalgic Romantic"
+  },
+  {
+    "category": "Minor",
+    "style": "pop2",
+    "progression": "i iv VI v - Sad Hopeful",
+    "name": "i iv VI v - Sad Hopeful"
+  },
+  {
+    "category": "Minor",
+    "style": "pop2",
+    "progression": "i iv VII i - Sad Nostalgic",
+    "name": "i iv VII i - Sad Nostalgic"
+  },
+  {
+    "category": "Minor",
+    "style": "pop2",
+    "progression": "i iv VII v i i ii V - Mysterious Surprised",
+    "name": "i iv VII v i i ii V - Mysterious Surprised"
+  },
+  {
+    "category": "Minor",
+    "style": "pop2",
+    "progression": "i iv v iv - Mysterious Sad",
+    "name": "i iv v iv - Mysterious Sad"
+  },
+  {
+    "category": "Minor",
+    "style": "pop2",
+    "progression": "i iv v v - Sad Lonely",
+    "name": "i iv v v - Sad Lonely"
+  },
+  {
+    "category": "Minor",
+    "style": "pop2",
+    "progression": "i v iv VII - Sad Rebellious",
+    "name": "i v iv VII - Sad Rebellious"
+  },
+  {
+    "category": "Minor",
+    "style": "pop2",
+    "progression": "i vdim iv VI - Dark Nostalgic",
+    "name": "i vdim iv VI - Dark Nostalgic"
+  },
+  {
+    "category": "Minor",
+    "style": "pop2",
+    "progression": "i7 VI III7 VII6 i i7 III7 iv7 - Dark Nostalgic",
+    "name": "i7 VI III7 VII6 i i7 III7 iv7 - Dark Nostalgic"
+  },
+  {
+    "category": "Minor",
+    "style": "pop2",
+    "progression": "i7 VII VI7 iv7 - Nostalgic Romantic",
+    "name": "i7 VII VI7 iv7 - Nostalgic Romantic"
+  },
+  {
+    "category": "Minor",
+    "style": "pop2",
+    "progression": "ii VI i iv - Sad Hopeful",
+    "name": "ii VI i iv - Sad Hopeful"
+  },
+  {
+    "category": "Minor",
+    "style": "pop2",
+    "progression": "ii v i i - Peaceful Hopeful",
+    "name": "ii v i i - Peaceful Hopeful"
+  },
+  {
+    "category": "Minor",
+    "style": "pop2",
+    "progression": "ii v i iv - Peaceful Nostalgic",
+    "name": "ii v i iv - Peaceful Nostalgic"
+  },
+  {
+    "category": "Minor",
+    "style": "pop2",
+    "progression": "im7 ivsus4 v7 isus4 - Mysterious Tender",
+    "name": "im7 ivsus4 v7 isus4 - Mysterious Tender"
+  },
+  {
+    "category": "Minor",
+    "style": "pop2",
+    "progression": "iv III VII i - Nostalgic Mysterious",
+    "name": "iv III VII i - Nostalgic Mysterious"
+  },
+  {
+    "category": "Minor",
+    "style": "pop2",
+    "progression": "iv III vsus4 VI iv i III VI - Nostalgic Mysterious",
+    "name": "iv III vsus4 VI iv i III VI - Nostalgic Mysterious"
+  },
+  {
+    "category": "Minor",
+    "style": "pop2",
+    "progression": "iv VI VII i - Triumphant",
+    "name": "iv VI VII i - Triumphant"
+  },
+  {
+    "category": "Minor",
+    "style": "pop2",
+    "progression": "iv VI v VII - Mysterious Hopeful",
+    "name": "iv VI v VII - Mysterious Hopeful"
+  },
+  {
+    "category": "Minor",
+    "style": "pop2",
+    "progression": "iv i v VI - Nostalgic Hopeful",
+    "name": "iv i v VI - Nostalgic Hopeful"
+  },
+  {
+    "category": "Minor",
+    "style": "pop2",
+    "progression": "iv v VI VII - Mysterious Rebellious",
+    "name": "iv v VI VII - Mysterious Rebellious"
+  },
+  {
+    "category": "Minor",
+    "style": "pop2",
+    "progression": "v VI III i - Hopeful Nostalgic",
+    "name": "v VI III i - Hopeful Nostalgic"
+  },
+  {
+    "category": "Minor",
+    "style": "pop2",
+    "progression": "v VI v i - Sad",
+    "name": "v VI v i - Sad"
+  },
+  {
+    "category": "Minor",
+    "style": "pop2",
+    "progression": "v i iv VII - Dark Rebellious",
+    "name": "v i iv VII - Dark Rebellious"
+  },
+  {
+    "category": "Minor",
+    "style": "pop2",
+    "progression": "v iv i i - Lonely",
+    "name": "v iv i i - Lonely"
+  },
+  {
+    "category": "Minor",
+    "style": "soul",
+    "progression": "VI III i v - Nostalgic Dark",
+    "name": "VI III i v - Nostalgic Dark"
+  },
+  {
+    "category": "Minor",
+    "style": "soul",
+    "progression": "VI VI i VII - Empowered",
+    "name": "VI VI i VII - Empowered"
+  },
+  {
+    "category": "Minor",
+    "style": "soul",
+    "progression": "VI VII i III - Triumphant Nostalgic",
+    "name": "VI VII i III - Triumphant Nostalgic"
+  },
+  {
+    "category": "Minor",
+    "style": "soul",
+    "progression": "VI VII v III - Rebellious Nostalgic",
+    "name": "VI VII v III - Rebellious Nostalgic"
+  },
+  {
+    "category": "Minor",
+    "style": "soul",
+    "progression": "VI i v III - Hopeful Nostalgic",
+    "name": "VI i v III - Hopeful Nostalgic"
+  },
+  {
+    "category": "Minor",
+    "style": "soul",
+    "progression": "VI i v v - Sad",
+    "name": "VI i v v - Sad"
+  },
+  {
+    "category": "Minor",
+    "style": "soul",
+    "progression": "VI iv i v - Hopeful Tender",
+    "name": "VI iv i v - Hopeful Tender"
+  },
+  {
+    "category": "Minor",
+    "style": "soul",
+    "progression": "VII iv VII i - Spiritual",
+    "name": "VII iv VII i - Spiritual"
+  },
+  {
+    "category": "Minor",
+    "style": "soul",
+    "progression": "VII iv v i - Mysterious Dark",
+    "name": "VII iv v i - Mysterious Dark"
+  },
+  {
+    "category": "Minor",
+    "style": "soul",
+    "progression": "i III VII VI - Nostalgic Romantic",
+    "name": "i III VII VI - Nostalgic Romantic"
+  },
+  {
+    "category": "Minor",
+    "style": "soul",
+    "progression": "i III iv VI - Nostalgic Romantic",
+    "name": "i III iv VI - Nostalgic Romantic"
+  },
+  {
+    "category": "Minor",
+    "style": "soul",
+    "progression": "i VI III VII - Nostalgic Hopeful",
+    "name": "i VI III VII - Nostalgic Hopeful"
+  },
+  {
+    "category": "Minor",
+    "style": "soul",
+    "progression": "i VI III VII i VI69 III7 VII - Mysterious Spiritual",
+    "name": "i VI III VII i VI69 III7 VII - Mysterious Spiritual"
+  },
+  {
+    "category": "Minor",
+    "style": "soul",
+    "progression": "i VI VII VII - Triumphant Rebellious",
+    "name": "i VI VII VII - Triumphant Rebellious"
+  },
+  {
+    "category": "Minor",
+    "style": "soul",
+    "progression": "i VI VII iv - Mysterious Nostalgic",
+    "name": "i VI VII iv - Mysterious Nostalgic"
+  },
+  {
+    "category": "Minor",
+    "style": "soul",
+    "progression": "i VI VII v - Mysterious Rebellious",
+    "name": "i VI VII v - Mysterious Rebellious"
+  },
+  {
+    "category": "Minor",
+    "style": "soul",
+    "progression": "i VI iv III - Sad Nostalgic",
+    "name": "i VI iv III - Sad Nostalgic"
+  },
+  {
+    "category": "Minor",
+    "style": "soul",
+    "progression": "i VI iv ii - Sad Tender",
+    "name": "i VI iv ii - Sad Tender"
+  },
+  {
+    "category": "Minor",
+    "style": "soul",
+    "progression": "i VI iv v - Sad Hopeful",
+    "name": "i VI iv v - Sad Hopeful"
+  },
+  {
+    "category": "Minor",
+    "style": "soul",
+    "progression": "i VII III VI - Rebellious Triumphant",
+    "name": "i VII III VI - Rebellious Triumphant"
+  },
+  {
+    "category": "Minor",
+    "style": "soul",
+    "progression": "i VII VI III - Nostalgic Hopeful",
+    "name": "i VII VI III - Nostalgic Hopeful"
+  },
+  {
+    "category": "Minor",
+    "style": "soul",
+    "progression": "i VII VI III iv VI VII i - Mysterious Surprised",
+    "name": "i VII VI III iv VI VII i - Mysterious Surprised"
+  },
+  {
+    "category": "Minor",
+    "style": "soul",
+    "progression": "i VII VI VII - Rebellious Triumphant",
+    "name": "i VII VI VII - Rebellious Triumphant"
+  },
+  {
+    "category": "Minor",
+    "style": "soul",
+    "progression": "i VII VI iv - Sad Romantic",
+    "name": "i VII VI iv - Sad Romantic"
+  },
+  {
+    "category": "Minor",
+    "style": "soul",
+    "progression": "i VII i v - Mysterious Nostalgic",
+    "name": "i VII i v - Mysterious Nostalgic"
+  },
+  {
+    "category": "Minor",
+    "style": "soul",
+    "progression": "i VII i v III VII i v i - Mysterious Surprised",
+    "name": "i VII i v III VII i v i - Mysterious Surprised"
+  },
+  {
+    "category": "Minor",
+    "style": "soul",
+    "progression": "i VII v VI - Mysterious Hopeful",
+    "name": "i VII v VI - Mysterious Hopeful"
+  },
+  {
+    "category": "Minor",
+    "style": "soul",
+    "progression": "i i iv iv v7 ii5 v v7 - Dark Mysterious",
+    "name": "i i iv iv v7 ii5 v v7 - Dark Mysterious"
+  },
+  {
+    "category": "Minor",
+    "style": "soul",
+    "progression": "i ii v III i ii v VII - Mysterious Dramatic",
+    "name": "i ii v III i ii v VII - Mysterious Dramatic"
+  },
+  {
+    "category": "Minor",
+    "style": "soul",
+    "progression": "i ii v i - Mysterious Triumphant",
+    "name": "i ii v i - Mysterious Triumphant"
+  },
+  {
+    "category": "Minor",
+    "style": "soul",
+    "progression": "i iv III VI - Nostalgic Romantic",
+    "name": "i iv III VI - Nostalgic Romantic"
+  },
+  {
+    "category": "Minor",
+    "style": "soul",
+    "progression": "i iv VI v - Sad Hopeful",
+    "name": "i iv VI v - Sad Hopeful"
+  },
+  {
+    "category": "Minor",
+    "style": "soul",
+    "progression": "i iv VII i - Sad Nostalgic",
+    "name": "i iv VII i - Sad Nostalgic"
+  },
+  {
+    "category": "Minor",
+    "style": "soul",
+    "progression": "i iv VII v i i ii V - Mysterious Surprised",
+    "name": "i iv VII v i i ii V - Mysterious Surprised"
+  },
+  {
+    "category": "Minor",
+    "style": "soul",
+    "progression": "i iv v iv - Mysterious Sad",
+    "name": "i iv v iv - Mysterious Sad"
+  },
+  {
+    "category": "Minor",
+    "style": "soul",
+    "progression": "i iv v v - Sad Lonely",
+    "name": "i iv v v - Sad Lonely"
+  },
+  {
+    "category": "Minor",
+    "style": "soul",
+    "progression": "i v iv VII - Sad Rebellious",
+    "name": "i v iv VII - Sad Rebellious"
+  },
+  {
+    "category": "Minor",
+    "style": "soul",
+    "progression": "i vdim iv VI - Dark Nostalgic",
+    "name": "i vdim iv VI - Dark Nostalgic"
+  },
+  {
+    "category": "Minor",
+    "style": "soul",
+    "progression": "i7 VI III7 VII6 i i7 III7 iv7 - Dark Nostalgic",
+    "name": "i7 VI III7 VII6 i i7 III7 iv7 - Dark Nostalgic"
+  },
+  {
+    "category": "Minor",
+    "style": "soul",
+    "progression": "i7 VII VI7 iv7 - Nostalgic Romantic",
+    "name": "i7 VII VI7 iv7 - Nostalgic Romantic"
+  },
+  {
+    "category": "Minor",
+    "style": "soul",
+    "progression": "ii VI i iv - Sad Hopeful",
+    "name": "ii VI i iv - Sad Hopeful"
+  },
+  {
+    "category": "Minor",
+    "style": "soul",
+    "progression": "ii v i i - Peaceful Hopeful",
+    "name": "ii v i i - Peaceful Hopeful"
+  },
+  {
+    "category": "Minor",
+    "style": "soul",
+    "progression": "ii v i iv - Peaceful Nostalgic",
+    "name": "ii v i iv - Peaceful Nostalgic"
+  },
+  {
+    "category": "Minor",
+    "style": "soul",
+    "progression": "im7 ivsus4 v7 isus4 - Mysterious Tender",
+    "name": "im7 ivsus4 v7 isus4 - Mysterious Tender"
+  },
+  {
+    "category": "Minor",
+    "style": "soul",
+    "progression": "iv III VII i - Nostalgic Mysterious",
+    "name": "iv III VII i - Nostalgic Mysterious"
+  },
+  {
+    "category": "Minor",
+    "style": "soul",
+    "progression": "iv III vsus4 VI iv i III VI - Nostalgic Mysterious",
+    "name": "iv III vsus4 VI iv i III VI - Nostalgic Mysterious"
+  },
+  {
+    "category": "Minor",
+    "style": "soul",
+    "progression": "iv VI VII i - Triumphant",
+    "name": "iv VI VII i - Triumphant"
+  },
+  {
+    "category": "Minor",
+    "style": "soul",
+    "progression": "iv VI v VII - Mysterious Hopeful",
+    "name": "iv VI v VII - Mysterious Hopeful"
+  },
+  {
+    "category": "Minor",
+    "style": "soul",
+    "progression": "iv i v VI - Nostalgic Hopeful",
+    "name": "iv i v VI - Nostalgic Hopeful"
+  },
+  {
+    "category": "Minor",
+    "style": "soul",
+    "progression": "iv v VI VII - Mysterious Rebellious",
+    "name": "iv v VI VII - Mysterious Rebellious"
+  },
+  {
+    "category": "Minor",
+    "style": "soul",
+    "progression": "v VI III i - Hopeful Nostalgic",
+    "name": "v VI III i - Hopeful Nostalgic"
+  },
+  {
+    "category": "Minor",
+    "style": "soul",
+    "progression": "v VI v i - Sad",
+    "name": "v VI v i - Sad"
+  },
+  {
+    "category": "Minor",
+    "style": "soul",
+    "progression": "v i iv VII - Dark Rebellious",
+    "name": "v i iv VII - Dark Rebellious"
+  },
+  {
+    "category": "Minor",
+    "style": "soul",
+    "progression": "v iv i i - Lonely",
+    "name": "v iv i i - Lonely"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "I I7 I9 IV ivm - Romantic Nostalgic",
+    "name": "I I7 I9 IV ivm - Romantic Nostalgic"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "I I7 Idom7 IV ivm I - Relaxed Nostalgic",
+    "name": "I I7 Idom7 IV ivm I - Relaxed Nostalgic"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "I I7 Idom7 IV ivm I ivm6 Vdom7 - Relaxed Romantic",
+    "name": "I I7 Idom7 IV ivm I ivm6 Vdom7 - Relaxed Romantic"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "I IIIM vi V - Joyful Hopeful",
+    "name": "I IIIM vi V - Joyful Hopeful"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "I IIM IV I - Joyful Triumphant",
+    "name": "I IIM IV I - Joyful Triumphant"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "I IIM iii V6 - Surprised Triumphant",
+    "name": "I IIM iii V6 - Surprised Triumphant"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "I IV V bVIIM - Triumphant Rebellious",
+    "name": "I IV V bVIIM - Triumphant Rebellious"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "I IV bIIIM bVIM - Nostalgic Mysterious",
+    "name": "I IV bIIIM bVIM - Nostalgic Mysterious"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "I IV bVIIM IV - Joyful Rebellious",
+    "name": "I IV bVIIM IV - Joyful Rebellious"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "I V bVIIM IV - Triumphant Rebellious",
+    "name": "I V bVIIM IV - Triumphant Rebellious"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "I V ivm bVIM - Surprised Mysterious",
+    "name": "I V ivm bVIM - Surprised Mysterious"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "I bIIIM IV I - Romantic",
+    "name": "I bIIIM IV I - Romantic"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "I bIIIM bVIIM I - Triumphant Rebellious",
+    "name": "I bIIIM bVIIM I - Triumphant Rebellious"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "I bIIIM bVIIM IV - Triumphant Mysterious",
+    "name": "I bIIIM bVIIM IV - Triumphant Mysterious"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "I bIIIM bVIM bVIIM - Triumphant Hopeful",
+    "name": "I bIIIM bVIM bVIIM - Triumphant Hopeful"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "I bIIM I iii - Surprised Mysterious",
+    "name": "I bIIM I iii - Surprised Mysterious"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "I bIIM7 bIIIM6 bIIM7 I im bVIIM bIIM - Surprised Mysterious",
+    "name": "I bIIM7 bIIIM6 bIIM7 I im bVIIM bIIM - Surprised Mysterious"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "I bVIIM I I bVIM V - Triumphant Hopeful",
+    "name": "I bVIIM I I bVIM V - Triumphant Hopeful"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "I bVIIM IV V - Joyful Triumphant",
+    "name": "I bVIIM IV V - Joyful Triumphant"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "I bVIIM bVIM IV IVsus4 IV - Hopeful Nostalgic",
+    "name": "I bVIIM bVIM IV IVsus4 IV - Hopeful Nostalgic"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "I bVIIM bVIM bIIM - Triumphant Rebellious",
+    "name": "I bVIIM bVIM bIIM - Triumphant Rebellious"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "I bVIM I bIIM - Surprised Mysterious",
+    "name": "I bVIM I bIIM - Surprised Mysterious"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "I bVIM IV bIIIM bVIIM - Mysterious Nostalgic",
+    "name": "I bVIM IV bIIIM bVIIM - Mysterious Nostalgic"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "I ivm bIIIM bVIIM - Mysterious Nostalgic",
+    "name": "I ivm bIIIM bVIIM - Mysterious Nostalgic"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "I5 iii II5 sIVm IV5 vi V5 viim - Excited Triumphant",
+    "name": "I5 iii II5 sIVm IV5 vi V5 viim - Excited Triumphant"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "I7 bIdom7 III7 ii7 V7 - Playful Surprised",
+    "name": "I7 bIdom7 III7 ii7 V7 - Playful Surprised"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "IIIM V VIsus4 VIM I IIM - Triumphant Surprised",
+    "name": "IIIM V VIsus4 VIM I IIM - Triumphant Surprised"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "IV V ii im bIIIM IV - Hopeful Nostalgic",
+    "name": "IV V ii im bIIIM IV - Hopeful Nostalgic"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "VIM bVIM im bVIIM - Surprised Rebellious",
+    "name": "VIM bVIM im bVIIM - Surprised Rebellious"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "bIIIM V7 I - Cadence",
+    "name": "bIIIM V7 I - Cadence"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "bIIIM ii bIIM I - Mysterious Surprised",
+    "name": "bIIIM ii bIIM I - Mysterious Surprised"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "bIIM bVIM biii bviim - Mysterious Surprised",
+    "name": "bIIM bVIM biii bviim - Mysterious Surprised"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "bIIM ivm biii im - Mysterious Dark",
+    "name": "bIIM ivm biii im - Mysterious Dark"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "bVIIM V7 I - Cadence",
+    "name": "bVIIM V7 I - Cadence"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "bVIIM bIIM bIIIM im - Mysterious Rebellious",
+    "name": "bVIIM bIIM bIIIM im - Mysterious Rebellious"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "bVIM bIIIM bVIIM IV I - Triumphant Mysterious",
+    "name": "bVIM bIIIM bVIIM IV I - Triumphant Mysterious"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "bVIM bVIIm im bIIM - Mysterious Dark",
+    "name": "bVIM bVIIm im bIIM - Mysterious Dark"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "bVIM vi im bVIIM - Hopeful Mysterious",
+    "name": "bVIM vi im bVIIM - Hopeful Mysterious"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "bVIM7 ivmadd9 I I - Spiritual Nostalgic",
+    "name": "bVIM7 ivmadd9 I I - Spiritual Nostalgic"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "ii IVM vm bVIIM - Mysterious Nostalgic",
+    "name": "ii IVM vm bVIIM - Mysterious Nostalgic"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "ii bIIM I bVIIM - Mysterious Rebellious",
+    "name": "ii bIIM I bVIIM - Mysterious Rebellious"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "ii bVIIM7 I - Hopeful Triumphant",
+    "name": "ii bVIIM7 I - Hopeful Triumphant"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "im V bVIIM IV bVIM bIIIM ivm V - Mysterious Rebellious",
+    "name": "im V bVIIM IV bVIM bIIIM ivm V - Mysterious Rebellious"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "im VIM IIIM bIIM - Nostalgic Surprised",
+    "name": "im VIM IIIM bIIM - Nostalgic Surprised"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "im VIM bi V - Mysterious Triumphant",
+    "name": "im VIM bi V - Mysterious Triumphant"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "im bIIIM IV bVIM - Mysterious Hopeful",
+    "name": "im bIIIM IV bVIM - Mysterious Hopeful"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "im bIIIM bVIIM IV - Romantic Nostalgic",
+    "name": "im bIIIM bVIIM IV - Romantic Nostalgic"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "im bIIIM bVIM V - Mysterious Triumphant",
+    "name": "im bIIIM bVIM V - Mysterious Triumphant"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "im bIIIsus2 IV IV - Mysterious Peaceful",
+    "name": "im bIIIsus2 IV IV - Mysterious Peaceful"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "im bIIM bIIIM bIIM - Mysterious Dark",
+    "name": "im bIIM bIIIM bIIM - Mysterious Dark"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "im bIIM biim6 ivm - Mysterious Tender",
+    "name": "im bIIM biim6 ivm - Mysterious Tender"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "im bIIM im7 bviim - Mysterious Spiritual",
+    "name": "im bIIM im7 bviim - Mysterious Spiritual"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "im bIIM ivm IIIM bIIM ivm IIIM IIIM - Mysterious Nostalgic",
+    "name": "im bIIM ivm IIIM bIIM ivm IIIM IIIM - Mysterious Nostalgic"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "im bIIM vm im7 - Mysterious Dark",
+    "name": "im bIIM vm im7 - Mysterious Dark"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "im bVIIM IV im - Cadence",
+    "name": "im bVIIM IV im - Cadence"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "im bVIIM bIIM vm - Mysterious Rebellious",
+    "name": "im bVIIM bIIM vm - Mysterious Rebellious"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "im bVIM ivm V - Triumphant",
+    "name": "im bVIM ivm V - Triumphant"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "im bviim bVIM bIIM - Mysterious Hopeful",
+    "name": "im bviim bVIM bIIM - Mysterious Hopeful"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "im ii vm IV - Nostalgic Hopeful",
+    "name": "im ii vm IV - Nostalgic Hopeful"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "im ivm9 bIIM im - Mysterious Nostalgic",
+    "name": "im ivm9 bIIM im - Mysterious Nostalgic"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "im ivm9 bIIM im vm ivm7 bIIM im7 - Mysterious Tender",
+    "name": "im ivm9 bIIM im vm ivm7 bIIM im7 - Mysterious Tender"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "im vm bVIM bIIM - Mysterious Hopeful",
+    "name": "im vm bVIM bIIM - Mysterious Hopeful"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "im vm isus4 I - Hopeful Spiritual",
+    "name": "im vm isus4 I - Hopeful Spiritual"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "im vm ivm bIIM7 - Mysterious Dark",
+    "name": "im vm ivm bIIM7 - Mysterious Dark"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "ivm IIIM bIIM I - Cadence",
+    "name": "ivm IIIM bIIM I - Cadence"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "ivm bIIIM bIIM I - Cadence",
+    "name": "ivm bIIIM bIIM I - Cadence"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "ivm bIIIM bVIM I - Cadence",
+    "name": "ivm bIIIM bVIM I - Cadence"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "ivm bIIIM iim7 V - Mysterious Tender",
+    "name": "ivm bIIIM iim7 V - Mysterious Tender"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "ivm im bviim bVIM - Dark",
+    "name": "ivm im bviim bVIM - Dark"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "vdim vdim ivm bIIIM - Fearful Mysterious",
+    "name": "vdim vdim ivm bIIIM - Fearful Mysterious"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "vi IV I IIM - Hopeful Peaceful",
+    "name": "vi IV I IIM - Hopeful Peaceful"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "vi bVIM bVIIM I - Hopeful Triumphant",
+    "name": "vi bVIM bVIIM I - Hopeful Triumphant"
+  },
+  {
+    "category": "Modal",
+    "style": "Modal",
+    "progression": "vi viim V vi sIVdim V - Nostalgic Dark",
+    "name": "vi viim V vi sIVdim V - Nostalgic Dark"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "I I7 I9 IV ivm - Romantic Nostalgic",
+    "name": "I I7 I9 IV ivm - Romantic Nostalgic"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "I I7 Idom7 IV ivm I - Relaxed Nostalgic",
+    "name": "I I7 Idom7 IV ivm I - Relaxed Nostalgic"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "I I7 Idom7 IV ivm I ivm6 Vdom7 - Relaxed Romantic",
+    "name": "I I7 Idom7 IV ivm I ivm6 Vdom7 - Relaxed Romantic"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "I IIIM vi V - Joyful Hopeful",
+    "name": "I IIIM vi V - Joyful Hopeful"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "I IIM IV I - Joyful Triumphant",
+    "name": "I IIM IV I - Joyful Triumphant"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "I IIM iii V6 - Surprised Triumphant",
+    "name": "I IIM iii V6 - Surprised Triumphant"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "I IV V bVIIM - Triumphant Rebellious",
+    "name": "I IV V bVIIM - Triumphant Rebellious"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "I IV bIIIM bVIM - Nostalgic Mysterious",
+    "name": "I IV bIIIM bVIM - Nostalgic Mysterious"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "I IV bVIIM IV - Joyful Rebellious",
+    "name": "I IV bVIIM IV - Joyful Rebellious"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "I V bVIIM IV - Triumphant Rebellious",
+    "name": "I V bVIIM IV - Triumphant Rebellious"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "I V ivm bVIM - Surprised Mysterious",
+    "name": "I V ivm bVIM - Surprised Mysterious"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "I bIIIM IV I - Romantic",
+    "name": "I bIIIM IV I - Romantic"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "I bIIIM bVIIM I - Triumphant Rebellious",
+    "name": "I bIIIM bVIIM I - Triumphant Rebellious"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "I bIIIM bVIIM IV - Triumphant Mysterious",
+    "name": "I bIIIM bVIIM IV - Triumphant Mysterious"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "I bIIIM bVIM bVIIM - Triumphant Hopeful",
+    "name": "I bIIIM bVIM bVIIM - Triumphant Hopeful"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "I bIIM I iii - Surprised Mysterious",
+    "name": "I bIIM I iii - Surprised Mysterious"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "I bIIM7 bIIIM6 bIIM7 I im bVIIM bIIM - Surprised Mysterious",
+    "name": "I bIIM7 bIIIM6 bIIM7 I im bVIIM bIIM - Surprised Mysterious"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "I bVIIM I I bVIM V - Triumphant Hopeful",
+    "name": "I bVIIM I I bVIM V - Triumphant Hopeful"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "I bVIIM IV V - Joyful Triumphant",
+    "name": "I bVIIM IV V - Joyful Triumphant"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "I bVIIM bVIM IV IVsus4 IV - Hopeful Nostalgic",
+    "name": "I bVIIM bVIM IV IVsus4 IV - Hopeful Nostalgic"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "I bVIIM bVIM bIIM - Triumphant Rebellious",
+    "name": "I bVIIM bVIM bIIM - Triumphant Rebellious"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "I bVIM I bIIM - Surprised Mysterious",
+    "name": "I bVIM I bIIM - Surprised Mysterious"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "I bVIM IV bIIIM bVIIM - Mysterious Nostalgic",
+    "name": "I bVIM IV bIIIM bVIIM - Mysterious Nostalgic"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "I ivm bIIIM bVIIM - Mysterious Nostalgic",
+    "name": "I ivm bIIIM bVIIM - Mysterious Nostalgic"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "I5 iii II5 sIVm IV5 vi V5 viim - Excited Triumphant",
+    "name": "I5 iii II5 sIVm IV5 vi V5 viim - Excited Triumphant"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "I7 bIdom7 III7 ii7 V7 - Playful Surprised",
+    "name": "I7 bIdom7 III7 ii7 V7 - Playful Surprised"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "IIIM V VIsus4 VIM I IIM - Triumphant Surprised",
+    "name": "IIIM V VIsus4 VIM I IIM - Triumphant Surprised"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "IV V ii im bIIIM IV - Hopeful Nostalgic",
+    "name": "IV V ii im bIIIM IV - Hopeful Nostalgic"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "VIM bVIM im bVIIM - Surprised Rebellious",
+    "name": "VIM bVIM im bVIIM - Surprised Rebellious"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "bIIIM V7 I - Cadence",
+    "name": "bIIIM V7 I - Cadence"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "bIIIM ii bIIM I - Mysterious Surprised",
+    "name": "bIIIM ii bIIM I - Mysterious Surprised"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "bIIM bVIM biii bviim - Mysterious Surprised",
+    "name": "bIIM bVIM biii bviim - Mysterious Surprised"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "bIIM ivm biii im - Mysterious Dark",
+    "name": "bIIM ivm biii im - Mysterious Dark"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "bVIIM V7 I - Cadence",
+    "name": "bVIIM V7 I - Cadence"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "bVIIM bIIM bIIIM im - Mysterious Rebellious",
+    "name": "bVIIM bIIM bIIIM im - Mysterious Rebellious"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "bVIM bIIIM bVIIM IV I - Triumphant Mysterious",
+    "name": "bVIM bIIIM bVIIM IV I - Triumphant Mysterious"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "bVIM bVIIm im bIIM - Mysterious Dark",
+    "name": "bVIM bVIIm im bIIM - Mysterious Dark"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "bVIM vi im bVIIM - Hopeful Mysterious",
+    "name": "bVIM vi im bVIIM - Hopeful Mysterious"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "bVIM7 ivmadd9 I I - Spiritual Nostalgic",
+    "name": "bVIM7 ivmadd9 I I - Spiritual Nostalgic"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "ii IVM vm bVIIM - Mysterious Nostalgic",
+    "name": "ii IVM vm bVIIM - Mysterious Nostalgic"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "ii bIIM I bVIIM - Mysterious Rebellious",
+    "name": "ii bIIM I bVIIM - Mysterious Rebellious"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "ii bVIIM7 I - Hopeful Triumphant",
+    "name": "ii bVIIM7 I - Hopeful Triumphant"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "im V bVIIM IV bVIM bIIIM ivm V - Mysterious Rebellious",
+    "name": "im V bVIIM IV bVIM bIIIM ivm V - Mysterious Rebellious"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "im VIM IIIM bIIM - Nostalgic Surprised",
+    "name": "im VIM IIIM bIIM - Nostalgic Surprised"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "im VIM bi V - Mysterious Triumphant",
+    "name": "im VIM bi V - Mysterious Triumphant"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "im bIIIM IV bVIM - Mysterious Hopeful",
+    "name": "im bIIIM IV bVIM - Mysterious Hopeful"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "im bIIIM bVIIM IV - Romantic Nostalgic",
+    "name": "im bIIIM bVIIM IV - Romantic Nostalgic"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "im bIIIM bVIM V - Mysterious Triumphant",
+    "name": "im bIIIM bVIM V - Mysterious Triumphant"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "im bIIIsus2 IV IV - Mysterious Peaceful",
+    "name": "im bIIIsus2 IV IV - Mysterious Peaceful"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "im bIIM bIIIM bIIM - Mysterious Dark",
+    "name": "im bIIM bIIIM bIIM - Mysterious Dark"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "im bIIM biim6 ivm - Mysterious Tender",
+    "name": "im bIIM biim6 ivm - Mysterious Tender"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "im bIIM im7 bviim - Mysterious Spiritual",
+    "name": "im bIIM im7 bviim - Mysterious Spiritual"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "im bIIM ivm IIIM bIIM ivm IIIM IIIM - Mysterious Nostalgic",
+    "name": "im bIIM ivm IIIM bIIM ivm IIIM IIIM - Mysterious Nostalgic"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "im bIIM vm im7 - Mysterious Dark",
+    "name": "im bIIM vm im7 - Mysterious Dark"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "im bVIIM IV im - Cadence",
+    "name": "im bVIIM IV im - Cadence"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "im bVIIM bIIM vm - Mysterious Rebellious",
+    "name": "im bVIIM bIIM vm - Mysterious Rebellious"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "im bVIM ivm V - Triumphant",
+    "name": "im bVIM ivm V - Triumphant"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "im bviim bVIM bIIM - Mysterious Hopeful",
+    "name": "im bviim bVIM bIIM - Mysterious Hopeful"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "im ii vm IV - Nostalgic Hopeful",
+    "name": "im ii vm IV - Nostalgic Hopeful"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "im ivm9 bIIM im - Mysterious Nostalgic",
+    "name": "im ivm9 bIIM im - Mysterious Nostalgic"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "im ivm9 bIIM im vm ivm7 bIIM im7 - Mysterious Tender",
+    "name": "im ivm9 bIIM im vm ivm7 bIIM im7 - Mysterious Tender"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "im vm bVIM bIIM - Mysterious Hopeful",
+    "name": "im vm bVIM bIIM - Mysterious Hopeful"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "im vm isus4 I - Hopeful Spiritual",
+    "name": "im vm isus4 I - Hopeful Spiritual"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "im vm ivm bIIM7 - Mysterious Dark",
+    "name": "im vm ivm bIIM7 - Mysterious Dark"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "ivm IIIM bIIM I - Cadence",
+    "name": "ivm IIIM bIIM I - Cadence"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "ivm bIIIM bIIM I - Cadence",
+    "name": "ivm bIIIM bIIM I - Cadence"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "ivm bIIIM bVIM I - Cadence",
+    "name": "ivm bIIIM bVIM I - Cadence"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "ivm bIIIM iim7 V - Mysterious Tender",
+    "name": "ivm bIIIM iim7 V - Mysterious Tender"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "ivm im bviim bVIM - Dark",
+    "name": "ivm im bviim bVIM - Dark"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "vdim vdim ivm bIIIM - Fearful Mysterious",
+    "name": "vdim vdim ivm bIIIM - Fearful Mysterious"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "vi IV I IIM - Hopeful Peaceful",
+    "name": "vi IV I IIM - Hopeful Peaceful"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "vi bVIM bVIIM I - Hopeful Triumphant",
+    "name": "vi bVIM bVIIM I - Hopeful Triumphant"
+  },
+  {
+    "category": "Modal",
+    "style": "hiphop2",
+    "progression": "vi viim V vi sIVdim V - Nostalgic Dark",
+    "name": "vi viim V vi sIVdim V - Nostalgic Dark"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "I I7 I9 IV ivm - Romantic Nostalgic",
+    "name": "I I7 I9 IV ivm - Romantic Nostalgic"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "I I7 Idom7 IV ivm I - Relaxed Nostalgic",
+    "name": "I I7 Idom7 IV ivm I - Relaxed Nostalgic"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "I I7 Idom7 IV ivm I ivm6 Vdom7 - Relaxed Romantic",
+    "name": "I I7 Idom7 IV ivm I ivm6 Vdom7 - Relaxed Romantic"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "I IIIM vi V - Joyful Hopeful",
+    "name": "I IIIM vi V - Joyful Hopeful"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "I IIM IV I - Joyful Triumphant",
+    "name": "I IIM IV I - Joyful Triumphant"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "I IIM iii V6 - Surprised Triumphant",
+    "name": "I IIM iii V6 - Surprised Triumphant"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "I IV V bVIIM - Triumphant Rebellious",
+    "name": "I IV V bVIIM - Triumphant Rebellious"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "I IV bIIIM bVIM - Nostalgic Mysterious",
+    "name": "I IV bIIIM bVIM - Nostalgic Mysterious"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "I IV bVIIM IV - Joyful Rebellious",
+    "name": "I IV bVIIM IV - Joyful Rebellious"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "I V bVIIM IV - Triumphant Rebellious",
+    "name": "I V bVIIM IV - Triumphant Rebellious"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "I V ivm bVIM - Surprised Mysterious",
+    "name": "I V ivm bVIM - Surprised Mysterious"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "I bIIIM IV I - Romantic",
+    "name": "I bIIIM IV I - Romantic"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "I bIIIM bVIIM I - Triumphant Rebellious",
+    "name": "I bIIIM bVIIM I - Triumphant Rebellious"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "I bIIIM bVIIM IV - Triumphant Mysterious",
+    "name": "I bIIIM bVIIM IV - Triumphant Mysterious"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "I bIIIM bVIM bVIIM - Triumphant Hopeful",
+    "name": "I bIIIM bVIM bVIIM - Triumphant Hopeful"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "I bIIM I iii - Surprised Mysterious",
+    "name": "I bIIM I iii - Surprised Mysterious"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "I bIIM7 bIIIM6 bIIM7 I im bVIIM bIIM - Surprised Mysterious",
+    "name": "I bIIM7 bIIIM6 bIIM7 I im bVIIM bIIM - Surprised Mysterious"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "I bVIIM I I bVIM V - Triumphant Hopeful",
+    "name": "I bVIIM I I bVIM V - Triumphant Hopeful"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "I bVIIM IV V - Joyful Triumphant",
+    "name": "I bVIIM IV V - Joyful Triumphant"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "I bVIIM bVIM IV IVsus4 IV - Hopeful Nostalgic",
+    "name": "I bVIIM bVIM IV IVsus4 IV - Hopeful Nostalgic"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "I bVIIM bVIM bIIM - Triumphant Rebellious",
+    "name": "I bVIIM bVIM bIIM - Triumphant Rebellious"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "I bVIM I bIIM - Surprised Mysterious",
+    "name": "I bVIM I bIIM - Surprised Mysterious"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "I bVIM IV bIIIM bVIIM - Mysterious Nostalgic",
+    "name": "I bVIM IV bIIIM bVIIM - Mysterious Nostalgic"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "I ivm bIIIM bVIIM - Mysterious Nostalgic",
+    "name": "I ivm bIIIM bVIIM - Mysterious Nostalgic"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "I5 iii II5 sIVm IV5 vi V5 viim - Excited Triumphant",
+    "name": "I5 iii II5 sIVm IV5 vi V5 viim - Excited Triumphant"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "I7 bIdom7 III7 ii7 V7 - Playful Surprised",
+    "name": "I7 bIdom7 III7 ii7 V7 - Playful Surprised"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "IIIM V VIsus4 VIM I IIM - Triumphant Surprised",
+    "name": "IIIM V VIsus4 VIM I IIM - Triumphant Surprised"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "IV V ii im bIIIM IV - Hopeful Nostalgic",
+    "name": "IV V ii im bIIIM IV - Hopeful Nostalgic"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "VIM bVIM im bVIIM - Surprised Rebellious",
+    "name": "VIM bVIM im bVIIM - Surprised Rebellious"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "bIIIM V7 I - Cadence",
+    "name": "bIIIM V7 I - Cadence"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "bIIIM ii bIIM I - Mysterious Surprised",
+    "name": "bIIIM ii bIIM I - Mysterious Surprised"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "bIIM bVIM biii bviim - Mysterious Surprised",
+    "name": "bIIM bVIM biii bviim - Mysterious Surprised"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "bIIM ivm biii im - Mysterious Dark",
+    "name": "bIIM ivm biii im - Mysterious Dark"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "bVIIM V7 I - Cadence",
+    "name": "bVIIM V7 I - Cadence"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "bVIIM bIIM bIIIM im - Mysterious Rebellious",
+    "name": "bVIIM bIIM bIIIM im - Mysterious Rebellious"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "bVIM bIIIM bVIIM IV I - Triumphant Mysterious",
+    "name": "bVIM bIIIM bVIIM IV I - Triumphant Mysterious"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "bVIM bVIIm im bIIM - Mysterious Dark",
+    "name": "bVIM bVIIm im bIIM - Mysterious Dark"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "bVIM vi im bVIIM - Hopeful Mysterious",
+    "name": "bVIM vi im bVIIM - Hopeful Mysterious"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "bVIM7 ivmadd9 I I - Spiritual Nostalgic",
+    "name": "bVIM7 ivmadd9 I I - Spiritual Nostalgic"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "ii IVM vm bVIIM - Mysterious Nostalgic",
+    "name": "ii IVM vm bVIIM - Mysterious Nostalgic"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "ii bIIM I bVIIM - Mysterious Rebellious",
+    "name": "ii bIIM I bVIIM - Mysterious Rebellious"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "ii bVIIM7 I - Hopeful Triumphant",
+    "name": "ii bVIIM7 I - Hopeful Triumphant"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "im V bVIIM IV bVIM bIIIM ivm V - Mysterious Rebellious",
+    "name": "im V bVIIM IV bVIM bIIIM ivm V - Mysterious Rebellious"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "im VIM IIIM bIIM - Nostalgic Surprised",
+    "name": "im VIM IIIM bIIM - Nostalgic Surprised"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "im VIM bi V - Mysterious Triumphant",
+    "name": "im VIM bi V - Mysterious Triumphant"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "im bIIIM IV bVIM - Mysterious Hopeful",
+    "name": "im bIIIM IV bVIM - Mysterious Hopeful"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "im bIIIM bVIIM IV - Romantic Nostalgic",
+    "name": "im bIIIM bVIIM IV - Romantic Nostalgic"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "im bIIIM bVIM V - Mysterious Triumphant",
+    "name": "im bIIIM bVIM V - Mysterious Triumphant"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "im bIIIsus2 IV IV - Mysterious Peaceful",
+    "name": "im bIIIsus2 IV IV - Mysterious Peaceful"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "im bIIM bIIIM bIIM - Mysterious Dark",
+    "name": "im bIIM bIIIM bIIM - Mysterious Dark"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "im bIIM biim6 ivm - Mysterious Tender",
+    "name": "im bIIM biim6 ivm - Mysterious Tender"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "im bIIM im7 bviim - Mysterious Spiritual",
+    "name": "im bIIM im7 bviim - Mysterious Spiritual"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "im bIIM ivm IIIM bIIM ivm IIIM IIIM - Mysterious Nostalgic",
+    "name": "im bIIM ivm IIIM bIIM ivm IIIM IIIM - Mysterious Nostalgic"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "im bIIM vm im7 - Mysterious Dark",
+    "name": "im bIIM vm im7 - Mysterious Dark"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "im bVIIM IV im - Cadence",
+    "name": "im bVIIM IV im - Cadence"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "im bVIIM bIIM vm - Mysterious Rebellious",
+    "name": "im bVIIM bIIM vm - Mysterious Rebellious"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "im bVIM ivm V - Triumphant",
+    "name": "im bVIM ivm V - Triumphant"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "im bviim bVIM bIIM - Mysterious Hopeful",
+    "name": "im bviim bVIM bIIM - Mysterious Hopeful"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "im ii vm IV - Nostalgic Hopeful",
+    "name": "im ii vm IV - Nostalgic Hopeful"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "im ivm9 bIIM im - Mysterious Nostalgic",
+    "name": "im ivm9 bIIM im - Mysterious Nostalgic"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "im ivm9 bIIM im vm ivm7 bIIM im7 - Mysterious Tender",
+    "name": "im ivm9 bIIM im vm ivm7 bIIM im7 - Mysterious Tender"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "im vm bVIM bIIM - Mysterious Hopeful",
+    "name": "im vm bVIM bIIM - Mysterious Hopeful"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "im vm isus4 I - Hopeful Spiritual",
+    "name": "im vm isus4 I - Hopeful Spiritual"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "im vm ivm bIIM7 - Mysterious Dark",
+    "name": "im vm ivm bIIM7 - Mysterious Dark"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "ivm IIIM bIIM I - Cadence",
+    "name": "ivm IIIM bIIM I - Cadence"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "ivm bIIIM bIIM I - Cadence",
+    "name": "ivm bIIIM bIIM I - Cadence"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "ivm bIIIM bVIM I - Cadence",
+    "name": "ivm bIIIM bVIM I - Cadence"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "ivm bIIIM iim7 V - Mysterious Tender",
+    "name": "ivm bIIIM iim7 V - Mysterious Tender"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "ivm im bviim bVIM - Dark",
+    "name": "ivm im bviim bVIM - Dark"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "vdim vdim ivm bIIIM - Fearful Mysterious",
+    "name": "vdim vdim ivm bIIIM - Fearful Mysterious"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "vi IV I IIM - Hopeful Peaceful",
+    "name": "vi IV I IIM - Hopeful Peaceful"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "vi bVIM bVIIM I - Hopeful Triumphant",
+    "name": "vi bVIM bVIIM I - Hopeful Triumphant"
+  },
+  {
+    "category": "Modal",
+    "style": "pop",
+    "progression": "vi viim V vi sIVdim V - Nostalgic Dark",
+    "name": "vi viim V vi sIVdim V - Nostalgic Dark"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "I I7 I9 IV ivm - Romantic Nostalgic",
+    "name": "I I7 I9 IV ivm - Romantic Nostalgic"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "I I7 Idom7 IV ivm I - Relaxed Nostalgic",
+    "name": "I I7 Idom7 IV ivm I - Relaxed Nostalgic"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "I I7 Idom7 IV ivm I ivm6 Vdom7 - Relaxed Romantic",
+    "name": "I I7 Idom7 IV ivm I ivm6 Vdom7 - Relaxed Romantic"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "I IIIM vi V - Joyful Hopeful",
+    "name": "I IIIM vi V - Joyful Hopeful"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "I IIM IV I - Joyful Triumphant",
+    "name": "I IIM IV I - Joyful Triumphant"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "I IIM iii V6 - Surprised Triumphant",
+    "name": "I IIM iii V6 - Surprised Triumphant"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "I IV V bVIIM - Triumphant Rebellious",
+    "name": "I IV V bVIIM - Triumphant Rebellious"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "I IV bIIIM bVIM - Nostalgic Mysterious",
+    "name": "I IV bIIIM bVIM - Nostalgic Mysterious"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "I IV bVIIM IV - Joyful Rebellious",
+    "name": "I IV bVIIM IV - Joyful Rebellious"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "I V bVIIM IV - Triumphant Rebellious",
+    "name": "I V bVIIM IV - Triumphant Rebellious"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "I V ivm bVIM - Surprised Mysterious",
+    "name": "I V ivm bVIM - Surprised Mysterious"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "I bIIIM IV I - Romantic",
+    "name": "I bIIIM IV I - Romantic"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "I bIIIM bVIIM I - Triumphant Rebellious",
+    "name": "I bIIIM bVIIM I - Triumphant Rebellious"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "I bIIIM bVIIM IV - Triumphant Mysterious",
+    "name": "I bIIIM bVIIM IV - Triumphant Mysterious"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "I bIIIM bVIM bVIIM - Triumphant Hopeful",
+    "name": "I bIIIM bVIM bVIIM - Triumphant Hopeful"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "I bIIM I iii - Surprised Mysterious",
+    "name": "I bIIM I iii - Surprised Mysterious"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "I bIIM7 bIIIM6 bIIM7 I im bVIIM bIIM - Surprised Mysterious",
+    "name": "I bIIM7 bIIIM6 bIIM7 I im bVIIM bIIM - Surprised Mysterious"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "I bVIIM I I bVIM V - Triumphant Hopeful",
+    "name": "I bVIIM I I bVIM V - Triumphant Hopeful"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "I bVIIM IV V - Joyful Triumphant",
+    "name": "I bVIIM IV V - Joyful Triumphant"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "I bVIIM bVIM IV IVsus4 IV - Hopeful Nostalgic",
+    "name": "I bVIIM bVIM IV IVsus4 IV - Hopeful Nostalgic"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "I bVIIM bVIM bIIM - Triumphant Rebellious",
+    "name": "I bVIIM bVIM bIIM - Triumphant Rebellious"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "I bVIM I bIIM - Surprised Mysterious",
+    "name": "I bVIM I bIIM - Surprised Mysterious"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "I bVIM IV bIIIM bVIIM - Mysterious Nostalgic",
+    "name": "I bVIM IV bIIIM bVIIM - Mysterious Nostalgic"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "I ivm bIIIM bVIIM - Mysterious Nostalgic",
+    "name": "I ivm bIIIM bVIIM - Mysterious Nostalgic"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "I5 iii II5 sIVm IV5 vi V5 viim - Excited Triumphant",
+    "name": "I5 iii II5 sIVm IV5 vi V5 viim - Excited Triumphant"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "I7 bIdom7 III7 ii7 V7 - Playful Surprised",
+    "name": "I7 bIdom7 III7 ii7 V7 - Playful Surprised"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "IIIM V VIsus4 VIM I IIM - Triumphant Surprised",
+    "name": "IIIM V VIsus4 VIM I IIM - Triumphant Surprised"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "IV V ii im bIIIM IV - Hopeful Nostalgic",
+    "name": "IV V ii im bIIIM IV - Hopeful Nostalgic"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "VIM bVIM im bVIIM - Surprised Rebellious",
+    "name": "VIM bVIM im bVIIM - Surprised Rebellious"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "bIIIM V7 I - Cadence",
+    "name": "bIIIM V7 I - Cadence"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "bIIIM ii bIIM I - Mysterious Surprised",
+    "name": "bIIIM ii bIIM I - Mysterious Surprised"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "bIIM bVIM biii bviim - Mysterious Surprised",
+    "name": "bIIM bVIM biii bviim - Mysterious Surprised"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "bIIM ivm biii im - Mysterious Dark",
+    "name": "bIIM ivm biii im - Mysterious Dark"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "bVIIM V7 I - Cadence",
+    "name": "bVIIM V7 I - Cadence"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "bVIIM bIIM bIIIM im - Mysterious Rebellious",
+    "name": "bVIIM bIIM bIIIM im - Mysterious Rebellious"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "bVIM bIIIM bVIIM IV I - Triumphant Mysterious",
+    "name": "bVIM bIIIM bVIIM IV I - Triumphant Mysterious"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "bVIM bVIIm im bIIM - Mysterious Dark",
+    "name": "bVIM bVIIm im bIIM - Mysterious Dark"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "bVIM vi im bVIIM - Hopeful Mysterious",
+    "name": "bVIM vi im bVIIM - Hopeful Mysterious"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "bVIM7 ivmadd9 I I - Spiritual Nostalgic",
+    "name": "bVIM7 ivmadd9 I I - Spiritual Nostalgic"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "ii IVM vm bVIIM - Mysterious Nostalgic",
+    "name": "ii IVM vm bVIIM - Mysterious Nostalgic"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "ii bIIM I bVIIM - Mysterious Rebellious",
+    "name": "ii bIIM I bVIIM - Mysterious Rebellious"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "ii bVIIM7 I - Hopeful Triumphant",
+    "name": "ii bVIIM7 I - Hopeful Triumphant"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "im V bVIIM IV bVIM bIIIM ivm V - Mysterious Rebellious",
+    "name": "im V bVIIM IV bVIM bIIIM ivm V - Mysterious Rebellious"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "im VIM IIIM bIIM - Nostalgic Surprised",
+    "name": "im VIM IIIM bIIM - Nostalgic Surprised"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "im VIM bi V - Mysterious Triumphant",
+    "name": "im VIM bi V - Mysterious Triumphant"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "im bIIIM IV bVIM - Mysterious Hopeful",
+    "name": "im bIIIM IV bVIM - Mysterious Hopeful"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "im bIIIM bVIIM IV - Romantic Nostalgic",
+    "name": "im bIIIM bVIIM IV - Romantic Nostalgic"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "im bIIIM bVIM V - Mysterious Triumphant",
+    "name": "im bIIIM bVIM V - Mysterious Triumphant"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "im bIIIsus2 IV IV - Mysterious Peaceful",
+    "name": "im bIIIsus2 IV IV - Mysterious Peaceful"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "im bIIM bIIIM bIIM - Mysterious Dark",
+    "name": "im bIIM bIIIM bIIM - Mysterious Dark"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "im bIIM biim6 ivm - Mysterious Tender",
+    "name": "im bIIM biim6 ivm - Mysterious Tender"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "im bIIM im7 bviim - Mysterious Spiritual",
+    "name": "im bIIM im7 bviim - Mysterious Spiritual"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "im bIIM ivm IIIM bIIM ivm IIIM IIIM - Mysterious Nostalgic",
+    "name": "im bIIM ivm IIIM bIIM ivm IIIM IIIM - Mysterious Nostalgic"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "im bIIM vm im7 - Mysterious Dark",
+    "name": "im bIIM vm im7 - Mysterious Dark"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "im bVIIM IV im - Cadence",
+    "name": "im bVIIM IV im - Cadence"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "im bVIIM bIIM vm - Mysterious Rebellious",
+    "name": "im bVIIM bIIM vm - Mysterious Rebellious"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "im bVIM ivm V - Triumphant",
+    "name": "im bVIM ivm V - Triumphant"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "im bviim bVIM bIIM - Mysterious Hopeful",
+    "name": "im bviim bVIM bIIM - Mysterious Hopeful"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "im ii vm IV - Nostalgic Hopeful",
+    "name": "im ii vm IV - Nostalgic Hopeful"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "im ivm9 bIIM im - Mysterious Nostalgic",
+    "name": "im ivm9 bIIM im - Mysterious Nostalgic"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "im ivm9 bIIM im vm ivm7 bIIM im7 - Mysterious Tender",
+    "name": "im ivm9 bIIM im vm ivm7 bIIM im7 - Mysterious Tender"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "im vm bVIM bIIM - Mysterious Hopeful",
+    "name": "im vm bVIM bIIM - Mysterious Hopeful"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "im vm isus4 I - Hopeful Spiritual",
+    "name": "im vm isus4 I - Hopeful Spiritual"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "im vm ivm bIIM7 - Mysterious Dark",
+    "name": "im vm ivm bIIM7 - Mysterious Dark"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "ivm IIIM bIIM I - Cadence",
+    "name": "ivm IIIM bIIM I - Cadence"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "ivm bIIIM bIIM I - Cadence",
+    "name": "ivm bIIIM bIIM I - Cadence"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "ivm bIIIM bVIM I - Cadence",
+    "name": "ivm bIIIM bVIM I - Cadence"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "ivm bIIIM iim7 V - Mysterious Tender",
+    "name": "ivm bIIIM iim7 V - Mysterious Tender"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "ivm im bviim bVIM - Dark",
+    "name": "ivm im bviim bVIM - Dark"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "vdim vdim ivm bIIIM - Fearful Mysterious",
+    "name": "vdim vdim ivm bIIIM - Fearful Mysterious"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "vi IV I IIM - Hopeful Peaceful",
+    "name": "vi IV I IIM - Hopeful Peaceful"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "vi bVIM bVIIM I - Hopeful Triumphant",
+    "name": "vi bVIM bVIIM I - Hopeful Triumphant"
+  },
+  {
+    "category": "Modal",
+    "style": "pop2",
+    "progression": "vi viim V vi sIVdim V - Nostalgic Dark",
+    "name": "vi viim V vi sIVdim V - Nostalgic Dark"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "I I7 I9 IV ivm - Romantic Nostalgic",
+    "name": "I I7 I9 IV ivm - Romantic Nostalgic"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "I I7 Idom7 IV ivm I - Relaxed Nostalgic",
+    "name": "I I7 Idom7 IV ivm I - Relaxed Nostalgic"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "I I7 Idom7 IV ivm I ivm6 Vdom7 - Relaxed Romantic",
+    "name": "I I7 Idom7 IV ivm I ivm6 Vdom7 - Relaxed Romantic"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "I IIIM vi V - Joyful Hopeful",
+    "name": "I IIIM vi V - Joyful Hopeful"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "I IIM IV I - Joyful Triumphant",
+    "name": "I IIM IV I - Joyful Triumphant"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "I IIM iii V6 - Surprised Triumphant",
+    "name": "I IIM iii V6 - Surprised Triumphant"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "I IV V bVIIM - Triumphant Rebellious",
+    "name": "I IV V bVIIM - Triumphant Rebellious"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "I IV bIIIM bVIM - Nostalgic Mysterious",
+    "name": "I IV bIIIM bVIM - Nostalgic Mysterious"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "I IV bVIIM IV - Joyful Rebellious",
+    "name": "I IV bVIIM IV - Joyful Rebellious"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "I V bVIIM IV - Triumphant Rebellious",
+    "name": "I V bVIIM IV - Triumphant Rebellious"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "I V ivm bVIM - Surprised Mysterious",
+    "name": "I V ivm bVIM - Surprised Mysterious"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "I bIIIM IV I - Romantic",
+    "name": "I bIIIM IV I - Romantic"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "I bIIIM bVIIM I - Triumphant Rebellious",
+    "name": "I bIIIM bVIIM I - Triumphant Rebellious"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "I bIIIM bVIIM IV - Triumphant Mysterious",
+    "name": "I bIIIM bVIIM IV - Triumphant Mysterious"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "I bIIIM bVIM bVIIM - Triumphant Hopeful",
+    "name": "I bIIIM bVIM bVIIM - Triumphant Hopeful"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "I bIIM I iii - Surprised Mysterious",
+    "name": "I bIIM I iii - Surprised Mysterious"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "I bIIM7 bIIIM6 bIIM7 I im bVIIM bIIM - Surprised Mysterious",
+    "name": "I bIIM7 bIIIM6 bIIM7 I im bVIIM bIIM - Surprised Mysterious"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "I bVIIM I I bVIM V - Triumphant Hopeful",
+    "name": "I bVIIM I I bVIM V - Triumphant Hopeful"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "I bVIIM IV V - Joyful Triumphant",
+    "name": "I bVIIM IV V - Joyful Triumphant"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "I bVIIM bVIM IV IVsus4 IV - Hopeful Nostalgic",
+    "name": "I bVIIM bVIM IV IVsus4 IV - Hopeful Nostalgic"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "I bVIIM bVIM bIIM - Triumphant Rebellious",
+    "name": "I bVIIM bVIM bIIM - Triumphant Rebellious"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "I bVIM I bIIM - Surprised Mysterious",
+    "name": "I bVIM I bIIM - Surprised Mysterious"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "I bVIM IV bIIIM bVIIM - Mysterious Nostalgic",
+    "name": "I bVIM IV bIIIM bVIIM - Mysterious Nostalgic"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "I ivm bIIIM bVIIM - Mysterious Nostalgic",
+    "name": "I ivm bIIIM bVIIM - Mysterious Nostalgic"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "I5 iii II5 sIVm IV5 vi V5 viim - Excited Triumphant",
+    "name": "I5 iii II5 sIVm IV5 vi V5 viim - Excited Triumphant"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "I7 bIdom7 III7 ii7 V7 - Playful Surprised",
+    "name": "I7 bIdom7 III7 ii7 V7 - Playful Surprised"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "IIIM V VIsus4 VIM I IIM - Triumphant Surprised",
+    "name": "IIIM V VIsus4 VIM I IIM - Triumphant Surprised"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "IV V ii im bIIIM IV - Hopeful Nostalgic",
+    "name": "IV V ii im bIIIM IV - Hopeful Nostalgic"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "VIM bVIM im bVIIM - Surprised Rebellious",
+    "name": "VIM bVIM im bVIIM - Surprised Rebellious"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "bIIIM V7 I - Cadence",
+    "name": "bIIIM V7 I - Cadence"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "bIIIM ii bIIM I - Mysterious Surprised",
+    "name": "bIIIM ii bIIM I - Mysterious Surprised"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "bIIM bVIM biii bviim - Mysterious Surprised",
+    "name": "bIIM bVIM biii bviim - Mysterious Surprised"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "bIIM ivm biii im - Mysterious Dark",
+    "name": "bIIM ivm biii im - Mysterious Dark"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "bVIIM V7 I - Cadence",
+    "name": "bVIIM V7 I - Cadence"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "bVIIM bIIM bIIIM im - Mysterious Rebellious",
+    "name": "bVIIM bIIM bIIIM im - Mysterious Rebellious"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "bVIM bIIIM bVIIM IV I - Triumphant Mysterious",
+    "name": "bVIM bIIIM bVIIM IV I - Triumphant Mysterious"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "bVIM bVIIm im bIIM - Mysterious Dark",
+    "name": "bVIM bVIIm im bIIM - Mysterious Dark"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "bVIM vi im bVIIM - Hopeful Mysterious",
+    "name": "bVIM vi im bVIIM - Hopeful Mysterious"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "bVIM7 ivmadd9 I I - Spiritual Nostalgic",
+    "name": "bVIM7 ivmadd9 I I - Spiritual Nostalgic"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "ii IVM vm bVIIM - Mysterious Nostalgic",
+    "name": "ii IVM vm bVIIM - Mysterious Nostalgic"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "ii bIIM I bVIIM - Mysterious Rebellious",
+    "name": "ii bIIM I bVIIM - Mysterious Rebellious"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "ii bVIIM7 I - Hopeful Triumphant",
+    "name": "ii bVIIM7 I - Hopeful Triumphant"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "im V bVIIM IV bVIM bIIIM ivm V - Mysterious Rebellious",
+    "name": "im V bVIIM IV bVIM bIIIM ivm V - Mysterious Rebellious"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "im VIM IIIM bIIM - Nostalgic Surprised",
+    "name": "im VIM IIIM bIIM - Nostalgic Surprised"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "im VIM bi V - Mysterious Triumphant",
+    "name": "im VIM bi V - Mysterious Triumphant"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "im bIIIM IV bVIM - Mysterious Hopeful",
+    "name": "im bIIIM IV bVIM - Mysterious Hopeful"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "im bIIIM bVIIM IV - Romantic Nostalgic",
+    "name": "im bIIIM bVIIM IV - Romantic Nostalgic"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "im bIIIM bVIM V - Mysterious Triumphant",
+    "name": "im bIIIM bVIM V - Mysterious Triumphant"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "im bIIIsus2 IV IV - Mysterious Peaceful",
+    "name": "im bIIIsus2 IV IV - Mysterious Peaceful"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "im bIIM bIIIM bIIM - Mysterious Dark",
+    "name": "im bIIM bIIIM bIIM - Mysterious Dark"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "im bIIM biim6 ivm - Mysterious Tender",
+    "name": "im bIIM biim6 ivm - Mysterious Tender"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "im bIIM im7 bviim - Mysterious Spiritual",
+    "name": "im bIIM im7 bviim - Mysterious Spiritual"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "im bIIM ivm IIIM bIIM ivm IIIM IIIM - Mysterious Nostalgic",
+    "name": "im bIIM ivm IIIM bIIM ivm IIIM IIIM - Mysterious Nostalgic"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "im bIIM vm im7 - Mysterious Dark",
+    "name": "im bIIM vm im7 - Mysterious Dark"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "im bVIIM IV im - Cadence",
+    "name": "im bVIIM IV im - Cadence"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "im bVIIM bIIM vm - Mysterious Rebellious",
+    "name": "im bVIIM bIIM vm - Mysterious Rebellious"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "im bVIM ivm V - Triumphant",
+    "name": "im bVIM ivm V - Triumphant"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "im bviim bVIM bIIM - Mysterious Hopeful",
+    "name": "im bviim bVIM bIIM - Mysterious Hopeful"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "im ii vm IV - Nostalgic Hopeful",
+    "name": "im ii vm IV - Nostalgic Hopeful"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "im ivm9 bIIM im - Mysterious Nostalgic",
+    "name": "im ivm9 bIIM im - Mysterious Nostalgic"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "im ivm9 bIIM im vm ivm7 bIIM im7 - Mysterious Tender",
+    "name": "im ivm9 bIIM im vm ivm7 bIIM im7 - Mysterious Tender"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "im vm bVIM bIIM - Mysterious Hopeful",
+    "name": "im vm bVIM bIIM - Mysterious Hopeful"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "im vm isus4 I - Hopeful Spiritual",
+    "name": "im vm isus4 I - Hopeful Spiritual"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "im vm ivm bIIM7 - Mysterious Dark",
+    "name": "im vm ivm bIIM7 - Mysterious Dark"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "ivm IIIM bIIM I - Cadence",
+    "name": "ivm IIIM bIIM I - Cadence"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "ivm bIIIM bIIM I - Cadence",
+    "name": "ivm bIIIM bIIM I - Cadence"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "ivm bIIIM bVIM I - Cadence",
+    "name": "ivm bIIIM bVIM I - Cadence"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "ivm bIIIM iim7 V - Mysterious Tender",
+    "name": "ivm bIIIM iim7 V - Mysterious Tender"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "ivm im bviim bVIM - Dark",
+    "name": "ivm im bviim bVIM - Dark"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "vdim vdim ivm bIIIM - Fearful Mysterious",
+    "name": "vdim vdim ivm bIIIM - Fearful Mysterious"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "vi IV I IIM - Hopeful Peaceful",
+    "name": "vi IV I IIM - Hopeful Peaceful"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "vi bVIM bVIIM I - Hopeful Triumphant",
+    "name": "vi bVIM bVIIM I - Hopeful Triumphant"
+  },
+  {
+    "category": "Modal",
+    "style": "soul",
+    "progression": "vi viim V vi sIVdim V - Nostalgic Dark",
+    "name": "vi viim V vi sIVdim V - Nostalgic Dark"
+  }
+]

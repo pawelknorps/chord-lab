@@ -243,7 +243,7 @@ const Tonnetz: React.FC = () => {
     }, [rootCoord]);
 
     return (
-        <div className="h-full w-full flex flex-col bg-gray-900 text-white relative">
+        <div className="h-full w-full flex flex-col bg-[var(--bg-app)] text-[var(--text-primary)] relative">
             {/* 3D Scene */}
             <div className="flex-1">
                 <Canvas camera={{ position: [0, 0, 10], fov: 50 }}>
@@ -260,48 +260,50 @@ const Tonnetz: React.FC = () => {
 
             {/* Controls Overlay */}
             <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-4 pointer-events-none">
-                <div className="text-4xl font-bold neon-text drop-shadow-md bg-black/50 px-4 py-2 rounded-xl pointer-events-auto flex items-center gap-4">
-                    {midiToNoteName(currentTriad.root + 60).slice(0, -1)} {currentTriad.quality}
-                    <div className="h-4 w-px bg-white/20"></div>
+                <div className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] px-6 py-3 rounded-md pointer-events-auto flex items-center gap-4 shadow-lg">
+                    <span className="text-2xl font-bold tracking-tight text-[var(--accent)]">
+                        {midiToNoteName(currentTriad.root + 60).slice(0, -1)} {currentTriad.quality}
+                    </span>
+                    <div className="h-6 w-px bg-[var(--border-subtle)]"></div>
                     <label className="flex items-center gap-2 cursor-pointer select-none">
                         <input
                             type="checkbox"
                             checked={steerEnabled}
                             onChange={(e) => setSteerEnabled(e.target.checked)}
-                            className="w-4 h-4 accent-green-500"
+                            className="w-4 h-4 accent-[var(--accent)]"
                         />
-                        <span className="text-xs uppercase tracking-widest text-gray-400">MIDI Steering</span>
+                        <span className="text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-bold">MIDI Steering</span>
                     </label>
                 </div>
 
                 <div className="flex gap-4 pointer-events-auto">
                     <button
                         onClick={() => transform('P')}
-                        className="w-16 h-16 rounded-full bg-blue-600 hover:bg-blue-500 flex items-center justify-center font-bold text-xl shadow-lg transition-transform hover:scale-110 active:scale-95 border-2 border-white/20"
+                        className="w-14 h-14 rounded-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] hover:bg-[var(--bg-hover)] text-[var(--text-primary)] flex items-center justify-center font-bold text-lg shadow-sm transition-transform hover:scale-105 active:scale-95"
                     >
                         P
                     </button>
                     <button
                         onClick={() => transform('L')}
-                        className="w-16 h-16 rounded-full bg-green-600 hover:bg-green-500 flex items-center justify-center font-bold text-xl shadow-lg transition-transform hover:scale-110 active:scale-95 border-2 border-white/20"
+                        className="w-14 h-14 rounded-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] hover:bg-[var(--bg-hover)] text-[var(--text-primary)] flex items-center justify-center font-bold text-lg shadow-sm transition-transform hover:scale-105 active:scale-95"
                     >
                         L
                     </button>
                     <button
                         onClick={() => transform('R')}
-                        className="w-16 h-16 rounded-full bg-purple-600 hover:bg-purple-500 flex items-center justify-center font-bold text-xl shadow-lg transition-transform hover:scale-110 active:scale-95 border-2 border-white/20"
+                        className="w-14 h-14 rounded-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] hover:bg-[var(--bg-hover)] text-[var(--text-primary)] flex items-center justify-center font-bold text-lg shadow-sm transition-transform hover:scale-105 active:scale-95"
                     >
                         R
                     </button>
                 </div>
 
-                <div className="text-sm bg-black/60 px-3 py-1 rounded text-gray-300 pointer-events-auto">
+                <div className="text-xs bg-[var(--bg-panel)] border border-[var(--border-subtle)] px-4 py-2 rounded-full text-[var(--text-secondary)] pointer-events-auto">
                     Play the "target notes" on your MIDI keyboard to steer the harmony.
                 </div>
             </div>
 
             {/* Keyboard for Interaction */}
-            <div className="bg-black/80 border-t border-white/10 p-4">
+            <div className="bg-[var(--bg-panel)] border-t border-[var(--border-subtle)] p-4">
                 <InteractivePiano
                     startOctave={3}
                     endOctave={5}

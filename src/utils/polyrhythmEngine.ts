@@ -47,8 +47,16 @@ export class PolyrhythmEngine {
 
     start() {
         if (this.isPlaying) return;
+
+        // Clean up any existing loops first
+        this.loopA?.dispose();
+        this.loopB?.dispose();
+        this.loopA = null;
+        this.loopB = null;
+
         Tone.start();
         Tone.Transport.bpm.value = this.bpm;
+        Tone.Transport.position = 0; // Reset position
 
         // We treat the "Bar" as one measure of 4/4 (or just 1 measure). 
         // Tone.Transport '1m' depends on time signature. Let's assume 1 measure duration.

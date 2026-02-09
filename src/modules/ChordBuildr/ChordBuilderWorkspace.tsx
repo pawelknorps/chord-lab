@@ -1,7 +1,8 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useMidi } from '../../context/MidiContext';
 import { midiToNoteName } from '../../core/theory';
-import { Play, RotateCcw, Download } from 'lucide-react';
+import { Play, RotateCcw, ArrowRight } from 'lucide-react';
 import { playChord, initAudio } from '../../core/audio/globalAudio';
 
 interface Note {
@@ -50,6 +51,7 @@ export default function ChordBuilderWorkspace() {
     const [notes, setNotes] = useState<Note[]>([]);
     const { activeNotes } = useMidi();
     const [audioReady, setAudioReady] = useState(false);
+    const navigate = useNavigate();
 
     useEffect(() => {
         initAudio().then(() => setAudioReady(true));
@@ -57,7 +59,6 @@ export default function ChordBuilderWorkspace() {
 
     const chord = useMemo(() => detectChord(notes), [notes]);
 
-    // Add note from piano click
     const handleNoteClick = useCallback((midiNote: number) => {
         setNotes(prev => {
             const exists = prev.find(n => n.midi === midiNote);
@@ -68,7 +69,6 @@ export default function ChordBuilderWorkspace() {
         });
     }, []);
 
-    // Clear all notes
     const handleClear = useCallback(() => {
         setNotes([]);
     }, []);
@@ -78,6 +78,19 @@ export default function ChordBuilderWorkspace() {
             playChord(notes.map(n => n.midi), '2n', 'None');
         }
     }, [notes, audioReady]);
+
+    const handleExport = useCallback(() => {
+        if (notes.length >= 3) {
+            navigate('/', {
+                state: {
+                    importedChord: {
+                        notes: notes.map(n => n.midi),
+                        name: chord.name
+                    }
+                }
+            });
+        }
+    }, [notes, chord, navigate]);
 
     const getIntervalColor = (interval: number) => {
         const name = INTERVAL_NAMES[interval];
@@ -197,9 +210,12 @@ export default function ChordBuilderWorkspace() {
                             <Play size={16} fill="currentColor" />
                             Play Chord
                         </button>
-                        <button className="flex items-center gap-2 px-4 py-2 bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--text-primary)] rounded-md hover:border-[var(--text-muted)] transition-colors">
-                            <Download size={16} />
-                            Export
+                        <button
+                            onClick={handleExport}
+                            disabled={notes.length < 3}
+                            className="flex items-center gap-2 px-4 py-2 bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--text-primary)] rounded-md hover:border-[var(--text-muted)] transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
+                            <ArrowRight size={16} />
+                            Send to ChordLab
                         </button>
                     </div>
                 </div>

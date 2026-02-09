@@ -12,6 +12,7 @@ interface Method {
     additionalFiles?: string[];
     tags: string[];
     color: string;
+    isLocalOnly?: boolean;
 }
 
 const METHODS: Method[] = [
@@ -31,6 +32,7 @@ const METHODS: Method[] = [
             "Takadimi displacement cycles"
         ],
         file: "Rafael Reina Karnatic Rhythm.pdf",
+        isLocalOnly: true,
         tags: ["Karnatic", "Complex", "Tuplets"],
         color: "purple"
     },
@@ -50,6 +52,7 @@ const METHODS: Method[] = [
             "Odd-meter swing feel"
         ],
         file: "Don Ellis New Rhythm Book 1972.pdf",
+        isLocalOnly: true,
         tags: ["Jazz", "Odd Meters", "Grouping"],
         color: "amber"
     },
@@ -446,16 +449,29 @@ export default function StudyMethods() {
                             <p className="text-white/40 text-lg mt-1">{selectedMethod.author}</p>
                         </div>
                         <div className="flex flex-col items-end gap-3">
-                            <a
-                                href={`/RHYTHM/${selectedMethod.file}`}
-                                target="_blank"
-                                rel="noreferrer"
-                                className={`flex items-center gap-2 px-6 py-3 bg-${selectedMethod.color}-600 hover:bg-${selectedMethod.color}-500 text-white rounded-xl transition font-bold shadow-lg`}
-                            >
-                                <ExternalLink size={18} />
-                                Open Full PDF
-                            </a>
-                            <p className="text-[10px] text-white/20 font-mono">Opens document in new tab</p>
+                            {selectedMethod.isLocalOnly ? (
+                                <div className="flex flex-col items-end gap-2">
+                                    <div className="px-4 py-3 bg-gray-800 text-gray-400 rounded-xl font-medium border border-white/5 text-sm">
+                                        Resource in /resources/RHYTHM
+                                    </div>
+                                    <p className="text-[10px] text-white/20 text-right max-w-[200px]">
+                                        This file was moved to the project's local resources folder to improve site performance.
+                                    </p>
+                                </div>
+                            ) : (
+                                <>
+                                    <a
+                                        href={`/RHYTHM/${selectedMethod.file}`}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className={`flex items-center gap-2 px-6 py-3 bg-${selectedMethod.color}-600 hover:bg-${selectedMethod.color}-500 text-white rounded-xl transition font-bold shadow-lg`}
+                                    >
+                                        <ExternalLink size={18} />
+                                        Open Full PDF
+                                    </a>
+                                    <p className="text-[10px] text-white/20 font-mono">Opens document in new tab</p>
+                                </>
+                            )}
                         </div>
                     </div>
 
@@ -547,24 +563,40 @@ export default function StudyMethods() {
                                         Companion Resources
                                     </h4>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                        {selectedMethod.additionalFiles.map((file, idx) => (
-                                            <a
-                                                key={idx}
-                                                href={`/RHYTHM/${file}`}
-                                                target="_blank"
-                                                rel="noreferrer"
-                                                className="flex items-center gap-3 p-3 bg-white/5 hover:bg-white/10 rounded-xl border border-white/5 transition group"
-                                            >
-                                                <div className="p-2 bg-white/5 rounded-lg text-white/40 group-hover:text-blue-400 transition-colors">
-                                                    <FileText size={14} />
+                                        {selectedMethod.additionalFiles.map((file, idx) => {
+                                            const isFileLocal = file.includes("48 standards");
+                                            return isFileLocal ? (
+                                                <div
+                                                    key={idx}
+                                                    className="flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-white/5 opacity-60"
+                                                >
+                                                    <div className="p-2 bg-white/5 rounded-lg text-white/20">
+                                                        <FileText size={14} />
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="text-[11px] text-white/70 font-medium truncate">{file.split('/').pop()}</div>
+                                                        <div className="text-[9px] text-white/30 uppercase tracking-tighter">In /resources</div>
+                                                    </div>
                                                 </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <div className="text-[11px] text-white/70 font-medium truncate">{file.split('/').pop()}</div>
-                                                    <div className="text-[9px] text-white/30 uppercase tracking-tighter">PDF Document</div>
-                                                </div>
-                                                <ExternalLink size={12} className="text-white/10 group-hover:text-white/40" />
-                                            </a>
-                                        ))}
+                                            ) : (
+                                                <a
+                                                    key={idx}
+                                                    href={`/RHYTHM/${file}`}
+                                                    target="_blank"
+                                                    rel="noreferrer"
+                                                    className="flex items-center gap-3 p-3 bg-white/5 hover:bg-white/10 rounded-xl border border-white/5 transition group"
+                                                >
+                                                    <div className="p-2 bg-white/5 rounded-lg text-white/40 group-hover:text-blue-400 transition-colors">
+                                                        <FileText size={14} />
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="text-[11px] text-white/70 font-medium truncate">{file.split('/').pop()}</div>
+                                                        <div className="text-[9px] text-white/30 uppercase tracking-tighter">PDF Document</div>
+                                                    </div>
+                                                    <ExternalLink size={12} className="text-white/10 group-hover:text-white/40" />
+                                                </a>
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             )}

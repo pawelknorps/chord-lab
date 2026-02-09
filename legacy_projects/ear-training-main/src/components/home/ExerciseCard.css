@@ -1,0 +1,80 @@
+.exercise-card {
+  background-color: var(--color-bg);
+  border: 2px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-xl);
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-md);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  font-family: inherit;
+  text-align: center;
+}
+
+.exercise-card:hover:not(.disabled) {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(33, 150, 243, 0.2);
+  border-color: var(--color-primary);
+}
+
+.exercise-card:active:not(.disabled) {
+  transform: translateY(-2px);
+}
+
+.exercise-card.disabled {
+  background-color: var(--color-bg-secondary);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.exercise-card-icon {
+  font-size: 5rem;
+  margin-bottom: var(--spacing-sm);
+  filter: grayscale(0%);
+  transition: filter var(--transition-normal);
+}
+
+.exercise-card.disabled .exercise-card-icon {
+  filter: grayscale(100%);
+  opacity: 0.5;
+}
+
+.exercise-card-title {
+  margin: 0;
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.exercise-card.disabled .exercise-card-title {
+  color: var(--color-text-secondary);
+}
+
+.exercise-card-badge {
+  background-color: var(--color-warning);
+  color: var(--color-text);
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: 12px;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  margin-top: var(--spacing-sm);
+}
+
+@media (max-width: 768px) {
+  .exercise-card {
+    padding: var(--spacing-lg);
+  }
+
+  .exercise-card-icon {
+    font-size: 4rem;
+  }
+
+  .exercise-card-title {
+    font-size: var(--font-size-lg);
+  }
+}

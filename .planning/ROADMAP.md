@@ -1,58 +1,45 @@
-# Roadmap: Advanced Ear Training
+# Roadmap
 
-## Milestone 1: Theory Foundations & Secondary Dominants
+## Phase 1: Foundation & Critical Fixes
+**Goal**: Stabilize the application and fix immediate bugs.
+*   [ ] **CORE-01**: Implement `cleanupAudio` hook or context to stop engines on unmount.
+*   [ ] **SYNC-01**: Fix ghost note audio in `rhythmEngine.ts`.
+*   [ ] **POLY-01**: Fix visualizer state staleness in `PolyrhythmGenerator.tsx`.
 
-Goal: Establish the theory engine corrections and implement the first advanced level.
+### Phase 1: Design System & App Shell [✓ Complete]
 
-### Phase 1: Theory Engine & Spelling [✓ Complete]
+- Goal: Establish the new visual language and layout structure.
+- Requirements: UI-NEW-01, UI-NEW-02
+- Success Criteria:
+  - New global CSS variables (Themes).
+  - Collapsible Sidebar implemented.
+  - Clean, minimalist typography active globally.
 
-- Goal: Fix enharmonic spelling logic and prepare background theory utils.
+### Phase 2: Module Internal Refactors [✓ Complete]
+
+- Goal: Update individual modules to use the new system and improve "screen density".
 - Completed: 2026-02-09
-- Requirements: THEORY-04, INTEG-01
+- Requirements: UI-NEW-03
 - Success Criteria:
-  - Centralized enharmonic utility returns correct spelling for all keys.
-  - New level slots visible in the UI (placeholder state).
+  - `ChordLab` updated.
+  - `EarTraining` updated.
+  - `Dashboard` fully consolidated.
 
-### Phase 1.5: Theory Harmonization [✓ Complete]
+## Phase 2: Syncopation Overhaul
+**Goal**: Transform Syncopation from a toy into a training tool.
+*   [ ] **CORE-02**: Apply new design to Syncopation builder.
+*   [ ] **SYNC-02**: Build "Groove Dictation" game logic.
+*   [ ] **SYNC-03**: Implement difficulty tiers for Syncopation.
 
-- Goal: Make the unified theory engine the base rule for all modules.
-- Completed: 2026-02-09
-- Requirements: THEORY-04
-- Success Criteria:
-  - `src/core/theory/index.ts` refactored to use `theoryEngine.ts`.
-  - All modules using `midiToNoteName` or similar now follow the unified jazz rules.
+## Phase 3: Polyrhythm & Subdivision
+**Goal**: Make abstract concepts interactive and testable.
+*   [ ] **CORE-02**: Apply new design to Polyrhythm & Subdivision.
+*   [ ] **POLY-02**: Build "Tap the Polyrhythm" game.
+*   [ ] **SUB-01**: Make Subdivision Pyramid interactive.
+*   [ ] **SUB-02**: Build "Subdivision Switch" game.
 
-### Phase 2: Secondary Dominants [✓ Complete]
-
-- Goal: Implement full ear training loop for secondary dominants.
-- Completed: 2026-02-09
-- Requirements: THEORY-01, UI-01, UI-04
-- Success Criteria:
-  - User can hear a progression and identify the secondary dominant.
-  - MIDI keyboard input correctly identifies the chord.
-
-## Milestone 2: Modal Interchange & USTs
-
-Goal: Complete the set of advanced functional exercises.
-
-### Phase 3: Modal Interchange [✓ Complete]
-
-- Goal: Identify chords borrowed from parallel modes.
-- Completed: 2026-02-09
-- Requirements: THEORY-02, UI-02
-- Success Criteria:
-  - Recognition of iv, bVI, bVII, etc., in a functional context.
-
-### Phase 4: Upper Structure Triads
-
-- Goal: Advanced identification of compound structures.
-- Requirements: THEORY-03, UI-03
-- Success Criteria:
-  - Identification of USTs (e.g., II/I dominant) by ear.
-
----
-
-## State
-
-- **Current Phase**: 4
-- **Overall Progress**: 90%
+## Phase 4: Polish & Integration
+**Goal**: Ensure a cohesive "Pro" experience.
+*   [ ] **GAME-01**: Verify XP systems across all new modules.
+*   [ ] **SYNC-04**: Implement MIDI export for Syncopation.
+*   [ ] **CORE-02**: Final design polish (animations, transitions).

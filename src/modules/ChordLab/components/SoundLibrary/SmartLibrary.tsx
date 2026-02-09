@@ -216,11 +216,11 @@ export function SmartLibrary({
 
                     {/* Grid View */}
                     <div className={`
-            grid gap-4 
-            ${viewMode === 'grid'
-                            ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6'
+                        grid gap-4
+                        ${viewMode === 'grid'
+                            ? 'grid-cols-[repeat(auto-fill,minmax(140px,1fr))]'
                             : 'grid-cols-1'}
-          `}>
+                    `}>
                         {filteredData.slice(0, 200).map((item: any, index: number) => (
                             <LibraryCard
                                 key={index}

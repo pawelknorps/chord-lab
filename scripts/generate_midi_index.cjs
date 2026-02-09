@@ -2,18 +2,19 @@
 const fs = require('fs');
 const path = require('path');
 
-const ROOT_DIR = '/Users/pawelknorps/chord-lab';
-const SRC_DIR = path.join(ROOT_DIR, 'src', 'midi_progressions');
+const ROOT_DIR = process.cwd();
 const PUBLIC_DIR = path.join(ROOT_DIR, 'public');
-const OUTPUT_FILE = path.join(PUBLIC_DIR, 'midi_index.json');
+const MIDI_DIR = path.join(PUBLIC_DIR, 'midi_progressions');
+const OUTPUT_FILE = path.join(PUBLIC_DIR, 'midi_library.json');
 
-const files = [];
+const progressions = new Map();
 
 function scanDir(dir, relativePath = []) {
+    if (!fs.existsSync(dir)) return;
     const entries = fs.readdirSync(dir, { withFileTypes: true });
 
     for (const entry of entries) {
-        if (entry.name.startsWith('.')) continue; // skip hidden
+        if (entry.name.startsWith('.')) continue;
 
         if (entry.isDirectory()) {
             scanDir(path.join(dir, entry.name), [...relativePath, entry.name]);
@@ -24,61 +25,37 @@ function scanDir(dir, relativePath = []) {
 }
 
 function processFile(filename, dirParts) {
-    // Reconstruct logic from useMidiLibrary.ts
-    // In the original, 'parts' included the full path.
-    // Here dirParts are components relative to src/midi_progressions.
-    // e.g. ['Major'] or ['Major', 'pop style']
+    // Category isusually the first folder under midi_progressions
+    let category = dirParts[0] || 'Unknown';
+    let style = dirParts[dirParts.length - 1] || 'Classic';
 
-    // logic:
-    // let finalCategory = parts[parts.length - 2]; 
-    // Wait, in glob it was full path. 
-    // Here, if file is at `Major/file.mid`, dirParts is `['Major']`.
-    // so category is dirParts[dirParts.length - 1].
-
-    let category = dirParts[dirParts.length - 1] || 'Unknown';
-    let style = 'Classic';
-
-    // Handle style folders
-    if (category.includes('style')) {
-        style = category.replace(' style', '');
-        category = dirParts[dirParts.length - 2] || 'Unknown';
+    if (style.includes('style')) {
+        style = style.replace(' style', '');
     }
 
-    // Filename parsing
-    // 1. Remove extension
+    // Filename: "Key - Roman - Roman - ..."
     const rawName = filename.replace(/\.mid$/i, '');
-
-    // 2. Split by " - "
     const nameParts = rawName.split(' - ');
 
-    // Ensure we have at least Key and Progression
-    let key = nameParts[0]?.trim() || 'C';
-    key = key.replace('s', '#');
+    const key = nameParts[0]?.trim() || 'C';
+    const romanParts = nameParts.slice(1).map(p => p.trim());
+    const fullProgression = romanParts.join(' - ');
 
-    const progression = nameParts[1]?.trim() || 'Unknown';
-    const mood = nameParts.slice(2).join(' - ').trim();
+    // Unique ID for de-duplication across keys
+    const id = `${category}|${style}|${fullProgression}`;
 
-    // specific handling for "flat" files
-    // The original code used parts from the glob path.
-    // We need to map this carefully.
-
-    // Path for the app to fetch:
-    // /midi_progressions/Major/file.mid
-    const webPath = '/midi_progressions/' + [...dirParts, filename].join('/');
-
-    files.push({
-        name: filename,
-        path: webPath,
-        category,
-        style,
-        key,
-        progression,
-        mood
-    });
+    if (!progressions.has(id)) {
+        progressions.set(id, {
+            category,
+            style,
+            progression: fullProgression,
+            name: fullProgression
+        });
+    }
 }
 
-console.log('Scanning...');
-scanDir(SRC_DIR);
-console.log(`Found ${files.length} MIDI files.`);
-fs.writeFileSync(OUTPUT_FILE, JSON.stringify(files, null, 2));
-console.log(`Wrote index to ${OUTPUT_FILE}`);
+console.log('Scanning MIDI library...');
+scanDir(MIDI_DIR);
+const optimized = Array.from(progressions.values());
+fs.writeFileSync(OUTPUT_FILE, JSON.stringify(optimized, null, 2));
+console.log(`Successfully generated optimized library with ${optimized.length} unique progressions.`);

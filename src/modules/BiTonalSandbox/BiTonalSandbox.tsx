@@ -121,24 +121,24 @@ const BiTonalSandbox: React.FC = () => {
     if (!exercise) return <div>Loading...</div>;
 
     return (
-        <div className="flex flex-col h-full bg-gradient-to-b from-gray-900 to-black text-white p-8">
+        <div className="flex flex-col h-full bg-[var(--bg-app)] text-[var(--text-primary)] p-8">
             {/* Header */}
             <div className="flex justify-between items-center mb-6">
-                <h2 className="text-3xl font-bold neon-text">
-                    <span className="text-purple-400">Target:</span> {exercise.targetColor}
+                <h2 className="text-3xl font-bold tracking-tight">
+                    <span className="text-[var(--accent)]">Target:</span> {exercise.targetColor}
                 </h2>
 
                 <div className="flex gap-4">
-                    <div className="flex bg-white/10 rounded-full p-1">
+                    <div className="flex bg-[var(--bg-surface)] rounded-md p-1 border border-[var(--border-subtle)]">
                         <button
                             onClick={() => { setMode('keyboard'); setActiveNotes(new Set()); }}
-                            className={`px-4 py-2 rounded-full flex items-center gap-2 transition-all ${mode === 'keyboard' ? 'bg-purple-600 text-white' : 'hover:bg-white/10'}`}
+                            className={`px-4 py-2 rounded-sm flex items-center gap-2 transition-all text-sm font-medium ${mode === 'keyboard' ? 'bg-[var(--bg-hover)] text-white shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'}`}
                         >
                             <Volume2 size={16} /> Keyboard
                         </button>
                         <button
                             onClick={() => { setMode('mic'); setActiveNotes(new Set()); }}
-                            className={`px-4 py-2 rounded-full flex items-center gap-2 transition-all ${mode === 'mic' ? 'bg-purple-600 text-white' : 'hover:bg-white/10'}`}
+                            className={`px-4 py-2 rounded-sm flex items-center gap-2 transition-all text-sm font-medium ${mode === 'mic' ? 'bg-[var(--bg-hover)] text-white shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'}`}
                         >
                             <Mic size={16} /> Sing
                         </button>
@@ -146,9 +146,9 @@ const BiTonalSandbox: React.FC = () => {
 
                     <button
                         onClick={newExercise}
-                        className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-full transition-all"
+                        className="flex items-center gap-2 px-4 py-2 bg-[var(--bg-surface)] border border-[var(--border-subtle)] hover:bg-[var(--bg-hover)] rounded-md transition-all text-sm font-medium"
                     >
-                        <RefreshCw size={20} /> Next Exercise
+                        <RefreshCw size={18} /> Next Exercise
                     </button>
                 </div>
             </div>
@@ -160,14 +160,14 @@ const BiTonalSandbox: React.FC = () => {
                         targetNotes={exercise.upperStructureNotes}
                         onPitchDetected={handleSingingPitch}
                     />
-                    <div className="text-center mt-2 text-sm text-gray-400">
+                    <div className="text-center mt-2 text-sm text-[var(--text-muted)]">
                         Sing the notes of the Upper Structure: {exercise.upperStructureRoot} {exercise.upperStructureQuality}
                         <div className="flex justify-center gap-2 mt-2">
                             {exercise.upperStructureNotes.map(note => {
                                 const noteMidi = noteNameToMidi(note);
                                 const isSung = Array.from(activeNotes).some(n => n % 12 === noteMidi % 12);
                                 return (
-                                    <span key={note} className={`px-2 py-1 rounded ${isSung ? 'bg-green-500 text-black' : 'bg-gray-700'}`}>
+                                    <span key={note} className={`px-2 py-1 rounded text-xs font-mono border ${isSung ? 'bg-green-500/20 text-green-400 border-green-500/50' : 'bg-[var(--bg-surface)] text-[var(--text-secondary)] border-[var(--border-subtle)]'}`}>
                                         {note}
                                     </span>
                                 );
@@ -183,26 +183,26 @@ const BiTonalSandbox: React.FC = () => {
                 {/* Left Hemisphere (Shell) */}
                 <div className="flex-1 flex flex-col items-center">
                     <motion.div
-                        className="w-64 h-64 rounded-full bg-indigo-900/30 border-2 border-indigo-500/50 flex items-center justify-center relative glow-blue"
+                        className="w-64 h-64 rounded-full bg-[var(--bg-surface)] border-2 border-[var(--border-active)] flex items-center justify-center relative"
                         animate={{ scale: [1, 1.02, 1] }}
                         transition={{ duration: 4, repeat: Infinity }}
                     >
                         <div className="text-center">
-                            <div className="text-4xl font-bold mb-2">{exercise.shellRoot}{exercise.shellQuality}</div>
-                            <div className="text-sm text-indigo-300">Left Ear (Shell)</div>
+                            <div className="text-4xl font-bold mb-2 tracking-tighter">{exercise.shellRoot}{exercise.shellQuality}</div>
+                            <div className="text-sm text-[var(--text-muted)] uppercase tracking-wider font-semibold">Left Ear (Shell)</div>
                         </div>
                     </motion.div>
 
                     <button
                         onClick={handlePlayShell}
-                        className="mt-8 p-4 bg-indigo-600/20 hover:bg-indigo-600/40 rounded-full transition-all"
+                        className="mt-8 p-4 bg-[var(--bg-surface)] border border-[var(--border-subtle)] hover:border-[var(--accent)] hover:text-[var(--accent)] rounded-full transition-all"
                     >
-                        <Volume2 size={32} />
+                        <Volume2 size={24} />
                     </button>
                 </div>
 
                 {/* Connection / Separator */}
-                <div className="w-px h-64 bg-gradient-to-b from-transparent via-white/20 to-transparent"></div>
+                <div className="w-px h-64 bg-[var(--border-subtle)]"></div>
 
                 {/* Right Hemisphere (Upper Structure) */}
                 <div className="flex-1 flex flex-col items-center">
@@ -210,8 +210,8 @@ const BiTonalSandbox: React.FC = () => {
                         className={`
               w-64 h-64 rounded-full flex items-center justify-center relative border-2 transition-colors duration-300
               ${status === 'success'
-                                ? 'bg-green-900/30 border-green-500/50 glow-green'
-                                : 'bg-pink-900/30 border-pink-500/50 glow-pink'}
+                                ? 'bg-green-900/10 border-green-500'
+                                : 'bg-[var(--bg-surface)] border-[var(--border-subtle)]'}
             `}
                         animate={
                             dissonanceAmount > 0
@@ -223,28 +223,27 @@ const BiTonalSandbox: React.FC = () => {
                         <div className="text-center">
                             {status === 'success' ? (
                                 <>
-                                    <div className="text-4xl font-bold mb-2 text-green-400">{exercise.upperStructureRoot} {exercise.upperStructureQuality}</div>
-                                    <div className="text-sm text-green-300">Locked In!</div>
+                                    <div className="text-4xl font-bold mb-2 text-green-500 tracking-tighter">{exercise.upperStructureRoot} {exercise.upperStructureQuality}</div>
+                                    <div className="text-sm text-green-600 font-medium uppercase tracking-wider">Locked In!</div>
                                 </>
                             ) : (
                                 <>
-                                    <div className="text-5xl font-bold mb-2 text-pink-400">?</div>
-                                    <div className="text-sm text-pink-300">Right Ear (Grip)</div>
+                                    <div className="text-5xl font-bold mb-2 text-[var(--text-muted)]">?</div>
+                                    <div className="text-sm text-[var(--text-muted)] uppercase tracking-wider font-semibold">Right Ear (Grip)</div>
                                 </>
                             )}
                         </div>
                     </motion.div>
 
-                    <div className="mt-8 flex gap-4">
-                        <div className="text-center">
-                            <div className="text-xs uppercase tracking-widest text-gray-500 mb-2">Play on {mode === 'keyboard' ? 'MIDI Keyboard' : 'Mic'}</div>
-                            <div className="h-2 w-32 bg-gray-800 rounded-full overflow-hidden">
+                    <div className="mt-8 flex gap-4 w-64">
+                        <div className="text-center w-full">
+                            <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)] mb-2">Stability</div>
+                            <div className="h-1 w-full bg-[var(--bg-surface)] rounded-full overflow-hidden">
                                 <motion.div
-                                    className="h-full bg-gradient-to-r from-green-500 to-yellow-500"
-                                    animate={{ width: `${(1 - dissonanceAmount) * 100}%` }}
+                                    className="h-full bg-[var(--accent)]"
+                                    animate={{ width: `${(1 - dissonanceAmount) * 100}%`, opacity: (1 - dissonanceAmount) }}
                                 />
                             </div>
-                            <div className="text-xs text-gray-400 mt-1">Stability</div>
                         </div>
                     </div>
                 </div>
@@ -265,10 +264,10 @@ const BiTonalSandbox: React.FC = () => {
                     </div>
                 )}
 
-                <div className="text-center text-white/40">
+                <div className="text-center text-[var(--text-muted)]">
                     <p>Listen to the Shell in your Left Ear. Find the Triad that creates the target color.</p>
-                    <p className="text-xs mt-2">
-                        {dissonanceAmount > 0.5 ? "Too Dissonant! Try a different root." :
+                    <p className="text-xs mt-2 font-medium text-[var(--accent)]">
+                        {dissonanceAmount > 0.5 ? "Too Dissonant! search for consonance." :
                             status === 'success' ? "Nice Job!" : "Getting closer..."}
                     </p>
                 </div>
