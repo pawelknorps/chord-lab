@@ -7,10 +7,14 @@ import { ProgressionsLevel } from './components/levels/ProgressionsLevel';
 import { MelodyStepsLevel } from './components/levels/MelodyStepsLevel';
 import { ChordQualitiesLevel } from './components/levels/ChordQualitiesLevel';
 import { JazzStandardsLevel } from './components/levels/JazzStandardsLevel';
-import { Brain, Sparkles, Activity, Layers, Music, Anchor, Repeat, Zap, Box, Star } from 'lucide-react';
+import { FretboardLevel } from './components/levels/FretboardLevel';
+import { ChordTonesLevel } from './components/levels/ChordTonesLevel';
+import { PositionsLevel } from './components/levels/PositionsLevel';
+import { IntervalsLevel } from './components/levels/IntervalsLevel';
 import { QuickExerciseJump } from '../../components/widgets/QuickExerciseJump';
 import { useMasteryStore } from '../../core/store/useMasteryStore';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Activity, Repeat, Anchor, Layers, Music, Zap, Piano, Binary, Guitar, Box, Brain, Sparkles, Network, GitBranch, Pyramid } from 'lucide-react';
 
 export function FunctionalEarTraining() {
     const { level, setLevel, difficulty, setDifficulty, score, streak } = useFunctionalEarTrainingStore();
@@ -23,17 +27,22 @@ export function FunctionalEarTraining() {
         { id: 'Interference', label: 'Interference', icon: <Layers size={16} />, color: 'from-orange-400 to-amber-400' },
         { id: 'Progressions', label: 'Progressions', icon: <Music size={16} />, color: 'from-emerald-400 to-teal-400' },
         { id: 'MelodySteps', label: 'Melody Steps', icon: <Zap size={16} />, color: 'from-orange-400 to-red-400' },
-        { id: 'ChordQualities', label: 'Chord Qualities', icon: <Box size={16} />, color: 'from-purple-400 to-indigo-400' },
-        { id: 'JazzStandards', label: 'Jazz Standards', icon: <Star size={16} />, color: 'from-amber-400 to-orange-400' },
+        { id: 'ChordQualities', label: 'Chord Qualities', icon: <Piano size={16} />, color: 'from-amber-400 to-yellow-400' },
+        { id: 'JazzStandards', label: 'Jazz Standards', icon: <Music size={16} />, color: 'from-blue-400 to-indigo-400' },
+        { id: 'Intervals', label: 'Pure Intervals', icon: <Binary size={16} />, color: 'from-indigo-400 to-purple-400' },
+        { id: 'Fretboard', label: 'Fretboard', icon: <Guitar size={16} />, color: 'from-cyan-400 to-teal-400' },
+        { id: 'ChordTones', label: 'Chord Tones', icon: <Layers size={16} />, color: 'from-orange-400 to-amber-400' },
+        { id: 'Positions', label: 'Positions', icon: <Box size={16} />, color: 'from-pink-400 to-rose-400' },
+        { id: 'SecondaryDominants', label: 'V/x Dominants', icon: <Network size={16} />, color: 'from-red-400 to-orange-400' },
+        { id: 'ModalInterchange', label: 'Borrowed', icon: <GitBranch size={16} />, color: 'from-blue-400 to-indigo-400' },
+        { id: 'UST', label: 'Upper Upper', icon: <Pyramid size={16} />, color: 'from-yellow-400 to-lime-400' },
     ] as const;
 
     return (
         <div className="flex flex-col h-full p-6 space-y-6 bg-gradient-to-br from-gray-950 via-gray-900 to-black overflow-hidden relative">
-            {/* Background decorative elements */}
             <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-cyan-500/5 rounded-full blur-[120px] -mr-64 -mt-64 animate-pulse pointer-events-none" />
             <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-500/5 rounded-full blur-[120px] -ml-64 -mb-64 animate-pulse pointer-events-none" />
 
-            {/* Header / HUD */}
             <motion.div
                 initial={{ y: -20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
@@ -82,7 +91,6 @@ export function FunctionalEarTraining() {
                 </div>
             </motion.div>
 
-            {/* Level Selector */}
             <div className="flex gap-2 bg-black/40 p-1.5 rounded-2xl self-start border border-white/5 backdrop-blur-xl relative z-10 overflow-x-auto no-scrollbar max-w-full">
                 {levels.map((l) => (
                     <button
@@ -90,9 +98,7 @@ export function FunctionalEarTraining() {
                         onClick={() => setLevel(l.id)}
                         className={`
                             flex items-center gap-2 px-5 py-2.5 rounded-xl transition-all duration-300 relative group
-                            ${level === l.id
-                                ? 'text-white'
-                                : 'text-white/40 hover:text-white hover:bg-white/5'}
+                            ${level === l.id ? 'text-white' : 'text-white/40 hover:text-white hover:bg-white/5'}
                         `}
                     >
                         {level === l.id && (
@@ -117,7 +123,6 @@ export function FunctionalEarTraining() {
                 ))}
             </div>
 
-            {/* Game Area */}
             <motion.div
                 key={level}
                 initial={{ opacity: 0, scale: 0.98 }}
@@ -125,7 +130,6 @@ export function FunctionalEarTraining() {
                 transition={{ duration: 0.4 }}
                 className="flex-1 glass-panel rounded-[32px] p-8 relative overflow-hidden flex items-center justify-center border border-white/10 shadow-[0_30px_100px_rgba(0,0,0,0.5)] bg-white/[0.02]"
             >
-                {/* Decorative grid pattern */}
                 <div className="absolute inset-0 opacity-[0.03] pointer-events-none"
                     style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
 
@@ -142,10 +146,16 @@ export function FunctionalEarTraining() {
                         {level === 'Bass' && <BassLevel />}
                         {level === 'Interference' && <InterferenceLevel />}
                         {level === 'Progressions' && <ProgressionsLevel />}
-                        {level === 'Progressions' && <ProgressionsLevel />}
                         {level === 'MelodySteps' && <MelodyStepsLevel />}
                         {level === 'ChordQualities' && <ChordQualitiesLevel />}
                         {level === 'JazzStandards' && <JazzStandardsLevel />}
+                        {level === 'Fretboard' && <FretboardLevel />}
+                        {level === 'ChordTones' && <ChordTonesLevel />}
+                        {level === 'Positions' && <PositionsLevel />}
+                        {level === 'Intervals' && <IntervalsLevel />}
+                        {level === 'SecondaryDominants' && <div className="text-white/20 font-black italic uppercase tracking-[0.5em] text-2xl">Secondary Dominants Coming Soon</div>}
+                        {level === 'ModalInterchange' && <div className="text-white/20 font-black italic uppercase tracking-[0.5em] text-2xl">Modal Interchange Coming Soon</div>}
+                        {level === 'UST' && <div className="text-white/20 font-black italic uppercase tracking-[0.5em] text-2xl">Upper Structures Coming Soon</div>}
                     </motion.div>
                 </AnimatePresence>
             </motion.div>
