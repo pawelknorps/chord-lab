@@ -1,5 +1,7 @@
 // All note names (Sharps)
 import { getFunctionalPitchClassOverride } from './functionalRules';
+export * from './analysis';
+
 export const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] as const;
 // All note names (Flats)
 export const NOTE_NAMES_FLAT = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'] as const;

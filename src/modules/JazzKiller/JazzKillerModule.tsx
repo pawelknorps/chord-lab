@@ -15,6 +15,7 @@ import {
 import { Search, Music, Play, StopCircle, X, ChevronUp, ChevronDown, Sliders, Volume2, Target as Targeted } from 'lucide-react';
 import { SendToMenu } from '../../components/shared/SendToMenu';
 import { useAudioCleanup } from '../../hooks/useAudioManager';
+import { usePracticeStore } from '../../core/store/usePracticeStore';
 
 export default function JazzKillerModule() {
     useAudioCleanup('jazz-killer');
@@ -24,6 +25,9 @@ export default function JazzKillerModule() {
     const [showMixer, setShowMixer] = useState(false);
     const [showPracticeTips, setShowPracticeTips] = useState(true);
     const { standards, getSongAsIRealFormat } = useJazzLibrary();
+
+    // Practice Store integration
+    const { loadSong, detectedPatterns, practiceExercises } = usePracticeStore();
 
     const selectedSong = useMemo(() => {
         if (!selectedStandard) return null;
@@ -39,6 +43,22 @@ export default function JazzKillerModule() {
         loopCountSignal,
         totalLoopsSignal
     } = useJazzPlayback(selectedSong);
+
+    // Analyze song when loaded
+    useEffect(() => {
+        if (selectedSong && selectedSong.music) {
+            const chords = selectedSong.music.measures
+                .flatMap(m => m.chords)
+                .filter(c => c && c !== "");
+
+            loadSong({
+                title: selectedSong.title,
+                chords,
+                key: selectedSong.key,
+                bars: selectedSong.music.measures.length
+            });
+        }
+    }, [selectedSong, loadSong]);
 
     const filteredStandards = useMemo(() => {
         if (!searchQuery) return [];
