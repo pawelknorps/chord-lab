@@ -12,7 +12,7 @@ import {
     pianoReverbSignal,
     reverbVolumeSignal
 } from './state/jazzSignals';
-import { Search, Music, Play, StopCircle, X, ChevronUp, ChevronDown, Sliders, Volume2, Target as Targeted } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, Volume2, Search, X, ChevronDown, ChevronUp, Sliders, Target, Music, StopCircle } from 'lucide-react';
 import { SendToMenu } from '../../components/shared/SendToMenu';
 import { useAudioCleanup } from '../../hooks/useAudioManager';
 import { usePracticeStore } from '../../core/store/usePracticeStore';
