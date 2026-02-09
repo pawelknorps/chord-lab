@@ -1,16 +1,61 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useMidi } from '../../context/MidiContext';
 import { midiToNoteName } from '../../core/theory';
 import { Play, RotateCcw, Download } from 'lucide-react';
+import { playChord, initAudio } from '../../core/audio/globalAudio';
 
 interface Note {
     midi: number;
     name: string;
 }
 
+const INTERVAL_NAMES: Record<number, string> = {
+    0: 'R', 1: 'm2', 2: 'M2', 3: 'm3', 4: 'M3', 5: 'P4', 6: 'TT',
+    7: 'P5', 8: 'm6', 9: 'M6', 10: 'm7', 11: 'M7', 12: 'P8'
+};
+
+const CHORD_TONE_COLORS: Record<string, string> = {
+    'R': 'bg-red-500', 'M3': 'bg-blue-500', 'm3': 'bg-blue-400',
+    'P5': 'bg-green-500', 'm7': 'bg-purple-500', 'M7': 'bg-purple-600',
+    'M2': 'bg-yellow-400', 'P4': 'bg-yellow-500'
+};
+
+function detectChord(notes: Note[]): { name: string; formula: string; intervals: number[] } {
+    if (notes.length < 3) return { name: 'Select 3+ notes', formula: '', intervals: [] };
+
+    const sorted = [...notes].sort((a, b) => a.midi - b.midi);
+    const root = sorted[0];
+    const intervals = sorted.map(n => (n.midi - root.midi) % 12);
+
+    const has = (int: number) => intervals.includes(int);
+    let name = root.name;
+    let quality = '';
+
+    // Basic chord detection logic (can be expanded)
+    if (has(4) && has(7)) { // Major triad
+        quality = has(11) ? 'maj7' : has(10) ? '7' : '';
+    } else if (has(3) && has(7)) { // Minor triad
+        quality = has(10) ? 'm7' : 'm';
+    } else if (has(3) && has(6)) { // Diminished triad
+        quality = 'dim';
+    } else if (has(4) && has(8)) { // Augmented triad
+        quality = 'aug';
+    }
+
+    const formula = intervals.map(i => INTERVAL_NAMES[i]).filter(Boolean).join('-');
+    return { name: name + quality, formula, intervals };
+}
+
 export default function ChordBuilderWorkspace() {
     const [notes, setNotes] = useState<Note[]>([]);
     const { activeNotes } = useMidi();
+    const [audioReady, setAudioReady] = useState(false);
+
+    useEffect(() => {
+        initAudio().then(() => setAudioReady(true));
+    }, []);
+
+    const chord = useMemo(() => detectChord(notes), [notes]);
 
     // Add note from piano click
     const handleNoteClick = useCallback((midiNote: number) => {
@@ -27,6 +72,17 @@ export default function ChordBuilderWorkspace() {
     const handleClear = useCallback(() => {
         setNotes([]);
     }, []);
+
+    const handlePlay = useCallback(() => {
+        if (notes.length > 0 && audioReady) {
+            playChord(notes.map(n => n.midi), '2n', 'None');
+        }
+    }, [notes, audioReady]);
+
+    const getIntervalColor = (interval: number) => {
+        const name = INTERVAL_NAMES[interval];
+        return CHORD_TONE_COLORS[name] || 'bg-gray-500';
+    };
 
     // Render piano keyboard
     const renderPiano = () => {
@@ -134,7 +190,10 @@ export default function ChordBuilderWorkspace() {
 
                     {/* Actions */}
                     <div className="flex gap-3 justify-center mt-6">
-                        <button className="flex items-center gap-2 px-4 py-2 bg-[var(--text-primary)] text-[var(--bg-app)] rounded-md hover:bg-white transition-colors">
+                        <button
+                            onClick={handlePlay}
+                            disabled={notes.length === 0 || !audioReady}
+                            className="flex items-center gap-2 px-4 py-2 bg-[var(--text-primary)] text-[var(--bg-app)] rounded-md hover:bg-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
                             <Play size={16} fill="currentColor" />
                             Play Chord
                         </button>
@@ -145,17 +204,46 @@ export default function ChordBuilderWorkspace() {
                     </div>
                 </div>
 
-                {/* Chord Analysis Panel (Placeholder) */}
+                {/* Chord Analysis Panel */}
                 <div className="bg-[var(--bg-panel)] border border-[var(--border-subtle)] rounded-lg p-6">
                     <h2 className="text-sm uppercase font-bold text-[var(--text-muted)] tracking-wider mb-4">
                         Chord Analysis
                     </h2>
-                    <div className="text-center text-[var(--text-muted)] py-8">
-                        <p className="text-sm">Select 3 or more notes to see chord analysis</p>
-                    </div>
-                </div>
 
+                    {notes.length < 3 ? (
+                        <div className="text-center text-[var(--text-muted)] py-8">
+                            <p className="text-sm">Select 3 or more notes to see chord analysis</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            <div>
+                                <div className="text-xs text-[var(--text-muted)] mb-1">Detected Chord</div>
+                                <div className="text-3xl font-bold text-[var(--accent)]">{chord.name}</div>
+                            </div>
+
+                            <div>
+                                <div className="text-xs text-[var(--text-muted)] mb-2">Interval Formula</div>
+                                <div className="flex flex-wrap gap-2">
+                                    {chord.intervals.map((interval, idx) => (
+                                        <div
+                                            key={idx}
+                                            className={`px-3 py-1 rounded text-white text-xs font-bold ${getIntervalColor(interval)}`}
+                                        >
+                                            {INTERVAL_NAMES[interval]}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div>
+                                <div className="text-xs text-[var(--text-muted)] mb-1">Formula String</div>
+                                <div className="text-sm font-mono text-[var(--text-secondary)]">{chord.formula}</div>
+                            </div>
+                        </div>
+                    )}
+                </div>
             </div>
+
         </div>
     );
 }
