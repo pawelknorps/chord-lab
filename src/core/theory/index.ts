@@ -137,15 +137,32 @@ export function midiToNoteName(midi: number, context?: string | boolean): string
   }
 
   // Handle string context (Functional Jazz Rules)
-  const tonic = typeof context === 'string' ? context.replace(/[0-9-]/g, '') : 'C';
+  let tonic = typeof context === 'string' ? context.replace(/[0-9-]/g, '') : 'C';
 
   // 1. Check for functional overrides (Jazz Rules)
-  // Determine if context contains functional hints (e.g. "C:V/V" or just "C")
   const functionalOverride = getFunctionalPitchClassOverride(pc, tonic);
   if (functionalOverride) return `${functionalOverride}${octave}`;
 
   const FLAT_KEYS = ['F', 'Bb', 'Eb', 'Ab', 'Db', 'Gb', 'Cb', 'Dm', 'Gm', 'Cm', 'Fm', 'Bbm', 'Ebm', 'Abm'];
-  const prefersFlats = FLAT_KEYS.includes(tonic) || tonic.includes('b');
+  let prefersFlats = FLAT_KEYS.includes(tonic) || tonic.includes('b');
+
+  // If no specific key context given, infer from the note itself if it is a black key
+  if (!context && [1, 3, 6, 8, 10].includes(pc)) {
+    // Default to sharp for ambiguous cases unless logic dictates otherwise
+    // But user complained about A#maj7 (Bbmaj7), so let's check common keys
+    // Actually, without context, we can't know. 
+    // But if we are in a Flat Key context, we should definitely return flats.
+  }
+
+  // FORCE FLAT override for specific problem chords if they appear in standard contexts
+  // e.g. Bb is clearer than A# in almost all jazz contexts except B major / F# major
+  if (pc === 10 && !['B', 'F#', 'C#', 'G#', 'D#', 'A#'].includes(tonic)) {
+    prefersFlats = true; // High preference for Bb over A#
+  }
+  if (pc === 3 && !['B', 'E', 'A', 'D', 'G', 'F#', 'C#'].includes(tonic)) {
+    // Eb vs D# - Eb is usually preferred unless B/E/F# major
+    if (!['B', 'E', 'F#', 'C#'].includes(tonic)) prefersFlats = true;
+  }
 
   const noteName = prefersFlats ? NOTE_NAMES_FLAT[pc] : NOTE_NAMES[pc];
   return `${noteName}${octave}`;
@@ -462,6 +479,19 @@ export function transposeChordSymbol(chordSymbol: string, semitones: number, key
       transposedSymbol += '/' + bass;
     }
   }
-
   return transposedSymbol;
+}
+
+// Helper for interval names
+export function getIntervalName(root: number, note: number): string {
+  const semitones = (note - root) % 12;
+  const names = ['R', 'm2', 'M2', 'm3', 'M3', 'P4', 'T', 'P5', 'm6', 'M6', 'm7', 'M7'];
+  return names[(semitones + 12) % 12];
+}
+
+// Helper for scale degrees
+export function getScaleDegree(root: number, note: number): string {
+  const semitones = (note - root) % 12;
+  const degrees = ['1', 'b2', '2', 'b3', '3', '4', 'b5', '5', 'b6', '6', 'b7', '7'];
+  return degrees[(semitones + 12) % 12];
 }
