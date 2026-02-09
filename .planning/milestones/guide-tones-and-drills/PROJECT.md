@@ -308,14 +308,227 @@ Transform the Teaching Machine from a **pattern detector** into an **interactive
 
 ---
 
+## Feature 3: Roman Numeral Analysis & Practice Hotspots
+
+### The Problem
+- Students don't know which sections of a song are "tricky"
+- They waste time practicing easy parts
+- No visual indication of harmonic complexity
+
+### The Solution
+**Automatic Roman numeral analysis** that identifies "practice hotspots" - sections with complex harmony, key changes, or difficult voice leading.
+
+### Core Functionality
+
+#### 3.1 Roman Numeral Analysis Engine
+- Use **Tonal.js** to analyze each chord in relation to the song's key
+- Generate Roman numerals (I, ii, V7, etc.)
+- Detect:
+  - **Diatonic chords** (in-key, green highlight)
+  - **Secondary dominants** (V/x, yellow highlight)
+  - **Modal interchange** (borrowed chords, orange highlight)
+  - **Chromatic passing** (out-of-key, red highlight)
+
+#### 3.2 Hotspot Detection Algorithm
+- **Complexity score** for each measure (0-10):
+  - +2 for secondary dominants
+  - +3 for altered chords (#9, b13, etc.)
+  - +4 for key changes
+  - +5 for tritone substitutions
+  - +3 for rapid chord changes (2+ chords per bar)
+- **Hotspot threshold**: Measures with score ≥ 7
+- Visual: 🔥 Fire icon next to complex measures
+
+#### 3.3 Visual Display
+- Show Roman numerals **above chord symbols** on lead sheet
+- Color-code by function:
+  - **Green**: Tonic function (I, vi)
+  - **Blue**: Subdominant (ii, IV)
+  - **Red**: Dominant (V, vii°)
+  - **Yellow**: Secondary dominants
+- Highlight hotspots with red border
+
+#### 3.4 Practice Recommendations
+- "Focus on measures 17-20 (Bridge hotspot)"
+- "This section has 3 key changes - practice slowly"
+- Auto-suggest drill mode for hotspot sections
+
+---
+
+## Feature 4: Custom Bar Range Drill UI
+
+### The Problem
+- Students want to practice specific sections (bridge, turnaround, etc.)
+- Current drill mode only works with detected patterns
+- No way to isolate arbitrary bar ranges
+
+### The Solution
+**Interactive bar range selector** that lets students create custom practice loops for any section of a song.
+
+### Core Functionality
+
+#### 4.1 Visual Range Selector
+- **Click and drag** on lead sheet to select bar range
+- Visual feedback: Selected bars highlighted in blue
+- Display: "Practicing bars 17-24 (Bridge)"
+- Quick presets:
+  - **A Section** (bars 1-8)
+  - **B Section** (bars 9-16)
+  - **Bridge** (auto-detect based on form)
+  - **Turnaround** (last 2 bars)
+  - **Full Song**
+
+#### 4.2 Section Auto-Detection
+- Parse song form from metadata (AABA, ABAC, etc.)
+- Automatically identify:
+  - A sections
+  - B sections (bridge)
+  - Intro/Outro
+  - Turnarounds
+  - Vamps
+- One-click to practice any section
+
+#### 4.3 Drill Controls
+- **Loop count**: 1x, 2x, 4x, 8x, ∞
+- **Tempo adjustment**: -50% to +50%
+- **Count-in**: 0, 1, 2, or 4 bars
+- **Metronome**: On/Off, volume slider
+- **Save preset**: Name and save custom ranges
+
+#### 4.4 Integration with Hotspots
+- "Practice Hotspot" button on detected complex sections
+- Auto-create drill for hotspot range
+- Suggest starting tempo based on complexity
+
+---
+
+## Feature 5: Student Profile & Progress Tracking
+
+### The Problem
+- No way to track progress across multiple songs
+- Students forget which songs they've practiced
+- No historical data on BPM improvements
+
+### The Solution
+**Student profile system** that tracks practice history, BPM progress, and mastery levels across the entire 1,300-song library.
+
+### Core Functionality
+
+#### 5.1 Profile Data Structure
+```typescript
+interface StudentProfile {
+  id: string;
+  name: string;
+  createdAt: Date;
+  stats: {
+    totalPracticeTime: number; // minutes
+    songsStarted: number;
+    songsMastered: number;
+    patternsCompleted: number;
+    currentStreak: number; // days
+  };
+  songProgress: Map<string, SongProgress>;
+  achievements: Achievement[];
+}
+
+interface SongProgress {
+  songTitle: string;
+  firstPracticed: Date;
+  lastPracticed: Date;
+  totalTime: number; // minutes
+  maxBpm: number;
+  currentBpm: number;
+  masteryLevel: 'Beginner' | 'Intermediate' | 'Advanced' | 'Mastered';
+  sectionsCompleted: string[]; // ['A', 'B', 'Bridge']
+  hotspotsPracticed: number[];
+}
+```
+
+#### 5.2 BPM Progress Tracking
+- **Auto-track** BPM for each practice session
+- **Chart visualization**: BPM over time for each song
+- **Goal setting**: "Master 'Autumn Leaves' at 160 BPM"
+- **Milestones**:
+  - 🎯 First play-through (any BPM)
+  - 🚀 Comfortable (100 BPM)
+  - ⚡ Performance ready (140 BPM)
+  - 🏆 Mastered (160+ BPM)
+
+#### 5.3 Song Library Dashboard
+- **Grid view** of all 1,300 standards
+- **Color-coded** by mastery level:
+  - Gray: Not started
+  - Yellow: In progress
+  - Green: Mastered
+- **Filter/sort** by:
+  - Mastery level
+  - Last practiced
+  - BPM achieved
+  - Difficulty
+  - Composer
+  - Style (Bebop, Modal, etc.)
+- **Search** by song title or composer
+
+#### 5.4 Practice History
+- **Calendar view**: Days practiced (GitHub-style heatmap)
+- **Session log**: Date, song, duration, BPM
+- **Weekly report**: Songs practiced, time spent, progress made
+- **Export data**: CSV download for external analysis
+
+#### 5.5 Recommendations Engine
+- **"Practice Next"** suggestion based on:
+  - Songs not practiced recently
+  - Songs close to mastery (90% BPM goal)
+  - Songs with similar patterns to recently mastered
+- **"Challenge Mode"**: Suggest harder songs based on current level
+- **"Review Mode"**: Revisit mastered songs to maintain skills
+
+#### 5.6 Multi-Profile Support
+- Create multiple profiles (e.g., "Jazz", "Bebop Focus", "Beginner")
+- Switch between profiles
+- Compare progress across profiles
+- Share profiles (export/import JSON)
+
+---
+
+## Enhanced Learning Experience (Updated)
+
+### Integration with All Features
+
+**1. Workflow: Learning a New Song**
+1. **Load song** → Roman numerals auto-display
+2. **Hotspots detected** → "3 complex sections found"
+3. **Click hotspot** → Auto-create drill for that range
+4. **Practice drill** → Guide tones highlighted
+5. **BPM tracked** → Progress saved to profile
+6. **Mastery achieved** → Song turns green in library
+
+**2. Workflow: Targeted Practice**
+1. **Open song library** → Filter by "In Progress"
+2. **Select song** → See last BPM (120) and goal (160)
+3. **Practice hotspot** → Bridge (bars 17-24)
+4. **Guide tones on** → Focus on 3rds & 7ths
+5. **Complete drill** → BPM increases to 125
+6. **Profile updated** → Chart shows progress
+
+**3. Workflow: ii-V-I Mastery**
+1. **Start Cycle of Fifths drill** → 12 keys
+2. **Guide tones visible** → Learn voice leading
+3. **Complete cycle** → Achievement unlocked
+4. **Profile shows** → "ii-V-I Master" badge
+5. **Recommendation** → "Try Giant Steps (uses Coltrane changes)"
+
+---
+
 ## Out of Scope (v2 Features)
 
 - ❌ Real-time pitch detection (microphone input)
 - ❌ Automatic BPM progression based on accuracy
 - ❌ Adaptive stem mixing (Aebersold modes)
-- ❌ Custom drill creation UI (use presets for v1)
 - ❌ Social features (sharing drills, leaderboards)
 - ❌ Mobile app version (web only for v1)
+- ❌ Cloud sync for profiles (localStorage only for v1)
+- ❌ AI-powered practice recommendations (rule-based only)
 
 ---
 
@@ -327,15 +540,18 @@ Transform the Teaching Machine from a **pattern detector** into an **interactive
 | **Use existing pattern detection** | Leverage `ConceptAnalyzer` already built |
 | **IndexedDB for pattern storage** | Fast access, works offline, no backend needed |
 | **Cycle of Fifths as primary drill** | Most pedagogically valuable sequence |
-| **No custom drill builder in v1** | Preset modes cover 80% of use cases |
-| **Tonal.js for guide-tone extraction** | Already integrated, reliable, well-documented |
+| **No custom drill builder in v1** | Preset modes + bar range selector cover 95% of use cases |
+| **Tonal.js for all theory analysis** | Already integrated, reliable, well-documented |
+| **localStorage for profiles** | No backend needed, works offline, simple implementation |
+| **Roman numerals above chords** | Doesn't clutter the chart, easy to toggle off |
+| **Hotspot auto-detection** | Saves students time identifying difficult sections |
 
 ---
 
 ## Next Steps
 
-1. **Create ROADMAP.md** - Break into 5 phases
+1. **Create ROADMAP.md** - Break into phases (now 8 phases with new features)
 2. **Plan Phase 1** - Guide-Tone Calculation & Storage
 3. **Implement** - Start with `GuideToneCalculator` utility
 4. **Test** - Verify guide tones for all chord types
-5. **Iterate** - Add visual display, then drill mode
+5. **Iterate** - Add visual display, then drill mode, then profiles
