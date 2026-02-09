@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
-import { useMidi } from '../../../context/MidiContext';
-import { midiToNoteName } from '../../../core/theory';
+import { useMidi } from '../../context/MidiContext';
+import { midiToNoteName } from '../../core/theory';
 import { Play, RotateCcw, Download } from 'lucide-react';
 
 interface Note {
