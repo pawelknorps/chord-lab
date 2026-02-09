@@ -11,6 +11,7 @@ import { FretboardLevel } from './components/levels/FretboardLevel';
 import { ChordTonesLevel } from './components/levels/ChordTonesLevel';
 import { PositionsLevel } from './components/levels/PositionsLevel';
 import { IntervalsLevel } from './components/levels/IntervalsLevel';
+import { SecondaryDominantsLevel } from './components/levels/SecondaryDominantsLevel';
 import { QuickExerciseJump } from '../../components/widgets/QuickExerciseJump';
 import { useMasteryStore } from '../../core/store/useMasteryStore';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -153,7 +154,7 @@ export function FunctionalEarTraining() {
                         {level === 'ChordTones' && <ChordTonesLevel />}
                         {level === 'Positions' && <PositionsLevel />}
                         {level === 'Intervals' && <IntervalsLevel />}
-                        {level === 'SecondaryDominants' && <div className="text-white/20 font-black italic uppercase tracking-[0.5em] text-2xl">Secondary Dominants Coming Soon</div>}
+                        {level === 'SecondaryDominants' && <SecondaryDominantsLevel />}
                         {level === 'ModalInterchange' && <div className="text-white/20 font-black italic uppercase tracking-[0.5em] text-2xl">Modal Interchange Coming Soon</div>}
                         {level === 'UST' && <div className="text-white/20 font-black italic uppercase tracking-[0.5em] text-2xl">Upper Structures Coming Soon</div>}
                     </motion.div>

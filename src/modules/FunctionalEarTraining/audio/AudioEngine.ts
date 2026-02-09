@@ -49,6 +49,11 @@ class FETAudioEngine {
         this.pianoSampler.triggerAttackRelease(notes, duration);
     }
 
+    playChord(notes: string[], duration = '2n') {
+        if (!this.pianoSampler) return;
+        this.pianoSampler.triggerAttackRelease(notes, duration);
+    }
+
     playTarget(note: string, duration = '1n') {
         if (!this.targetSynth) return;
         this.targetSynth.triggerAttackRelease(note, duration);
