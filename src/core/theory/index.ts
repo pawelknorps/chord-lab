@@ -1,4 +1,5 @@
 // All note names (Sharps)
+import { getFunctionalPitchClassOverride } from './functionalRules';
 export const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] as const;
 // All note names (Flats)
 export const NOTE_NAMES_FLAT = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'] as const;
@@ -124,22 +125,29 @@ export function getSpelledScale(rootName: string, intervals: number[]): string[]
   });
 }
 
-// Get note name from MIDI number - now context aware and backward compatible
+// Get note name from MIDI number - now functional and context aware
 export function midiToNoteName(midi: number, context?: string | boolean): string {
   if (isNaN(midi) || !isFinite(midi)) return 'C4';
+  const pc = midi % 12;
   const octave = Math.floor(midi / 12) - 1;
-  const noteIndex = midi % 12;
 
-  let useFlats = false;
+  // Handle boolean context (backward compatibility)
   if (typeof context === 'boolean') {
-    useFlats = context;
-  } else if (typeof context === 'string') {
-    // Determine if we should use flats based on known flat keys
-    const FLAT_KEYS = ['F', 'Bb', 'Eb', 'Ab', 'Db', 'Gb', 'Cb', 'Dm', 'Gm', 'Cm', 'Fm', 'Bbm', 'Ebm', 'Abm'];
-    useFlats = FLAT_KEYS.includes(context) || context.includes('b');
+    return (context ? NOTE_NAMES_FLAT[pc] : NOTE_NAMES[pc]) + octave;
   }
 
-  const noteName = useFlats ? NOTE_NAMES_FLAT[noteIndex] : NOTE_NAMES[noteIndex];
+  // Handle string context (Functional Jazz Rules)
+  const tonic = typeof context === 'string' ? context.replace(/[0-9-]/g, '') : 'C';
+
+  // 1. Check for functional overrides (Jazz Rules)
+  // Determine if context contains functional hints (e.g. "C:V/V" or just "C")
+  const functionalOverride = getFunctionalPitchClassOverride(pc, tonic);
+  if (functionalOverride) return `${functionalOverride}${octave}`;
+
+  const FLAT_KEYS = ['F', 'Bb', 'Eb', 'Ab', 'Db', 'Gb', 'Cb', 'Dm', 'Gm', 'Cm', 'Fm', 'Bbm', 'Ebm', 'Abm'];
+  const prefersFlats = FLAT_KEYS.includes(tonic) || tonic.includes('b');
+
+  const noteName = prefersFlats ? NOTE_NAMES_FLAT[pc] : NOTE_NAMES[pc];
   return `${noteName}${octave}`;
 }
 

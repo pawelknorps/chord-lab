@@ -1,5 +1,5 @@
-import * as Note from '@tonaljs/note';
 import * as Scale from 'tonal-scale';
+import { midiToNoteName as coreMidiToNoteName } from '../core/theory';
 
 /**
  * Theory Engine: The single source of truth for music theory logic in Chord Lab.
@@ -27,20 +27,13 @@ export type ChordFunction =
  * @param chordContext Optional chord symbol or functional context (e.g., "V/ii", "iv")
  */
 export function getFunctionalNoteName(midi: number, tonic: string, chordContext?: string): string {
+    // If no specific functional context is provided, use the harmonized core logic
+    if (!chordContext) {
+        return coreMidiToNoteName(midi, tonic);
+    }
+
     const pc = midi % 12;
     const octave = Math.floor(midi / 12) - 1;
-
-    // Default to a sane mapping if no context
-    if (!tonic) return Note.fromMidi(midi);
-
-    // Get the basic scale for the key
-    const scaleNotes = Scale.notes(tonic, 'major');
-
-    // Check if the pitch class is in the diatonic scale
-    const diatonicMatch = scaleNotes.find((n: string) => Note.chroma(n) === pc);
-    if (diatonicMatch && !chordContext) {
-        return `${diatonicMatch}${octave}`;
-    }
 
     // Handle Secondary Dominants (Jazz Rules)
     if (chordContext?.startsWith('V/')) {
@@ -61,16 +54,8 @@ export function getFunctionalNoteName(midi: number, tonic: string, chordContext?
         if (pc === 1) return `Db${octave}`; // b2 in major (from minor/phrygian - Neapolitan)
     }
 
-    // Fallback based on Key Signature (Circle of Fifths logic)
-    const isFlatKey = ['F', 'Bb', 'Eb', 'Ab', 'Db', 'Gb', 'Cb', 'Dm', 'Gm', 'Cm', 'Fm', 'Bbm', 'Ebm', 'Abm'].includes(tonic);
-    const accidental = isFlatKey ? 'b' : '#';
-
-    const rawNote = Note.fromMidi(midi);
-    if (accidental === 'b' && rawNote.includes('#')) {
-        return (Note.simplify(rawNote) || rawNote) + octave;
-    }
-
-    return rawNote;
+    // Fallback to core contextual naming
+    return coreMidiToNoteName(midi, tonic);
 }
 
 /**
