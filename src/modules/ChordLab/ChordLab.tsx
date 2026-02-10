@@ -2,13 +2,15 @@ import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { decodeProgression } from '../../core/routing/deepLinks';
 import type { ChordInfo, Progression } from '../../core/theory';
-import { getScaleChords, applyVoicing, parseChord, getChordNotes, midiToNoteName, noteNameToMidi } from '../../core/theory';
+import { getScaleChords, applyVoicing, parseChord, getChordNotes, midiToNoteName, noteNameToMidi, analyzeChordFromNotes } from '../../core/theory';
 
 
 import type { Style } from '../../core/audio/globalAudio';
 import {
   playProgression,
-  setBpm as setGlobalBpm
+  setBpm as setGlobalBpm,
+  initAudio as initGlobalAudio,
+  playChord as playChordGlobal
 } from '../../core/audio/globalAudio';
 import { bpmSignal } from '../../core/audio/audioSignals';
 import { exportToMidi, downloadMidi } from '../../core/midi/export';
@@ -22,7 +24,7 @@ import { audioManager } from '../../core/services';
 import { useAudioCleanup } from '../../hooks/useAudioManager';
 import { SmartLessonPane } from './components/SmartLessonPane';
 import { useSettingsStore } from '../../core/store/useSettingsStore';
-
+import * as Tone from 'tone';
 
 const MAX_PROGRESSION_LENGTH = 16;
 const DEFAULT_TRANSPOSE_SETTINGS = { enabled: false, interval: 1, step: 1 };
@@ -43,43 +45,16 @@ function ChordLab() {
   const [selectedLessonTitle, setSelectedLessonTitle] = useState<string | null>(null);
   const [buildingNotes, setBuildingNotes] = useState<number[]>([]);
 
-  // Chord detection for builder
-  const detectChord = useCallback((notes: number[]): { root: string; quality: string } | null => {
+  // Chord detection for builder (uses true root + inversion/slash when applicable, key-aware enharmonics)
+  const detectChord = useCallback((notes: number[]): { root: string; quality: string; bass?: string } | null => {
     if (notes.length < 3) return null;
-
+    const analyzed = analyzeChordFromNotes(notes, selectedKey);
+    if (analyzed) return analyzed;
+    // Fallback for unknown pitch sets: show lowest note as root
     const sorted = [...notes].sort((a, b) => a - b);
-    const root = sorted[0];
-    const intervals = sorted.map(n => (n - root) % 12);
-
-    const has = (int: number) => intervals.includes(int);
-    const rootName = midiToNoteName(root).replace(/[0-9-]/g, '');
-    let quality = '';
-
-    if (has(4) && has(7)) {
-      if (has(11)) quality = 'maj7';
-      else if (has(10)) quality = '7';
-      else if (has(2) && has(10)) quality = '9';
-      else quality = 'maj';
-    } else if (has(3) && has(7)) {
-      if (has(10)) quality = 'm7';
-      else if (has(11)) quality = 'm(maj7)';
-      else quality = 'm';
-    } else if (has(3) && has(6)) {
-      if (has(9)) quality = 'dim7';
-      else if (has(10)) quality = 'm7♭5';
-      else quality = 'dim';
-    } else if (has(4) && has(8)) {
-      quality = 'aug';
-    } else if (has(5) && has(7)) {
-      quality = 'sus4';
-    } else if (has(2) && has(7)) {
-      quality = 'sus2';
-    } else {
-      quality = 'custom';
-    }
-
-    return { root: rootName, quality };
-  }, []);
+    const rootName = midiToNoteName(sorted[0], selectedKey).replace(/[0-9-]/g, '');
+    return { root: rootName, quality: 'custom' };
+  }, [selectedKey]);
 
   const builtChord = useMemo(() => detectChord(buildingNotes), [buildingNotes, detectChord]);
 
@@ -139,10 +114,15 @@ function ChordLab() {
   );
 
   const handleSlotClick = useCallback(
-    async (index: number) => {
+    (index: number) => {
       const chord = progression[index];
       if (chord) {
-        audioManager.playChord(chord.midiNotes, '2n', 0.8);
+        Tone.start();
+        initGlobalAudio().then(() => {
+          playChordGlobal(chord.midiNotes, '2n');
+        }).catch(() => {
+          audioManager.initialize().then(() => audioManager.playChord(chord.midiNotes, '2n', 0.8));
+        });
       }
     },
     [progression]
@@ -295,9 +275,10 @@ function ChordLab() {
         setProgression(prevProg => prevProg.map(chord => {
           if (!chord) return null;
           const newRoot = shiftNote(chord.root, shift);
+          const newBass = chord.bass ? shiftNote(chord.bass, shift) : undefined;
           const newMidiNotes = chord.midiNotes.map(n => n + shift);
           const newNotes = newMidiNotes.map(n => midiToNoteName(n, newKey));
-          return { ...chord, root: newRoot, notes: newNotes, midiNotes: newMidiNotes };
+          return { ...chord, root: newRoot, bass: newBass, notes: newNotes, midiNotes: newMidiNotes };
         }));
       }
 
@@ -350,11 +331,17 @@ function ChordLab() {
           const newMidiNotes = chord.midiNotes.map(n => n + shift);
           const newNotes = newMidiNotes.map(n => midiToNoteName(n, selectedKey));
 
+          // Transpose bass note for inversions/slash chords
+          const newBass = chord.bass
+            ? midiToNoteName(noteNameToMidi(chord.bass + '4') + shift, selectedKey).replace(/[0-9-]/g, '')
+            : undefined;
+
           return {
             ...chord,
             root: newRoot,
             notes: newNotes,
-            midiNotes: newMidiNotes
+            midiNotes: newMidiNotes,
+            bass: newBass
           };
         }));
       }
@@ -367,37 +354,24 @@ function ChordLab() {
   // Detect chord from activeNotes when requested
   const [detectedChord, setDetectedChord] = useState<ChordInfo | null>(null);
 
-  // Basic Chord Detection Helper (Move to theory later if complex)
+  // Chord detection from MIDI notes (true root + inversion/slash)
   const detectChordFromNotes = useCallback((notes: number[]): ChordInfo | null => {
     if (notes.length < 3) return null;
 
     const sorted = [...notes].sort((a, b) => a - b);
-    const rootMidi = sorted[0];
-    const rootName = midiToNoteName(rootMidi).replace(/[0-9-]/g, '');
-    const intervals = sorted.map(n => (n - rootMidi) % 12); // relative semitones
+    const analyzed = analyzeChordFromNotes(notes, selectedKey);
+    if (!analyzed) return null;
 
-    // Simple pattern matching
-    // 0, 4, 7 -> Maj
-    // 0, 3, 7 -> Min
-    // ...
-
-    let quality = 'Custom';
-    const has = (int: number) => intervals.includes(int);
-
-    if (has(4) && has(7)) quality = has(11) ? 'maj7' : has(10) ? 'dom7' : 'maj';
-    else if (has(3) && has(7)) quality = has(11) ? 'min(maj7)' : has(10) ? 'min7' : 'min';
-    else if (has(3) && has(6)) quality = has(9) ? 'dim7' : has(10) ? 'm7b5' : 'dim';
-    else if (has(4) && has(8)) quality = 'aug';
-    else if (has(2) && has(7)) quality = 'sus2';
-    else if (has(5) && has(7)) quality = 'sus4';
+    const displayQuality = analyzed.quality === 'maj' ? '' : analyzed.quality === 'min' ? 'm' : analyzed.quality;
 
     return {
-      root: rootName,
-      quality,
-      roman: quality, // Placeholder
+      root: analyzed.root,
+      quality: analyzed.quality,
+      roman: displayQuality,
       degree: -1,
       notes: sorted.map(n => midiToNoteName(n, selectedKey)),
-      midiNotes: sorted
+      midiNotes: sorted,
+      bass: analyzed.bass
     };
   }, [selectedKey]);
 
@@ -464,7 +438,7 @@ function ChordLab() {
     downloadMidi(blob, `chord-progression-${selectedKey}-${selectedScale}`);
   }, [progression, selectedKey, selectedScale, bpm]);
 
-  // Chord Builder Handlers
+  // Chord Builder Handlers — use main audio engine (globalAudio piano) so Piano loads with Guitar/Bass
   const handleNoteToggle = useCallback((note: number) => {
     setBuildingNotes(prev => {
       if (prev.includes(note)) {
@@ -472,7 +446,12 @@ function ChordLab() {
       }
       return [...prev, note].sort((a, b) => a - b);
     });
-    audioManager.playNote(note, '8n', 0.6);
+    Tone.start();
+    initGlobalAudio().then(() => {
+      playChordGlobal([note], '8n'); // same piano as progression playback
+    }).catch(() => {
+      audioManager.initialize().then(() => audioManager.playNote(note, '8n', 0.6));
+    });
   }, []);
 
   const handleAddBuiltChord = useCallback(() => {
@@ -489,6 +468,7 @@ function ChordLab() {
         notes: buildingNotes.map(n => midiToNoteName(n)),
         roman: '',
         degree: 0,
+        bass: builtChord.bass,
       };
 
       if (firstEmpty === -1) {
@@ -499,7 +479,12 @@ function ChordLab() {
       return newProg;
     });
 
-    audioManager.playChord(voicedNotes, '4n', 0.8);
+    Tone.start();
+    initGlobalAudio().then(() => {
+      playChordGlobal(voicedNotes, '4n');
+    }).catch(() => {
+      audioManager.initialize().then(() => audioManager.playChord(voicedNotes, '4n', 0.8));
+    });
     setBuildingNotes([]);
   }, [builtChord, buildingNotes, selectedVoicing]);
 
@@ -712,6 +697,15 @@ function ChordLab() {
           <SmartLessonPane
             songTitle={selectedLessonTitle}
             onClose={() => setSelectedLessonTitle(null)}
+            progressionChords={progression.filter((c): c is ChordInfo => c !== null).map(c => `${c.root}${c.quality === 'maj' ? '' : c.quality === 'min' ? 'm' : c.quality}${c.bass ? '/' + c.bass : ''}`)}
+            key={selectedKey}
+            scale={selectedScale}
+            onSetBpm={(newBpm) => {
+              setBpm(newBpm);
+            }}
+            onSetKey={(newKey) => {
+              setSelectedKey(newKey);
+            }}
             onSpotlightDrill={() => {
               // Loop last 4 bars (or last 4 chords)
               let lastIndex = -1;
@@ -742,7 +736,11 @@ function ChordLab() {
             <div className="glass-panel p-4 rounded-xl border border-cyan-500/50 shadow-[0_0_30px_rgba(34,211,238,0.2)] flex items-center gap-4">
               <div className="text-center">
                 <div className="text-[10px] text-cyan-400 uppercase font-bold tracking-widest">Detected</div>
-                <div className="text-2xl font-black text-white">{detectedChord.root}<span className="text-lg font-normal">{detectedChord.quality}</span></div>
+                <div className="text-2xl font-black text-white">
+                  {detectedChord.root}
+                  <span className="text-lg font-normal">{detectedChord.quality === 'maj' ? '' : detectedChord.quality === 'min' ? 'm' : detectedChord.quality}</span>
+                  {detectedChord.bass && <span className="text-lg font-normal">/{detectedChord.bass}</span>}
+                </div>
               </div>
               <button
                 onClick={handleAddDetectedChord}
