@@ -585,8 +585,10 @@ export default function JazzKillerModule() {
                             </div>
                         </div>
                     )}
-                </div>
-            )}
+                )}\n            </div>
+            
+            {/* Drill Dashboard */}
+            {showDrillMode && <DrillDashboard />}
         </div>
     );
 }
