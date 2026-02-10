@@ -266,7 +266,7 @@ export default function JazzKillerModule() {
                             className={`p-2.5 rounded-xl transition-all ${(showPracticeTips || showPracticePanel) ? 'bg-amber-500 text-black' : 'text-neutral-500 hover:text-white hover:bg-white/5'}`}
                             title={detectedPatterns.length > 0 ? "Toggle Practice Drills" : "Toggle Practice Tips"}
                         >
-                            <Targeted size={20} />
+                            <Target size={20} />
                         </button>
 
                         <div className="h-10 w-px bg-white/10 mx-1"></div>
