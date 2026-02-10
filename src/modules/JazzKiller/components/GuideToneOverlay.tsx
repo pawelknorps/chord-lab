@@ -17,18 +17,18 @@ export function GuideToneOverlay() {
                 return (
                     <div
                         key={index}
-                        className={`absolute transition-all duration-200 ${isActive ? 'opacity-100 scale-110' : 'opacity-60'}`}
+                        className={`absolute transition-all duration-200 ${isActive ? 'opacity-100 scale-105' : 'opacity-80'}`}
                         style={{
-                            top: `${row * 25 + 18}%`,
-                            left: `${(col / 4) * 100 + 2}%`,
-                            width: '22%',
+                            top: `${row * 25 + 16}%`,
+                            left: `${(col / 4) * 100 + 1}%`,
+                            width: '23%',
                         }}
                     >
-                        <div className="flex gap-2 text-xs font-bold justify-center">
-                            <span className="text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded shadow-sm">
+                        <div className="flex gap-1.5 text-sm font-bold justify-center items-center">
+                            <span className="text-emerald-700 bg-emerald-100 px-2.5 py-1 rounded-md shadow-md border border-emerald-300">
                                 {gt.third}
                             </span>
-                            <span className="text-blue-600 bg-blue-50 px-2 py-0.5 rounded shadow-sm">
+                            <span className="text-blue-700 bg-blue-100 px-2.5 py-1 rounded-md shadow-md border border-blue-300">
                                 {gt.seventh}
                             </span>
                         </div>
