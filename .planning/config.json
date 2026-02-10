@@ -1,7 +1,1 @@
-{
-    "mode": "YOLO",
-    "depth": "Standard",
-    "parallelization": "Sequential",
-    "commit_docs": true,
-    "milestone_name": "Semantic AI Mentor"
-}
+{"mode":"YOLO","depth":"Standard","parallelization":"Sequential","commit_docs":true,"milestone_name":"Semantic AI Mentor (JazzKiller + Chord Lab Chatbot + Drill Actions)"}
