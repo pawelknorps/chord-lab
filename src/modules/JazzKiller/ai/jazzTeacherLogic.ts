@@ -232,11 +232,18 @@ ${context.focusedPattern.guideTones?.length ? `Guide tones in this section: ${co
 
     const hotspotsLine = context.hotspots.length > 0 ? `Hotspots (hard measures): ${context.hotspots.join(', ')}.` : '';
 
+    const isComplexProgression =
+      (context.focusedPattern?.chords.length ?? 0) >= 3 ||
+      (customTask?.toLowerCase().includes('explain') ?? false);
+    const cotInstruction = isComplexProgression
+      ? ' First identify the Roman numeral of each chord. Second, identify the target note of the resolution. Third, suggest a short lick.'
+      : '';
+
     const task =
       customTask ||
       (context.focusedPattern && forFocusedPatternOnly
-        ? `Give a 3-bullet lesson specifically for this drill. Use the guide tones and chord resolution. No generic advice.`
-        : `Identify the hardest harmonic pivot in this tune and give one concrete note-choice strategy. Mention hotspots if relevant. Max 3 bullets.`);
+        ? `Give a 3-bullet lesson specifically for this drill. Use the guide tones and chord resolution. No generic advice.${cotInstruction}`
+        : `Identify the hardest harmonic pivot in this tune and give one concrete note-choice strategy. Mention hotspots if relevant. Max 3 bullets.${cotInstruction}`);
 
     const prompt = `
 SONG: "${context.songTitle}" in the key of ${context.key}.
@@ -362,14 +369,21 @@ export async function generateJazzLesson(
     const bundle = AiContextService.generateBundle(song);
     const semanticMd = AiContextService.toMarkdown(bundle);
 
+    const cotInstruction = customPrompt?.toLowerCase().includes('explain')
+      ? ' First identify the Roman numeral of each chord. Second, identify the target note of the resolution. Third, suggest a short lick.'
+      : '';
+    const taskBlock = customPrompt
+      ? `TASK: ${customPrompt}${cotInstruction}`
+      : `TASK: Identify the most important harmonic "pivot point" in this standard using the Semantic Map above.
+Explain why it is tricky and give a specific note-choice strategy for the student.
+Include bar numbers in your explanation.${cotInstruction}`;
+
     const prompt = `
 ${semanticMd}
 
 FOCUS: ${focusMode}.
 
-${customPrompt ? `TASK: ${customPrompt}` : `TASK: Identify the most important harmonic "pivot point" in this standard using the Semantic Map above.
-Explain why it is tricky and give a specific note-choice strategy for the student.
-Include bar numbers in your explanation.`}
+${taskBlock}
 `.trim();
 
     const response = await session.prompt(prompt);
