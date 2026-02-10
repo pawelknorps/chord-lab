@@ -1,5 +1,6 @@
 import { Target, Play, Check } from 'lucide-react';
 import { usePracticeStore } from '../../../core/store/usePracticeStore';
+import * as Tone from 'tone';
 
 const PATTERN_COLORS: Record<string, string> = {
     'MajorII-V-I': 'border-emerald-500 bg-emerald-500/10 text-emerald-400',
@@ -136,10 +137,24 @@ export function PracticeExercisePanel() {
                             <button
                                 onClick={async () => {
                                     if (isActive) {
+                                        // Stop playback and clear focus
+                                        const { isPlaying, togglePlayback } = usePracticeStore.getState();
+                                        if (isPlaying) {
+                                            await togglePlayback();
+                                        }
                                         clearFocus();
                                     } else {
+                                        // Set loop boundaries first
                                         focusOnPattern(index);
-                                        // Auto-start playback when focusing on a pattern
+
+                                        // Jump to loop start
+                                        const pattern = detectedPatterns[index];
+                                        if (pattern) {
+                                            const startMeasure = pattern.startIndex;
+                                            Tone.Transport.position = `${startMeasure}:0:0`;
+                                        }
+
+                                        // Start playback
                                         const { isPlaying, togglePlayback } = usePracticeStore.getState();
                                         if (!isPlaying) {
                                             await togglePlayback();
