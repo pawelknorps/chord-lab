@@ -41,6 +41,47 @@ function ChordLab() {
   const [selectedStyle, setSelectedStyle] = useState<Style>('Jazz');
   const [bpm, setBpm] = useState(80);
   const [selectedLessonTitle, setSelectedLessonTitle] = useState<string | null>(null);
+  const [buildingNotes, setBuildingNotes] = useState<number[]>([]);
+
+  // Chord detection for builder
+  const detectChord = useCallback((notes: number[]): { root: string; quality: string } | null => {
+    if (notes.length < 3) return null;
+
+    const sorted = [...notes].sort((a, b) => a - b);
+    const root = sorted[0];
+    const intervals = sorted.map(n => (n - root) % 12);
+
+    const has = (int: number) => intervals.includes(int);
+    const rootName = midiToNoteName(root).replace(/[0-9-]/g, '');
+    let quality = '';
+
+    if (has(4) && has(7)) {
+      if (has(11)) quality = 'maj7';
+      else if (has(10)) quality = '7';
+      else if (has(2) && has(10)) quality = '9';
+      else quality = 'maj';
+    } else if (has(3) && has(7)) {
+      if (has(10)) quality = 'm7';
+      else if (has(11)) quality = 'm(maj7)';
+      else quality = 'm';
+    } else if (has(3) && has(6)) {
+      if (has(9)) quality = 'dim7';
+      else if (has(10)) quality = 'm7♭5';
+      else quality = 'dim';
+    } else if (has(4) && has(8)) {
+      quality = 'aug';
+    } else if (has(5) && has(7)) {
+      quality = 'sus4';
+    } else if (has(2) && has(7)) {
+      quality = 'sus2';
+    } else {
+      quality = 'custom';
+    }
+
+    return { root: rootName, quality };
+  }, []);
+
+  const builtChord = useMemo(() => detectChord(buildingNotes), [buildingNotes, detectChord]);
 
 
   // Sync BPM
@@ -422,6 +463,49 @@ function ChordLab() {
     });
     downloadMidi(blob, `chord-progression-${selectedKey}-${selectedScale}`);
   }, [progression, selectedKey, selectedScale, bpm]);
+
+  // Chord Builder Handlers
+  const handleNoteToggle = useCallback((note: number) => {
+    setBuildingNotes(prev => {
+      if (prev.includes(note)) {
+        return prev.filter(n => n !== note);
+      }
+      return [...prev, note].sort((a, b) => a - b);
+    });
+    audioManager.playNote(note, '8n', 0.6);
+  }, []);
+
+  const handleAddBuiltChord = useCallback(() => {
+    if (!builtChord || buildingNotes.length < 3) return;
+
+    const voicedNotes = applyVoicing(buildingNotes, selectedVoicing);
+
+    setProgression((prev) => {
+      const firstEmpty = prev.findIndex((c) => c === null);
+      const chordInfo: ChordInfo = {
+        root: builtChord.root,
+        quality: builtChord.quality,
+        midiNotes: voicedNotes,
+        notes: buildingNotes.map(n => midiToNoteName(n)),
+        roman: '',
+        degree: 0,
+      };
+
+      if (firstEmpty === -1) {
+        return [...prev.slice(1), chordInfo];
+      }
+      const newProg = [...prev];
+      newProg[firstEmpty] = chordInfo;
+      return newProg;
+    });
+
+    audioManager.playChord(voicedNotes, '4n', 0.8);
+    setBuildingNotes([]);
+  }, [builtChord, buildingNotes, selectedVoicing]);
+
+  const handleClearBuilder = useCallback(() => {
+    setBuildingNotes([]);
+  }, []);
 
   useEffect(() => {
     setProgression((prev) =>

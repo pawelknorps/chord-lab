@@ -51,6 +51,13 @@ interface ChordLabDashboardProps {
     onImportMidi: (data: any) => void;
     onAddChord: (chord: ChordInfo) => void;
 
+    // Chord Builder
+    buildingNotes: number[];
+    builtChord: { root: string; quality: string } | null;
+    onNoteToggle: (note: number) => void;
+    onAddBuiltChord: () => void;
+    onClearBuilder: () => void;
+
     // User Presets
     userPresets: Progression[];
     onSaveUserPreset: () => void;
