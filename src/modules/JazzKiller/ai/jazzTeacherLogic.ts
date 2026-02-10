@@ -109,7 +109,7 @@ export interface PracticeStateSnapshot {
 
 const MAX_CHORDS_IN_PROMPT = 48;
 /** Keep CONTEXT under ~200 tokens for Nano; 4+4 bars is typically enough. */
-const STATE_SLICE_BARS = 8; // current 4 + next 4
+const STATE_SLICE_BARS = 8; // current 4 + next 4 (token optimization Step 10)
 
 /**
  * Returns chord symbols for a stateless slice: current 4 bars + next 4 bars from startBarIndex.
