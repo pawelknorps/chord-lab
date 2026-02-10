@@ -20,6 +20,9 @@ import { useUserPresets } from '../../hooks/useUserPresets';
 import { useMusicalClipboard } from '../../core/state/musicalClipboard';
 import { audioManager } from '../../core/services';
 import { useAudioCleanup } from '../../hooks/useAudioManager';
+import { SmartLessonPane } from './components/SmartLessonPane';
+import { useSettingsStore } from '../../core/store/useSettingsStore';
+
 
 const MAX_PROGRESSION_LENGTH = 16;
 const DEFAULT_TRANSPOSE_SETTINGS = { enabled: false, interval: 1, step: 1 };
@@ -36,7 +39,9 @@ function ChordLab() {
   const [selectedScale, setSelectedScale] = useState('Major');
   const [selectedVoicing, setSelectedVoicing] = useState('Root Position');
   const [selectedStyle, setSelectedStyle] = useState<Style>('Jazz');
-  const [bpm, setBpm] = useState(120);
+  const [bpm, setBpm] = useState(80);
+  const [selectedLessonTitle, setSelectedLessonTitle] = useState<string | null>(null);
+
 
   // Sync BPM
   useEffect(() => {
@@ -55,8 +60,10 @@ function ChordLab() {
   const [isLooping, setIsLooping] = useState(false);
   const [transposeSettings, setTransposeSettings] = useState(DEFAULT_TRANSPOSE_SETTINGS);
   const [loopCount, setLoopCount] = useState(0);
+  const [playbackRange, setPlaybackRange] = useState<{ start: number, end: number } | null>(null);
 
   useEffect(() => {
+
     audioManager.setVisualizationCallback((notes) => {
       setVisualizedNotes(notes);
     });
@@ -154,8 +161,18 @@ function ChordLab() {
       if ((preset as any).style) {
         setSelectedStyle((preset as any).style);
         setBpm((preset as any).tempo || 120);
-      } else if (preset.degrees) {
+      }
+
+      // Check if it's a Jazz Standard to trigger Lesson Mode
+      if (preset.genre === 'Jazz Standard') {
+        setSelectedLessonTitle(preset.name);
+      } else {
+        setSelectedLessonTitle(null);
+      }
+
+      if (preset.degrees) {
         // Degree based (Diatonic)
+
         const keyRoot = 'C'; // Default to C major for degrees if not specified, or use preset.key?
         const scale = getScaleChords(keyRoot, 'Major');
         preset.degrees.forEach((degree, index) => {
@@ -206,13 +223,18 @@ function ChordLab() {
   const handlePlay = useCallback(async () => {
     const validChords = progression
       .map((c, i) => ({ chord: c, index: i }))
-      .filter((item): item is { chord: ChordInfo, index: number } => item.chord !== null);
+      .filter((item): item is { chord: ChordInfo, index: number } => item.chord !== null)
+      .filter(item => {
+        if (!playbackRange) return true;
+        return item.index >= playbackRange.start && item.index <= playbackRange.end;
+      });
 
     if (validChords.length === 0) return;
 
     setIsPlaying(true);
     startPlayback(validChords);
-  }, [progression, startPlayback]);
+  }, [progression, startPlayback, playbackRange]);
+
 
   // Handle Looping + Auto-Transpose Effect
   useEffect(() => {
@@ -602,7 +624,35 @@ function ChordLab() {
           {/* <LanguageSelector value={i18n.language} onChange={setLanguage} /> */}
         </header>
 
+        {selectedLessonTitle && (
+          <SmartLessonPane
+            songTitle={selectedLessonTitle}
+            onClose={() => setSelectedLessonTitle(null)}
+            onSpotlightDrill={() => {
+              // Loop last 4 bars (or last 4 chords)
+              let lastIndex = -1;
+              for (let i = progression.length - 1; i >= 0; i--) {
+                if (progression[i] !== null) {
+                  lastIndex = i;
+                  break;
+                }
+              }
+              if (lastIndex === -1) return;
+              const rangeEnd = lastIndex;
+              const rangeStart = Math.max(0, lastIndex - 3);
+              setPlaybackRange({ start: rangeStart, end: rangeEnd });
+              setIsLooping(true);
+              if (!isPlaying) handlePlay();
+            }}
+            onBlindfoldChallenge={() => {
+              useSettingsStore.getState().setPiano(false);
+              useSettingsStore.getState().setFretboard(false);
+            }}
+          />
+        )}
+
         {/* MIDI Detection UI floating or integrated */}
+
         {detectedChord && (
           <div className="fixed bottom-4 right-4 md:bottom-8 md:right-8 z-50 animate-bounce-in">
             <div className="glass-panel p-4 rounded-xl border border-cyan-500/50 shadow-[0_0_30px_rgba(34,211,238,0.2)] flex items-center gap-4">
@@ -649,7 +699,6 @@ function ChordLab() {
           onPlay={handlePlay}
           onStop={handleStop}
           onExportMidi={handleExportMidi}
-          onChordClick={handleChordClick}
           onSlotClick={handleSlotClick}
           onRemoveChord={handleRemoveChord}
           onClearProgression={handleClearProgression}
@@ -667,8 +716,10 @@ function ChordLab() {
           }}
           onSelectPreset={handleSelectPreset}
           onImportMidi={handleLoadExternalMidi}
+          onAddChord={handleChordClick}
 
           userPresets={userPresets}
+
           onSaveUserPreset={handleSaveUserPreset}
           onDeleteUserPreset={deletePreset}
         />

@@ -1,0 +1,30 @@
+{
+  "meta": {
+    "title": "26-2",
+    "source": "MOCK_GENERATOR",
+    "promptUsed": 946
+  },
+  "harmonicAnalysis": [
+    {
+      "barRange": "1-4",
+      "analysis": "The tune opens with a standard ii-V-I progression.",
+      "function": "Tonal Center Establishment"
+    },
+    {
+      "barRange": "5-8",
+      "analysis": "Unexpected modulation to the relative minor.",
+      "function": "Modulation"
+    }
+  ],
+  "commonTraps": [
+    "Rushing the tempo during the B section.",
+    "Ignoring the dynamic shift in bar 12."
+  ],
+  "proTips": [
+    "Try tritone substitution on the dominant chords in the A section."
+  ],
+  "goldenLick": {
+    "notation": "C D E F G A B c",
+    "description": "A scalar run to connect the measure."
+  }
+}
