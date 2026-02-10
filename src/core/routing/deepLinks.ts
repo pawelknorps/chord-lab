@@ -4,6 +4,8 @@ export interface ProgressionData {
     chords: string[];
     key?: string;
     mode?: string;
+    name?: string;
+    source?: string;
 }
 
 export interface ChordData {
@@ -17,17 +19,23 @@ export function encodeProgression(progression: ProgressionData): string {
     params.set('chords', progression.chords.join(','));
     if (progression.key) params.set('key', progression.key);
     if (progression.mode) params.set('mode', progression.mode);
+    if (progression.name) params.set('name', progression.name);
+    if (progression.source) params.set('source', progression.source);
     return params.toString();
 }
 
 export function decodeProgression(searchParams: URLSearchParams): ProgressionData | null {
     const chords = searchParams.get('chords');
-    if (!chords) return null;
+    const name = searchParams.get('name');
+
+    if (!chords && !name) return null;
 
     return {
-        chords: chords.split(',').filter(Boolean),
+        chords: chords ? chords.split(',').filter(Boolean) : [],
         key: searchParams.get('key') || undefined,
         mode: searchParams.get('mode') || undefined,
+        name: name || undefined,
+        source: searchParams.get('source') || undefined,
     };
 }
 

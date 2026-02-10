@@ -7,16 +7,18 @@ import { TendencyLevel } from './components/levels/TendencyLevel';
 import { ModulationLevel } from './components/levels/ModulationLevel';
 import { BassLevel } from './components/levels/BassLevel';
 import { InterferenceLevel } from './components/levels/InterferenceLevel';
-import { ProgressionsLevel } from './components/levels/ProgressionsLevel';
+import { HarmonicContextLevel } from './components/levels/HarmonicContextLevel';
+import { InstrumentMappingLevel } from './components/levels/InstrumentMappingLevel';
+import { IntervalsLevel } from './components/levels/IntervalsLevel';
 import { MelodyStepsLevel } from './components/levels/MelodyStepsLevel';
 import { ChordQualitiesLevel } from './components/levels/ChordQualitiesLevel';
-import { JazzStandardsLevel } from './components/levels/JazzStandardsLevel';
-import { FretboardLevel } from './components/levels/FretboardLevel';
 import { ChordTonesLevel } from './components/levels/ChordTonesLevel';
-import { PositionsLevel } from './components/levels/PositionsLevel';
-import { IntervalsLevel } from './components/levels/IntervalsLevel';
 import { SecondaryDominantsLevel } from './components/levels/SecondaryDominantsLevel';
 import { ModalInterchangeLevel } from './components/levels/ModalInterchangeLevel';
+import { FretboardLevel } from './components/levels/FretboardLevel';
+import { PositionsLevel } from './components/levels/PositionsLevel';
+import { JazzStandardsLevel } from './components/levels/JazzStandardsLevel';
+import { ProgressionsLevel } from './components/levels/ProgressionsLevel';
 import { HUD } from './components/HUD';
 import { useMasteryStore } from '../../core/store/useMasteryStore';
 import { useAudioCleanup } from '../../hooks/useAudioManager';
@@ -34,7 +36,12 @@ export function FunctionalEarTraining() {
         // 1. Check SearchParams (Deep Linking)
         const deepProg = decodeProgression(searchParams);
         if (deepProg) {
-            setLevel('Progressions');
+            const exercise = searchParams.get('exercise');
+            if (exercise === 'JazzStandards' || exercise === 'Progressions') {
+                setLevel('HarmonicContext');
+            } else {
+                setLevel('HarmonicContext');
+            }
             setExternalData(deepProg);
             return;
         }
@@ -49,7 +56,7 @@ export function FunctionalEarTraining() {
         // 2. Check Musical Clipboard (Local session)
         const inboundProg = pasteProgression();
         if (inboundProg && inboundProg.source === 'navigation') {
-            setLevel('Progressions');
+            setLevel('HarmonicContext');
             setExternalData(inboundProg);
             clearClipboard();
             return;
@@ -68,16 +75,18 @@ export function FunctionalEarTraining() {
         { id: 'Modulation', label: 'Modulation', icon: Repeat },
         { id: 'Bass', label: 'Bass Function', icon: Anchor },
         { id: 'Interference', label: 'Interference', icon: Layers },
-        { id: 'Progressions', label: 'Progressions', icon: Music },
+        { id: 'HarmonicContext', label: 'Harmonization', icon: Music },
         { id: 'MelodySteps', label: 'Melody Steps', icon: Zap },
         { id: 'ChordQualities', label: 'Chord Qualities', icon: Piano },
-        { id: 'JazzStandards', label: 'Jazz Standards', icon: Music },
         { id: 'Intervals', label: 'Pure Intervals', icon: Binary },
-        { id: 'Fretboard', label: 'Fretboard', icon: Guitar },
+        { id: 'InstrumentMapping', label: 'Fretboard Map', icon: Guitar },
         { id: 'ChordTones', label: 'Chord Tones', icon: Layers },
-        { id: 'Positions', label: 'Positions', icon: Box },
         { id: 'SecondaryDominants', label: 'V/x Dominants', icon: Network },
         { id: 'ModalInterchange', label: 'Borrowed', icon: GitBranch },
+        { id: 'Fretboard', label: 'Fretboard Logic', icon: Box },
+        { id: 'Positions', label: 'Geometry', icon: Pyramid },
+        { id: 'JazzStandards', label: 'Jazz Standards', icon: Music },
+        { id: 'Progressions', label: 'Progressions', icon: GitBranch },
         { id: 'UST', label: 'Upper Upper', icon: Pyramid },
     ] as const;
 
@@ -141,16 +150,18 @@ export function FunctionalEarTraining() {
                                 {level === 'Modulation' && <ModulationLevel />}
                                 {level === 'Bass' && <BassLevel />}
                                 {level === 'Interference' && <InterferenceLevel />}
-                                {level === 'Progressions' && <ProgressionsLevel />}
+                                {level === 'HarmonicContext' && <HarmonicContextLevel />}
                                 {level === 'MelodySteps' && <MelodyStepsLevel />}
                                 {level === 'ChordQualities' && <ChordQualitiesLevel />}
-                                {level === 'JazzStandards' && <JazzStandardsLevel />}
-                                {level === 'Fretboard' && <FretboardLevel />}
+                                {level === 'InstrumentMapping' && <InstrumentMappingLevel />}
                                 {level === 'ChordTones' && <ChordTonesLevel />}
-                                {level === 'Positions' && <PositionsLevel />}
                                 {level === 'Intervals' && <IntervalsLevel />}
                                 {level === 'SecondaryDominants' && <SecondaryDominantsLevel />}
                                 {level === 'ModalInterchange' && <ModalInterchangeLevel />}
+                                {level === 'Fretboard' && <FretboardLevel />}
+                                {level === 'Positions' && <PositionsLevel />}
+                                {level === 'JazzStandards' && <JazzStandardsLevel />}
+                                {level === 'Progressions' && <ProgressionsLevel />}
                                 {level === 'UST' && <div className="text-[var(--text-muted)] font-mono text-sm tracking-widest uppercase">Upper Structures Coming Soon</div>}
                             </div>
                         </motion.div>

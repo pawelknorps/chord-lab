@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faPenToSquare } from "@fortawesome/free-regular-svg-icons"
 import { AppState, useAppContext } from "../context/AppContext"
 import { playChordById } from "../../utils/synthPlayer"
-import { Button } from '../../components/ui/button'
+import { Button } from '../../../../components/ui/button'
 import {
   getChordDisplay,
   getProgressionString,

@@ -7,6 +7,7 @@ import Dashboard from './components/layout/Dashboard';
 import { GlobalMidiHandler } from './components/GlobalMidiHandler';
 import { Loader2 } from 'lucide-react';
 import { SessionHUD } from './components/shared/SessionHUD';
+import { PerformanceMonitor } from './components/shared/PerformanceMonitor';
 
 // Lazy Load Heavy Modules
 const BiTonalSandbox = lazy(() => import('./modules/BiTonalSandbox/BiTonalSandbox'));
@@ -114,6 +115,7 @@ function App() {
                         </Routes>
                     </div>
                 </BrowserRouter>
+                <PerformanceMonitor />
             </MidiProvider>
         </AudioProvider>
     );

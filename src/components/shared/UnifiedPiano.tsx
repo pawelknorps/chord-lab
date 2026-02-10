@@ -4,6 +4,18 @@ import styles from './UnifiedPiano.module.css';
 
 const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 const INTERVALS = ['P1', 'm2', 'M2', 'm3', 'M3', 'P4', 'TT', 'P5', 'm6', 'M6', 'm7', 'M7'];
+const CHORD_TONE_LABELS = ['R', 'b9', '9', 'm3', 'M3', '11', 'b5', '5', '#5', '13', 'b7', 'M7'];
+const CHORD_TONE_COLORS = {
+    0: '#3b82f6',   // Root - Blue
+    3: '#10b981',   // Minor 3rd - Green
+    4: '#10b981',   // Major 3rd - Green
+    7: '#eab308',   // Perfect 5th - Yellow
+    10: '#ef4444',  // Minor 7th - Red
+    11: '#ef4444',  // Major 7th - Red
+    2: '#a855f7',   // 9th - Purple
+    5: '#a855f7',   // 11th - Purple
+    9: '#a855f7',   // 13th - Purple
+};
 
 export function UnifiedPiano({
     mode,
@@ -37,6 +49,12 @@ export function UnifiedPiano({
         return result;
     }, [octaveRange]);
 
+    const getChordToneColor = useCallback((note: number): string | null => {
+        if (rootNote === undefined) return null;
+        const interval = (note - rootNote + 12) % 12;
+        return CHORD_TONE_COLORS[interval as keyof typeof CHORD_TONE_COLORS] || null;
+    }, [rootNote]);
+
     const getLabel = useCallback((note: number): string => {
         if (showLabels === 'none') return '';
 
@@ -54,6 +72,11 @@ export function UnifiedPiano({
         if (showLabels === 'scale-degree' && rootNote !== undefined) {
             const degree = ((note - rootNote + 12) % 12) + 1;
             return degree.toString();
+        }
+
+        if (showLabels === 'chord-tone' && rootNote !== undefined) {
+            const interval = (note - rootNote + 12) % 12;
+            return CHORD_TONE_LABELS[interval];
         }
 
         return '';
@@ -77,6 +100,8 @@ export function UnifiedPiano({
                     const isHighlighted = highlightedNotes.includes(key.note);
                     const isActive = activeNotes.includes(key.note);
                     const isRoot = rootNote === key.note;
+                    const chordToneColor = getChordToneColor(key.note);
+                    const shouldShowLabel = isHighlighted || isActive;
 
                     return (
                         <div
@@ -86,8 +111,14 @@ export function UnifiedPiano({
                                 } ${isInteractive ? styles.interactive : ''}`}
                             onClick={() => handleKeyClick(key.note)}
                             data-note={key.note}
+                            style={{
+                                ...(shouldShowLabel && chordToneColor && !isRoot ? {
+                                    background: `linear-gradient(to bottom, ${chordToneColor} 0%, ${chordToneColor}dd 100%)`,
+                                    boxShadow: `0 0 15px ${chordToneColor}`
+                                } : {})
+                            }}
                         >
-                            {(isHighlighted || isActive) && (
+                            {shouldShowLabel && (
                                 <span className={styles.label}>{getLabel(key.note)}</span>
                             )}
                         </div>
@@ -99,6 +130,8 @@ export function UnifiedPiano({
                     const isHighlighted = highlightedNotes.includes(key.note);
                     const isActive = activeNotes.includes(key.note);
                     const isRoot = rootNote === key.note;
+                    const chordToneColor = getChordToneColor(key.note);
+                    const shouldShowLabel = isHighlighted || isActive;
                     const whiteKeyIndex = whiteKeys.findIndex(k => k.note > key.note) - 1;
 
                     return (
@@ -107,11 +140,17 @@ export function UnifiedPiano({
                             className={`${styles.key} ${styles.blackKey} ${isHighlighted ? styles.highlighted : ''
                                 } ${isActive ? styles.active : ''} ${isRoot ? styles.root : ''
                                 } ${isInteractive ? styles.interactive : ''}`}
-                            style={{ left: `${(whiteKeyIndex + 0.7) * (100 / whiteKeys.length)}%` }}
+                            style={{
+                                left: `${(whiteKeyIndex + 0.7) * (100 / whiteKeys.length)}%`,
+                                ...(shouldShowLabel && chordToneColor && !isRoot ? {
+                                    background: `linear-gradient(to bottom, ${chordToneColor} 0%, ${chordToneColor}cc 100%)`,
+                                    boxShadow: `0 0 15px ${chordToneColor}`
+                                } : {})
+                            }}
                             onClick={() => handleKeyClick(key.note)}
                             data-note={key.note}
                         >
-                            {(isHighlighted || isActive) && (
+                            {shouldShowLabel && (
                                 <span className={styles.label}>{getLabel(key.note)}</span>
                             )}
                         </div>

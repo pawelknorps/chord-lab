@@ -35,14 +35,24 @@ export const MelodyStepsLevel: React.FC = () => {
 
     const validFiles = files.filter((f: any) => f.progression && f.progression.length > 0);
 
-    const loadNewChallenge = useCallback(async () => {
-        if (validFiles.length === 0) return;
+    const loadNewChallenge = useCallback(async (retryCountOrEvent: number | React.MouseEvent = 0) => {
+        const retryCount = typeof retryCountOrEvent === 'number' ? retryCountOrEvent : 0;
+        if (validFiles.length === 0 || retryCount > 5) {
+            setLoading(false);
+            return;
+        }
+
         setLoading(true);
         setResult(null);
         setSelectedOption(null);
         setMidiFeedback(null);
 
         const currentPool = ALL_INTERVALS.filter(i => i.difficulty.includes(difficulty));
+        if (currentPool.length === 0) {
+            console.error("No intervals found for difficulty:", difficulty);
+            setLoading(false);
+            return;
+        }
 
         // Pick a file, trying not to repeat recently used ones
         let randomFile = validFiles[Math.floor(Math.random() * validFiles.length)];
@@ -53,14 +63,23 @@ export const MelodyStepsLevel: React.FC = () => {
         }
 
         try {
+            if (typeof randomFile.loadUrl !== 'function') {
+                throw new Error(`File ${randomFile.name} missing loadUrl capability`);
+            }
+
             const url = await randomFile.loadUrl();
             const midi = await Midi.fromUrl(url);
+
+            if (!midi.tracks || midi.tracks.length === 0) {
+                throw new Error("No tracks found in MIDI file");
+            }
 
             const track = midi.tracks[0];
             const notes = track.notes;
 
-            if (notes.length < 3) {
-                loadNewChallenge();
+            if (!notes || notes.length < 3) {
+                console.warn("MIDI file too short, skipping:", randomFile.name);
+                setTimeout(() => loadNewChallenge(retryCount + 1), 50);
                 return;
             }
 
@@ -72,6 +91,8 @@ export const MelodyStepsLevel: React.FC = () => {
             });
 
             const times = Object.keys(timeSlots);
+            if (times.length === 0) throw new Error("No notes detected in time slots");
+
             const randomTime = times[Math.floor(Math.random() * times.length)];
             const chordNotes = timeSlots[randomTime];
 
@@ -100,9 +121,11 @@ export const MelodyStepsLevel: React.FC = () => {
             setLoading(false);
 
         } catch (e) {
-            console.error("Error loading MIDI for melody steps", e);
+            console.error("Error loading MIDI context:", e);
             setLoading(false);
-            setTimeout(loadNewChallenge, 100);
+            if (retryCount < 5) {
+                setTimeout(() => loadNewChallenge(retryCount + 1), 100);
+            }
         }
     }, [validFiles, difficulty, history]);
 

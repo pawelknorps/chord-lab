@@ -10,7 +10,7 @@ import { useSignals } from "@preact/signals-react/runtime";
 
 export const JazzStandardsLevel: React.FC = () => {
     useSignals();
-    const { addScore, difficulty, streak } = useFunctionalEarTrainingStore();
+    const { addScore, difficulty, streak, externalData } = useFunctionalEarTrainingStore();
     const { standards, getSongAsIRealFormat } = useJazzLibrary();
 
     type ExerciseMode = 'Analysis' | 'Prediction' | 'Bass';
@@ -50,12 +50,20 @@ export const JazzStandardsLevel: React.FC = () => {
         if (validStandards.length === 0) return;
         setLoading(true);
 
-        // Pick a random standard
-        let standard = validStandards[Math.floor(Math.random() * validStandards.length)];
-        let attempts = 0;
-        while (history.includes(standard.Title) && attempts < 5 && validStandards.length > 5) {
+        let standard: JazzStandard;
+
+        // Check if a specific standard was sent from JazzKiller
+        if (externalData && externalData.name && externalData.source === 'jazz-killer') {
+            const targetStandard = standards.find(s => s.Title === externalData.name);
+            standard = targetStandard || validStandards[Math.floor(Math.random() * validStandards.length)];
+        } else {
+            // Pick a random standard
             standard = validStandards[Math.floor(Math.random() * validStandards.length)];
-            attempts++;
+            let attempts = 0;
+            while (history.includes(standard.Title) && attempts < 5 && validStandards.length > 5) {
+                standard = validStandards[Math.floor(Math.random() * validStandards.length)];
+                attempts++;
+            }
         }
 
         const songData = getSongAsIRealFormat(standard, 0);
@@ -170,7 +178,7 @@ export const JazzStandardsLevel: React.FC = () => {
         // Reset playback signals
         totalLoopsSignal.value = difficulty === 'Pro' ? 1 : 2;
         bpmSignal.value = difficulty === 'Novice' ? 100 : difficulty === 'Pro' ? 180 : 130;
-    }, [validStandards, history, getSongAsIRealFormat, difficulty, mode]);
+    }, [validStandards, history, getSongAsIRealFormat, difficulty, mode, externalData]);
 
     useEffect(() => {
         if (validStandards.length > 0 && !currentStandard) {
@@ -178,6 +186,15 @@ export const JazzStandardsLevel: React.FC = () => {
             return () => clearTimeout(timer);
         }
     }, [validStandards, currentStandard, loadNewQuestion]);
+
+    // Force reload if external data changes (e.g. sent from JazzKiller)
+    useEffect(() => {
+        if (externalData && externalData.name && externalData.source === 'jazz-killer') {
+            if (currentStandard?.Title !== externalData.name) {
+                loadNewQuestion();
+            }
+        }
+    }, [externalData, currentStandard, loadNewQuestion]);
 
     const handleOptionSelect = (option: string) => {
         if (result || !fragment) return;

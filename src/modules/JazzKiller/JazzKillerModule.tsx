@@ -13,7 +13,7 @@ import {
     reverbVolumeSignal
 } from './state/jazzSignals';
 import {
-    Play, Volume2, Search, X, Target, Music, StopCircle, Sliders, ChevronDown, ChevronUp, Layers, Zap, Info
+    Play, Volume2, Search, X, Target, Music, StopCircle, Sliders, ChevronDown, ChevronUp, Layers, Zap, Info, Activity, BookOpen
 } from 'lucide-react';
 import { SendToMenu } from '../../components/shared/SendToMenu';
 import { useAudioCleanup } from '../../hooks/useAudioManager';
@@ -21,8 +21,9 @@ import { usePracticeStore } from '../../core/store/usePracticeStore';
 import { AnalysisToolbar, AnalysisFilters } from './components/AnalysisToolbar';
 import { PracticeExercisePanel } from './components/PracticeExercisePanel';
 import { DrillDashboard } from './components/DrillDashboard';
-import { ProfilePanel } from './components/ProfilePanel';
 import { BarRangeDrill } from './components/BarRangeDrill';
+import { WalkthroughPanel } from './components/TheoryWalkthrough/WalkthroughPanel';
+import { ChordScalePanel } from './components/ChordScaleExplorer/ChordScalePanel';
 
 export default function JazzKillerModule() {
     useAudioCleanup('jazz-killer');
@@ -30,16 +31,28 @@ export default function JazzKillerModule() {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedStandard, setSelectedStandard] = useState<JazzStandard | null>(null);
     const [showMixer, setShowMixer] = useState(false);
-    const [showPracticeTips, setShowPracticeTips] = useState(true);
+    const [showPracticeTips, setShowPracticeTips] = useState(false);
     const [showPracticePanel, setShowPracticePanel] = useState(false);
     const [showDrillMode, setShowDrillMode] = useState(false);
-    const [showProfilePanel, setShowProfilePanel] = useState(false);
     const [showBarRangeDrill, setShowBarRangeDrill] = useState(false);
+    const [showWalkthrough, setShowWalkthrough] = useState(false);
+    const [showChordScaleExplorer, setShowChordScaleExplorer] = useState(false);
+    const [selectedChordForScale, setSelectedChordForScale] = useState<string | null>(null);
     const [showRelated, setShowRelated] = useState(false);
+
+    // Hint animation for onboarding
+    const [showToolHints, setShowToolHints] = useState(false);
+    useEffect(() => {
+        if (selectedStandard) {
+            setShowToolHints(true);
+            const timer = setTimeout(() => setShowToolHints(false), 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [selectedStandard]);
     const { standards, getSongAsIRealFormat } = useJazzLibrary();
 
     // Practice Store integration
-    const { loadSong, detectedPatterns, practiceExercises, activeFocusIndex, showGuideTones, toggleGuideTones, showAnalysis, toggleAnalysis } = usePracticeStore();
+    const { loadSong, detectedPatterns, showGuideTones, toggleGuideTones, showAnalysis, toggleAnalysis } = usePracticeStore();
 
     // Analysis filters
     const [analysisFilters, setAnalysisFilters] = useState<AnalysisFilters>({
@@ -67,13 +80,14 @@ export default function JazzKillerModule() {
     }, [selectedStandard, transposeSignal.value, getSongAsIRealFormat]);
 
     const {
-        isPlayingSignal,
         isLoadedSignal,
-        togglePlayback,
-        setBpm,
+        isPlayingSignal,
         bpmSignal,
         loopCountSignal,
-        totalLoopsSignal
+        totalLoopsSignal,
+        togglePlayback,
+        playChord,
+        setBpm,
     } = useJazzPlayback(selectedSong);
 
     // Scan standards for ii-V-I patterns on mount
@@ -94,10 +108,8 @@ export default function JazzKillerModule() {
     // Analyze song when loaded
     useEffect(() => {
         if (selectedSong && selectedSong.music) {
-            // Create a unique key for this song state
             const songKey = `${selectedSong.title}-${transposeSignal.value}`;
 
-            // Only analyze if this is a different song or transposition
             if (lastAnalyzedSongRef.current !== songKey) {
                 const measures = selectedSong.music.measures.map((m: any) =>
                     m.chords.filter((c: string) => c && c !== "")
@@ -113,19 +125,25 @@ export default function JazzKillerModule() {
                 lastAnalyzedSongRef.current = songKey;
             }
         }
-    }, [selectedSong, transposeSignal.value]); // loadSong is stable from Zustand
+    }, [selectedSong, transposeSignal.value, loadSong]);
 
     const filteredStandards = useMemo(() => {
         if (!searchQuery) return [];
-        return standards.filter(s =>
-            s.Title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            (s.Composer && s.Composer.toLowerCase().includes(searchQuery.toLowerCase()))
-        ).slice(0, 50);
-    }, [searchQuery, standards]);
+        return standards.filter(std =>
+            std.Title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (std.Composer && std.Composer.toLowerCase().includes(searchQuery.toLowerCase()))
+        );
+    }, [standards, searchQuery]);
 
-    const handleSelectSong = (standard: JazzStandard) => {
-        setSelectedStandard(standard);
+    const handleChordClick = (chord: string, _measureIndex: number) => {
+        playChord(chord);
+        setSelectedChordForScale(chord);
+        setShowChordScaleExplorer(true);
+    };
+
+    const handleSelectSong = (song: JazzStandard) => {
         setSearchQuery('');
+        setSelectedStandard(song);
     };
 
     const handleCloseSong = () => {
@@ -137,7 +155,6 @@ export default function JazzKillerModule() {
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.code === 'Space' && selectedSong) {
-                // Prevent scrolling if not in search
                 const isTyping = document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA';
                 if (!isTyping) {
                     e.preventDefault();
@@ -151,8 +168,6 @@ export default function JazzKillerModule() {
 
     const nextStandards = useMemo(() => {
         if (!selectedStandard) return [];
-        // Just pick 6 random standards or some related ones?
-        // Let's just pick 6 different ones for now
         return standards
             .filter(s => s.Title !== selectedStandard.Title)
             .sort(() => Math.random() - 0.5)
@@ -165,224 +180,195 @@ export default function JazzKillerModule() {
             .flatMap(m => m.chords)
             .filter(c => c && c !== "");
         return {
+            name: selectedSong.title,
             chords,
-            key: selectedSong.key
+            key: selectedSong.key,
+            source: 'jazz-killer'
         };
     }, [selectedSong]);
 
     return (
-        <div className="h-full w-full bg-[#0a0a0a] text-white p-4 md:p-8 flex flex-col gap-6 overflow-hidden relative">
+        <div className="h-full w-full bg-[#0a0a0a] text-white p-1.5 md:p-3 flex flex-col gap-2 md:gap-3 overflow-hidden relative">
+            <style>
+                {`
+                    @keyframes hint-pulse {
+                        0%, 100% { transform: scale(1); opacity: 0.5; }
+                        50% { transform: scale(1.2); opacity: 1; filter: drop-shadow(0 0 8px currentColor); }
+                    }
+                    .animate-hint-pulse {
+                        animation: hint-pulse 1.5s ease-in-out infinite;
+                    }
+                `}
+            </style>
             <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-amber-500/10 blur-[120px] -z-10 rounded-full"></div>
 
-            <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <div>
-                    <h1 className="text-4xl font-black tracking-tighter bg-gradient-to-r from-amber-200 via-amber-400 to-orange-500 bg-clip-text text-transparent">
-                        Jazz<span className="text-white">Killer</span>
-                    </h1>
-                    <p className="text-neutral-500 text-sm font-medium">Professional Practice Engine • {standards.length} Standards</p>
+            <header className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-2 md:gap-3 pr-14">
+                <div className="flex items-center justify-between w-full lg:w-auto gap-4">
+                    {!selectedSong && (
+                        <div>
+                            <h1 className="text-2xl md:text-3xl font-black tracking-tighter bg-gradient-to-r from-amber-200 via-amber-400 to-orange-500 bg-clip-text text-transparent">
+                                Jazz<span className="text-white">Killer</span>
+                            </h1>
+                            <p className="hidden md:block text-neutral-400 text-[10px] font-bold tracking-tight mt-0.5">Professional Practice Engine • {standards.length} Standards</p>
+                        </div>
+                    )}
+
+                    {selectedSong && (
+                        <div className="flex items-center gap-3">
+                            <h1 className="text-lg font-black tracking-tighter bg-gradient-to-r from-amber-200 via-amber-400 to-orange-500 bg-clip-text text-transparent">
+                                Jazz<span className="text-white">Killer</span>
+                            </h1>
+                            <button
+                                onClick={handleCloseSong}
+                                className="flex items-center gap-2 px-3 py-1 bg-white/5 hover:bg-white/10 rounded-lg text-[10px] font-bold text-neutral-500 hover:text-white transition-all border border-white/5"
+                                title="Exit Song"
+                            >
+                                <X size={14} />
+                                EXIT
+                            </button>
+                        </div>
+                    )}
                 </div>
 
                 {selectedSong && (
-                    <div className="flex items-center gap-3 bg-neutral-900/50 backdrop-blur-md border border-white/5 p-2 rounded-2xl">
-                        <div className="flex flex-col px-3">
-                            <span className="text-[10px] text-neutral-500 font-bold uppercase tracking-widest">Transpose</span>
-                            <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-1.5 md:gap-3 bg-neutral-900/40 backdrop-blur-xl border border-white/10 p-1 md:p-2 rounded-xl md:rounded-2xl shadow-2xl w-full lg:w-auto overflow-x-auto no-scrollbar">
+                        {/* Transpose Control */}
+                        <div className="flex flex-col px-2 md:px-4 border-r border-white/10">
+                            <span className="text-[8px] md:text-[10px] text-neutral-500 font-black uppercase tracking-[0.2em] mb-0.5 md:mb-1">Trans</span>
+                            <div className="flex items-center gap-2 md:gap-3">
                                 <button
                                     onClick={() => transposeSignal.value -= 1}
-                                    className="p-1 hover:bg-white/10 rounded text-neutral-400 hover:text-white transition-colors"
+                                    className="p-1 hover:bg-white/10 rounded-lg text-neutral-400 hover:text-white transition-all"
                                 >
                                     <ChevronDown size={14} />
                                 </button>
-                                <span className={`w-6 text-center text-lg font-mono font-bold ${transposeSignal.value === 0 ? 'text-amber-400' : 'text-orange-400'}`}>
+                                <span className={`min-w-[1.5rem] md:min-w-[2.5rem] text-center text-lg md:text-2xl font-black font-mono leading-none ${transposeSignal.value === 0 ? 'text-white/40' : 'text-orange-400'}`}>
                                     {transposeSignal.value > 0 ? '+' : ''}{transposeSignal.value}
                                 </span>
                                 <button
                                     onClick={() => transposeSignal.value += 1}
-                                    className="p-1 hover:bg-white/10 rounded text-neutral-400 hover:text-white transition-colors"
+                                    className="p-1 hover:bg-white/10 rounded-lg text-neutral-400 hover:text-white transition-all"
                                 >
                                     <ChevronUp size={14} />
                                 </button>
                             </div>
                         </div>
 
-                        <div className="h-10 w-px bg-white/10 mx-1"></div>
-
-                        <div className="flex flex-col px-3">
-                            <span className="text-[10px] text-neutral-500 font-bold uppercase tracking-widest">Tempo</span>
-                            <div className="flex items-center gap-2">
+                        {/* Tempo Control */}
+                        <div className="flex flex-col px-2 md:px-4 border-r border-white/10">
+                            <span className="text-[8px] md:text-[10px] text-neutral-500 font-black uppercase tracking-[0.2em] mb-0.5 md:mb-1">Tempo</span>
+                            <div className="flex items-center gap-1 md:gap-2">
                                 <input
                                     type="number"
                                     value={bpmSignal.value}
                                     onChange={(e) => setBpm(Number(e.target.value))}
-                                    className="w-12 bg-transparent text-lg font-mono font-bold focus:outline-none text-amber-400"
+                                    className="w-10 md:w-16 bg-transparent text-lg md:text-2xl font-black font-mono leading-none focus:outline-none text-amber-500 [appearance:textfield]"
                                 />
-                                <span className="text-xs text-neutral-600 font-bold">BPM</span>
+                                <span className="text-[8px] md:text-[10px] text-neutral-600 font-black uppercase tracking-tighter">BPM</span>
                             </div>
                         </div>
 
-                        <div className="h-10 w-px bg-white/10 mx-1"></div>
-
-                        <div className="flex flex-col px-3">
-                            <span className="text-[10px] text-neutral-500 font-bold uppercase tracking-widest">Loops</span>
-                            <div className="flex items-center gap-2">
+                        {/* Loop Control */}
+                        <div className="flex flex-col px-2 md:px-4 border-r border-white/10">
+                            <span className="text-[8px] md:text-[10px] text-neutral-500 font-black uppercase tracking-[0.2em] mb-0.5 md:mb-1">Cycles</span>
+                            <div className="flex items-center gap-1 md:gap-2">
                                 <input
                                     type="number"
                                     value={isPlayingSignal.value ? loopCountSignal.value + 1 : totalLoopsSignal.value}
                                     onChange={(e) => totalLoopsSignal.value = Math.max(1, Number(e.target.value))}
                                     disabled={isPlayingSignal.value}
-                                    className={`w-10 bg-transparent text-lg font-mono font-bold focus:outline-none ${isPlayingSignal.value ? 'text-white' : 'text-amber-400'}`}
+                                    className={`w-8 md:w-12 bg-transparent text-lg md:text-2xl font-black font-mono leading-none focus:outline-none ${isPlayingSignal.value ? 'text-indigo-400' : 'text-amber-500'}`}
                                 />
-                                <span className="text-xs text-neutral-600 font-bold">{isPlayingSignal.value ? `of ${totalLoopsSignal.value}` : 'total'}</span>
+                                <span className="text-[8px] md:text-[10px] text-neutral-600 font-black uppercase tracking-tighter">{isPlayingSignal.value ? `/${totalLoopsSignal.value}` : 'REP'}</span>
                             </div>
                         </div>
 
-                        <div className="h-10 w-px bg-white/10 mx-1"></div>
-
+                        {/* Main Play Action */}
                         <button
                             onClick={togglePlayback}
                             disabled={!isLoadedSignal.value}
-                            className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-black transition-all active:scale-95 ${!isLoadedSignal.value
+                            className={`flex items-center gap-2 md:gap-3 px-3 md:px-6 py-1.5 md:py-3 rounded-xl md:rounded-2xl font-black tracking-widest transition-all active:scale-95 text-[10px] md:text-sm ${!isLoadedSignal.value
                                 ? 'bg-neutral-800 text-neutral-600 cursor-not-allowed'
                                 : isPlayingSignal.value
-                                    ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
-                                    : 'bg-amber-500 text-black hover:bg-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.3)]'
+                                    ? 'bg-red-500 text-white hover:bg-red-600 shadow-[0_0_20px_rgba(239,68,68,0.3)]'
+                                    : 'bg-amber-500 text-black hover:bg-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.4)]'
                                 }`}
                         >
                             {!isLoadedSignal.value ? (
                                 <>
-                                    <div className="w-4 h-4 border-2 border-neutral-600 border-t-transparent rounded-full animate-spin"></div>
-                                    LOADING...
+                                    <div className="w-3 h-3 md:w-5 md:h-5 border-2 border-neutral-600 border-t-transparent rounded-full animate-spin"></div>
+                                    WAIT
                                 </>
                             ) : (
                                 <>
-                                    {isPlayingSignal.value ? <StopCircle size={20} /> : <Play size={20} />}
-                                    {isPlayingSignal.value ? 'STOP' : 'PLAY'}
+                                    {isPlayingSignal.value ? <StopCircle size={18} className="md:w-6 md:h-6" /> : <Play size={18} className="md:w-6 md:h-6" />}
+                                    {isPlayingSignal.value ? 'STOP' : 'START'}
                                 </>
                             )}
                         </button>
 
-                        <div className="h-10 w-px bg-white/10 mx-1"></div>
+                        <div className="h-8 md:h-12 w-px bg-white/10 mx-1 hidden lg:block"></div>
 
-                        <button
-                            onClick={() => setShowPracticePanel(!showPracticePanel)}
-                            className={`px-4 py-2 rounded-xl transition-all ${showPracticePanel ? 'bg-amber-500 text-black' : 'bg-white/5 hover:bg-white/10 text-white'}`}
-                            title="Practice Drills"
-                        >
-                            <Target size={18} />
-                        </button>
-                        <button
-                            onClick={toggleGuideTones}
-                            className={`px-4 py-2 rounded-xl transition-all ${showGuideTones ? 'bg-emerald-500 text-black' : 'bg-white/5 hover:bg-white/10 text-white'}`}
-                            title="Guide Tones (3rds & 7ths)"
-                        >
-                            🎯
-                        </button>
-                        <button
-                            onClick={toggleAnalysis}
-                            className={`px-4 py-2 rounded-xl transition-all ${showAnalysis ? 'bg-blue-500 text-black' : 'bg-white/5 hover:bg-white/10 text-white'}`}
-                            title="Analysis Brackets"
-                        >
-                            📊
-                        </button>
-                        <button
-                            onClick={() => setShowDrillMode(!showDrillMode)}
-                            className={`px-4 py-2 rounded-xl transition-all ${showDrillMode ? 'bg-purple-500 text-black' : 'bg-white/5 hover:bg-white/10 text-white'}`}
-                            title="ii-V-I Drills"
-                        >
-                            🎓
-                        </button>
-                        <button
-                            onClick={() => setShowProfilePanel(!showProfilePanel)}
-                            className={`px-4 py-2 rounded-xl transition-all ${showProfilePanel ? 'bg-green-500 text-black' : 'bg-white/5 hover:bg-white/10 text-white'}`}
-                            title="Student Profile"
-                        >
-                            👤
-                        </button>
-                        <button
-                            onClick={() => setShowBarRangeDrill(!showBarRangeDrill)}
-                            className={`px-4 py-2 rounded-xl transition-all ${showBarRangeDrill ? 'bg-orange-500 text-black' : 'bg-white/5 hover:bg-white/10 text-white'}`}
-                            title="Bar Range Drill"
-                        >
-                            🎯
-                        </button>
-                        <button
-                            onClick={() => setShowMixer(!showMixer)}
-                            className={`px-4 py-2 rounded-xl transition-all ${showMixer ? 'bg-amber-500 text-black' : 'bg-white/5 hover:bg-white/10 text-white'}`}
-                            title="Mixer"
-                        >
-                            <Volume2 size={18} />
-                        </button>
-
-                        <div className="h-10 w-px bg-white/10 mx-1"></div>
-
-                        <button
-                            onClick={() => {
-                                if (detectedPatterns.length > 0) {
-                                    setShowPracticePanel(!showPracticePanel);
-                                } else {
-                                    setShowPracticeTips(!showPracticeTips);
-                                }
-                            }}
-                            className={`p-2.5 rounded-xl transition-all ${(showPracticeTips || showPracticePanel) ? 'bg-amber-500 text-black' : 'text-neutral-500 hover:text-white hover:bg-white/5'}`}
-                            title={detectedPatterns.length > 0 ? "Toggle Practice Drills" : "Toggle Practice Tips"}
-                        >
-                            <Target size={20} />
-                        </button>
-
-                        <div className="h-10 w-px bg-white/10 mx-1"></div>
-
-                        {/* Quick Search in Header */}
-                        <div className="flex items-center gap-2 group px-2">
-                            <Search className="text-neutral-500 group-focus-within:text-amber-400 transition-colors" size={18} />
-                            <input
-                                type="text"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                placeholder="Quick search..."
-                                className="w-32 bg-transparent text-sm font-medium focus:outline-none focus:w-48 transition-all placeholder:text-neutral-700"
-                            />
-                            {searchQuery && (
-                                <div className="absolute top-16 right-8 w-80 bg-neutral-900 border border-white/10 rounded-2xl shadow-2xl z-50 overflow-hidden max-h-[400px] overflow-y-auto custom-scrollbar">
-                                    {filteredStandards.map((std, i) => (
-                                        <button
-                                            key={i}
-                                            onClick={() => handleSelectSong(std)}
-                                            className="w-full text-left p-3 hover:bg-white/5 border-b border-white/5 flex items-center gap-3 group/item"
-                                        >
-                                            <Music size={14} className="text-neutral-600 group-hover/item:text-amber-500" />
-                                            <div>
-                                                <div className="text-sm font-bold text-neutral-200">{std.Title}</div>
-                                                <div className="text-[10px] text-neutral-500">{std.Composer}</div>
-                                            </div>
-                                        </button>
-                                    ))}
-                                </div>
-                            )}
+                        {/* Toolbar Group */}
+                        <div className="flex items-center gap-1 p-1 bg-black/30 rounded-xl md:rounded-2xl border border-white/5 shadow-inner">
+                            <button
+                                onClick={toggleAnalysis}
+                                className={`p-1.5 md:p-2.5 rounded-lg md:rounded-xl transition-all ${showAnalysis ? 'bg-blue-500 text-black' : 'text-neutral-500 hover:text-white'} ${showToolHints ? 'animate-hint-pulse text-blue-400' : ''}`}
+                                title="Analysis"
+                            >
+                                <Layers size={18} />
+                            </button>
+                            <button
+                                onClick={toggleGuideTones}
+                                className={`p-1.5 md:p-2.5 rounded-lg md:rounded-xl transition-all ${showGuideTones ? 'bg-emerald-500 text-black' : 'text-neutral-500 hover:text-white'} ${showToolHints ? 'animate-hint-pulse text-emerald-400' : ''}`}
+                                title="Guide Tones"
+                            >
+                                <Target size={18} />
+                            </button>
+                            <div className="w-px h-4 md:h-6 bg-white/10 mx-0.5" />
+                            <button
+                                onClick={() => setShowPracticeTips(!showPracticeTips)}
+                                className={`p-1.5 md:p-2.5 rounded-lg md:rounded-xl transition-all ${showPracticeTips ? 'bg-amber-500 text-black' : 'text-neutral-500 hover:text-white'} ${showToolHints ? 'animate-hint-pulse text-amber-500' : ''}`}
+                                title="Tips"
+                            >
+                                <Info size={18} />
+                            </button>
+                            <button
+                                onClick={() => setShowPracticePanel(!showPracticePanel)}
+                                className={`p-1.5 md:p-2.5 rounded-lg md:rounded-xl transition-all ${showPracticePanel ? 'bg-purple-500 text-black' : 'text-neutral-500 hover:text-white'} ${showToolHints ? 'animate-hint-pulse text-purple-400' : ''}`}
+                                title="Drills"
+                            >
+                                <Zap size={18} />
+                            </button>
+                            <button
+                                onClick={() => setShowWalkthrough(!showWalkthrough)}
+                                className={`p-1.5 md:p-2.5 rounded-lg md:rounded-xl transition-all ${showWalkthrough ? 'bg-indigo-500 text-white' : 'text-neutral-500 hover:text-white'} ${showToolHints ? 'animate-hint-pulse text-indigo-400' : ''}`}
+                                title="Walkthrough"
+                            >
+                                <BookOpen size={18} />
+                            </button>
+                            <div className="w-px h-4 md:h-6 bg-white/10 mx-0.5" />
+                            <button
+                                onClick={() => setShowMixer(!showMixer)}
+                                className={`p-1.5 md:p-2.5 rounded-lg md:rounded-xl transition-all ${showMixer ? 'bg-white text-black' : 'text-neutral-500 hover:text-white'} ${showToolHints ? 'animate-hint-pulse text-white' : ''}`}
+                                title="Mixer"
+                            >
+                                <Sliders size={18} />
+                            </button>
+                            <button
+                                onClick={() => setShowDrillMode(!showDrillMode)}
+                                className={`p-1.5 md:p-2.5 rounded-lg md:rounded-xl transition-all ${showDrillMode ? 'bg-pink-500 text-black shadow-[0_0_20px_rgba(236,72,153,0.4)]' : 'text-neutral-500 hover:text-white hover:bg-white/5'} ${showToolHints ? 'animate-hint-pulse text-pink-400' : ''}`}
+                                title="Advanced Drills"
+                            >
+                                <Activity size={18} />
+                            </button>
                         </div>
-
-                        <div className="h-10 w-px bg-white/10 mx-1"></div>
-
-                        {progressionData && (
-                            <SendToMenu
-                                progression={progressionData}
-                                sourceModule="jazz-killer"
-                            />
-                        )}
-
-                        <div className="h-10 w-px bg-white/10 mx-1"></div>
-
-                        <button
-                            onClick={handleCloseSong}
-                            className="p-2.5 hover:bg-white/5 rounded-xl text-neutral-500 hover:text-white transition-colors"
-                        >
-                            <X size={20} />
-                        </button>
                     </div>
                 )}
             </header>
 
             {!selectedSong && (
-                <div className="flex-1 flex flex-col items-center justify-center max-w-2xl mx-auto w-full gap-8">
+                <div className="flex-1 flex flex-col items-center justify-center max-w-5xl mx-auto w-full gap-8 p-4">
                     <div className="w-full relative group">
                         <div className="absolute inset-0 bg-amber-500/20 blur-2xl group-focus-within:bg-amber-500/40 transition-all duration-500"></div>
                         <div className="relative flex items-center bg-neutral-900 border border-white/10 rounded-3xl p-2 shadow-2xl">
@@ -398,6 +384,33 @@ export default function JazzKillerModule() {
                     </div>
 
                     <div className="w-full flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-2">
+                        {searchQuery && filteredStandards.length > 0 && (
+                            <div className="flex flex-col gap-2 py-4">
+                                {filteredStandards.map((std, i) => (
+                                    <button
+                                        key={i}
+                                        onClick={() => handleSelectSong(std)}
+                                        className="w-full flex items-center justify-between p-4 bg-neutral-900/60 border border-white/5 hover:border-amber-500/50 rounded-2xl transition-all group hover:bg-neutral-800"
+                                    >
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-neutral-500 group-hover:bg-amber-500 group-hover:text-black transition-all">
+                                                <Music size={20} />
+                                            </div>
+                                            <div className="text-left">
+                                                <h4 className="font-bold text-lg leading-tight">{std.Title}</h4>
+                                                <p className="text-sm text-neutral-500">{std.Composer}</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                            <div className="px-3 py-1 bg-white/5 rounded-full text-[10px] font-bold uppercase tracking-wider text-neutral-500 group-hover:text-neutral-300 transition-colors border border-transparent group-hover:border-white/10">
+                                                Analyze
+                                            </div>
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+
                         {searchQuery && filteredStandards.length === 0 && (
                             <div className="text-center py-20 text-neutral-600">
                                 <Music size={48} className="mx-auto mb-4 opacity-20" />
@@ -407,325 +420,299 @@ export default function JazzKillerModule() {
 
                         {!searchQuery && (
                             <div className="flex flex-col gap-10 py-6 w-full animate-in slide-in-from-bottom-4 duration-500">
-
-                                {/* Featured / Available Now */}
-                                <div>
-                                    <div className="flex items-center gap-3 mb-6 px-2">
-                                        <div className="h-px bg-gradient-to-r from-transparent via-amber-500/30 to-transparent flex-1" />
-                                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-amber-500/80">Featured Standards</span>
-                                        <div className="h-px bg-gradient-to-r from-transparent via-amber-500/30 to-transparent flex-1" />
-                                    </div>
-
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                                        {standards.slice(0, 9).map((song, i) => (
-                                            <button
-                                                key={i}
-                                                onClick={() => handleSelectSong(song)}
-                                                className="relative overflow-hidden p-5 bg-neutral-900/40 border border-white/5 hover:border-amber-500/30 rounded-2xl text-left hover:bg-neutral-800/60 transition-all group duration-300"
-                                            >
-                                                <div className="absolute inset-0 bg-gradient-to-br from-amber-500/0 via-amber-500/0 to-amber-500/5 group-hover:via-amber-500/5 group-hover:to-amber-500/10 transition-all duration-500" />
-
-                                                <div className="relative flex items-start justify-between">
-                                                    <div>
-                                                        <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center mb-3 group-hover:bg-amber-500 group-hover:text-black transition-all duration-300 shadow-lg shadow-black/20">
-                                                            <Music size={18} />
-                                                        </div>
-                                                        <h3 className="font-bold text-neutral-200 group-hover:text-amber-100 text-lg leading-tight mb-1 transition-colors">{song.Title}</h3>
-                                                        <p className="text-xs text-neutral-500 group-hover:text-neutral-400 transition-colors uppercase tracking-wider font-medium">{song.Composer}</p>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                    {standards.slice(0, 9).map((song, i) => (
+                                        <button
+                                            key={i}
+                                            onClick={() => handleSelectSong(song)}
+                                            className="relative overflow-hidden p-5 bg-neutral-900/40 border border-white/5 hover:border-amber-500/30 rounded-2xl text-left hover:bg-neutral-800/60 transition-all group duration-300"
+                                        >
+                                            <div className="absolute inset-0 bg-gradient-to-br from-amber-500/0 via-amber-500/0 to-amber-500/5 group-hover:via-amber-500/5 group-hover:to-amber-500/10 transition-all duration-500" />
+                                            <div className="relative flex items-start justify-between">
+                                                <div>
+                                                    <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center mb-3 group-hover:bg-amber-500 group-hover:text-black transition-all duration-300 shadow-lg shadow-black/20">
+                                                        <Music size={18} />
                                                     </div>
-                                                    <div className="opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
-                                                        <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center border border-white/10">
-                                                            <Play size={12} className="ml-0.5 text-amber-500" fill="currentColor" />
-                                                        </div>
-                                                    </div>
+                                                    <h3 className="font-bold text-neutral-200 group-hover:text-amber-100 text-lg leading-tight mb-1 transition-colors">{song.Title}</h3>
+                                                    <p className="text-xs text-neutral-500 group-hover:text-neutral-400 transition-colors uppercase tracking-wider font-medium">{song.Composer}</p>
                                                 </div>
-                                            </button>
-                                        ))}
-                                    </div>
+                                            </div>
+                                        </button>
+                                    ))}
                                 </div>
 
-                                {/* Features & Quick Start Guide */}
-                                <div className="mt-4">
-                                    <div className="flex items-center gap-3 mb-8 px-2">
-                                        <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent flex-1" />
-                                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-neutral-500">Mastering Jazzkiller</span>
-                                        <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent flex-1" />
+                                {/* Detailed How-To Instructions */}
+                                <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300">
+                                    <div className="flex flex-col gap-3 p-6 bg-white/5 rounded-3xl border border-white/5 hover:bg-white/10 transition-colors group">
+                                        <div className="w-10 h-10 rounded-2xl bg-amber-500/20 flex items-center justify-center text-amber-400 group-hover:scale-110 transition-transform">
+                                            <Search size={20} />
+                                        </div>
+                                        <h4 className="font-black text-xs uppercase tracking-widest text-white/50">1. Select Standard</h4>
+                                        <p className="text-sm text-neutral-400 leading-relaxed">Search for a tune or pick from the grid to load the interactive lead sheet and setup the rhythm trio.</p>
                                     </div>
-
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div className="p-6 rounded-3xl border border-white/5 bg-white/[0.02] flex gap-5 group hover:bg-white/[0.04] transition-all">
-                                            <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                                                <Layers className="text-blue-400" size={24} />
-                                            </div>
-                                            <div>
-                                                <h4 className="font-bold text-neutral-200 mb-1">Interactive Analysis</h4>
-                                                <p className="text-sm text-neutral-500 leading-relaxed">Toggle the <span className="text-blue-400/80 font-bold italic">Analysis</span> tool to automatically detect <span className="text-neutral-300 underline underline-offset-4 decoration-blue-500/50">ii-V-I progressions</span>, Turnarounds, and secondary dominants in real-time.</p>
-                                            </div>
+                                    <div className="flex flex-col gap-3 p-6 bg-white/5 rounded-3xl border border-white/5 hover:bg-white/10 transition-colors group">
+                                        <div className="w-10 h-10 rounded-2xl bg-blue-500/20 flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
+                                            <Layers size={20} />
                                         </div>
-
-                                        <div className="p-6 rounded-3xl border border-white/5 bg-white/[0.02] flex gap-5 group hover:bg-white/[0.04] transition-all">
-                                            <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                                                <Target className="text-emerald-400" size={24} />
-                                            </div>
-                                            <div>
-                                                <h4 className="font-bold text-neutral-200 mb-1">Guide Tone Roadmap</h4>
-                                                <p className="text-sm text-neutral-500 leading-relaxed">Master soloing with <span className="text-emerald-400/80 font-bold italic">Guide Tones</span>. Visualize the 3rds and 7ths for every chord to build melodic bridges across the changes.</p>
-                                            </div>
-                                        </div>
-
-                                        <div className="p-6 rounded-3xl border border-white/5 bg-white/[0.02] flex gap-5 group hover:bg-white/[0.04] transition-all">
-                                            <div className="w-12 h-12 rounded-2xl bg-amber-500/10 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                                                <Zap className="text-amber-400" size={24} />
-                                            </div>
-                                            <div>
-                                                <h4 className="font-bold text-neutral-200 mb-1">Smart Transpose</h4>
-                                                <p className="text-sm text-neutral-500 leading-relaxed">Practice in all 12 keys. Our engine maintains <span className="text-amber-400/80 font-bold">correct musical spelling</span> (Eb vs D#) based on the tonal center automatically.</p>
-                                            </div>
-                                        </div>
-
-                                        <div className="p-6 rounded-3xl border border-white/5 bg-white/[0.02] flex gap-5 group hover:bg-white/[0.04] transition-all">
-                                            <div className="w-12 h-12 rounded-2xl bg-purple-500/10 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                                                <Sliders className="text-purple-400" size={24} />
-                                            </div>
-                                            <div>
-                                                <h4 className="font-bold text-neutral-200 mb-1">Teaching Machine</h4>
-                                                <p className="text-sm text-neutral-500 leading-relaxed">Select specialized <span className="text-purple-400/80 font-bold italic">Practice Loops</span> to focus on difficult transitions. Use the Mixer to solo the piano or double bass for specific training.</p>
-                                            </div>
-                                        </div>
+                                        <h4 className="font-black text-xs uppercase tracking-widest text-white/50">2. Analyze Harmony</h4>
+                                        <p className="text-sm text-neutral-400 leading-relaxed">Toggle the **Layers icon** to visualize ii-V-I patterns, secondary dominants, and harmonic substitutions.</p>
                                     </div>
-
-                                    <div className="mt-8 p-4 rounded-2xl border border-amber-500/10 bg-amber-500/5 flex items-center gap-4 text-xs text-amber-500/60 font-medium">
-                                        <Info size={16} className="shrink-0" />
-                                        <span>Pro Tip: Press <span className="px-1.5 py-0.5 rounded bg-black/40 text-amber-500 font-black border border-amber-500/20">SPACE</span> once a standard is loaded to start/stop the backing track immediately.</span>
+                                    <div className="flex flex-col gap-3 p-6 bg-white/5 rounded-3xl border border-white/5 hover:bg-white/10 transition-colors group">
+                                        <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
+                                            <Zap size={20} />
+                                        </div>
+                                        <h4 className="font-black text-xs uppercase tracking-widest text-white/50">3. Interactive Play</h4>
+                                        <p className="text-sm text-neutral-400 leading-relaxed">**Click any chord** to hear its sound. Press **Space** to start the piano trio and practice along at any tempo.</p>
+                                    </div>
+                                    <div className="flex flex-col gap-3 p-6 bg-white/5 rounded-3xl border border-white/5 hover:bg-white/10 transition-colors group">
+                                        <div className="w-10 h-10 rounded-2xl bg-purple-500/20 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
+                                            <Activity size={20} />
+                                        </div>
+                                        <h4 className="font-black text-xs uppercase tracking-widest text-white/50">4. Master the Tune</h4>
+                                        <p className="text-sm text-neutral-400 leading-relaxed">Open **Drills** and **Walkthroughs** to build vocabulary and understand the song's architecture in depth.</p>
                                     </div>
                                 </div>
-
                             </div>
                         )}
-
-                        {searchQuery && filteredStandards.map((standard, i) => (
-                            <button
-                                key={i}
-                                onClick={() => handleSelectSong(standard)}
-                                className="w-full flex items-center justify-between p-4 rounded-2xl hover:bg-white/5 border border-transparent hover:border-white/10 transition-all group"
-                            >
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 rounded-xl bg-neutral-800 flex items-center justify-center text-neutral-500 group-hover:bg-amber-500/20 group-hover:text-amber-400 transition-all">
-                                        <Music size={20} />
-                                    </div>
-                                    <div className="text-left">
-                                        <h4 className="font-bold text-lg leading-tight">{standard.Title}</h4>
-                                        <p className="text-sm text-neutral-500">{standard.Composer}</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                    <div className="px-3 py-1 bg-white/5 rounded-full text-[10px] font-bold uppercase tracking-wider text-neutral-500 group-hover:text-neutral-300 transition-colors border border-transparent group-hover:border-white/10">
-                                        Analyze
-                                    </div>
-                                </div>
-                            </button>
-                        ))}
                     </div>
                 </div>
             )}
 
             {selectedSong && (
-                <div className="flex-1 overflow-hidden flex flex-col p-2 bg-white/5 rounded-[40px] border border-white/5">
-
-
-                    <div className="px-8 py-6 flex flex-col">
-                        <div className="flex items-center gap-2 mb-1">
-                            <span className="text-[10px] font-black bg-amber-500 text-black px-2 py-0.5 rounded shadow-[0_0_10px_rgba(245,158,11,0.4)]">LIVE SESSION</span>
-                            <h2 className="text-2xl font-black tracking-tight">{selectedSong.title}</h2>
-                        </div>
-                        <p className="text-neutral-400 text-sm">Composed by <span className="text-neutral-200 font-medium">{selectedSong.composer}</span> • {selectedSong.style} • Key of {selectedSong.key}</p>
-                    </div>
-
-                    <div className="flex-1 overflow-hidden flex flex-row p-6 gap-6">
-                        {/* LEFT SIDEBAR AREA */}
-                        <div className="flex flex-col gap-4 max-h-full overflow-hidden">
-                            {/* Analysis Filters - Vertical */}
-                            {detectedPatterns.length > 0 && showAnalysis && (
-                                <AnalysisToolbar
-                                    orientation="vertical"
-                                    filters={analysisFilters}
-                                    onFiltersChange={setAnalysisFilters}
-                                    totalPatterns={detectedPatterns.length}
-                                />
-                            )}
-
-                            {/* Guided Practice Sidebar (Original) - LEFT */}
-                            {showPracticeTips && !showPracticePanel && (
-                                <PracticeTips
-                                    song={selectedSong}
-                                    onClose={() => setShowPracticeTips(false)}
-                                />
-                            )}
-                        </div>
-
-                        <div className={`flex-1 overflow-y-auto pr-2 custom-scrollbar transition-all duration-300`}>
-                            <LeadSheet song={selectedSong} filteredPatterns={filteredPatterns} />
-                        </div>
-
-                        {/* Practice Exercise Panel (New Teaching Machine) - RIGHT */}
-                        {showPracticePanel && detectedPatterns.length > 0 && (
-                            <PracticeExercisePanel />
-                        )}
-
-                        {/* Mixer Panel - RIGHT */}
-                        {showMixer && !showPracticePanel && (
-                            <div className="w-64 bg-neutral-900/40 backdrop-blur-md border-l border-white/5 p-6 flex flex-col gap-8 animate-in slide-in-from-right duration-300">
-                                <div className="flex items-center justify-between">
-                                    <h3 className="text-sm font-black uppercase tracking-widest text-neutral-400 flex items-center gap-2">
-                                        <Volume2 size={16} /> MIXER
-                                    </h3>
-                                    <button
-                                        onClick={() => setShowMixer(false)}
-                                        className="text-neutral-600 hover:text-white transition-colors"
-                                    >
-                                        <X size={16} />
-                                    </button>
-                                </div>
-
-                                <div className="space-y-8">
-                                    {/* Piano Volume */}
-                                    <div className="space-y-3">
-                                        <div className="flex justify-between items-end">
-                                            <span className="text-xs font-bold text-neutral-500 uppercase tracking-tighter">Piano</span>
-                                            <span className="text-xs font-mono text-amber-500">{pianoVolumeSignal.value}dB</span>
-                                        </div>
-                                        <input
-                                            type="range"
-                                            min="-60"
-                                            max="0"
-                                            step="1"
-                                            value={pianoVolumeSignal.value}
-                                            onChange={(e) => pianoVolumeSignal.value = Number(e.target.value)}
-                                            className="w-full h-1.5 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-amber-500"
-                                        />
-                                    </div>
-
-                                    {/* Piano Reverb (New) */}
-                                    <div className="space-y-3">
-                                        <div className="flex justify-between items-end">
-                                            <span className="text-xs font-bold text-neutral-500 uppercase tracking-tighter">Piano Reverb</span>
-                                            <span className="text-xs font-mono text-amber-500">{Math.round(pianoReverbSignal.value * 100)}%</span>
-                                        </div>
-                                        <input
-                                            type="range"
-                                            min="0"
-                                            max="1"
-                                            step="0.01"
-                                            value={pianoReverbSignal.value}
-                                            onChange={(e) => pianoReverbSignal.value = Number(e.target.value)}
-                                            className="w-full h-1.5 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-amber-500"
-                                        />
-                                    </div>
-
-                                    {/* Bass Volume */}
-                                    <div className="space-y-3">
-                                        <div className="flex justify-between items-end">
-                                            <span className="text-xs font-bold text-neutral-500 uppercase tracking-tighter">Double Bass</span>
-                                            <span className="text-xs font-mono text-amber-500">{bassVolumeSignal.value}dB</span>
-                                        </div>
-                                        <input
-                                            type="range"
-                                            min="-60"
-                                            max="0"
-                                            step="1"
-                                            value={bassVolumeSignal.value}
-                                            onChange={(e) => bassVolumeSignal.value = Number(e.target.value)}
-                                            className="w-full h-1.5 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-amber-500"
-                                        />
-                                    </div>
-
-                                    {/* Drums Volume */}
-                                    <div className="space-y-3">
-                                        <div className="flex justify-between items-end">
-                                            <span className="text-xs font-bold text-neutral-500 uppercase tracking-tighter">Drums</span>
-                                            <span className="text-xs font-mono text-amber-500">{drumsVolumeSignal.value}dB</span>
-                                        </div>
-                                        <input
-                                            type="range"
-                                            min="-60"
-                                            max="0"
-                                            step="1"
-                                            value={drumsVolumeSignal.value}
-                                            onChange={(e) => drumsVolumeSignal.value = Number(e.target.value)}
-                                            className="w-full h-1.5 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-amber-500"
-                                        />
-                                    </div>
-
-                                    {/* Master Reverb Level */}
-                                    <div className="space-y-3">
-                                        <div className="flex justify-between items-end">
-                                            <span className="text-xs font-bold text-neutral-500 uppercase tracking-tighter">Master Reverb</span>
-                                            <span className="text-xs font-mono text-amber-500">{Math.round(reverbVolumeSignal.value * 100)}%</span>
-                                        </div>
-                                        <input
-                                            type="range"
-                                            min="0"
-                                            max="1"
-                                            step="0.01"
-                                            value={reverbVolumeSignal.value}
-                                            onChange={(e) => reverbVolumeSignal.value = Number(e.target.value)}
-                                            className="w-full h-1.5 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-amber-500"
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="mt-auto pt-6 border-t border-white/5">
-                                    <p className="text-[10px] text-neutral-600 leading-relaxed italic">
-                                        Pro tip: Lower the piano volume to practice your own comping.
-                                    </p>
-                                </div>
+                <div className="flex-1 overflow-hidden flex flex-col p-1.5 bg-white/5 rounded-[32px] border border-white/5">
+                    <div className="px-4 md:px-6 py-2 md:py-3 flex flex-row items-center justify-between border-b border-white/5">
+                        <div className="flex flex-col overflow-hidden">
+                            <div className="flex items-center gap-2 mb-0.5">
+                                <span className={`text-[8px] md:text-[10px] font-black bg-amber-500 text-black px-1.5 md:px-2 py-0.5 rounded shadow-[0_0_10px_rgba(245,158,11,0.4)] ${isPlayingSignal.value ? 'animate-pulse' : ''}`}>LIVE</span>
+                                <h2 className="text-xl md:text-2xl font-black tracking-tight truncate">{selectedStandard?.Title}</h2>
                             </div>
-                        )}
+                            <p className="text-neutral-400 text-[9px] md:text-xs truncate">by <span className="text-neutral-200 font-medium">{selectedSong.composer}</span> • {selectedSong.style} • Key of {selectedSong.key}</p>
+                        </div>
 
-                        {/* Footer Widget - Up Next (Bottom Left) */}
-                        {!isPlayingSignal.value && (
-                            <div className="absolute bottom-6 left-6 z-30">
-                                <div className="w-64 bg-neutral-900/80 backdrop-blur-xl border border-white/10 rounded-2xl p-3 shadow-2xl transition-all duration-300">
-                                    <button
-                                        onClick={() => setShowRelated(!showRelated)}
-                                        className="w-full flex items-center justify-between group p-1"
-                                    >
-                                        <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-widest flex items-center gap-2 group-hover:text-amber-500 transition-colors">
-                                            <Music size={14} />
-                                            Up Next
-                                        </h3>
-                                        <div className={`text-neutral-500 transition-transform duration-300 ${showRelated ? '' : 'rotate-180'}`}>
-                                            <ChevronDown size={14} />
-                                        </div>
-                                    </button>
+                        <div className="flex items-center gap-3 shrink-0">
+                            {/* Compact Search / Jump */}
+                            <div className="hidden sm:flex relative items-center gap-2 px-3 py-1.5 bg-black/20 rounded-xl border border-white/5 focus-within:border-amber-500/50 transition-all group">
+                                <Search className="text-neutral-500 group-focus-within:text-amber-500 transition-colors" size={14} />
+                                <input
+                                    type="text"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    placeholder="Jump to..."
+                                    className="w-24 md:w-48 lg:w-64 bg-transparent text-[10px] md:text-xs font-bold focus:outline-none placeholder:text-neutral-700"
+                                />
 
-                                    {showRelated && (
-                                        <div className="mt-3 flex flex-col gap-2 max-h-64 overflow-y-auto custom-scrollbar animate-in slide-in-from-bottom-2 duration-300 pt-2 border-t border-white/5">
-                                            {nextStandards.map((std, i) => (
+                                {/* Search Results Dropdown */}
+                                {searchQuery && (
+                                    <div className="absolute top-full right-0 mt-2 w-64 md:w-80 bg-neutral-900/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-2 z-[110] flex flex-col gap-1 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                                        {filteredStandards.length > 0 ? (
+                                            filteredStandards.map((std, i) => (
                                                 <button
                                                     key={i}
                                                     onClick={() => handleSelectSong(std)}
-                                                    className="p-3 bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl text-left transition-all group"
+                                                    className="w-full text-left p-3 hover:bg-white/5 rounded-xl transition-all border border-transparent hover:border-white/5 group"
                                                 >
-                                                    <h4 className="text-sm font-bold text-neutral-200 group-hover:text-amber-400 truncate">{std.Title}</h4>
-                                                    <p className="text-[10px] text-neutral-600 truncate">{std.Composer}</p>
+                                                    <h4 className="font-bold text-xs text-neutral-200 group-hover:text-amber-400 truncate">{std.Title}</h4>
+                                                    <p className="text-[10px] text-neutral-500 truncate">{std.Composer}</p>
                                                 </button>
-                                            ))}
+                                            ))
+                                        ) : (
+                                            <div className="p-4 text-center text-[10px] text-neutral-600 font-bold uppercase tracking-widest">
+                                                No matches
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Up Next Toggle */}
+                            <div className="relative">
+                                <button
+                                    onClick={() => setShowRelated(!showRelated)}
+                                    className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border border-white/5 transition-all ${showRelated ? 'bg-amber-500 text-black border-amber-500' : 'bg-black/20 text-neutral-400 hover:text-white hover:bg-white/5'}`}
+                                    title="Up Next"
+                                >
+                                    <Music size={14} />
+                                    <span className="hidden lg:inline text-[10px] font-black uppercase tracking-tight">Up Next</span>
+                                </button>
+
+                                {showRelated && (
+                                    <div className="absolute top-full right-0 mt-2 w-64 md:w-80 bg-neutral-900/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-2 z-[110] flex flex-col gap-1 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                                        <div className="px-3 py-2 text-[8px] font-black text-neutral-500 uppercase tracking-[0.2em] border-b border-white/5 mb-1">
+                                            Suggestions
+                                        </div>
+                                        {nextStandards.map((std, i) => (
+                                            <button
+                                                key={i}
+                                                onClick={() => {
+                                                    handleSelectSong(std);
+                                                    setShowRelated(false);
+                                                }}
+                                                className="w-full text-left p-3 hover:bg-white/5 rounded-xl transition-all border border-transparent hover:border-white/5 group"
+                                            >
+                                                <h4 className="font-bold text-xs text-neutral-200 group-hover:text-amber-400 truncate">{std.Title}</h4>
+                                                <p className="text-[10px] text-neutral-500 truncate">{std.Composer}</p>
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Export / Share */}
+                            {progressionData && (
+                                <div className="scale-90 origin-right">
+                                    <SendToMenu
+                                        progression={progressionData}
+                                        sourceModule="jazz-killer"
+                                    />
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="flex-1 overflow-hidden flex flex-row p-1.5 md:p-3 gap-2 md:gap-4 relative">
+                        {/* LEFT SIDEBAR AREA */}
+                        {(showAnalysis || showPracticeTips || showWalkthrough || showChordScaleExplorer) && (
+                            <>
+                                <div
+                                    className="xl:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
+                                    onClick={() => {
+                                        setShowPracticeTips(false);
+                                        setShowWalkthrough(false);
+                                        setShowChordScaleExplorer(false);
+                                    }}
+                                />
+                                <div className="flex flex-col gap-4 max-h-full overflow-hidden shrink-0 
+                                              fixed xl:relative left-4 xl:left-0 top-24 xl:top-0 bottom-4 xl:bottom-auto
+                                              z-50 xl:z-auto w-[calc(100vw-2rem)] md:w-80 lg:w-[320px] xl:w-[350px] 
+                                              bg-neutral-900 xl:bg-transparent border border-white/10 xl:border-none rounded-3xl xl:rounded-none p-4 xl:p-0
+                                              overflow-y-auto custom-scrollbar animate-in slide-in-from-left duration-300">
+
+                                    <button
+                                        className="xl:hidden absolute top-4 right-4 p-2 bg-white/5 rounded-full hover:bg-white/10"
+                                        onClick={() => { setShowPracticeTips(false); setShowWalkthrough(false); setShowChordScaleExplorer(false); }}
+                                    >
+                                        <X size={20} />
+                                    </button>
+
+                                    {showWalkthrough && (
+                                        <WalkthroughPanel
+                                            song={selectedSong}
+                                            onClose={() => setShowWalkthrough(false)}
+                                            onExploreScales={(chord) => handleChordClick(chord, -1)}
+                                        />
+                                    )}
+
+                                    {showAnalysis && !showWalkthrough && (
+                                        <AnalysisToolbar
+                                            orientation="vertical"
+                                            filters={analysisFilters}
+                                            onFiltersChange={setAnalysisFilters}
+                                            totalPatterns={detectedPatterns.length}
+                                        />
+                                    )}
+
+                                    {showChordScaleExplorer && selectedChordForScale && (
+                                        <ChordScalePanel
+                                            chordSymbol={selectedChordForScale}
+                                            onClose={() => setShowChordScaleExplorer(false)}
+                                        />
+                                    )}
+
+                                    {showPracticeTips && !showWalkthrough && (
+                                        <PracticeTips
+                                            song={selectedSong}
+                                            onClose={() => setShowPracticeTips(false)}
+                                        />
+                                    )}
+                                </div>
+                            </>
+                        )}
+
+                        {/* MAIN CONTENT */}
+                        <div className="flex-1 overflow-y-auto px-1 md:px-2 custom-scrollbar transition-all duration-300">
+                            <LeadSheet
+                                song={selectedSong}
+                                filteredPatterns={filteredPatterns}
+                                onChordClick={handleChordClick}
+                            />
+                            <div className="h-32 xl:hidden" />
+                        </div>
+
+                        {/* RIGHT SIDEBAR AREA */}
+                        {(showPracticePanel || showMixer) && (
+                            <>
+                                <div
+                                    className="xl:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
+                                    onClick={() => {
+                                        setShowMixer(false);
+                                        setShowPracticePanel(false);
+                                    }}
+                                />
+                                <div className="flex flex-col gap-4 max-h-full overflow-y-auto shrink-0 
+                                              fixed xl:relative right-4 xl:right-0 top-24 xl:top-0 bottom-4 xl:bottom-auto
+                                              z-50 xl:z-auto w-[calc(100vw-2rem)] md:w-80 lg:w-[450px] xl:w-[500px] 2xl:w-[550px]
+                                              bg-neutral-900 xl:bg-transparent border border-white/10 xl:border-none rounded-3xl xl:rounded-none p-4 xl:p-0
+                                              custom-scrollbar animate-in slide-in-from-right duration-300">
+
+                                    <button
+                                        className="xl:hidden absolute top-4 right-4 p-2 bg-white/5 rounded-full hover:bg-white/10"
+                                        onClick={() => { setShowMixer(false); setShowPracticePanel(false); }}
+                                    >
+                                        <X size={20} />
+                                    </button>
+
+                                    {showMixer && (
+                                        <div className="bg-neutral-900/40 backdrop-blur-md rounded-3xl border border-white/5 p-4 md:p-6 flex flex-col gap-6 md:gap-8">
+                                            <div className="flex items-center justify-between">
+                                                <h3 className="text-sm font-black uppercase tracking-widest text-neutral-400 flex items-center gap-2">
+                                                    <Volume2 size={16} /> MIXER
+                                                </h3>
+                                                <button onClick={() => setShowMixer(false)} className="hidden xl:block text-neutral-600 hover:text-white transition-colors">
+                                                    <X size={16} />
+                                                </button>
+                                            </div>
+                                            <div className="space-y-6 md:space-y-8">
+                                                {[
+                                                    { label: 'Piano', signal: pianoVolumeSignal, min: -60, max: 0, step: 1, unit: 'dB' },
+                                                    { label: 'Piano Reverb', signal: pianoReverbSignal, min: 0, max: 1, step: 0.01, unit: '%' },
+                                                    { label: 'Double Bass', signal: bassVolumeSignal, min: -60, max: 0, step: 1, unit: 'dB' },
+                                                    { label: 'Drums', signal: drumsVolumeSignal, min: -60, max: 0, step: 1, unit: 'dB' },
+                                                    { label: 'Master Reverb', signal: reverbVolumeSignal, min: 0, max: 1, step: 0.01, unit: '%' }
+                                                ].map((ctrl, i) => (
+                                                    <div key={i} className="space-y-3">
+                                                        <div className="flex justify-between items-end">
+                                                            <span className="text-xs font-bold text-neutral-500 uppercase tracking-tighter">{ctrl.label}</span>
+                                                            <span className="text-xs font-mono text-amber-500">
+                                                                {ctrl.unit === '%' ? Math.round(ctrl.signal.value * 100) : ctrl.signal.value}{ctrl.unit}
+                                                            </span>
+                                                        </div>
+                                                        <input
+                                                            type="range"
+                                                            min={ctrl.min} max={ctrl.max} step={ctrl.step}
+                                                            value={ctrl.signal.value}
+                                                            onChange={(e) => ctrl.signal.value = Number(e.target.value)}
+                                                            className="w-full h-1.5 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-amber-500"
+                                                        />
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {showPracticePanel && (
+                                        <div className="flex-none">
+                                            <PracticeExercisePanel />
                                         </div>
                                     )}
                                 </div>
-                            </div>
+                            </>
                         )}
                     </div>
-
-
                 </div>
             )}
 
-            {/* Drill Dashboard */}
             {showDrillMode && <DrillDashboard />}
-            {showProfilePanel && <ProfilePanel />}
-            {showBarRangeDrill && <BarRangeDrill />}
+            {showBarRangeDrill && <BarRangeDrill onClose={() => setShowBarRangeDrill(false)} />}
         </div>
     );
 }

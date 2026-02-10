@@ -62,7 +62,7 @@ export function getFunctionalNoteName(midi: number, tonic: string, chordContext?
 /**
  * Identify the functional role of a chord in a key.
  */
-export function getChordFunction(_chordRoot: string, _quality: string, _tonic: string): ChordFunction {
+export function getChordFunction(): ChordFunction {
     // TODO: Implement calculation
     return 'Tonic';
 }

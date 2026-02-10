@@ -11,44 +11,43 @@ interface AnalysisOverlayProps {
 
 const CONCEPT_COLORS: Record<string, { bg: string; border: string; text: string; label: string }> = {
     'MajorII-V-I': {
-        bg: 'bg-emerald-500/10',
-        border: 'border-emerald-500',
-        text: 'text-emerald-400',
-        label: '2-5-1',
+        bg: 'bg-emerald-500/20',
+        border: 'border-emerald-400',
+        text: 'text-emerald-300',
+        label: 'Major ii-V-I',
     },
     'MinorII-V-i': {
-        bg: 'bg-purple-500/10',
-        border: 'border-purple-500',
-        text: 'text-purple-400',
-        label: '2-5-1 (minor)',
+        bg: 'bg-blue-600/25',
+        border: 'border-blue-400',
+        text: 'text-blue-300',
+        label: 'Minor ii-V-i',
     },
     'SecondaryDominant': {
-        bg: 'bg-amber-500/10',
-        border: 'border-amber-500',
-        text: 'text-amber-400',
-        label: 'V/x',
+        bg: 'bg-amber-500/20',
+        border: 'border-amber-400',
+        text: 'text-amber-300',
+        label: 'Sec. Dominant',
     },
     'TritoneSubstitution': {
-        bg: 'bg-rose-500/10',
-        border: 'border-rose-500',
-        text: 'text-rose-400',
-        label: '♭II⁷',
+        bg: 'bg-rose-600/25',
+        border: 'border-rose-400',
+        text: 'text-rose-300',
+        label: 'Tritone Sub',
     },
     'ColtraneChanges': {
-        bg: 'bg-cyan-500/10',
-        border: 'border-cyan-500',
-        text: 'text-cyan-400',
-        label: 'Giant Steps',
+        bg: 'bg-violet-600/25',
+        border: 'border-violet-400',
+        text: 'text-violet-300',
+        label: 'Coltrane Changes',
     },
 };
 
 export function AnalysisOverlay({
     concepts,
-    measureCount,
     onConceptClick,
     activeFocusIndex,
     gridRef
-}: AnalysisOverlayProps) {
+}: Omit<AnalysisOverlayProps, 'measureCount'>) {
     if (concepts.length === 0) return null;
 
     return (
@@ -80,6 +79,13 @@ interface Segment {
     height: number;
 }
 
+interface CurrentSegment {
+    top: number;
+    left: number;
+    right: number;
+    bottom: number;
+}
+
 function AnalysisBracket({ concept, index, isActive, colorScheme, onConceptClick, gridRef }: any) {
     const [segments, setSegments] = useState<Segment[]>([]);
     const [hidden, setHidden] = useState(true);
@@ -90,7 +96,10 @@ function AnalysisBracket({ concept, index, isActive, colorScheme, onConceptClick
 
             const containerRect = gridRef.current.getBoundingClientRect();
             // Get all direct children (measures)
-            const measureElements = Array.from(gridRef.current.children).filter(el => !el.classList.contains('pointer-events-none')) as HTMLElement[];
+            const children = Array.from(gridRef.current.children);
+            const measureElements = children.filter((el): el is HTMLElement =>
+                el instanceof HTMLElement && !el.classList.contains('pointer-events-none')
+            );
 
             // Filter to get only the measures (divs with specific border classes or similar)
             // Just filtering by 'div' tag and ensuring they are not the overlay itself (which is absolute)
@@ -116,9 +125,9 @@ function AnalysisBracket({ concept, index, isActive, colorScheme, onConceptClick
 
             // Compute segments
             const newSegments: Segment[] = [];
-            let currentSegment: { top: number; left: number; right: number; bottom: number } | null = null;
+            let currentSegment: CurrentSegment | null = null;
 
-            rects.forEach(rect => {
+            for (const rect of rects) {
                 const rTop = rect.top - containerRect.top;
                 const rLeft = rect.left - containerRect.left;
                 const rRight = rect.right - containerRect.left;
@@ -144,7 +153,7 @@ function AnalysisBracket({ concept, index, isActive, colorScheme, onConceptClick
                         currentSegment = { top: rTop, left: rLeft, right: rRight, bottom: rBottom };
                     }
                 }
-            });
+            }
 
             if (currentSegment) {
                 newSegments.push({
@@ -205,14 +214,14 @@ function AnalysisBracket({ concept, index, isActive, colorScheme, onConceptClick
                     {segIndex === 0 && (
                         <div
                             className={`
-                                absolute -top-5 left-2
+                                absolute -top-3.5 left-3
                                 px-2 py-0.5 rounded-md
-                                text-[10px] font-black uppercase tracking-wider
-                                ${colorScheme.bg} ${colorScheme.text}
-                                border ${colorScheme.border}
-                                shadow-lg backdrop-blur-sm
-                                ${isActive ? 'animate-pulse' : ''}
-                                z-40 whitespace-nowrap
+                                text-[9px] font-black uppercase tracking-widest
+                                ${colorScheme.border.replace('border-', 'bg-')} text-black
+                                shadow-[0_4px_12px_rgba(0,0,0,0.5)]
+                                border border-white/20
+                                ${isActive ? 'animate-pulse scale-110' : ''}
+                                z-40 whitespace-nowrap transition-all
                             `}
                         >
                             {colorScheme.label}

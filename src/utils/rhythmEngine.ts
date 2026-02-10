@@ -10,20 +10,40 @@ export class MetronomeEngine {
     // Synths
     private clickSynth: Tone.MembraneSynth;
     private ghostSynth: Tone.MembraneSynth;
+    private metronomeHigh: Tone.MembraneSynth;
+    private metronomeLow: Tone.MembraneSynth;
+    private metronomeLoop: Tone.Loop | null = null;
+    public metronomeEnabled: boolean = true;
 
     constructor() {
         this.clickSynth = new Tone.MembraneSynth({
-            pitchDecay: 0.008,
-            octaves: 2,
-            envelope: { attack: 0.001, decay: 0.2, sustain: 0, release: 0.1 }
+            pitchDecay: 0.005,
+            octaves: 1.5,
+            envelope: { attack: 0.001, decay: 0.08, sustain: 0, release: 0.05 }
         }).toDestination();
+        this.clickSynth.volume.value = -6;
 
         this.ghostSynth = new Tone.MembraneSynth({
             pitchDecay: 0.002,
             octaves: 1,
-            envelope: { attack: 0.001, decay: 0.1, sustain: 0, release: 0.05 }
+            envelope: { attack: 0.001, decay: 0.05, sustain: 0, release: 0.05 }
         }).toDestination();
-        this.ghostSynth.volume.value = -15;
+        this.ghostSynth.volume.value = -20;
+
+        // High-pitched woodblock-style clicks for metronome
+        this.metronomeHigh = new Tone.MembraneSynth({
+            pitchDecay: 0.005,
+            octaves: 1,
+            envelope: { attack: 0.001, decay: 0.04, sustain: 0, release: 0.05 }
+        }).toDestination();
+        this.metronomeHigh.volume.value = -8;
+
+        this.metronomeLow = new Tone.MembraneSynth({
+            pitchDecay: 0.005,
+            octaves: 1,
+            envelope: { attack: 0.001, decay: 0.04, sustain: 0, release: 0.05 }
+        }).toDestination();
+        this.metronomeLow.volume.value = -14;
     }
 
     setBpm(bpm: number) {
@@ -61,11 +81,21 @@ export class MetronomeEngine {
         Tone.Transport.bpm.value = this.bpm;
         Tone.Transport.swing = this.swing;
 
-        // Calculate interval based on subdivision
-        // 1 = 4n, 2 = 8n, 3 = 8t, 4 = 16n, 5 = 5:4, 6 = 16t, 7 = 7:4
-        // For simplicity in Tone.js, we might need custom intervals or just use 'n' values
+        // Setup metronome if enabled
+        if (this.metronomeEnabled) {
+            this.metronomeLoop = new Tone.Loop((time) => {
+                // Determine if it's beat 1 for accent
+                // Tone.Transport.position is "bar:beat:sixteenth"
+                const beat = parseInt(Tone.Transport.position.toString().split(':')[1]);
+                const isBeatOne = beat === 0;
 
-        // We will implement a custom loop callback that calculates next time
+                if (isBeatOne) {
+                    this.metronomeHigh.triggerAttackRelease("C6", "32n", time, 1.0);
+                } else {
+                    this.metronomeLow.triggerAttackRelease("C5", "32n", time, 0.7);
+                }
+            }, "4n").start(0);
+        }
 
         this.scheduleLoop();
         Tone.Transport.start();
@@ -74,37 +104,22 @@ export class MetronomeEngine {
 
     private scheduleLoop() {
         this.stopLoop();
-
-        // Pattern Mode (if pattern exists and subdivision is 16th or we force it)
-        // For Syncopation Builder, we assume 16th note grid (subdivision 4).
+        // Pattern Mode
         if (this.pattern.length > 0) {
             const interval = '16n';
-
-            // Create a sequence or stick to Loop?
-            // Loop is easier for infinite, but we need index.
-            // Tone.Sequence is better for patterns.
-
-            // Actually, let's use Tone.Loop and calculate step from Transport position
-            // or just a counter.
-
             let step = 0;
             this.loop = new Tone.Loop((time) => {
                 const currentStep = step % this.pattern.length;
                 const type = this.pattern[currentStep];
-
-                // 0 = Rest, 1 = Ghost (Low Vel), 2 = Accent (High Vel), 3 = Normal (Med)
-
                 if (type === 2) {
-                    this.clickSynth.triggerAttackRelease("C2", "32n", time, 1.0);
+                    this.clickSynth.triggerAttackRelease("G4", "32n", time, 1.0);
                 } else if (type === 1) {
-                    this.ghostSynth.triggerAttackRelease("C2", "32n", time, 0.6); // Ghost (audible click)
+                    this.ghostSynth.triggerAttackRelease("G4", "32n", time, 0.6);
                 } else if (type === 3) {
-                    this.clickSynth.triggerAttackRelease("C2", "32n", time, 0.5); // Normal
+                    this.clickSynth.triggerAttackRelease("G4", "32n", time, 0.5);
                 }
-
                 step++;
             }, interval).start(0);
-
             return;
         }
 
@@ -112,38 +127,20 @@ export class MetronomeEngine {
         if (this.subdivision <= 4) {
             let interval = '4n';
             if (this.subdivision === 2) interval = '8n';
-            if (this.subdivision === 3) interval = '8t'; // this is triplet 8th
+            if (this.subdivision === 3) interval = '8t';
             if (this.subdivision === 4) interval = '16n';
 
             this.loop = new Tone.Loop((time) => {
-                // Determine if downbeat
-                // We need to count.
-                // Tone.Transport.position gives bars:beats:sixteenths.
-                // But for pure metronome, we can just track a counter if we want, or use modulo of time?
-                // Actually, let's just play click. Differentiating downbeat requires synchronizing to '1'.
-
-                // For MVP: High click on beat 1, low on others is hard if we just loop an interval.
-                // Easier: Use a Sequence or Part?
-
-                // Let's just play a subdivision click for now.
-                // To emphasize the quarter note, we can check `Tone.Transport.position`.
-
-                this.clickSynth.triggerAttackRelease("C2", "32n", time);
+                this.clickSynth.triggerAttackRelease("G4", "32n", time);
             }, interval).start(0);
         } else {
             // Complex Patterns (5, 6, 7)
-            // Use a repeated event every beat, then schedule N micro-events
-
             this.loop = new Tone.Loop((time) => {
-                // beats are 1/4 note usually
-                // Calculate exact duration of one beat in seconds
                 const oneBeat = Tone.Time('4n').toSeconds();
                 const subInterval = oneBeat / this.subdivision;
-
                 for (let i = 0; i < this.subdivision; i++) {
                     const t = time + (i * subInterval);
-                    // Uniform sound for all subdivisions as requested
-                    this.clickSynth.triggerAttackRelease("C2", "32n", t);
+                    this.clickSynth.triggerAttackRelease("G4", "32n", t);
                 }
             }, '4n').start(0);
         }
@@ -157,13 +154,35 @@ export class MetronomeEngine {
     }
 
     stop() {
-        this.stopLoop();
         Tone.Transport.stop();
+        Tone.Transport.cancel();
+
+        this.stopLoop();
+        if (this.metronomeLoop) {
+            this.metronomeLoop.stop();
+            this.metronomeLoop.dispose();
+            this.metronomeLoop = null;
+        }
+
+        // Kill sounds immediately
+        this.clickSynth.triggerRelease();
+        this.ghostSynth.triggerRelease();
+        this.metronomeHigh.triggerRelease();
+        this.metronomeLow.triggerRelease();
+
         this.isPlaying = false;
     }
 
     restart() {
         this.stop();
         this.start();
+    }
+
+    dispose() {
+        this.stop();
+        this.clickSynth.dispose();
+        this.ghostSynth.dispose();
+        this.metronomeHigh.dispose();
+        this.metronomeLow.dispose();
     }
 }

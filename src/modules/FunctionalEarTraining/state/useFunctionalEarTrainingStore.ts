@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 
-export type FETLevel = 'Tendency' | 'Modulation' | 'Bass' | 'Interference' | 'Progressions' | 'MelodySteps' | 'ChordQualities' | 'JazzStandards' | 'Intervals' | 'Fretboard' | 'ChordTones' | 'Positions' | 'SecondaryDominants' | 'ModalInterchange' | 'UST';
-export type FETDifficulty = 'Novice' | 'Advanced' | 'Pro';
+export type FETLevel = 'Tendency' | 'Modulation' | 'Bass' | 'Interference' | 'HarmonicContext' | 'MelodySteps' | 'ChordQualities' | 'Intervals' | 'InstrumentMapping' | 'ChordTones' | 'SecondaryDominants' | 'ModalInterchange' | 'Fretboard' | 'Positions' | 'JazzStandards' | 'Progressions' | 'UST';
+export type FETDifficulty = 'Novice' | 'Intermediate' | 'Advanced' | 'Pro' | 'Virtuoso';
 
 interface FETState {
     level: FETLevel;

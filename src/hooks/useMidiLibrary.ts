@@ -42,10 +42,14 @@ export function useMidiLibrary() {
             fetchPromise = fetch('/midi_library.json')
                 .then(res => res.json())
                 .then((data: any[]) => {
-                    const processed = data.map((item: any) => ({
-                        ...item,
-                        loadUrl: item.path ? (async () => item.path) : undefined
-                    }));
+                    const processed = data.map((item: any) => {
+                        const filePath = item.path || `/midi_progressions/${item.category}/${item.style}/${item.name}.mid`;
+                        return {
+                            ...item,
+                            path: filePath,
+                            loadUrl: async () => filePath
+                        };
+                    });
                     globalFilesCache = processed;
                     return processed;
                 })

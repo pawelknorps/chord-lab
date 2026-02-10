@@ -1,21 +1,21 @@
 import { useEffect, useState } from 'react'
 import { Play, AudioLinesIcon } from 'lucide-react'
-import { Button } from '../../components/ui/button'
+import { Button } from '../../../../components/ui/button'
 import { Knob } from '../Knob'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
-} from '../../components/ui/dialog'
+} from '../../../../components/ui/dialog'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../../components/ui/select'
-import { Slider } from '../../components/ui/slider'
-//import { Badge } from '../../components/ui/badge'
+} from '../../../../components/ui/select'
+import { Slider } from '../../../../components/ui/slider'
+//import { Badge } from '../../../../components/ui/badge'
 import { useAppContext } from '../context/AppContext'
 import { DEFAULT_EQ, EQSettings, notEqual, playChord } from '../../utils/synthPlayer'
 import { SYNTH_TYPES as SYNTH_TYPES } from '../../utils/synthLibrary'

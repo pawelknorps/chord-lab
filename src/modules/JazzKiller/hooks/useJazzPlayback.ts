@@ -44,21 +44,13 @@ interface JazzPlaybackState {
     bpmSignal: Signal<number>;
     loopCountSignal: Signal<number>;
     totalLoopsSignal: Signal<number>;
-    setTotalLoops: (count: number) => void;
     togglePlayback: () => void;
     setBpm: (bpm: number) => void;
+    playChord: (symbol: string) => void;
 }
 
 export const useJazzPlayback = (song: any): JazzPlaybackState => {
-    // We still keep local state for simple UI triggers if needed,
-    // but the high-frequency updates will bypass React via Signals.
-    // Actually, for maximum performance, we should use Signals everywhere possible.
-
-    // Sync React state to Signals for backwards compatibility with existing UI if needed,
-    // or just export the signals. For now let's keep the return object structure but use signals internally.
-
     const pianoRef = useRef<Tone.Sampler | null>(null);
-
     const bassRef = useRef<Tone.Sampler | null>(null);
     const drumsRef = useRef<{
         ride: Tone.Sampler;
@@ -97,13 +89,12 @@ export const useJazzPlayback = (song: any): JazzPlaybackState => {
             },
             release: 1,
             baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/piano/",
-            volume: -12,
+            volume: pianoVolumeSignal.value,
             onload: () => {
                 if (bassRef.current?.loaded) isLoadedSignal.value = true;
             }
         }).connect(pianoReverbRef.current);
 
-        // ELECTRIC BASS SAMPLER
         bassRef.current = new Tone.Sampler({
             urls: {
                 "A#1": "As1.mp3", "C#1": "Cs1.mp3", "E1": "E1.mp3", "G1": "G1.mp3",
@@ -113,14 +104,13 @@ export const useJazzPlayback = (song: any): JazzPlaybackState => {
                 "C#5": "Cs5.mp3"
             },
             baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/bass-electric/",
-            volume: -8,
+            volume: bassVolumeSignal.value,
             release: 0.8,
             onload: () => {
                 if (pianoRef.current?.loaded) isLoadedSignal.value = true;
             }
         }).connect(reverbRef.current);
 
-        // NATE SMITH DRUM SAMPLES (Multi-Sampled)
         const drumBaseUrl = "/drum_samples/";
         drumsRef.current = {
             ride: new Tone.Sampler({
@@ -131,8 +121,8 @@ export const useJazzPlayback = (song: any): JazzPlaybackState => {
                     "F1": "CrashRide1_NateSmith.wav"
                 },
                 baseUrl: drumBaseUrl,
-                volume: -10,
-                onload: () => console.log('JazzKiller Ride loaded (multi)')
+                volume: drumsVolumeSignal.value,
+                onload: () => console.log('JazzKiller Ride loaded')
             }).connect(reverbRef.current),
             hihat: new Tone.Sampler({
                 urls: {
@@ -142,8 +132,8 @@ export const useJazzPlayback = (song: any): JazzPlaybackState => {
                     "F1": "HiHatOpen1_NateSmith.wav"
                 },
                 baseUrl: drumBaseUrl,
-                volume: -15,
-                onload: () => console.log('JazzKiller HiHat loaded (multi)')
+                volume: drumsVolumeSignal.value - 3,
+                onload: () => console.log('JazzKiller HiHat loaded')
             }).connect(reverbRef.current),
             snare: new Tone.Sampler({
                 urls: {
@@ -152,8 +142,8 @@ export const useJazzPlayback = (song: any): JazzPlaybackState => {
                     "E1": "CrossStick1_NateSmith.wav"
                 },
                 baseUrl: drumBaseUrl,
-                volume: -12,
-                onload: () => console.log('JazzKiller Snare loaded (multi)')
+                volume: drumsVolumeSignal.value - 8,
+                onload: () => console.log('JazzKiller Snare loaded')
             }).connect(reverbRef.current),
             kick: new Tone.Sampler({
                 urls: {
@@ -162,8 +152,8 @@ export const useJazzPlayback = (song: any): JazzPlaybackState => {
                     "E1": "KickOpen1_NateSmith.wav"
                 },
                 baseUrl: drumBaseUrl,
-                volume: -10,
-                onload: () => console.log('JazzKiller Kick loaded (multi)')
+                volume: drumsVolumeSignal.value - 6,
+                onload: () => console.log('JazzKiller Kick loaded')
             }).connect(reverbRef.current)
         };
 
@@ -179,14 +169,12 @@ export const useJazzPlayback = (song: any): JazzPlaybackState => {
         };
     }, []);
 
-    // Sync BPM & Swing
     useEffect(() => {
         Tone.Transport.bpm.value = bpmSignal.value;
         Tone.Transport.swing = 0.58;
         Tone.Transport.swingSubdivision = '8n';
     }, [bpmSignal.value]);
 
-    // Sync Volumes
     useEffect(() => {
         if (pianoRef.current) pianoRef.current.volume.value = pianoVolumeSignal.value;
     }, [pianoVolumeSignal.value]);
@@ -198,42 +186,34 @@ export const useJazzPlayback = (song: any): JazzPlaybackState => {
     useEffect(() => {
         if (drumsRef.current) {
             drumsRef.current.ride.volume.value = drumsVolumeSignal.value;
-            drumsRef.current.hihat.volume.value = drumsVolumeSignal.value - 3; // Keep relative balance
+            drumsRef.current.hihat.volume.value = drumsVolumeSignal.value - 3;
             drumsRef.current.snare.volume.value = drumsVolumeSignal.value - 8;
             drumsRef.current.kick.volume.value = drumsVolumeSignal.value - 6;
         }
     }, [drumsVolumeSignal.value]);
 
     useEffect(() => {
-        if (reverbRef.current) {
-            reverbRef.current.wet.value = reverbVolumeSignal.value;
-        }
+        if (reverbRef.current) reverbRef.current.wet.value = reverbVolumeSignal.value;
     }, [reverbVolumeSignal.value]);
 
     useEffect(() => {
-        if (pianoReverbRef.current) {
-            pianoReverbRef.current.wet.value = pianoReverbSignal.value;
-        }
+        if (pianoReverbRef.current) pianoReverbRef.current.wet.value = pianoReverbSignal.value;
     }, [pianoReverbSignal.value]);
 
-    // Playback Logic
     useEffect(() => {
         if (!song || !song.music || !song.music.measures) return;
 
         Tone.Transport.cancel();
         currentMeasureIndexSignal.value = -1;
 
-        const measures = song.music.measures;
-
         const loop = new Tone.Loop((time) => {
             const position = Tone.Transport.position.toString().split(':');
             const bar = parseInt(position[0]);
             const beat = parseInt(position[1]);
 
-            const measureIndex = bar % measures.length;
-            const currentLoop = Math.floor(bar / measures.length);
+            const measureIndex = bar % song.music.measures.length;
+            const currentLoop = Math.floor(bar / song.music.measures.length);
 
-            // STOP if max loops reached
             if (currentLoop >= totalLoopsSignal.value) {
                 Tone.Transport.stop();
                 isPlayingSignal.value = false;
@@ -248,11 +228,10 @@ export const useJazzPlayback = (song: any): JazzPlaybackState => {
                 loopCountSignal.value = currentLoop;
             }, time);
 
-            const measure = measures[measureIndex];
-            const nextMeasure = measures[(measureIndex + 1) % measures.length];
+            const measure = song.music.measures[measureIndex];
+            const nextMeasure = song.music.measures[(measureIndex + 1) % song.music.measures.length];
             const chords = measure.chords || [];
 
-            // Determine current chord
             let currentChordSymbol = "";
             let nextChordSymbol = "";
 
@@ -267,7 +246,6 @@ export const useJazzPlayback = (song: any): JazzPlaybackState => {
                 nextChordSymbol = chords[Math.min(beat + 1, chords.length - 1)] || nextMeasure.chords?.[0];
             }
 
-            // --- WALKING BASS (Every Beat) ---
             if (currentChordSymbol) {
                 const { root, quality } = parseChord(currentChordSymbol);
                 const rootMidi = Tone.Frequency(root + "2").toMidi();
@@ -276,13 +254,11 @@ export const useJazzPlayback = (song: any): JazzPlaybackState => {
                 if (beat === 0) {
                     targetNote = root + "2";
                 } else if (beat === 3 && nextChordSymbol) {
-                    // Chromatic approach to next chord
                     const { root: nextRoot } = parseChord(nextChordSymbol);
                     const nextMidi = Tone.Frequency(nextRoot + "2").toMidi();
                     const approachMidi = Math.random() > 0.5 ? nextMidi + 1 : nextMidi - 1;
                     targetNote = Tone.Frequency(approachMidi, "midi").toNote();
                 } else {
-                    // Scale/Arpeggio tones
                     const intervals = CHORD_INTERVALS[IREAL_QUALITY_MAP[quality] || quality] || CHORD_INTERVALS['maj'];
                     const candidates = intervals.map(i => rootMidi + i);
                     const chosenMidi = candidates[Math.floor(Math.random() * candidates.length)];
@@ -295,128 +271,93 @@ export const useJazzPlayback = (song: any): JazzPlaybackState => {
                 }
             }
 
-            // --- PIANO COMPING (Predictable & Reliable) ---
             let shouldPlayComp = false;
             let compOffset = 0;
             let compDuration = "2n";
-
-            // 1. ALWAYS play if the chord just changed (to ensure no chord is skipped)
             const isNewChord = currentChordSymbol !== lastChordRef.current;
+
             if (isNewChord && currentChordSymbol !== "") {
                 shouldPlayComp = true;
                 compOffset = 0;
                 compDuration = "2n";
                 lastChordRef.current = currentChordSymbol;
-            }
-            // 2. Otherwise, play on predictable beats if we didn't just play a new chord
-            else {
-                // Determine a stable pattern for this measure based on bar index
+            } else {
                 const measurePattern = (bar % 3);
-
-                if (measurePattern === 0) { // The Charleston
+                if (measurePattern === 0) {
                     if (beat === 0) { shouldPlayComp = true; compOffset = 0; compDuration = "4n."; }
                     if (beat === 1) { shouldPlayComp = true; compOffset = 0.5; compDuration = "8n"; }
-                } else if (measurePattern === 1) { // Red Garland Style (On the "and" of 2 and 4)
+                } else if (measurePattern === 1) {
                     if (beat === 1 || beat === 3) { shouldPlayComp = true; compOffset = 0.5; compDuration = "8n"; }
-                } else { // Relaxed half notes
+                } else {
                     if (beat === 0 || beat === 2) { shouldPlayComp = true; compOffset = 0; compDuration = "2n"; }
                 }
             }
 
             if (shouldPlayComp && currentChordSymbol) {
-                const cleanSymbol = currentChordSymbol.replace(/\(.*?\)/g, '').replace(/[\[\]]/g, '').trim();
-                if (cleanSymbol) {
-                    let { root, quality } = parseChord(cleanSymbol);
-                    if (IREAL_QUALITY_MAP[quality]) quality = IREAL_QUALITY_MAP[quality];
-                    if (quality.includes('^')) quality = 'maj7';
-
-                    const intervals = CHORD_INTERVALS[quality] || CHORD_INTERVALS['maj'];
-                    const midiRoot = Tone.Frequency(root + "4").toMidi();
-
-                    if (midiRoot) {
-                        // Humanization logic
-                        const jitter = () => (Math.random() - 0.5) * 0.015;
-                        const baseVel = 0.4 + Math.random() * 0.2;
-
-                        const notes = intervals.map(i => Tone.Frequency(midiRoot + i, "midi").toNote());
-
-                        if (pianoRef.current?.loaded) {
-                            notes.forEach((note, idx) => {
-                                // Micro-stagger (Strum)
-                                const stagger = idx * (0.01 + Math.random() * 0.02);
-                                const noteVel = baseVel * (0.9 + Math.random() * 0.2);
-                                pianoRef.current?.triggerAttackRelease(
-                                    note,
-                                    compDuration,
-                                    time + (compOffset * Tone.Time("4n").toSeconds()) + jitter() + stagger,
-                                    noteVel
-                                );
-                            });
-                        }
-                    }
-                }
+                playChord(currentChordSymbol, time + (compOffset * Tone.Time("4n").toSeconds()), compDuration);
             }
 
-            // --- SWING DRUMS (Advanced Jazz Pattern) ---
             if (drumsRef.current) {
-                // Humanization
-                const jitter = () => (Math.random() - 0.5) * 0.012;
                 const isStrongBeat = beat === 0 || beat === 2;
-
-                // 1. Ride Cymbal (Varied notes & dynamics)
                 const rideNote = Math.random() > 0.9 ? "E1" : (Math.random() > 0.4 ? "D1" : "C1");
                 const rideVel = (isStrongBeat ? 0.6 : 0.4) + (Math.random() * 0.1);
-                drumsRef.current.ride.triggerAttack(rideNote, time + jitter(), rideVel);
+                drumsRef.current.ride.triggerAttack(rideNote, time, rideVel);
 
-                // The "skip" beat
-                // Support 3/4: assuming 4 beats for now, but if beat > 2 we might be in 4/4.
-                // Dynamic skip logic
-                const shouldSkip = (beat === 1 || beat === 3 || Math.random() > 0.75);
-                if (shouldSkip) {
+                if (beat === 1 || beat === 3 || Math.random() > 0.75) {
                     const skipTime = time + Tone.Time("4n").toSeconds() * 0.66;
-                    const skipVel = 0.2 + (Math.random() * 0.15);
-                    drumsRef.current.ride.triggerAttack(rideNote, skipTime + jitter(), skipVel);
+                    drumsRef.current.ride.triggerAttack(rideNote, skipTime, 0.2 + (Math.random() * 0.15));
                 }
 
-                // 2. Hi-hat foot (Standard 2 & 4)
                 if (beat === 1 || beat === 3) {
-                    const hhNote = Math.random() > 0.7 ? "D1" : "C1";
-                    drumsRef.current.hihat.triggerAttack(hhNote, time + jitter(), 0.5 + Math.random() * 0.1);
+                    drumsRef.current.hihat.triggerAttack("C1", time, 0.5 + Math.random() * 0.1);
                 }
 
-                // 3. Kick Feathering (Steady 4/4)
-                const kickNote = Math.random() > 0.85 ? "D1" : "C1";
-                drumsRef.current.kick.triggerAttack(kickNote, time + jitter(), 0.15);
+                drumsRef.current.kick.triggerAttack("C1", time, 0.15);
 
-                // 4. Snare Comping (Random syncopation)
                 if (Math.random() > 0.65) {
-                    const snareNote = Math.random() > 0.7 ? "D1" : (Math.random() > 0.9 ? "E1" : "C1");
-                    const snareVel = 0.1 + Math.random() * 0.2;
                     const snareOffset = (Math.random() > 0.5 ? Tone.Time("8t").toSeconds() : Tone.Time("8t").toSeconds() * 2);
-                    drumsRef.current.snare.triggerAttack(snareNote, time + snareOffset + jitter(), snareVel);
-                }
-
-                // 5. Accent / Crash
-                if (beat === 0 && Math.random() > 0.9) {
-                    drumsRef.current.ride.triggerAttack("F1", time, 0.4);
+                    drumsRef.current.snare.triggerAttack("C1", time + snareOffset, 0.1 + Math.random() * 0.2);
                 }
             }
-
         }, "4n").start(0);
 
         return () => {
             loop.dispose();
         };
-    }, [song, bpmSignal.value, totalLoopsSignal.value]);
+    }, [song]);
 
+    const playChord = (symbol: string, time: number = Tone.now(), duration: string = "2n") => {
+        if (!pianoRef.current?.loaded) return;
+
+        const cleanSymbol = symbol.replace(/\(.*?\)/g, '').replace(/[\[\]]/g, '').trim();
+        if (!cleanSymbol) return;
+
+        let { root, quality } = parseChord(cleanSymbol);
+        if (IREAL_QUALITY_MAP[quality]) quality = IREAL_QUALITY_MAP[quality];
+        const intervals = CHORD_INTERVALS[quality] || CHORD_INTERVALS['maj'];
+        const midiRoot = Tone.Frequency(root + "4").toMidi();
+
+        if (midiRoot) {
+            const baseVel = 0.45 + Math.random() * 0.1;
+            const notes = intervals.map(i => Tone.Frequency(midiRoot + i, "midi").toNote());
+
+            notes.forEach((note, idx) => {
+                const stagger = idx * (0.01 + Math.random() * 0.02);
+                const noteVel = baseVel * (0.9 + Math.random() * 0.2);
+                pianoRef.current?.triggerAttackRelease(
+                    note,
+                    duration,
+                    time + stagger,
+                    noteVel
+                );
+            });
+        }
+    };
 
     const togglePlayback = async () => {
         if (isPlayingSignal.value) {
             Tone.Transport.stop();
             isPlayingSignal.value = false;
-            currentMeasureIndexSignal.value = -1;
-            currentBeatSignal.value = -1;
-            loopCountSignal.value = 0;
         } else {
             await Tone.start();
             Tone.Transport.start();
@@ -432,8 +373,8 @@ export const useJazzPlayback = (song: any): JazzPlaybackState => {
         bpmSignal,
         loopCountSignal,
         totalLoopsSignal,
-        setTotalLoops: (val: number) => totalLoopsSignal.value = val,
         togglePlayback,
+        playChord,
         setBpm: (val: number) => bpmSignal.value = val
     };
 };

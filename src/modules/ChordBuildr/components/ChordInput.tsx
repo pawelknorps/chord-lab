@@ -1,5 +1,5 @@
 import { useRef, useEffect, ReactNode } from 'react'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../components/ui/select'
 import {
   noteLetterMapWithSharps,
   noteLetterMapWithFlats,
@@ -16,7 +16,7 @@ import { selectChordKeys, hasSelectedNotes, ChordPiano, SelectedChord } from '..
 import { useAppContext, getPianoById, getProgKeyChord } from './context/AppContext'
 import { updateFlatOrSharpLetter } from '../utils/chordCodeHandler'
 import { cn } from '../lib/utils'
-import { Checkbox } from '../components/ui/checkbox';
+import { Checkbox } from '../../../components/ui/checkbox';
 import { getChordNumeral } from '../utils/numeralHelper'
 import { isGuitar, UNSUPPORTED_GUITAR_CHORDS } from '../utils/guitarUtil'
 //import { Combobox, ComboboxItem } from './Combobox';

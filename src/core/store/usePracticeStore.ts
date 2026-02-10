@@ -86,11 +86,26 @@ export const usePracticeStore = create<PracticeState>((set, get) => ({
         });
 
         // Analyze patterns and remap indices
+        // We analyze the flattened chords first to find the progressions
         const analysisResult = ConceptAnalyzer.analyze(flattenedChords, song.key);
+
+        // Then we remap the indices back to measure numbers
+        // This logic assumes we have a mapping array where index = flattenedChordIndex and value = measureIndex
+        const chordIndexToMeasureIndex: number[] = [];
+        let currentChordIndex = 0;
+        song.measures.forEach((measureChords, measureIndex) => {
+            measureChords.forEach(() => {
+                chordIndexToMeasureIndex[currentChordIndex] = measureIndex;
+                currentChordIndex++;
+            });
+        });
+
         const mappedConcepts = analysisResult.concepts.map(c => ({
             ...c,
-            startIndex: chordToMeasureMap[c.startIndex] ?? c.startIndex,
-            endIndex: chordToMeasureMap[c.endIndex] ?? c.endIndex
+            // Map the chord index (linear) to the measure index (musical)
+            startIndex: chordIndexToMeasureIndex[c.startIndex] ?? c.startIndex,
+            // For endIndex, we want the measure where the LAST chord of the pattern resides
+            endIndex: chordIndexToMeasureIndex[c.endIndex] ?? c.endIndex
         }));
 
         const exercises = ConceptAnalyzer.generateExercises({ ...analysisResult, concepts: mappedConcepts }, flattenedChords);

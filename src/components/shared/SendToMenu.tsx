@@ -37,9 +37,13 @@ export function SendToMenu({ progression, chord, sourceModule, className = '' }:
         const data = progression || chord;
         if (!data) return;
 
-        const targetModule = sourceModule === 'chordlab' ? 'chordlab' :
-            sourceModule === 'ear-training' ? 'ear-training' :
-                sourceModule === 'chord-builder' ? 'chord-builder' : sourceModule;
+        let targetModule = sourceModule;
+
+        // Map internal module names to route paths
+        if (sourceModule === 'ear-training') targetModule = 'functional-ear-training';
+        else if (sourceModule === 'chord-builder') targetModule = 'chord-buildr';
+        else if (sourceModule === 'chordlab') targetModule = ''; // Root route
+        else if (sourceModule === 'jazz-killer') targetModule = 'jazz-standards';
 
         const relativePath = createDeepLink(targetModule, data as any);
         const fullUrl = `${window.location.origin}${relativePath}`;
@@ -69,12 +73,30 @@ export function SendToMenu({ progression, chord, sourceModule, className = '' }:
                             <button
                                 className="group flex w-full items-center gap-3 px-4 py-2 text-sm text-white hover:bg-purple-600 transition"
                                 onClick={() => {
-                                    navigateToEarTraining(progression, { mode: 'progressions' });
+                                    navigateToEarTraining(progression, { mode: 'Progressions' });
                                     setIsOpen(false);
                                 }}
                             >
                                 <Ear size={16} />
                                 Practice by Ear
+                            </button>
+                        )}
+
+                        {progression && sourceModule === 'jazz-killer' && (
+                            <button
+                                className="group flex w-full items-center gap-3 px-4 py-2 text-sm text-white hover:bg-purple-600 transition"
+                                onClick={() => {
+                                    // Send simplified object to keep URL short
+                                    const standardData = {
+                                        ...progression,
+                                        chords: [],
+                                    };
+                                    navigateToEarTraining(standardData, { mode: 'JazzStandards' });
+                                    setIsOpen(false);
+                                }}
+                            >
+                                <Music size={16} />
+                                Practice Standard
                             </button>
                         )}
 
@@ -104,7 +126,7 @@ export function SendToMenu({ progression, chord, sourceModule, className = '' }:
                             </button>
                         )}
 
-                        {progression && sourceModule !== 'jazzkiller' && (
+                        {progression && sourceModule !== 'jazz-killer' && sourceModule !== 'jazzkiller' && (
                             <button
                                 className="group flex w-full items-center gap-3 px-4 py-2 text-sm text-white hover:bg-purple-600 transition"
                                 onClick={() => {

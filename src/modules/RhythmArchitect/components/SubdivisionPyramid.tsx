@@ -1,26 +1,26 @@
 import { useState, useEffect } from 'react';
 import { PyramidEngine } from '../../../utils/pyramidEngine';
-import { Play, Square, Zap, Info, Download } from 'lucide-react';
+import { Play, Square, Zap, Activity } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useMidiExport } from '../../../hooks/useMidiExport';
+import { useRhythmStore } from '../state/useRhythmStore';
 
 const engine = new PyramidEngine();
 
 const SUBDIVISION_NAMES = [
-    'Whole Note',
-    'Half Notes',
-    'Triplets',
-    '16th Notes',
-    'Quintuplets',
-    'Sextuplets',
-    'Septuplets'
+    'Whole Note', 'Half Notes', 'Triplets', '16th Notes',
+    'Quintuplets', 'Sextuplets', 'Septuplets', '32nd Notes',
+    'Nontuplets', 'Decuplets', 'Endecuplets', 'Dodecuplets'
 ];
 
-export default function SubdivisionPyramid() {
+const KONNAKOL_SYLLABLES = [
+    'Ta', 'Ta-Ka', 'Ta-Ki-Ta', 'Ta-Ka-Di-Mi',
+    'Ta-Di-Gi-Na-Thom', 'Ta-Ki-Ta-Ta-Ki-Ta', 'Ta-Ki-Ta-Ta-Ka-Di-Mi', 'Ta-Ka-Di-Mi-Ta-Ka-Di-Mi'
+];
+
+export default function PyramidLab() {
+    const { bpm, setCurrentBpm, difficulty, metronomeEnabled, setMetronomeEnabled } = useRhythmStore();
     const [isPlaying, setIsPlaying] = useState(false);
-    const [bpm, setBpm] = useState(60);
     const [activeLayers, setActiveLayers] = useState<Set<number>>(new Set([4]));
-    const { exportMidi } = useMidiExport();
 
     useEffect(() => {
         return () => {
@@ -28,11 +28,14 @@ export default function SubdivisionPyramid() {
         };
     }, []);
 
+    const maxLayer = difficulty === 'Novice' ? 4 : difficulty === 'Intermediate' ? 6 : difficulty === 'Advanced' ? 8 : 12;
+
     const togglePlay = () => {
         if (isPlaying) {
             engine.stop();
             setIsPlaying(false);
         } else {
+            engine.metronomeEnabled = metronomeEnabled;
             engine.setBpm(bpm);
             activeLayers.forEach(l => engine.toggleLayer(l, true));
             engine.start();
@@ -41,6 +44,7 @@ export default function SubdivisionPyramid() {
     };
 
     const toggleLayer = (num: number) => {
+        if (num > maxLayer) return;
         const next = new Set(activeLayers);
         if (next.has(num)) {
             next.delete(num);
@@ -52,177 +56,123 @@ export default function SubdivisionPyramid() {
         setActiveLayers(next);
     };
 
-    const handleExport = () => {
-        const measureDur = (60 / bpm) * 4;
-        const allNotes: any[] = [];
-        const pitches = ['C2', 'E2', 'G2', 'C3', 'E3', 'G3', 'B3']; // Map 1-7
-
-        activeLayers.forEach(layer => {
-            const stepDur = measureDur / layer;
-            for (let i = 0; i < layer; i++) {
-                allNotes.push({
-                    name: pitches[layer - 1] || 'C4',
-                    time: i * stepDur,
-                    duration: 0.1,
-                    velocity: 0.8
-                });
-            }
-        });
-
-        exportMidi(allNotes, { bpm, name: `Pyramid-Layers-${Array.from(activeLayers).join('-')}` });
-    };
-
     return (
-        <div className="max-w-6xl mx-auto h-full flex flex-col gap-8 p-6">
-            <div className="flex items-end justify-between px-2">
-                <div>
-                    <h2 className="text-3xl font-bold text-white tracking-tight">Subdivision Pyramid</h2>
-                    <p className="text-[var(--text-muted)] mt-1">Master rhythmic groupings and transitions.</p>
-                </div>
-            </div>
+        <div className="flex flex-col gap-10 w-full max-w-6xl py-4 fade-in">
+            <div className="flex flex-col md:flex-row gap-12 items-start">
+                {/* Visual Pyramid Visualization */}
+                <div className="flex-1 w-full bg-black/40 rounded-[40px] p-10 border border-white/5 shadow-2xl relative overflow-hidden flex flex-col items-center gap-4">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-indigo-500/20 to-transparent" />
 
-            <div className="flex-1 grid grid-cols-1 lg:grid-cols-5 gap-8">
-                <div className="lg:col-span-3 flex flex-col gap-3 items-center justify-center bg-[var(--bg-panel)] rounded-3xl p-12 border border-[var(--border-subtle)] shadow-2xl relative overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-b from-[var(--accent)]/5 to-transparent pointer-events-none" />
-
-                    {[1, 2, 3, 4, 5, 6, 7].map((num) => (
-                        <button
+                    {Array.from({ length: 12 }, (_, i) => i + 1).map((num) => (
+                        <motion.button
                             key={num}
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{
+                                opacity: num <= maxLayer ? 1 : 0.2,
+                                x: 0,
+                                filter: num <= maxLayer ? 'none' : 'grayscale(1)'
+                            }}
                             onClick={() => toggleLayer(num)}
+                            disabled={num > maxLayer}
                             className={`
-                                group relative flex items-center gap-4 px-6 py-4 rounded-2xl transition-all duration-300 border
+                                group relative h-12 rounded-2xl flex items-center gap-4 px-6 transition-all duration-500 border
                                 ${activeLayers.has(num)
-                                    ? 'bg-[var(--accent)] text-white border-white/20 shadow-xl shadow-[var(--accent)]/20 scale-105 z-10'
-                                    : 'bg-white/5 border-[var(--border-subtle)] text-[var(--text-muted)] hover:bg-white/10 hover:border-white/20'
+                                    ? 'bg-indigo-500 text-white border-white/20 shadow-[0_0_30px_rgba(99,102,241,0.3)] z-10'
+                                    : 'bg-white/5 border-white/5 text-white/40 hover:border-white/20'
                                 }
                             `}
                             style={{
-                                width: `${40 + (num * 8)}%`,
-                                minWidth: '180px'
+                                width: `${20 + (num * 6.5)}%`,
+                                minWidth: '160px'
                             }}
                         >
-                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-xl ${activeLayers.has(num) ? 'bg-white/20' : 'bg-black/20'}`}>
-                                {num}
+                            <span className="font-black italic text-lg w-8">{num}</span>
+                            <div className="flex flex-col items-start leading-none">
+                                <span className="text-[10px] uppercase font-bold tracking-widest hidden md:block">
+                                    {SUBDIVISION_NAMES[num - 1] || 'Poly-let'}
+                                </span>
+                                {KONNAKOL_SYLLABLES[num - 1] && (
+                                    <span className="text-[9px] opacity-40 font-mono mt-1 hidden md:block">
+                                        {KONNAKOL_SYLLABLES[num - 1]}
+                                    </span>
+                                )}
                             </div>
-                            <div className="flex-1 text-left">
-                                <div className={`font-bold tracking-tight ${activeLayers.has(num) ? 'text-white' : 'text-[var(--text-secondary)]'}`}>
-                                    {SUBDIVISION_NAMES[num - 1]}
-                                </div>
-                                <div className={`text-[10px] uppercase tracking-widest font-bold opacity-60`}>
-                                    {num === 1 ? 'Pulse' : `${num} Hits`}
-                                </div>
-                            </div>
+
                             {activeLayers.has(num) && isPlaying && (
                                 <motion.div
-                                    animate={{ scale: [1, 1.2, 1] }}
-                                    transition={{ repeat: Infinity, duration: (60 / bpm) / num }}
-                                    className="w-2 h-2 rounded-full bg-white shadow-[0_0_10px_white]"
+                                    animate={{
+                                        scale: [1, 1.3, 1],
+                                        opacity: [0.5, 1, 0.5]
+                                    }}
+                                    transition={{
+                                        repeat: Infinity,
+                                        duration: (60 / bpm) / (num / 4),
+                                        ease: "easeInOut"
+                                    }}
+                                    className="absolute right-4 w-2 h-2 rounded-full bg-white shadow-[0_0_15px_white]"
                                 />
                             )}
-                        </button>
+                        </motion.button>
                     ))}
-
-                    <div className="mt-8 flex items-center gap-2 text-[var(--text-muted)] text-xs">
-                        <Info size={14} />
-                        Click layers to toggle subdivisions and build your own pyramid.
-                    </div>
                 </div>
 
-                <div className="lg:col-span-2 space-y-6">
-                    <div className="bg-[var(--bg-panel)] rounded-3xl p-8 border border-[var(--border-subtle)] shadow-xl relative overflow-hidden">
-                        <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent pointer-events-none" />
+                {/* Control Panel */}
+                <div className="w-full md:w-80 space-y-6 shrink-0">
+                    <div className="bg-white/5 rounded-[32px] p-8 border border-white/5 shadow-xl space-y-8">
+                        <div className="flex flex-col items-center gap-6">
+                            <button
+                                onClick={togglePlay}
+                                className={`w-28 h-28 rounded-full flex items-center justify-center transition-all duration-500 shadow-2xl
+                                    ${isPlaying ? 'bg-red-500 shadow-red-500/20 scale-95' : 'bg-indigo-500 shadow-indigo-500/20 hover:scale-105'}`}
+                            >
+                                {isPlaying ? <Square fill="currentColor" size={32} className="text-white" /> :
+                                    <Play fill="currentColor" size={40} className="text-white ml-2" />}
+                            </button>
 
-                        <div className="flex flex-col gap-8">
-                            <div className="flex items-center gap-6">
-                                <button
-                                    onClick={togglePlay}
-                                    className={`
-                                        w-24 h-24 rounded-full flex items-center justify-center transition-all duration-300 shadow-2xl
-                                        ${isPlaying
-                                            ? 'bg-gradient-to-br from-red-500 to-red-700 text-white shadow-red-900/40 scale-95'
-                                            : 'bg-gradient-to-br from-[var(--accent)] to-indigo-700 text-white shadow-indigo-900/40 hover:scale-105'
-                                        }
-                                    `}
-                                >
-                                    {isPlaying ? <Square fill="currentColor" size={32} /> : <Play fill="currentColor" size={40} className="ml-2" />}
-                                </button>
+                            {/* Metronome Toggle */}
+                            <button
+                                onClick={() => setMetronomeEnabled(!metronomeEnabled)}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all text-[10px] font-black uppercase tracking-widest
+                                    ${metronomeEnabled ? 'bg-indigo-500/20 border-indigo-500/50 text-indigo-400' : 'bg-white/5 border-white/5 text-white/20'}`}
+                            >
+                                <Activity size={14} />
+                                Metronome: {metronomeEnabled ? 'ON' : 'OFF'}
+                            </button>
 
-                                <div className="flex-1 space-y-4">
-                                    <div className="flex justify-between items-center">
-                                        <label className="text-[10px] text-[var(--accent)] uppercase tracking-widest font-bold">Tempo</label>
-                                        <span className="text-xl font-mono text-white">{bpm} <span className="text-sm text-[var(--text-muted)]">BPM</span></span>
-                                    </div>
-                                    <input
-                                        type="range"
-                                        min="30"
-                                        max="180"
-                                        value={bpm}
-                                        onChange={(e) => {
-                                            const val = Number(e.target.value);
-                                            setBpm(val);
-                                            engine.setBpm(val);
-                                        }}
-                                        className="w-full h-2 bg-black/40 rounded-lg appearance-none cursor-pointer accent-[var(--accent)]"
-                                    />
+                            <div className="w-full space-y-4">
+                                <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-indigo-400">
+                                    <span>Global Tempo</span>
+                                    <span className="text-white font-mono text-lg">{bpm}</span>
                                 </div>
+                                <input
+                                    type="range" min="40" max="220" value={bpm}
+                                    onChange={(e) => setCurrentBpm(Number(e.target.value))}
+                                    className="w-full h-1 bg-white/10 rounded-full appearance-none cursor-pointer accent-indigo-500"
+                                />
                             </div>
                         </div>
                     </div>
 
-                    <div className="bg-[var(--bg-panel)] rounded-3xl p-8 border border-[var(--border-subtle)] shadow-xl">
-                        <h3 className="text-sm font-bold text-white mb-6 flex items-center gap-2">
-                            <Zap size={16} className="text-amber-500" />
-                            Pyramid Presets
-                        </h3>
+                    <div className="bg-white/5 rounded-[32px] p-8 border border-white/5 shadow-xl space-y-6">
+                        <h4 className="text-[10px] font-black uppercase tracking-widest text-white/40 flex items-center gap-2">
+                            <Zap size={14} className="text-amber-500" /> Layer Presets
+                        </h4>
                         <div className="grid grid-cols-1 gap-3">
-                            <button
-                                onClick={() => {
-                                    const next = new Set([1, 2, 4]);
-                                    setActiveLayers(next);
-                                    if (isPlaying) {
-                                        [1, 2, 3, 4, 5, 6, 7].forEach(n => engine.toggleLayer(n, next.has(n)));
-                                    }
-                                }}
-                                className="w-full p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition text-left"
-                            >
-                                <div className="text-white font-bold text-sm">Powers of Two</div>
-                                <div className="text-[10px] text-[var(--text-muted)]">1, 2, 4</div>
-                            </button>
-                            <button
-                                onClick={() => {
-                                    const next = new Set([2, 3]);
-                                    setActiveLayers(next);
-                                    if (isPlaying) {
-                                        [1, 2, 3, 4, 5, 6, 7].forEach(n => engine.toggleLayer(n, next.has(n)));
-                                    }
-                                }}
-                                className="w-full p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition text-left"
-                            >
-                                <div className="text-white font-bold text-sm">Hemiola</div>
-                                <div className="text-[10px] text-[var(--text-muted)]">2 vs 3</div>
-                            </button>
-                            <button
-                                onClick={() => {
-                                    const next = new Set([3, 4, 5]);
-                                    setActiveLayers(next);
-                                    if (isPlaying) {
-                                        [1, 2, 3, 4, 5, 6, 7].forEach(n => engine.toggleLayer(n, next.has(n)));
-                                    }
-                                }}
-                                className="w-full p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition text-left"
-                            >
-                                <div className="text-white font-bold text-sm">Odd Textures</div>
-                                <div className="text-[10px] text-[var(--text-muted)]">3, 4, 5</div>
-                            </button>
+                            {[
+                                { name: 'Fundamental', layers: [1, 2, 4], color: 'indigo' },
+                                { name: 'Hemiola (3:2)', layers: [2, 3], color: 'purple' },
+                                { name: 'Septal Drift', layers: [4, 7], color: 'emerald' },
+                            ].map(p => (
+                                <button
+                                    key={p.name}
+                                    onClick={() => setActiveLayers(new Set(p.layers))}
+                                    className="w-full p-4 rounded-2xl bg-white/[0.03] border border-white/5 hover:bg-white/10 transition-all text-left group"
+                                >
+                                    <div className="text-white font-bold text-xs group-hover:text-indigo-400 transition-colors">{p.name}</div>
+                                    <div className="text-[9px] text-white/20 mt-1 uppercase tracking-widest">{p.layers.join(' + ')}</div>
+                                </button>
+                            ))}
                         </div>
-
-                        <button
-                            onClick={handleExport}
-                            className="mt-6 w-full py-4 bg-white/5 border border-white/10 hover:bg-white/10 rounded-2xl text-sm font-bold text-emerald-400 transition-all flex items-center justify-center gap-3 shadow-lg hover:scale-[1.02] active:scale-95 uppercase tracking-widest"
-                        >
-                            <Download size={18} />
-                            Export Active Layers
-                        </button>
                     </div>
                 </div>
             </div>

@@ -282,7 +282,6 @@ export function stop() {
   piano?.releaseAll();
   guitar?.releaseAll();
   bass?.releaseAll();
-  emitVisualization([]);
 }
 
 // Play a single chord immediately or at a scheduled time
@@ -297,9 +296,6 @@ export function playChord(midiNotes: number[], duration = '8n', style: Style = '
     } else {
       piano.triggerAttackRelease(noteNames, duration, time);
     }
-    // Clear visualization after duration
-    const durSec = Tone.Time(duration).toSeconds();
-    setTimeout(() => emitVisualization([]), durSec * 1000);
   }
 }
 
@@ -329,8 +325,6 @@ export function playChordPart(midiNotes: number[], duration = '2n', _type: 'shel
   if (noteNames.length > 0) {
     emitVisualization(validNotes);
     piano.triggerAttackRelease(noteNames, duration);
-    const durSec = Tone.Time(duration).toSeconds();
-    setTimeout(() => emitVisualization([]), durSec * 1000);
   }
 }
 
@@ -351,8 +345,6 @@ export function playSplitBrain(shellNotes: string[] | number[], extensionNotes: 
 
   if (allMidi.length > 0) {
     emitVisualization(allMidi);
-    const durSec = Tone.Time(duration).toSeconds();
-    setTimeout(() => emitVisualization([]), durSec * 1000);
   }
 
   if (shells.length > 0 && shellSynth) {
@@ -473,15 +465,6 @@ export function playProgression(
             emitVisualization(chord.notes);
           }, actualTime);
         }, beatTime);
-
-        // Schedule visual cleanup
-        const cleanTime = beatTime + Tone.Time(config.dur).toSeconds();
-        Tone.Transport.schedule(t => {
-          Tone.Draw.schedule(() => {
-            onActiveNotesChange?.([]);
-            emitVisualization([]);
-          }, t);
-        }, cleanTime);
       });
 
     } else if (style === 'Bossa') {
@@ -492,12 +475,6 @@ export function playProgression(
           emitVisualization(chord.notes);
         }, t);
       }, startSec);
-      Tone.Transport.schedule(t => {
-        Tone.Draw.schedule(() => {
-          onActiveNotesChange?.([]);
-          emitVisualization([]);
-        }, t);
-      }, startSec + Tone.Time('2n').toSeconds());
     } else if (style === 'Guitar') {
       const vel = 0.4 + Math.random() * 0.2;
       noteNames.forEach((name, idx) => {
@@ -510,12 +487,6 @@ export function playProgression(
           }, t);
         }, startSec + strumOffset);
       });
-      Tone.Transport.schedule(t => {
-        Tone.Draw.schedule(() => {
-          onActiveNotesChange?.([]);
-          emitVisualization([]);
-        }, t);
-      }, startSec + Tone.Time('2n').toSeconds());
     } else {
       Tone.Transport.schedule(t => {
         piano?.triggerAttackRelease(noteNames, duration * Tone.Time('4n').toSeconds(), t, 0.5);
@@ -524,12 +495,6 @@ export function playProgression(
           emitVisualization(chord.notes);
         }, t);
       }, startSec);
-      Tone.Transport.schedule(t => {
-        Tone.Draw.schedule(() => {
-          onActiveNotesChange?.([]);
-          emitVisualization([]);
-        }, t);
-      }, startSec + duration * Tone.Time('4n').toSeconds());
     }
 
     // --- BASS ---

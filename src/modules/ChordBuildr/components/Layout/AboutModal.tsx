@@ -2,7 +2,7 @@ import {
   Dialog,
   DialogContent,
   DialogHeader,
-} from "../../components/ui/dialog"
+} from "../../../../components/ui/dialog"
 import { Music, Music2Icon } from "lucide-react"
 
 interface AboutModalProps {
@@ -17,15 +17,15 @@ export function AboutModal({ open, onOpenChange }: AboutModalProps) {
         <DialogHeader className="border-b pb-4">
           <div className=" inset-0" />
         </DialogHeader>
-        
+
         <div className="space-y-4 relative overflow-auto max-h-[60vh] px-4">
           <p className="text-sm text-center">
             Chord Buildr provides an easy way for musicians and music lovers to
             create and share chord progressions.
           </p>
-          
-        <div className="border-t border-border" />
-          
+
+          <div className="border-t border-border" />
+
           <div className="space-y-6">
             <div className="space-y-2">
               <h6 className="text-sm font-semibold flex items-center">
@@ -57,8 +57,8 @@ export function AboutModal({ open, onOpenChange }: AboutModalProps) {
                 open source
               </a>{" "}
               project <br /> by{" "}
-              <a 
-                className="text-primary hover:underline" 
+              <a
+                className="text-primary hover:underline"
                 href="https://www.jacobkrch.com"
               >
                 Jacob Krch
@@ -71,7 +71,7 @@ export function AboutModal({ open, onOpenChange }: AboutModalProps) {
                 Teran Keith
               </a>
             </p>
-            
+
             <p className="text-xs text-muted-foreground !mt-[2em]">
               &copy; 2020-{new Date().getFullYear()} Jacob Krch All Rights Reserved
             </p>

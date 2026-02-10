@@ -12,7 +12,7 @@ export function useModuleNavigation() {
 
     const navigateToEarTraining = useCallback(
         (data: ProgressionData | ChordData, options?: { mode?: string }) => {
-            const link = createDeepLink('ear-training', data as any);
+            const link = createDeepLink('functional-ear-training', data as any);
             const finalLink = options?.mode ? `${link}&exercise=${options.mode}` : link;
 
             if ('chords' in data) {
@@ -32,7 +32,8 @@ export function useModuleNavigation() {
 
     const navigateToChordLab = useCallback(
         (data: ProgressionData) => {
-            const link = createDeepLink('chordlab', data as any);
+            // ChordLab is the index route "/"
+            const link = createDeepLink('', data as any);
             copyProgression(data, 'navigation');
             startSession({ progression: data });
             addGoal({ type: 'construct', description: 'Apply Voicings' });
@@ -43,7 +44,7 @@ export function useModuleNavigation() {
 
     const navigateToChordBuilder = useCallback(
         (data: ChordData) => {
-            const link = createDeepLink('chord-builder', data as any);
+            const link = createDeepLink('chord-buildr', data as any);
             copyChord(data, 'navigation');
             startSession({ chord: data });
             addGoal({ type: 'construct', description: 'Analyze Intervals' });

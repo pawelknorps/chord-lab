@@ -2,7 +2,7 @@ import {
   Dialog,
   DialogContent,
   DialogHeader,
-} from "../../components/ui/dialog"
+} from "../../../../components/ui/dialog"
 
 interface VersionEntry {
   version: string
@@ -10,7 +10,7 @@ interface VersionEntry {
   items: string[]
 }
 
-interface VersionEntryProps extends VersionEntry {}
+interface VersionEntryProps extends VersionEntry { }
 
 interface VersionModalProps {
   open: boolean
@@ -155,7 +155,7 @@ const versionHistory: VersionEntry[] = [
     date: "03.20.2021",
     items: [
       "user chord input with interactive keyboards",
-      "url encoded progressions for sharing", 
+      "url encoded progressions for sharing",
       "synth playback via buttons and chord chart",
       "undo and clear functionality",
       "navigate to chords on chart click",
@@ -188,7 +188,7 @@ export function VersionModal({ open, onOpenChange }: VersionModalProps) {
           <div className="absolute inset-0" />
           <h2 className="text-base font-semibold text-center !-mt-1">change log</h2>
         </DialogHeader>
-        
+
         <div className="space-y-6 overflow-y-auto pr-2 max-h-[60vh] z-30">
           <div className="space-y-4 mr-2">
             {versionHistory.map((entry, index) => (

@@ -26,7 +26,7 @@ const FILTER_CONFIG = [
     {
         key: 'showMinorTwoFiveOne' as keyof AnalysisFilters,
         label: 'iiø-V-i',
-        color: 'purple',
+        color: 'blue',
         description: 'Minor ii-V-i progressions',
     },
     {
@@ -44,7 +44,7 @@ const FILTER_CONFIG = [
     {
         key: 'showColtraneChanges' as keyof AnalysisFilters,
         label: 'Giant Steps',
-        color: 'cyan',
+        color: 'violet',
         description: 'Coltrane changes',
     },
 ];
@@ -98,12 +98,12 @@ export function AnalysisToolbar({
                     {FILTER_CONFIG.map((config) => {
                         const isActive = filters[config.key];
                         const colorClasses = {
-                            emerald: 'bg-emerald-500/20 text-emerald-400 border-emerald-500',
-                            purple: 'bg-purple-500/20 text-purple-400 border-purple-500',
-                            amber: 'bg-amber-500/20 text-amber-400 border-amber-500',
-                            rose: 'bg-rose-500/20 text-rose-400 border-rose-500',
-                            cyan: 'bg-cyan-500/20 text-cyan-400 border-cyan-500',
-                        }[config.color];
+                            emerald: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/50',
+                            blue: 'bg-blue-600/20 text-blue-300 border-blue-500/50',
+                            amber: 'bg-amber-500/20 text-amber-300 border-amber-500/50',
+                            rose: 'bg-rose-600/20 text-rose-300 border-rose-500/50',
+                            violet: 'bg-violet-600/20 text-violet-300 border-violet-500/50',
+                        }[config.color as 'emerald' | 'blue' | 'amber' | 'rose' | 'violet'];
 
                         return (
                             <button
@@ -170,12 +170,12 @@ export function AnalysisToolbar({
                         {FILTER_CONFIG.map((config) => {
                             const isActive = filters[config.key];
                             const colorClasses = {
-                                emerald: 'bg-emerald-500/20 text-emerald-400 border-emerald-500',
-                                purple: 'bg-purple-500/20 text-purple-400 border-purple-500',
-                                amber: 'bg-amber-500/20 text-amber-400 border-amber-500',
-                                rose: 'bg-rose-500/20 text-rose-400 border-rose-500',
-                                cyan: 'bg-cyan-500/20 text-cyan-400 border-cyan-500',
-                            }[config.color];
+                                emerald: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/50',
+                                blue: 'bg-blue-600/20 text-blue-300 border-blue-500/50',
+                                amber: 'bg-amber-500/20 text-amber-300 border-amber-500/50',
+                                rose: 'bg-rose-600/20 text-rose-300 border-rose-500/50',
+                                violet: 'bg-violet-600/20 text-violet-300 border-violet-500/50',
+                            }[config.color as 'emerald' | 'blue' | 'amber' | 'rose' | 'violet'];
 
                             return (
                                 <button

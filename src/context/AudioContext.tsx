@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useRef, useState, useEffect } from 'react';
+import React, { createContext, useContext, useRef, useState, useEffect, useCallback } from 'react';
 import * as Tone from 'tone';
 import { initAudio as initGlobalAudio } from '../core/audio/globalAudio';
 import { audioManager } from '../core/services';
@@ -32,15 +32,39 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         masterVolume.current.volume.rampTo(db, 0.1);
     }, [masterVolumeValue]);
 
-    const startAudio = async () => {
+    const startAudio = useCallback(async () => {
         if (Tone.context.state !== 'running') {
             await Tone.start();
         }
         await initGlobalAudio();
         await audioManager.initialize();
         setIsReady(true);
-        console.log('Audio Engine Started');
-    };
+        console.log('Audio Engine Started/Resumed');
+    }, []);
+
+    // SILENT SENTRY: Prime audio engine on first interaction
+    useEffect(() => {
+        if (isReady) return;
+
+        const handleInteraction = () => {
+            console.log('Interaction detected, priming audio engine...');
+            startAudio();
+            // Remove listeners immediately
+            window.removeEventListener('mousedown', handleInteraction);
+            window.removeEventListener('keydown', handleInteraction);
+            window.removeEventListener('touchstart', handleInteraction);
+        };
+
+        window.addEventListener('mousedown', handleInteraction);
+        window.addEventListener('keydown', handleInteraction);
+        window.addEventListener('touchstart', handleInteraction);
+
+        return () => {
+            window.removeEventListener('mousedown', handleInteraction);
+            window.removeEventListener('keydown', handleInteraction);
+            window.removeEventListener('touchstart', handleInteraction);
+        };
+    }, [isReady, startAudio]);
 
     useEffect(() => {
         return () => {

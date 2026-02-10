@@ -1,5 +1,6 @@
 import * as Tone from 'tone';
 import { useSettingsStore } from '../store/useSettingsStore';
+import { instrumentService, InstrumentName } from './InstrumentService';
 
 type ModuleAudioState = {
     activeNotes: Set<string>;
@@ -21,6 +22,8 @@ export class AudioManager {
             if (this.currentGlobalInstrument !== state.instrument) {
                 this.currentGlobalInstrument = state.instrument;
                 console.log(`AudioManager: Global instrument switched to ${state.instrument}`);
+                // Pre-load the new instrument
+                this.preloadInstrument(state.instrument);
             }
         });
     }
@@ -46,42 +49,43 @@ export class AudioManager {
         if (this.initialized) return;
 
         try {
-            await Tone.start();
+            if (Tone.context.state !== 'running') {
+                await Tone.start();
+            }
             Tone.Transport.bpm.value = 120;
 
-            // Load piano (Salamander)
-            const piano = new Tone.Sampler({
-                urls: {
-                    C4: 'C4.mp3',
-                    'D#4': 'Ds4.mp3',
-                    'F#4': 'Fs4.mp3',
-                    A4: 'A4.mp3',
-                },
-                baseUrl: 'https://tonejs.github.io/audio/salamander/',
-            }).toDestination();
-
-            // Load EPiano (Tines)
-            const epiano = new Tone.Sampler({
-                urls: {
-                    C3: 'C3.mp3',
-                    'D#3': 'Ds3.mp3',
-                    'F#3': 'Fs3.mp3',
-                    A3: 'A3.mp3',
-                },
-                baseUrl: 'https://tonejs.github.io/audio/casio/',
-            }).toDestination();
-
-            // Simple Synth for fallback/lead
-            const synth = new Tone.PolySynth(Tone.Synth).toDestination();
+            // Load default instruments via InstrumentService
+            const [piano, epiano, synth] = await Promise.all([
+                instrumentService.getInstrument('piano-salamander'),
+                instrumentService.getInstrument('epiano-casio'),
+                instrumentService.getInstrument('synth-plumber')
+            ]);
 
             this.instruments.set('piano', piano);
             this.instruments.set('epiano', epiano);
             this.instruments.set('synth', synth);
 
             this.initialized = true;
+            console.log('AudioManager: Initialized with shared instruments');
         } catch (error) {
             console.error('AudioManager initialization failed:', error);
         }
+    }
+
+    private async preloadInstrument(name: string) {
+        const mappedName = this.mapInstrumentName(name);
+        const inst = await instrumentService.getInstrument(mappedName);
+        this.instruments.set(name, inst);
+    }
+
+    private mapInstrumentName(name: string): InstrumentName | string {
+        const mapping: Record<string, string> = {
+            'piano': 'piano-salamander',
+            'epiano': 'epiano-casio',
+            'synth': 'synth-plumber',
+            'guitar-nylon': 'guitar-nylon'
+        };
+        return mapping[name] || name;
     }
 
     getInstrument(name: string = 'piano'): any {
@@ -184,8 +188,6 @@ export class AudioManager {
 
     dispose(): void {
         this.cleanup();
-        this.instruments.forEach(inst => inst.dispose());
-        this.instruments.clear();
         this.initialized = false;
     }
 }

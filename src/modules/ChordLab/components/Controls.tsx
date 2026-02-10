@@ -6,7 +6,9 @@ import {
   Repeat,
   Sliders,
   Target,
-  Download
+  Download,
+  Keyboard,
+  Music
 } from 'lucide-react';
 
 interface ControlsProps {
@@ -34,6 +36,11 @@ interface ControlsProps {
   onMixerToggle: () => void;
   showPracticeTips: boolean;
   onPracticeTipsToggle: () => void;
+  // Visibility Toggles
+  showPiano: boolean;
+  onPianoToggle: (show: boolean) => void;
+  showFretboard: boolean;
+  onFretboardToggle: (show: boolean) => void;
 }
 
 const VOICINGS = ['Root Position', '1st Inversion', '2nd Inversion', 'Open Voicing', 'Drop 2'];
@@ -60,7 +67,11 @@ export function Controls({
   showMixer,
   onMixerToggle,
   showPracticeTips,
-  onPracticeTipsToggle
+  onPracticeTipsToggle,
+  showPiano,
+  onPianoToggle,
+  showFretboard,
+  onFretboardToggle
 }: ControlsProps) {
   return (
     <div className="bg-[var(--bg-panel)] border border-[var(--border-subtle)] rounded-lg p-4 shadow-sm">
@@ -146,6 +157,21 @@ export function Controls({
 
           {/* Secondary Actions */}
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => onPianoToggle(!showPiano)}
+              className={`h-9 w-9 flex items-center justify-center rounded border transition-colors ${showPiano ? 'bg-[var(--accent)] text-white border-[var(--accent)] shadow-[0_0_10px_rgba(var(--accent-rgb),0.3)]' : 'bg-[var(--bg-surface)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
+              title="Toggle Piano"
+            >
+              <Keyboard size={16} />
+            </button>
+            <button
+              onClick={() => onFretboardToggle(!showFretboard)}
+              className={`h-9 w-9 flex items-center justify-center rounded border transition-colors ${showFretboard ? 'bg-[var(--accent)] text-white border-[var(--accent)] shadow-[0_0_10px_rgba(var(--accent-rgb),0.3)]' : 'bg-[var(--bg-surface)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
+              title="Toggle Fretboard"
+            >
+              <Music size={16} />
+            </button>
+            <div className="w-px h-6 bg-[var(--border-subtle)] mx-1"></div>
             <button
               onClick={onPracticeTipsToggle}
               className={`h-9 w-9 flex items-center justify-center rounded border transition-colors ${showPracticeTips ? 'bg-[var(--accent)] text-white border-[var(--accent)]' : 'bg-[var(--bg-surface)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}

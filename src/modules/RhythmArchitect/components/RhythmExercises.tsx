@@ -1,442 +1,318 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { MetronomeEngine } from '../../../utils/rhythmEngine';
 import { PolyrhythmEngine } from '../../../utils/polyrhythmEngine';
-import { Play, RotateCcw, Layers, Activity, Repeat, Trophy, Wind } from 'lucide-react';
-import { useMasteryStore } from '../../../core/store/useMasteryStore';
-import { motion } from 'framer-motion';
+import { Play, Activity, Target, StopCircle, ArrowRight } from 'lucide-react';
+import { useRhythmStore } from '../state/useRhythmStore';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const engine = new MetronomeEngine();
 const polyEngine = new PolyrhythmEngine();
 
-type ExerciseMode = 'Subdivision' | 'Polyrhythm' | 'Dictation';
-type Difficulty = 'Novice' | 'Advanced' | 'Pro';
-
-const POLY_OPTIONS = {
-    Novice: [
-        { a: 3, b: 2, label: '3 against 2' },
-        { a: 2, b: 3, label: '2 against 3' },
-        { a: 3, b: 4, label: '3 against 4' },
-        { a: 4, b: 3, label: '4 against 3' },
-    ],
-    Advanced: [
-        { a: 5, b: 4, label: '5 against 4' },
-        { a: 4, b: 5, label: '4 against 5' },
-        { a: 5, b: 2, label: '5 against 2' },
-        { a: 2, b: 5, label: '2 against 5' },
-        { a: 7, b: 4, label: '7 against 4' },
-        { a: 4, b: 7, label: '4 against 7' },
-    ],
-    Pro: [
-        { a: 5, b: 3, label: '5 against 3' },
-        { a: 3, b: 5, label: '3 against 5' },
-        { a: 7, b: 3, label: '7 against 3' },
-        { a: 3, b: 7, label: '3 against 7' },
-        { a: 7, b: 8, label: '7 against 8' },
-        { a: 11, b: 4, label: '11 against 4' },
-    ]
+const SUB_OPTIONS: Record<string, number[]> = {
+    Novice: [2, 3, 4, 5, 6],
+    Intermediate: [3, 4, 5, 6, 7, 8],
+    Advanced: [5, 6, 7, 8, 9, 10, 11, 12],
+    Pro: [7, 8, 9, 10, 11, 12, 13, 14, 15],
+    Virtuoso: [11, 13, 15, 17, 19, 21, 23, 27, 31]
 };
 
-export default function RhythmExercises() {
-    const { addExperience, updateStreak: updateGlobalStreak } = useMasteryStore();
+const ALL_POLY = [
+    { a: 3, b: 2, label: '3:2' },
+    { a: 2, b: 3, label: '2:3' },
+    { a: 3, b: 4, label: '3:4' },
+    { a: 4, b: 3, label: '4:3' },
+    { a: 5, b: 4, label: '5:4' },
+    { a: 4, b: 5, label: '4:5' },
+    { a: 5, b: 2, label: '5:2' },
+    { a: 7, b: 4, label: '7:4' },
+    { a: 5, b: 3, label: '5:3' },
+    { a: 3, b: 7, label: '3:7' },
+    { a: 7, b: 8, label: '7:8' },
+    { a: 9, b: 4, label: '9:4' },
+    { a: 11, b: 4, label: '11:4' },
+    { a: 13, b: 4, label: '13:4' },
+    { a: 17, b: 4, label: '17:4' },
+    { a: 19, b: 12, label: '19:12' },
+];
+
+const POLY_OPTIONS: Record<string, any[]> = {
+    Novice: ALL_POLY.slice(0, 6),
+    Intermediate: ALL_POLY.slice(0, 9),
+    Advanced: ALL_POLY.slice(2, 12),
+    Pro: ALL_POLY.slice(4, 15),
+    Virtuoso: ALL_POLY
+};
+
+type ExerciseMode = 'Subdivision' | 'Polyrhythm' | 'Dictation';
+
+export default function RhythmArena() {
+    const { difficulty, addScore, streak, bpm: currentBpm, setCurrentBpm, isPlaying, setPlaying, metronomeEnabled, setMetronomeEnabled } = useRhythmStore();
+
     const [exerciseMode, setExerciseMode] = useState<ExerciseMode>('Subdivision');
-    const [difficulty, setDifficulty] = useState<Difficulty>('Novice');
-    const [isPlaying, setIsPlaying] = useState(false);
     const [targetSub, setTargetSub] = useState<number | null>(null);
     const [targetPoly, setTargetPoly] = useState<{ a: number, b: number } | null>(null);
-
-    // Dictation state: 0=Rest, 1=Ghost, 2=Accent
     const [targetDictation, setTargetDictation] = useState<number[]>(new Array(16).fill(0));
     const [userDictation, setUserDictation] = useState<number[]>(new Array(16).fill(0));
-
     const [hasSwing, setHasSwing] = useState(false);
     const [feedback, setFeedback] = useState<{ success: boolean; msg: string } | null>(null);
-    const [score, setScore] = useState(0);
-    const [streak, setStreak] = useState(0);
-    const [currentBpm, setCurrentBpm] = useState(60);
 
-    useEffect(() => {
-        // Reset BPM when difficulty or mode changes
-        if (difficulty === 'Novice') setCurrentBpm(60);
-        else if (difficulty === 'Advanced') setCurrentBpm(80);
-        else setCurrentBpm(100);
-    }, [difficulty, exerciseMode]);
+    const playTimeoutRef = useRef<any>(null);
 
     const startNewQuestion = useCallback(() => {
         setFeedback(null);
-        setIsPlaying(false);
+        setPlaying(false);
         engine.stop();
         polyEngine.stop();
+        if (playTimeoutRef.current) {
+            clearTimeout(playTimeoutRef.current);
+            playTimeoutRef.current = null;
+        }
 
-        // Swing Logic
-        if (difficulty === 'Pro' && exerciseMode !== 'Polyrhythm') {
-            setHasSwing(Math.random() > 0.6);
+        if (difficulty === 'Pro' || difficulty === 'Virtuoso') {
+            setHasSwing(Math.random() > 0.4);
         } else {
             setHasSwing(false);
         }
 
         if (exerciseMode === 'Subdivision') {
-            const maxSub = difficulty === 'Novice' ? 4 : difficulty === 'Advanced' ? 7 : 12;
-            const newSub = Math.floor(Math.random() * maxSub) + 1;
-            setTargetSub(newSub);
-            setTargetPoly(null);
+            const pool = SUB_OPTIONS[difficulty] || SUB_OPTIONS.Novice;
+            setTargetSub(pool[Math.floor(Math.random() * pool.length)]);
         } else if (exerciseMode === 'Polyrhythm') {
-            const pool = POLY_OPTIONS[difficulty];
-            const pick = pool[Math.floor(Math.random() * pool.length)];
-            setTargetPoly({ a: pick.a, b: pick.b });
-            setTargetSub(null);
+            const pool = POLY_OPTIONS[difficulty] || POLY_OPTIONS.Novice;
+            setTargetPoly(pool[Math.floor(Math.random() * pool.length)]);
         } else if (exerciseMode === 'Dictation') {
-            const newPattern = new Array(16).fill(0);
-            // Difficulty logic for pattern generation
-            const density = difficulty === 'Novice' ? 0.3 : difficulty === 'Advanced' ? 0.5 : 0.65;
-
+            const pattern = new Array(16).fill(0);
+            const density = difficulty === 'Novice' ? 0.3 : difficulty === 'Intermediate' ? 0.4 : 0.55;
             for (let i = 0; i < 16; i++) {
-                // Always accent the downbeat (index 0) slightly more likely
-                if (i === 0) {
-                    newPattern[i] = 2; // Accent
-                    continue;
-                }
-
-                // On beats (0, 4, 8, 12)
-                const isBeat = i % 4 === 0;
-
-                const roll = Math.random();
-
-                if (roll < density) {
-                    // Decide if Accent (2) or Ghost (1)
-                    // Novice uses mostly Accents. Advanced uses Ghosts.
-                    let ghostProb = difficulty === 'Novice' ? 0.0 : difficulty === 'Advanced' ? 0.3 : 0.5;
-
-                    if (Math.random() < ghostProb && !isBeat) {
-                        newPattern[i] = 1; // Ghost
-                    } else {
-                        newPattern[i] = 2; // Accent
-                    }
+                if (i === 0 || Math.random() < density) {
+                    pattern[i] = (difficulty !== 'Novice' && Math.random() > 0.75) ? 1 : 2;
                 }
             }
-            setTargetDictation(newPattern);
+            setTargetDictation(pattern);
             setUserDictation(new Array(16).fill(0));
-            setTargetSub(null);
-            setTargetPoly(null);
         }
-    }, [exerciseMode, difficulty]);
+    }, [exerciseMode, difficulty, setPlaying]);
 
     useEffect(() => {
+        // Lowering BPMs for better rhythmic clarity
+        const baseBpm = difficulty === 'Novice' ? 60 : difficulty === 'Intermediate' ? 75 : difficulty === 'Advanced' ? 90 : difficulty === 'Pro' ? 105 : 120;
+        setCurrentBpm(baseBpm);
         startNewQuestion();
         return () => {
             engine.stop();
             polyEngine.stop();
+            if (playTimeoutRef.current) clearTimeout(playTimeoutRef.current);
         };
-    }, [startNewQuestion, exerciseMode, difficulty]);
+    }, [difficulty, exerciseMode, setCurrentBpm, startNewQuestion]);
 
     const playQuestion = () => {
-        setIsPlaying(true);
+        if (isPlaying) {
+            engine.stop();
+            polyEngine.stop();
+            setPlaying(false);
+            if (playTimeoutRef.current) {
+                clearTimeout(playTimeoutRef.current);
+                playTimeoutRef.current = null;
+            }
+            return;
+        }
+
+        setPlaying(true);
         engine.setSwing(hasSwing ? 0.5 : 0);
+        engine.metronomeEnabled = metronomeEnabled;
+        polyEngine.metronomeEnabled = metronomeEnabled;
+
+        const duration = (60 / currentBpm) * 4 * 2 * 1000;
+
+        const onFinish = () => {
+            engine.stop();
+            polyEngine.stop();
+            setPlaying(false);
+            playTimeoutRef.current = null;
+        };
 
         if (exerciseMode === 'Subdivision' && targetSub) {
             engine.setBpm(currentBpm);
             engine.setSubdivision(targetSub);
             engine.start();
-
-            // Calculate play duration: 2 bars
-            const beatDur = 60 / currentBpm;
-            const playDur = beatDur * 4 * 2;
-
-            setTimeout(() => {
-                engine.stop();
-                setIsPlaying(false);
-            }, playDur * 1000);
-
+            playTimeoutRef.current = setTimeout(onFinish, duration);
         } else if (exerciseMode === 'Polyrhythm' && targetPoly) {
             polyEngine.setBpm(currentBpm);
             polyEngine.setDivisions(targetPoly.a, targetPoly.b);
             polyEngine.start();
-
-            const measureDur = (60 / currentBpm) * 4;
-            setTimeout(() => {
-                polyEngine.stop();
-                setIsPlaying(false);
-            }, measureDur * 2 * 1000);
-
+            playTimeoutRef.current = setTimeout(onFinish, duration);
         } else if (exerciseMode === 'Dictation' && targetDictation) {
             engine.setBpm(currentBpm);
-            engine.setSubdivision(4); // 16th grid
+            engine.setSubdivision(4);
             engine.setPattern(targetDictation);
             engine.start();
-
-            const measureDur = (60 / currentBpm) * 4;
-            setTimeout(() => {
-                engine.stop();
-                // engine.setPattern([]); // Don't verify pattern immediately 
-                setIsPlaying(false);
-            }, measureDur * 2 * 1000);
+            playTimeoutRef.current = setTimeout(onFinish, duration);
         }
     };
 
     const handleAnswer = (val: any) => {
-        if (feedback) return;
-
         let isCorrect = false;
-        let correctMsg = '';
-
-        if (exerciseMode === 'Subdivision') {
-            isCorrect = val === targetSub;
-            const labels: any = { 1: 'Quarters', 2: 'Eighths', 3: 'Triplets', 4: 'Sixteenths', 5: 'Quintuplets', 6: 'Sextuplets', 7: 'Septuplets' };
-            correctMsg = `It was ${labels[targetSub!] || targetSub + '-lets'}.`;
-        } else if (exerciseMode === 'Polyrhythm') {
-            isCorrect = val.a === targetPoly?.a && val.b === targetPoly?.b;
-            correctMsg = `It was ${targetPoly?.a} : ${targetPoly?.b}`;
-        } else if (exerciseMode === 'Dictation') {
-            // Compare arrays exactly
-            isCorrect = targetDictation.every((v, i) => v === userDictation[i]);
-            correctMsg = isCorrect ? "Spot on!" : "Pattern mismatch.";
-        }
+        if (exerciseMode === 'Subdivision') isCorrect = val === targetSub;
+        else if (exerciseMode === 'Polyrhythm') isCorrect = val.a === targetPoly?.a && val.b === targetPoly?.b;
+        else if (exerciseMode === 'Dictation') isCorrect = targetDictation.every((v, i) => v === userDictation[i]);
 
         if (isCorrect) {
-            const multiplier = difficulty === 'Novice' ? 1 : difficulty === 'Advanced' ? 3 : 5;
-            const points = (exerciseMode === 'Subdivision' ? 20 : 50) * multiplier;
-            setFeedback({ success: true, msg: 'Perfect! 🎉' });
-            setScore(prev => prev + points);
-            setStreak(prev => prev + 1);
-
-            // Adaptive difficulty: Slightly increase BPM on success to keep it challenging
-            if (currentBpm < 200) setCurrentBpm(prev => prev + 2);
-
-            addExperience('Rhythm', points);
-            updateGlobalStreak('Rhythm', streak + 1);
+            const mult = difficulty === 'Novice' ? 1 : difficulty === 'Intermediate' ? 1.5 : difficulty === 'Advanced' ? 2 : 4;
+            addScore(Math.floor(200 * mult) + streak * 20);
+            setFeedback({ success: true, msg: 'EXACT SYNCHRONIZATION ACHIEVED' });
             setTimeout(startNewQuestion, 2000);
         } else {
-            setFeedback({ success: false, msg: `Not quite! ${correctMsg}` });
-            setStreak(0);
-            updateGlobalStreak('Rhythm', 0);
+            setFeedback({ success: false, msg: 'TIMING DISCREPANCY - TRY AGAIN' });
+            // Don't restart, just show red so user can try another answer
+            setTimeout(() => setFeedback(null), 1500);
         }
-    };
-
-    const toggleDictationStep = (idx: number) => {
-        if (feedback) return;
-        const newD = [...userDictation];
-        // Cycle: 0 -> 2 (Accent) -> 1 (Ghost) -> 0
-        let nextVal = 0;
-        if (newD[idx] === 0) nextVal = 2; // Default to Accent first for easier input
-        else if (newD[idx] === 2) nextVal = 1;
-        else nextVal = 0;
-
-        newD[idx] = nextVal;
-        setUserDictation(newD);
     };
 
     return (
-        <div className="w-full h-full p-6 pb-20 fade-in flex flex-col max-w-7xl mx-auto space-y-6">
-            {/* Header / Stats */}
-            <header className="flex flex-col md:flex-row justify-between items-center bg-[var(--bg-panel)] p-8 rounded-[2rem] border border-[var(--border-subtle)] shadow-2xl gap-8">
-                <div className="flex items-center gap-6">
-                    <div className="p-5 bg-indigo-500/20 text-indigo-400 rounded-2xl ring-1 ring-indigo-500/20 shadow-inner">
-                        <Trophy size={36} />
-                    </div>
-                    <div>
-                        <h2 className="text-3xl font-black text-white tracking-tight">Rhythm Arena</h2>
-                        <div className="flex gap-2 mt-3">
-                            {(['Novice', 'Advanced', 'Pro'] as Difficulty[]).map(d => (
-                                <button
-                                    key={d}
-                                    onClick={() => setDifficulty(d)}
-                                    className={`
-                                        text-[10px] uppercase tracking-widest font-black px-4 py-1.5 rounded-full transition-all border
-                                        ${difficulty === d
-                                            ? 'bg-indigo-500 text-white border-indigo-400 shadow-lg shadow-indigo-900/40'
-                                            : 'bg-white/5 text-[var(--text-muted)] border-white/5 hover:bg-white/10 hover:text-white'}
-                                    `}
-                                >
-                                    {d}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-
-                <div className="flex gap-12">
-                    <div className="text-right">
-                        <div className="text-[10px] text-[var(--accent)] uppercase tracking-widest font-black mb-1">Tempo</div>
-                        <div className="text-3xl font-black text-white font-mono">{currentBpm}</div>
-                    </div>
-                    <div className="text-right">
-                        <div className="text-[10px] text-emerald-400 uppercase tracking-widest font-black mb-1">Score</div>
-                        <div className="text-3xl font-black text-white font-mono">{score}</div>
-                    </div>
-                    <div className="text-right">
-                        <div className="text-[10px] text-amber-500 uppercase tracking-widest font-black mb-1">Streak</div>
-                        <div className="text-3xl font-black text-white font-mono flex items-center gap-2 justify-end">
-                            {streak} <span className="text-lg">🔥</span>
-                        </div>
-                    </div>
+        <div className="flex flex-col items-center gap-8 w-full max-w-5xl fade-in relative z-10 px-4">
+            <header className="text-center space-y-6 w-full">
+                <div className="flex bg-black p-1 rounded-2xl border border-white/5 w-fit mx-auto">
+                    {(['Subdivision', 'Polyrhythm', 'Dictation'] as const).map(m => (
+                        <button
+                            key={m}
+                            onClick={() => { setExerciseMode(m); feedback && startNewQuestion(); }}
+                            className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${exerciseMode === m ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
+                        >
+                            {m}
+                        </button>
+                    ))}
                 </div>
             </header>
 
-            {/* Mode Selector */}
-            <div className="flex justify-center gap-4">
-                {[
-                    { id: 'Subdivision', icon: Layers, color: 'cyan' },
-                    { id: 'Polyrhythm', icon: Activity, color: 'purple' },
-                    { id: 'Dictation', icon: Repeat, color: 'amber' }
-                ].map((m: any) => (
+            <div className="flex flex-col items-center gap-12 py-8">
+                <div className="relative group flex flex-col items-center gap-8">
+                    {/* Metronome Toggle */}
                     <button
-                        key={m.id}
-                        onClick={() => setExerciseMode(m.id as ExerciseMode)}
-                        className={`
-                            flex items-center gap-4 px-10 py-4 rounded-2xl transition-all duration-500 font-bold text-sm tracking-wide border
-                            ${exerciseMode === m.id
-                                ? `bg-${m.color}-500/20 border-${m.color}-500 text-${m.color}-300 shadow-xl shadow-${m.color}-500/10 scale-105`
-                                : 'bg-white/5 text-[var(--text-muted)] border-white/5 hover:bg-white/10 hover:text-white'}
-                        `}
+                        onClick={() => setMetronomeEnabled(!metronomeEnabled)}
+                        className={`z-20 flex items-center gap-2 px-6 py-3 rounded-full border transition-all text-[10px] font-black uppercase tracking-[0.2em] shadow-xl backdrop-blur-md
+                            ${metronomeEnabled ? 'bg-indigo-500/20 border-indigo-500/50 text-indigo-400' : 'bg-white/5 border-white/5 text-white/20'}`}
                     >
-                        <m.icon size={20} />
-                        {m.id}
+                        <Activity size={16} />
+                        Reference Metronome: {metronomeEnabled ? 'ACTIVE' : 'OFF'}
                     </button>
-                ))}
-            </div>
 
-            {/* Game Area */}
-            <div className="flex-1 bg-[var(--bg-panel)] rounded-[3rem] p-12 border border-[var(--border-subtle)] relative overflow-hidden flex flex-col justify-center min-h-[550px] shadow-2xl">
-                <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/[0.03] to-purple-500/[0.03] pointer-events-none" />
+                    <div className="relative">
+                        <motion.div
+                            animate={{
+                                scale: isPlaying ? [1, 1.25, 1] : [1, 1.1, 1],
+                                opacity: isPlaying ? [0.2, 0.4, 0.2] : [0.1, 0.2, 0.1]
+                            }}
+                            transition={{ duration: 1, repeat: Infinity }}
+                            className="absolute -inset-16 bg-indigo-500 rounded-full blur-[80px]"
+                        />
+                        <button
+                            className={`relative w-44 h-44 rounded-full bg-black/80 flex items-center justify-center transition-all border-2 
+                                ${feedback?.success ? 'border-emerald-500 shadow-[0_0_60px_rgba(16,185,129,0.3)]' :
+                                    feedback?.success === false ? 'border-red-500 shadow-[0_0_60px_rgba(239,68,68,0.3)]' :
+                                        isPlaying ? 'border-indigo-400 shadow-[0_0_60px_rgba(99,102,241,0.2)]' :
+                                            'border-white/10 hover:border-white/30'}`}
+                            onClick={playQuestion}
+                        >
+                            {isPlaying ? <StopCircle size={64} className="text-indigo-400 fill-current animate-pulse" /> :
+                                <Play size={64} className="ml-2 text-white fill-current" />}
+                        </button>
+                    </div>
 
-                {/* Progress Bar */}
-                <div className="absolute top-0 left-0 w-full h-2 bg-white/5">
-                    <div className={`h-full bg-gradient-to-r from-indigo-500 via-indigo-400 to-indigo-600 transition-all duration-[1s] linear shadow-[0_0_15px_rgba(99,102,241,0.5)] ${isPlaying ? 'w-full' : 'w-0'}`}
-                        style={{ transitionDuration: isPlaying ? '3s' : '0.3s' }}
-                    />
-                </div>
-
-                <div className="space-y-6 shrink-0 mb-10 text-center">
-                    <h3 className="text-3xl md:text-5xl font-black text-white/90 tracking-tight flex flex-col items-center gap-4 justify-center">
-                        <span className="text-lg font-medium text-white/30 uppercase tracking-widest">Target</span>
-                        {exerciseMode === 'Subdivision' ? 'Identify the Grid' : exerciseMode === 'Polyrhythm' ? 'Identify the Polyrhythm' : 'Transcribe the Pattern'}
-                    </h3>
-
-                    <div className="flex justify-center">
-                        {hasSwing && (
-                            <div className="flex items-center gap-2 text-xs bg-amber-500/10 text-amber-400 px-4 py-2 rounded-full border border-amber-500/20 font-bold uppercase tracking-widest">
-                                <Wind size={14} /> Swing Feel
-                            </div>
-                        )}
+                    <div className="px-6 py-2 bg-black/60 border border-white/10 rounded-full text-[10px] italic uppercase font-black tracking-tighter text-white/40 backdrop-blur-md">
+                        {exerciseMode} • {difficulty} {hasSwing && '• SWING'}
                     </div>
                 </div>
+            </div>
 
-                <div className="flex justify-center mb-16">
-                    <button
-                        onClick={playQuestion}
-                        disabled={isPlaying}
-                        className={`
-                            group w-32 h-32 rounded-full flex items-center justify-center transition-all duration-500
-                            ${isPlaying
-                                ? 'bg-white/10 scale-95 shadow-inner'
-                                : 'bg-gradient-to-br from-indigo-500 to-indigo-600 hover:scale-110 shadow-[0_20px_50px_rgba(79,70,229,0.3)] hover:shadow-[0_20px_60px_rgba(79,70,229,0.5)]'
-                            }
-                        `}
-                    >
-                        {isPlaying ? (
-                            <Activity className="text-white animate-pulse" size={48} />
-                        ) : (
-                            <Play fill="currentColor" size={48} className="text-white ml-2" />
-                        )}
-                    </button>
-                </div>
-
-                {feedback ? (
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className={`flex flex-col items-center gap-8 ${feedback.success ? 'text-emerald-400' : 'text-red-400'}`}
-                    >
-                        <div className="text-6xl font-black tracking-tighter drop-shadow-2xl">{feedback.msg}</div>
-                        {!feedback.success && (
-                            <button
-                                onClick={startNewQuestion}
-                                className="flex items-center gap-3 px-10 py-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl text-white font-bold transition-all hover:scale-105 active:scale-95 shadow-xl"
+            <div className="w-full max-w-4xl mt-8">
+                {exerciseMode === 'Subdivision' && (
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {(SUB_OPTIONS[difficulty] || SUB_OPTIONS.Novice).map(n => (
+                            <motion.button
+                                key={n}
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => handleAnswer(n)}
+                                className="p-8 bg-white/5 border border-white/5 hover:border-indigo-500/50 rounded-3xl transition-all group"
                             >
-                                <RotateCcw size={20} />
-                                Try Next Question
+                                <div className="text-4xl font-black italic tracking-tighter text-white/60 group-hover:text-white">{n}</div>
+                                <div className="text-[10px] uppercase font-bold tracking-[0.2em] text-white/20 mt-2">{n}-lets</div>
+                            </motion.button>
+                        ))}
+                    </div>
+                )}
+
+                {exerciseMode === 'Polyrhythm' && (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {(POLY_OPTIONS[difficulty] || POLY_OPTIONS.Novice).map(opt => (
+                            <motion.button
+                                key={`${opt.a}:${opt.b}`}
+                                whileHover={{ scale: 1.02 }}
+                                onClick={() => handleAnswer(opt)}
+                                className="p-10 bg-white/5 border border-white/5 hover:border-purple-500/50 rounded-[40px] transition-all text-center"
+                            >
+                                <div className="text-5xl font-black italic tracking-tighter text-white mb-2">{opt.a}:{opt.b}</div>
+                                <div className="text-[10px] uppercase font-bold tracking-widest text-white/20">{opt.label}</div>
+                            </motion.button>
+                        ))}
+                    </div>
+                )}
+
+                {exerciseMode === 'Dictation' && (
+                    <div className="space-y-6">
+                        <div className="grid grid-cols-4 md:grid-cols-8 gap-3 p-6 bg-black/40 rounded-[32px] border border-white/5 shadow-2xl">
+                            {userDictation.map((val, idx) => (
+                                <button
+                                    key={idx}
+                                    onClick={() => {
+                                        const next = [...userDictation];
+                                        next[idx] = (next[idx] + 1) % 3; // 0=Rest, 1=Ghost, 2=Accent
+                                        setUserDictation(next);
+                                    }}
+                                    className={`h-20 rounded-2xl transition-all border flex flex-col items-center justify-center gap-2 relative overflow-hidden group
+                                        ${val === 2 ? 'bg-indigo-500/20 border-indigo-400 shadow-[0_0_20px_rgba(99,102,241,0.2)]' :
+                                            val === 1 ? 'bg-white/10 border-white/20' : 'bg-white/5 border-white/5 hover:bg-white/10'}`}
+                                >
+                                    <span className={`text-[8px] font-black uppercase tracking-tighter ${val === 0 ? 'text-white/10' : 'text-white/40'}`}>
+                                        {val === 2 ? 'Accent' : val === 1 ? 'Ghost' : 'Rest'}
+                                    </span>
+                                    <div className={`w-2 h-2 rounded-full ${val === 2 ? 'bg-white shadow-[0_0_10px_white]' : val === 1 ? 'bg-white/40' : 'bg-white/5'}`} />
+                                    <div className="absolute top-1 left-1 text-[7px] font-mono text-white/10">{idx + 1}</div>
+                                </button>
+                            ))}
+                        </div>
+                        <div className="flex gap-4">
+                            <button
+                                onClick={() => setUserDictation(new Array(16).fill(0))}
+                                className="px-6 py-4 bg-white/5 hover:bg-white/10 text-white/40 hover:text-white font-black rounded-2xl transition-all uppercase tracking-widest text-[10px] border border-white/5"
+                            >
+                                Clear
                             </button>
-                        )}
-                    </motion.div>
-                ) : (
-                    <div className="w-full max-w-6xl mx-auto">
-                        {exerciseMode === 'Subdivision' && (
-                            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
-                                    .filter(n => difficulty === 'Novice' ? n <= 4 : difficulty === 'Advanced' ? n <= 8 : true)
-                                    .map((n) => (
-                                        <button
-                                            key={n}
-                                            onClick={() => handleAnswer(n)}
-                                            className="group relative flex flex-col items-center justify-center p-8 bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/20 rounded-3xl transition-all shadow-lg active:scale-95"
-                                        >
-                                            <div className="text-5xl font-black text-white group-hover:text-cyan-300 transition-colors drop-shadow-xl">{n}</div>
-                                            <div className="text-[10px] uppercase tracking-[0.2em] font-black text-white/20 group-hover:text-white/40 mt-3">
-                                                {n === 1 ? 'Whole' : n === 2 ? 'Halves' : n === 3 ? 'Triplets' : n === 4 ? '16ths' : 'Pattern'}
-                                            </div>
-                                        </button>
-                                    ))}
-                            </div>
-                        )}
-
-                        {exerciseMode === 'Polyrhythm' && (
-                            <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-                                {POLY_OPTIONS[difficulty].map((opt: any) => (
-                                    <button
-                                        key={`${opt.a}:${opt.b}`}
-                                        onClick={() => handleAnswer(opt)}
-                                        className="group relative flex flex-col items-center justify-center py-12 bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/20 rounded-[2.5rem] transition-all shadow-xl active:scale-95"
-                                    >
-                                        <div className="text-6xl font-black text-white group-hover:text-purple-300 transition-colors drop-shadow-2xl mb-2">{opt.a}:{opt.b}</div>
-                                        <div className="text-[10px] uppercase tracking-[0.2em] font-black text-white/20 group-hover:text-white/40">{opt.label}</div>
-                                    </button>
-                                ))}
-                            </div>
-                        )}
-
-                        {exerciseMode === 'Dictation' && (
-                            <div className="space-y-12">
-                                <div className="grid grid-cols-4 gap-4 max-w-4xl mx-auto p-8 bg-black/40 rounded-[2.5rem] border border-white/5 shadow-2xl">
-                                    {[0, 1, 2, 3].map(beat => (
-                                        <div key={beat} className="flex gap-2.5">
-                                            {[0, 1, 2, 3].map(sub => {
-                                                const idx = beat * 4 + sub;
-                                                const val = userDictation[idx];
-                                                return (
-                                                    <button
-                                                        key={idx}
-                                                        onClick={() => toggleDictationStep(idx)}
-                                                        className={`
-                                                            flex-1 aspect-[3/4] rounded-xl transition-all duration-300 border
-                                                            ${val === 2
-                                                                ? 'bg-gradient-to-b from-amber-400 to-amber-600 border-amber-300 shadow-[0_0_20px_rgba(245,158,11,0.4)] scale-110 z-10'
-                                                                : val === 1
-                                                                    ? 'bg-white/20 border-white/30'
-                                                                    : 'bg-white/[0.03] border-white/5 hover:border-white/20'}
-                                                        `}
-                                                    >
-                                                        {val === 2 && <div className="w-full h-full flex items-center justify-center"><div className="w-1.5 h-1.5 rounded-full bg-amber-950/40" /></div>}
-                                                    </button>
-                                                )
-                                            })}
-                                        </div>
-                                    ))}
-                                </div>
-                                <div className="flex justify-center gap-6">
-                                    <button
-                                        onClick={() => handleAnswer(userDictation)}
-                                        className="px-16 py-5 bg-indigo-500 hover:bg-indigo-400 text-white font-black rounded-2xl transition-all shadow-[0_15px_40px_rgba(99,102,241,0.4)] hover:scale-105 active:scale-95 uppercase tracking-widest text-xs"
-                                    >
-                                        Analyze Pattern
-                                    </button>
-                                </div>
-                                <p className="text-center text-[10px] text-[var(--text-muted)] uppercase tracking-[0.2em] font-black">
-                                    <span className="text-amber-500">Accent</span> &bull; <span className="text-white/40">Ghost</span> &bull; <span className="text-white/10">Rest</span>
-                                </p>
-                            </div>
-                        )}
+                            <button
+                                onClick={() => handleAnswer(userDictation)}
+                                className="flex-1 py-4 bg-indigo-500/10 hover:bg-indigo-500 text-white font-black rounded-2xl border border-indigo-500/20 hover:border-indigo-400 transition-all uppercase tracking-[0.3em] text-[10px] shadow-xl"
+                            >
+                                ANALZE TEMPORAL PATTERN
+                            </button>
+                        </div>
                     </div>
                 )}
             </div>
+
+            <div className="h-20 flex items-center justify-center">
+                <AnimatePresence>
+                    {feedback && (
+                        <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className={`text-2xl font-black italic flex items-center gap-4 ${feedback.success ? 'text-emerald-400' : 'text-red-400'}`}>
+                            {feedback.success ? <Target className="animate-bounce" /> : <Activity />}
+                            {feedback.msg}
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </div>
+
+            <button onClick={startNewQuestion} className="group flex items-center gap-4 text-white/20 hover:text-white transition-all font-black uppercase text-[10px] tracking-[0.3em] py-4">
+                SKIP SEQUENCE <ArrowRight size={18} className="group-hover:translate-x-2 transition-transform text-indigo-500" />
+            </button>
         </div>
     );
 }
