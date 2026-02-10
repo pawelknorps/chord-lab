@@ -13,45 +13,16 @@ interface AnalysisToolbarProps {
     filters: AnalysisFilters;
     onFiltersChange: (filters: AnalysisFilters) => void;
     totalPatterns: number;
+    orientation?: 'horizontal' | 'vertical';
 }
 
-const FILTER_CONFIG = [
-    {
-        key: 'showMajorTwoFiveOne' as keyof AnalysisFilters,
-        label: 'ii-V-I',
-        color: 'emerald',
-        description: 'Major ii-V-I progressions',
-    },
-    {
-        key: 'showMinorTwoFiveOne' as keyof AnalysisFilters,
-        label: 'iiø-V-i',
-        color: 'purple',
-        description: 'Minor ii-V-i progressions',
-    },
-    {
-        key: 'showSecondaryDominants' as keyof AnalysisFilters,
-        label: 'V/x',
-        color: 'amber',
-        description: 'Secondary dominants',
-    },
-    {
-        key: 'showTritoneSubstitutions' as keyof AnalysisFilters,
-        label: '♭II⁷',
-        color: 'rose',
-        description: 'Tritone substitutions',
-    },
-    {
-        key: 'showColtraneChanges' as keyof AnalysisFilters,
-        label: 'Giant Steps',
-        color: 'cyan',
-        description: 'Coltrane changes',
-    },
-];
+// ... existing config ...
 
 export function AnalysisToolbar({
     filters,
     onFiltersChange,
     totalPatterns,
+    orientation = 'horizontal',
 }: AnalysisToolbarProps) {
     const [isExpanded, setIsExpanded] = useState(true);
 
@@ -72,6 +43,61 @@ export function AnalysisToolbar({
     };
 
     const activeCount = Object.values(filters).filter((v) => v).length;
+
+    if (orientation === 'vertical') {
+        return (
+            <div className="bg-neutral-900/60 backdrop-blur-md border border-white/5 rounded-2xl p-4 w-64 animate-in slide-in-from-left duration-300">
+                <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xs font-black uppercase tracking-widest text-neutral-400 flex items-center gap-2">
+                        <Sparkles size={14} className="text-amber-500" />
+                        Analysis
+                        <span className="text-amber-500">({totalPatterns})</span>
+                    </h3>
+
+                    <button
+                        onClick={toggleAll}
+                        className="p-1.5 hover:bg-white/10 rounded-lg text-neutral-500 hover:text-white transition-colors"
+                        title={activeCount === FILTER_CONFIG.length ? "Hide All" : "Show All"}
+                    >
+                        {activeCount === FILTER_CONFIG.length ? <EyeOff size={14} /> : <Eye size={14} />}
+                    </button>
+                </div>
+
+                <div className="flex flex-col gap-2">
+                    {FILTER_CONFIG.map((config) => {
+                        const isActive = filters[config.key];
+                        const colorClasses = {
+                            emerald: 'bg-emerald-500/20 text-emerald-400 border-emerald-500',
+                            purple: 'bg-purple-500/20 text-purple-400 border-purple-500',
+                            amber: 'bg-amber-500/20 text-amber-400 border-amber-500',
+                            rose: 'bg-rose-500/20 text-rose-400 border-rose-500',
+                            cyan: 'bg-cyan-500/20 text-cyan-400 border-cyan-500',
+                        }[config.color];
+
+                        return (
+                            <button
+                                key={config.key}
+                                onClick={() => toggleFilter(config.key)}
+                                className={`
+                                    w-full flex items-center justify-between
+                                    px-3 py-2 rounded-lg border-2
+                                    text-xs font-bold uppercase tracking-wider
+                                    transition-all active:scale-95 text-left
+                                    ${isActive
+                                        ? `${colorClasses} opacity-100`
+                                        : 'bg-neutral-800 text-neutral-600 border-neutral-700 opacity-40 hover:opacity-100'
+                                    }
+                                `}
+                            >
+                                <span>{config.label}</span>
+                                {isActive && <div className="w-1.5 h-1.5 rounded-full bg-current shadow-[0_0_5px_currentColor]" />}
+                            </button>
+                        );
+                    })}
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="bg-neutral-900/60 backdrop-blur-md border-b border-white/5 px-6 py-3">
