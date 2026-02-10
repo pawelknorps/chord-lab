@@ -603,8 +603,9 @@ export default function JazzKillerModule() {
                             </div>
                         </div>
                     )}
-                )}            </div>
-            
+                </div>
+            )}
+
             {/* Drill Dashboard */}
             {showDrillMode && <DrillDashboard />}
             {showProfilePanel && <ProfilePanel />}
