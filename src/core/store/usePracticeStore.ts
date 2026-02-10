@@ -36,6 +36,7 @@ interface PracticeState {
     // --- Guide Tones ---
     guideTones: Map<number, GuideTone>;
     showGuideTones: boolean;
+    showAnalysis: boolean;
 
     // --- Actions ---
     loadSong: (song: JazzStandard) => void;
@@ -47,6 +48,7 @@ interface PracticeState {
     updateHeatmap: (measureIndex: number, successScore: number) => void;
     incrementBpm: (step?: number) => void;
     toggleGuideTones: () => void;
+    toggleAnalysis: () => void;
 }
 
 export const usePracticeStore = create<PracticeState>((set, get) => ({
@@ -63,6 +65,7 @@ export const usePracticeStore = create<PracticeState>((set, get) => ({
     performanceHeatmap: {},
     guideTones: new Map(),
     showGuideTones: false,
+    showAnalysis: false,
 
     // --- Actions ---
     loadSong: (song: JazzStandard) => {
@@ -188,5 +191,10 @@ export const usePracticeStore = create<PracticeState>((set, get) => ({
     toggleGuideTones: () => {
         set((state) => ({ showGuideTones: !state.showGuideTones }));
         console.log(`🎯 Guide tones ${get().showGuideTones ? 'ON' : 'OFF'}`);
+    },
+
+    toggleAnalysis: () => {
+        set((state) => ({ showAnalysis: !state.showAnalysis }));
+        console.log(`📊 Analysis ${get().showAnalysis ? 'ON' : 'OFF'}`);
     },
 }));

@@ -30,7 +30,7 @@ export default function JazzKillerModule() {
     const { standards, getSongAsIRealFormat } = useJazzLibrary();
 
     // Practice Store integration
-    const { loadSong, detectedPatterns, practiceExercises, activeFocusIndex, showGuideTones, toggleGuideTones } = usePracticeStore();
+    const { loadSong, detectedPatterns, practiceExercises, activeFocusIndex, showGuideTones, toggleGuideTones, showAnalysis, toggleAnalysis } = usePracticeStore();
 
     // Analysis filters
     const [analysisFilters, setAnalysisFilters] = useState<AnalysisFilters>({
@@ -244,6 +244,13 @@ export default function JazzKillerModule() {
                             title="Guide Tones (3rds & 7ths)"
                         >
                             🎯
+                        </button>
+                        <button
+                            onClick={toggleAnalysis}
+                            className={`px-4 py-2 rounded-xl transition-all ${showAnalysis ? 'bg-blue-500 text-black' : 'bg-white/5 hover:bg-white/10 text-white'}`}
+                            title="Analysis Brackets"
+                        >
+                            📊
                         </button>
                         <button
                             onClick={() => setShowMixer(!showMixer)}

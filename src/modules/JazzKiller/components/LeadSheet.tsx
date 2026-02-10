@@ -15,7 +15,7 @@ interface LeadSheetProps {
 export const LeadSheet = ({ song }: LeadSheetProps) => {
     useSignals();
     const activeRef = useRef<HTMLDivElement>(null);
-    const { detectedPatterns, activeFocusIndex, focusOnPattern } = usePracticeStore();
+    const { detectedPatterns, activeFocusIndex, focusOnPattern, showAnalysis } = usePracticeStore();
 
     useEffect(() => {
         // Automatic scroll to active measure (React-based scroll is fine for measure changes)
@@ -57,12 +57,14 @@ export const LeadSheet = ({ song }: LeadSheetProps) => {
                 {/* Analysis Overlay - Visual Brackets */}
                 <div className="relative">
                     <GuideToneOverlay />
-                    <AnalysisOverlay
-                        concepts={detectedPatterns}
-                        measureCount={song.music.measures.length}
-                        onConceptClick={(concept, index) => focusOnPattern(index)}
-                        activeFocusIndex={activeFocusIndex}
-                    />
+                    {showAnalysis && (
+                        <AnalysisOverlay
+                            concepts={detectedPatterns}
+                            measureCount={song.music.measures.length}
+                            onConceptClick={(concept, index) => focusOnPattern(index)}
+                            activeFocusIndex={activeFocusIndex}
+                        />
+                    )}
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-y-0 border-t-2 border-b-2 border-black">
                         {song.music.measures.map((measure: any, index: number) => {
