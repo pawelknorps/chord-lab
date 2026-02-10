@@ -43,6 +43,25 @@
 - **REQ-CL-AI-05**: Use existing LocalAgentService (Gemini Nano); reuse theory core (RomanNumeralAnalyzer, ChordScaleEngine, etc.) for context. No cloud LLM in v1.
 - **REQ-CL-AI-06**: **Make it work**: Chord Lab AI assistant is discoverable and works end-to-end—user can open Smart Lesson, use Progression Assistant chat, ask about the progression, and get coherent answers; loading and error states are clear; Gemini Nano availability (or fallback) is communicated (e.g. banner).
 
+### THEORY-AGENT: Progression Builder (Voice Leading Triplet)
+- **REQ-TA-01**: **Triplet context**: When explaining a chord in context, send Nano a triplet (Previous → Current → Next) with ground truth from Tonal.js (e.g. 7th of G7 → 3rd of Cmaj7).
+- **REQ-TA-02**: **Voice-leading prompt**: Use prompt pattern: "Given the sequence Dm7→G7→Cmaj7 in C Major, explain the movement of the 7th of G7 (F) to the 3rd of Cmaj7 (E)." Nano returns flavor text only; Tonal.js provides the notes.
+
+### EAR-AI: Ear Trainer Contextual Feedback & Feedback Loop
+- **REQ-EAR-01**: **Diagnose error**: When the student misidentifies an interval/chord, compute "Aural Distance" (correct vs guess: semitones, overshot/undershot, common confusions e.g. 4P vs tritone). Implement `diagnoseEarError(correctInterval, userGuess)` using Tonal.js Interval.semitones.
+- **REQ-EAR-02**: **Hint generator**: Pass diagnosis to Nano via `getEarHint(diagnosis)`; Nano returns a **1-sentence hint** on the "vibe" or "character" of the correct interval; **never** give the answer. System prompt: "You are a jazz ear-training coach. Never give the answer. Provide a 1-sentence hint focused on the 'vibe' or 'character' of the interval."
+- **REQ-EAR-03**: **Listen Again UI**: Flow: Play → Guess → "Not quite" + AI Hint (toast/bubble) → Retry (replay) → Success → Update performance heatmap.
+- **REQ-EAR-04**: **Aural mnemonics**: Nano may suggest mnemonics (e.g. "The Simpsons theme" for Tritone) based on the specific mistake.
+- **REQ-EAR-05**: **Error profiling** (v2): If the student consistently overshoots/undershoots, AI can summarize: e.g. "I noticed you're hearing everything a bit sharp today. Let's focus on the 'gravity' of the Perfect 4th."
+
+### RHYTHM-AI: Rhythm Scat Generator
+- **REQ-RHY-01**: **Scat for subdivision**: For a selected rhythm (e.g. "Swing"), ask Nano for a 3-word vocalization or "scat" phrase that matches the subdivision (e.g. "Doo-dah, doo-dah").
+- **REQ-RHY-02**: **Display above metronome**: Show the scat phrase above the metronome so students internalize the "pocket" through language.
+- **REQ-RHY-03**: **Complex rhythm → scat**: For complex syncopated rhythms, use Nano to generate a vocalized scat phrase ("Doo-be-dah") to help internalize time.
+
+### NANO-GUARD: Zero-Shot Context Wrapper
+- **REQ-NANO-08**: **askNano wrapper**: All Nano calls must re-inject ground truth. Implement or use a wrapper: `askNano(context, question)` with systemPrompt "You are a concise Jazz Coach. Limit answers to 15 words." Context must be JSON.stringify(context) from Tonal.js/state; never assume the model remembers the previous chord.
+
 ## v2: Future Considerations (Deferred)
 - **REQ-AI-05**: Persistent User Weakness Map (Track which scales the user fails at).
 - **REQ-AI-06**: Audio-to-AI (Analyze user's incoming MIDI in real-time for mistakes).
