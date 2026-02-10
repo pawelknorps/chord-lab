@@ -108,17 +108,39 @@ export interface PracticeStateSnapshot {
 }
 
 const MAX_CHORDS_IN_PROMPT = 48;
+/** Keep CONTEXT under ~200 tokens for Nano; 4+4 bars is typically enough. */
+const STATE_SLICE_BARS = 8; // current 4 + next 4
+
+/**
+ * Returns chord symbols for a stateless slice: current 4 bars + next 4 bars from startBarIndex.
+ * Use for minimal context when generating theory replies (REQ-NANO-01).
+ */
+export function getStateSlice4Plus4(measures: string[][], startBarIndex: number): string[] {
+  const endBar = Math.min(startBarIndex + STATE_SLICE_BARS, measures.length);
+  const slice = measures.slice(startBarIndex, endBar);
+  return slice.flat().filter(c => c && c.trim() !== '');
+}
 
 /**
  * Build a PracticeContext from the practice store state.
  * Call with usePracticeStore.getState() from the UI.
+ * When a pattern is focused, chordSummary is limited to 4+4 bars around that pattern for token efficiency.
  */
 export function buildPracticeContext(state: PracticeStateSnapshot): PracticeContext | null {
   if (!state.currentSong) return null;
 
   const { title, measures, key } = state.currentSong;
   const flatChords = measures.flat().filter(c => c && c.trim() !== '');
-  const chordSummary = flatChords.slice(0, MAX_CHORDS_IN_PROMPT).join(' | ');
+  const focusedPatternIndex = state.activeFocusIndex;
+  const hasFocusedPattern =
+    focusedPatternIndex !== null &&
+    focusedPatternIndex >= 0 &&
+    focusedPatternIndex < state.detectedPatterns.length;
+  const startBar = hasFocusedPattern ? state.detectedPatterns[focusedPatternIndex!].startIndex : 0;
+  const chordSummary =
+    hasFocusedPattern && state.detectedPatterns[focusedPatternIndex!]
+      ? getStateSlice4Plus4(measures, startBar).join(' | ')
+      : flatChords.slice(0, MAX_CHORDS_IN_PROMPT).join(' | ');
 
   const patterns: PracticeContextPattern[] = state.detectedPatterns.map((p, i) => {
     const exercise = state.practiceExercises[i];
@@ -155,7 +177,6 @@ export function buildPracticeContext(state: PracticeStateSnapshot): PracticeCont
     };
   });
 
-  const focusedPatternIndex = state.activeFocusIndex;
   const focusedPattern =
     focusedPatternIndex !== null && focusedPatternIndex >= 0 && focusedPatternIndex < patterns.length
       ? patterns[focusedPatternIndex]
