@@ -1,87 +1,27 @@
-# Project Vision: Chord Lab - The Incredible Teaching Machine
+# Project Milestone: Codebase Health & Scalability (The Resilient Lab)
 
 ## Vision Statement
-To transform Chord Lab into an **Incredible Teaching Machine** that surpasses iReal Pro by moving from passive playback to active, intelligent coaching. The app will analyze jazz standards in real-time, identify practice hotspots (ii-V-I patterns, turnarounds, etc.), and provide adaptive feedback that turns hours of practice into focused, efficient learning.
-
-## The Three Pillars
-
-### 1. Smart Analysis (The Brain)
-**Beyond Static Playback**: Use Tonal.js to perform Roman numeral analysis on any loaded standard, automatically detecting:
-- Major and Minor ii-V-I progressions
-- Secondary dominants and tritone substitutions
-- Turnarounds and common jazz patterns
-- Modal interchange and advanced harmonic concepts
-
-**Dynamic Exercise Generation**: The app scans the 1,300+ jazz standards and creates targeted exercises:
-- "Practice this ii-V-I in 12 keys"
-- "Focus on the bridge of Cherokee (measures 17-24)"
-- "Drill all dominant alterations in Autumn Leaves"
-
-### 2. Adaptive Practice (The Coach)
-**Focus Loops**: Automatically set Tone.Transport loop points to isolate challenging sections
-- Smart BPM progression: Start at 80, auto-increment on success
-- Pattern drilling: Chain together all ii-V-Is from the database
-- Heatmap visualization: Color-code measures based on student performance
-
-**Guided Routines**:
-- **Bassline Mode**: Highlight roots/fifths, mute other tracks
-- **Shell Voicing Mode**: Show 3rds and 7ths guide tones
-- **Comping Mode**: Visual voicing suggestions with rhythm patterns
-- **Scale Practice**: Context-aware scale recommendations (e.g., "G Altered over V7→Cm")
-
-### 3. Intelligent Feedback (The Tutor)
-**Performance Tracking**:
-- Latency-calibrated rhythm analysis (compensate for web audio delays)
-- Performance heatmap stored per song (LocalStorage)
-- Progressive difficulty adjustment based on success metrics
-
-**Visual Learning Aids**:
-- Ghost playhead showing student timing vs. perfect timing
-- Color-coded chord charts (Green = mastered, Red = needs work)
-- Real-time scale/arpeggio overlays on fretboard/piano
+To mature the Chord-Lab architecture into a truly resilient, performance-oriented modular monolith. We will eliminate technical debt, unify the UI core, and ensure the application remains "fast and fluid" even as we add more complex music-theory modules. Scalability and premium user experience are our North Stars.
 
 ## Core Value Proposition
+- **Shared Foundation**: Eliminate UI duplication between modules by establishing a robust `src/components/ui` layer.
+- **Optimized Performance**: Implement intelligent asset management (especially for audio samples) and refined lazy-loading patterns.
+- **State Clarity**: Standardize the usage of Zustand (Global App State) vs. Signals (High-Frequency Engine State) to reduce complexity-induced bugs.
+- **Resilient UX**: Ensure 100% responsiveness and "zero-jank" transitions between the 12+ experimental labs.
 
-| Feature | iReal Pro | Chord Lab 2026 |
-|---------|-----------|----------------|
-| **Analysis** | None (static charts) | Auto-detects ii-V-I, modulations, patterns |
-| **Practice** | Manual loops only | Smart Focus Loops with auto-BPM progression |
-| **Feedback** | None | Performance Heatmaps, visual timing analysis |
-| **Scale Selection** | Static list | Context-aware suggestions (e.g., "Use Altered here") |
-| **Audio** | General MIDI | High-quality stems with adaptive mixing |
-| **Teaching** | Passive playback | Active coaching with exercise generation |
+## Key Targets
+1. **The UI Core**: Refactor `src/components/ui` to be the single source of truth for all modules.
+2. **Audio Asset Pipeline**: Centralize sample loading and instrument management to prevent duplicate memory usage.
+3. **State Best Practices**: Documentation and refactoring of one core module (likely `ChordLab` or `JazzKiller`) to serve as an architectural blueprint.
+4. **Resiliency Audit**: Fix known bugs in module transitions and playback head timing.
 
-## Technical Architecture
+## Architectural Decisions
+- **Signals vs Zustand**:
+    - **Zustand**: User profiles, global settings, "coarsely" defined session state.
+    - **Signals**: Playback heads, visualizer data, high-frequency theory analysis updates.
+- **Component Pattern**: Modules should import primitives from `src/components/ui` and provide only *arrangement* and *domain-specific* logic.
 
-### Theory Engine (Tonal.js)
-- `@tonaljs/progression`: Roman numeral conversion
-- `@tonaljs/key`: Key detection and modulation tracking  
-- `@tonaljs/chord`: Chord-scale relationship mapping
-
-### State Management (Zustand)
-- `usePracticeStore`: Centralized teaching machine state
-  - Current song and detected patterns
-  - Active focus loops and BPM settings
-  - User latency calibration
-  - Performance heatmap data
-
-### Audio Engine (Tone.js)
-- Sample-accurate loop points for practice drills
-- Dynamic stem mixing (mute piano for comping practice)
-- BPM automation with Transport synchronization
-
-## Out of Scope (v1)
-- Real-time pitch detection (latency issues on web)
-- Full rhythm game mechanics (calibration is complex)
-- Social features / leaderboards
-- Automatic transcription or AI solo generation
-
-## Key Decisions
-
-| Decision | Rationale |
-|----------|-----------|
-| **Tonal.js for Analysis** | Industry standard, modular, minimal overhead |
-| **Calibrated Latency** | Accept web audio latency but compensate via measurement |
-| **Zustand Practice Store** | Decouples audio logic from React, prevents render thrashing |
-| **Progressive Enhancement** | Start with pattern detection, add pitch tracking in v2 |
-| **Focus on ii-V-I** | The DNA of jazz - master this, unlock everything else |
+## Out of Scope
+- Rewriting the entire routing system (we can live with `App.tsx` for now).
+- Adding new music theory logic (unless required to fix existing bugs).
+- Implementing a server-side backend (staying local-first).

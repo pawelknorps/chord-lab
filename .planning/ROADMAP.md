@@ -1,27 +1,20 @@
-# Roadmap: Jazz Education Expansion
+# Roadmap: Codebase Health & Scalability
 
-## Phase 1: Foundation & Analysis Engine
-**Goal**: Build the brain that understands jazz concepts in the existing data.
-- **Step 1**: Create `ConceptAnalyzer` service in `src/core/theory`.
-    - Implement detectors for ii-V-I (Major/Minor).
-    - Implement detectors for Secondary Dominants.
-- **Step 2**: Integrate `ConceptAnalyzer` with the `JazzKiller` (Standards) module.
-- **Step 3**: Define data structures for `AnalysisResult` that map ranges of bars to concepts.
+## Phase 1: Shared UI & Foundational Cleanup
+- **Step 1**: Identify all duplicate UI primitives in modules and consolidate them into `src/components/ui`.
+- **Step 2**: Create the `SharedInstrumentService` to deduplicate audio samples.
+- **Step 3**: Implement a "Performance Monitor" widget for dev mode to track re-renders and audio jank.
 
-## Phase 2: Visualization (Concept Highlighting)
-**Goal**: Show the analysis on the screen.
-- **Step 1**: Refactor `JazzKiller` chart renderer to support "Layers" or "Overlays".
-- **Step 2**: Implement visual brackets/highlights for the `AnalysisResult` ranges.
-- **Step 3**: Create `AnalysisToolbar` to toggle specific concept layers.
+## Phase 2: State Standardisation & Engine Refactor
+- **Step 4**: Audit `useFunctionalEarTrainingStore` and `JazzKiller` state. Move high-freq trackers (playback time, active notes) to Signals.
+- **Step 5**: Standardize the "Audio Lifecycle" across all modules (Start/Stop/Suspend).
+- **Step 6**: Refactor `midiToNoteName` to be globally context-aware based on the active key signal.
 
-## Phase 3: The Learn Panel (Interactive Education)
-**Goal**: Explain the concepts to the user.
-- **Step 1**: Create `LearnPanel` component shell (Slide-over or resizing sidebar).
-- **Step 2**: Create a content registry (Markdown or JSON) with definitions for "ii-V-I", "Secondary Dominant", etc.
-- **Step 3**: Implement "Click-to-Inspect": Clicking a highlight updates the `LearnPanel` state.
+## Phase 3: Responsiveness & UX Polish
+- **Step 7**: Layout audit for all 12 modules. Fix horizontal scrolling on mobile (especially for Piano/Fretboard).
+- **Step 8**: Smooth out lazy-loading transitions with module-specific skeleton loaders.
+- **Step 9**: Resolve high-priority bugs identified in `CONCERNS.md`.
 
-## Phase 4: Guided Practice Routines
-**Goal**: Walk the user through performing the song.
-- **Step 1**: Create `PracticeSession` store/state machine (Idle -> Active -> Finished).
-- **Step 2**: Implement `PracticeOverlay`: A focused view showing only the current target (e.g., "Play Root for Cm7").
-- **Step 3**: Build the "Shells" and "Basslines" routines using the analyzer data (extracting roots/3rds/7ths).
+## Phase 4: Final Validation & Testing
+- **Step 10**: Add Vitest unit tests for the centralized `SharedInstrumentService`.
+- **Step 11**: Perform a full "Module Transition" stress test (switching labs rapidly).

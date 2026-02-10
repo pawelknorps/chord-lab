@@ -1,30 +1,29 @@
-# Requirements: Jazz Education Expansion
+# Requirements: Codebase Health & Scalability
 
-## V1 Requirements (Must-Haves)
+## v1 Milestone: The Resilient Foundation
 
-### Concept Highlighting
-- **REQ-HL-01**: System identifies and visually brackets **ii-V-I** progressions (Major and Minor) in any loaded standard.
-- **REQ-HL-02**: System identifies **Secondary Dominants** (V of V, V of ii, etc.).
-- **REQ-HL-03**: Users can toggle highlighters on/off via a "Theory Layer" menu.
+### UI & UX (UI)
+- **REQ-UI-01**: Consolidate `src/modules/*/components/ui` into `src/components/ui`. Eliminate duplicates (e.g., Select, Slider, Button).
+- **REQ-UI-02**: All 12+ modules must pass a "Responsive Stress Test" (Mobile, Tablet, Desktop).
+- **REQ-UI-03**: Implement a global `AudioInitOverlay` to ensure Tone.js context is resumed gracefully across all modules.
 
-### Learn Panels
-- **REQ-LP-01**: A collapsible sidebar component (`LearnPanel`) available in the main Jazz view.
-- **REQ-LP-02**: Panel displays text content relevant to the currently selected chord or highlighted block.
-- **REQ-LP-03**: "What is this?" feature: Clicking a chord/concept populates the panel with a definition and usage examples.
+### Performance (PERF)
+- **REQ-PERF-01**: Refactor instrument loading (`soundfont-player`, `tonejs-instrument-*`) into a centralized `SharedInstrumentService`.
+- **REQ-PERF-02**: Ensure heavy modules (Tonnetz, ChordBuildr) release WebGL/Audio resources on unmount to prevent leaks.
+- **REQ-PERF-03**: Optimize the index.css and Tailwind 4 bundles for smaller initial LCP.
 
-### Guided Practice
-- **REQ-GP-01**: A "Practice Mode" toggle that simplifies the UI.
-- **REQ-GP-02**: **Bassline Routine**: Highlights root notes, mutes other tracks, prompts user to play roots.
-- **REQ-GP-03**: **Shell Routine**: Highlights 3rd and 7th, prompts user to play shells.
-- **REQ-GP-04**: Progression tracking: Simple "Next" button to advance through chords in the song at user's pace.
+### State & Logic (STATE)
+- **REQ-STATE-01**: Migrate module-level theory analysis (e.g., `chordManager.ts`) to use Preact Signals for real-time UI updates without re-renders.
+- **REQ-STATE-02**: Restrict Zustand to "Serialized State" (Settings, Mastery, User Progress).
 
-## V2 Requirements (Nice-to-Haves)
-- **REQ-HL-04**: Analysis of Tritone Substitutions.
-- **REQ-HL-05**: Analysis of Coltrane Changes.
-- **REQ-GP-05**: MIDI Input Validation (Listen to user playing and auto-advance).
-- **REQ-GP-06**: Rhythmic specific exercises (Charleston rhythm etc.).
-- **REQ-LP-04**: Interactive diagrams inside the Learn Panel (mini-fretboard/piano).
+### Bug Elimination (BUG)
+- **REQ-BUG-01**: Fix "Ghost Playback" bug where audio continues or fails to start during module transitions.
+- **REQ-BUG-02**: Audit all `midiToNoteName` calls for context-aware enharmonic spelling (Major/Minor key awareness).
+
+## v2 / Deferred
+- **REQ-EXT-01**: Full E2E regression suite using Vitest + Playwright.
+- **REQ-EXT-02**: Dynamic Plugin Routing (loading modules from dedicated JSON manifests).
 
 ## Out of Scope
-- Vocal comping.
-- Drum tracks generation beyond basic metronome.
+- Redesigning the core navigation dashboard.
+- Modifying the iReal Pro parsing logic.
