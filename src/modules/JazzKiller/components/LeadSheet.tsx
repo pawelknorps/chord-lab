@@ -65,7 +65,7 @@ export const LeadSheet = ({ song, filteredPatterns }: LeadSheetProps) => {
                             <AnalysisOverlay
                                 concepts={patternsToDisplay}
                                 measureCount={song.music.measures.length}
-                                onConceptClick={(concept, index) => focusOnPattern(index)}
+                                onConceptClick={(_, index) => focusOnPattern(index)}
                                 activeFocusIndex={activeFocusIndex}
                                 gridRef={gridRef}
                             />
