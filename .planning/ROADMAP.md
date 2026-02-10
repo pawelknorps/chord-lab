@@ -21,13 +21,13 @@
 - [x] **Step 9**: Expand UI commands to include visual overlays.
 - **Success Criteria**: User can ask about specific measures and get context-aware answers.
 
-## Phase 4: Polish & Theory Calibration & Nano Hardening 🛠️
-- **Step 10**: Optimize token usage to avoid Nano context overflow.
-- **Step 11**: Add "Theory Validation" prompts to ensure 100% accuracy in interval naming.
+## Phase 4: Polish & Theory Calibration & Nano Hardening ✅
+- [x] **Step 10**: Optimize token usage to avoid Nano context overflow (4+4 slice, comment).
+- [x] **Step 11**: Add "Theory Validation" prompts to ensure 100% accuracy in interval naming (system prompt rule).
 - [x] **Step 12**: Integrated physical Chord/Scale tone verification in prompts.
-- **Step 12b**: **Stateless + Atomic prompts**: State slice (current 4 + next 4 bars), theory grounding (Tonal.js), atomic CONTEXT/TASK/CONSTRAINTS/RESPONSE template; few-shot examples in system prompt; CoT for complex progressions.
-- **Step 12c**: **Guardrails**: Use `temperature: 0.2`, `topK: 3` for theory; periodic `session.destroy()` and fresh sessions.
-- **Step 12d**: **Validator**: Tonal.js validates AI-suggested notes; do not display suggestions outside current scale/chord.
+- [x] **Step 12b**: **Stateless + Atomic prompts**: State slice (current 4 + next 4 bars), theory grounding (Tonal.js), atomic CONTEXT/TASK/CONSTRAINTS/RESPONSE template; few-shot examples in system prompt; CoT for complex progressions.
+- [x] **Step 12c**: **Guardrails**: Use `temperature: 0.2`, `topK: 3` for theory; periodic `session.destroy()` and fresh sessions (LocalAgentService reset after N requests).
+- [x] **Step 12d**: **Validator**: Tonal.js validates AI-suggested notes; do not display suggestions outside current scale/chord (noteValidator.ts; Practice Studio, Chord Lab, JazzKiller SmartLessonPane).
 - **Success Criteria**: AI response time < 2s for complex lookups; theory answers stay on-topic; suggested notes pass Tonal.js validation.
 
 ## Phase 5: AI Drill Actions (Practice Studio)
