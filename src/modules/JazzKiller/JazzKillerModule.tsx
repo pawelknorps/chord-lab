@@ -12,7 +12,9 @@ import {
     pianoReverbSignal,
     reverbVolumeSignal
 } from './state/jazzSignals';
-import { Play, Volume2, Search, X, Target, Music, StopCircle, Sliders, ChevronDown, ChevronUp, Lock } from 'lucide-react';
+import {
+    Play, Volume2, Search, X, Target, Music, StopCircle, Sliders, ChevronDown, ChevronUp, Layers, Zap, Info
+} from 'lucide-react';
 import { SendToMenu } from '../../components/shared/SendToMenu';
 import { useAudioCleanup } from '../../hooks/useAudioManager';
 import { usePracticeStore } from '../../core/store/usePracticeStore';
@@ -442,23 +444,59 @@ export default function JazzKillerModule() {
                                     </div>
                                 </div>
 
-                                {/* Coming Soon */}
-                                <div className="opacity-60 hover:opacity-100 transition-opacity duration-500">
-                                    <div className="flex items-center gap-3 mb-6 px-2">
+                                {/* Features & Quick Start Guide */}
+                                <div className="mt-4">
+                                    <div className="flex items-center gap-3 mb-8 px-2">
                                         <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent flex-1" />
-                                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-neutral-600">Coming Soon</span>
+                                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-neutral-500">Mastering Jazzkiller</span>
                                         <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent flex-1" />
                                     </div>
 
-                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                                        {['Rhythm Changes', 'Giant Steps', 'Stella By Starlight', 'So What'].map((title, i) => (
-                                            <div key={i} className="p-4 rounded-2xl border border-white/5 bg-white/5 flex flex-col items-center justify-center text-center gap-2 group cursor-not-allowed hover:bg-white/10 transition-colors">
-                                                <div className="w-8 h-8 rounded-full bg-black/20 flex items-center justify-center mb-1 group-hover:scale-110 transition-transform">
-                                                    <Lock size={14} className="text-neutral-600" />
-                                                </div>
-                                                <span className="text-xs font-bold text-neutral-400 group-hover:text-neutral-300 transition-colors">{title}</span>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="p-6 rounded-3xl border border-white/5 bg-white/[0.02] flex gap-5 group hover:bg-white/[0.04] transition-all">
+                                            <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                                                <Layers className="text-blue-400" size={24} />
                                             </div>
-                                        ))}
+                                            <div>
+                                                <h4 className="font-bold text-neutral-200 mb-1">Interactive Analysis</h4>
+                                                <p className="text-sm text-neutral-500 leading-relaxed">Toggle the <span className="text-blue-400/80 font-bold italic">Analysis</span> tool to automatically detect <span className="text-neutral-300 underline underline-offset-4 decoration-blue-500/50">ii-V-I progressions</span>, Turnarounds, and secondary dominants in real-time.</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="p-6 rounded-3xl border border-white/5 bg-white/[0.02] flex gap-5 group hover:bg-white/[0.04] transition-all">
+                                            <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                                                <Target className="text-emerald-400" size={24} />
+                                            </div>
+                                            <div>
+                                                <h4 className="font-bold text-neutral-200 mb-1">Guide Tone Roadmap</h4>
+                                                <p className="text-sm text-neutral-500 leading-relaxed">Master soloing with <span className="text-emerald-400/80 font-bold italic">Guide Tones</span>. Visualize the 3rds and 7ths for every chord to build melodic bridges across the changes.</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="p-6 rounded-3xl border border-white/5 bg-white/[0.02] flex gap-5 group hover:bg-white/[0.04] transition-all">
+                                            <div className="w-12 h-12 rounded-2xl bg-amber-500/10 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                                                <Zap className="text-amber-400" size={24} />
+                                            </div>
+                                            <div>
+                                                <h4 className="font-bold text-neutral-200 mb-1">Smart Transpose</h4>
+                                                <p className="text-sm text-neutral-500 leading-relaxed">Practice in all 12 keys. Our engine maintains <span className="text-amber-400/80 font-bold">correct musical spelling</span> (Eb vs D#) based on the tonal center automatically.</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="p-6 rounded-3xl border border-white/5 bg-white/[0.02] flex gap-5 group hover:bg-white/[0.04] transition-all">
+                                            <div className="w-12 h-12 rounded-2xl bg-purple-500/10 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                                                <Sliders className="text-purple-400" size={24} />
+                                            </div>
+                                            <div>
+                                                <h4 className="font-bold text-neutral-200 mb-1">Teaching Machine</h4>
+                                                <p className="text-sm text-neutral-500 leading-relaxed">Select specialized <span className="text-purple-400/80 font-bold italic">Practice Loops</span> to focus on difficult transitions. Use the Mixer to solo the piano or double bass for specific training.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="mt-8 p-4 rounded-2xl border border-amber-500/10 bg-amber-500/5 flex items-center gap-4 text-xs text-amber-500/60 font-medium">
+                                        <Info size={16} className="shrink-0" />
+                                        <span>Pro Tip: Press <span className="px-1.5 py-0.5 rounded bg-black/40 text-amber-500 font-black border border-amber-500/20">SPACE</span> once a standard is loaded to start/stop the backing track immediately.</span>
                                     </div>
                                 </div>
 
