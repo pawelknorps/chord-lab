@@ -19,6 +19,7 @@ import { usePracticeStore } from '../../core/store/usePracticeStore';
 import { AnalysisToolbar, AnalysisFilters } from './components/AnalysisToolbar';
 import { PracticeExercisePanel } from './components/PracticeExercisePanel';
 import { DrillDashboard } from './components/DrillDashboard';
+import { ProfilePanel } from './components/ProfilePanel';
 
 export default function JazzKillerModule() {
     useAudioCleanup('jazz-killer');
@@ -29,6 +30,7 @@ export default function JazzKillerModule() {
     const [showPracticeTips, setShowPracticeTips] = useState(true);
     const [showPracticePanel, setShowPracticePanel] = useState(false);
     const [showDrillMode, setShowDrillMode] = useState(false);
+    const [showProfilePanel, setShowProfilePanel] = useState(false);
     const { standards, getSongAsIRealFormat } = useJazzLibrary();
 
     // Practice Store integration
@@ -272,6 +274,13 @@ export default function JazzKillerModule() {
                             title="ii-V-I Drills"
                         >
                             🎓
+                        </button>
+                        <button
+                            onClick={() => setShowProfilePanel(!showProfilePanel)}
+                            className={`px-4 py-2 rounded-xl transition-all ${showProfilePanel ? 'bg-green-500 text-black' : 'bg-white/5 hover:bg-white/10 text-white'}`}
+                            title="Student Profile"
+                        >
+                            👤
                         </button>
                         <button
                             onClick={() => setShowMixer(!showMixer)}
