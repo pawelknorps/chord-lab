@@ -2,8 +2,10 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useFunctionalEarTrainingStore } from '../../state/useFunctionalEarTrainingStore';
 import { useMasteryStore } from '../../../../core/store/useMasteryStore';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Play, Check, X, ArrowRight, Music, Activity } from 'lucide-react';
+import { Play, Check, X, ArrowRight, Music, Activity, RotateCcw, SkipForward } from 'lucide-react';
 import * as Tone from 'tone';
+import { diagnoseEarError } from '../../utils/earDiagnosis';
+import { getEarHint } from '../../../../core/services/earHintService';
 
 const INTERVALS = [
     { name: 'm2', semitones: 1, label: 'Minor 2nd' },
@@ -28,10 +30,13 @@ export const IntervalsLevel: React.FC = () => {
     const [selectedInterval, setSelectedInterval] = useState<string | null>(null);
     const [result, setResult] = useState<'correct' | 'incorrect' | null>(null);
     const [playMode, setPlayMode] = useState<'melodic' | 'harmonic'>('melodic');
+    const [aiHint, setAiHint] = useState<string | null>(null);
+    const [hintLoading, setHintLoading] = useState(false);
 
     const loadNewChallenge = useCallback(() => {
         setResult(null);
         setSelectedInterval(null);
+        setAiHint(null);
 
         const interval = INTERVALS[Math.floor(Math.random() * INTERVALS.length)];
         const rootMidi = 60; // Middle C
@@ -74,7 +79,7 @@ export const IntervalsLevel: React.FC = () => {
         }, 1500);
     };
 
-    const handleAnswer = (intervalName: string) => {
+    const handleAnswer = useCallback(async (intervalName: string) => {
         if (result === 'correct') return;
         setSelectedInterval(intervalName);
 
@@ -89,12 +94,19 @@ export const IntervalsLevel: React.FC = () => {
         } else {
             setResult('incorrect');
             updateStreak('FET', 0);
-            setTimeout(() => {
-                setResult(null);
-                setSelectedInterval(null);
-            }, 1000);
+            setAiHint(null);
+            setHintLoading(true);
+            const diagnosis = diagnoseEarError(challenge.interval.name, intervalName);
+            try {
+                const hint = await getEarHint(diagnosis);
+                setAiHint(hint);
+            } catch {
+                setAiHint('Listen for the tension and release.');
+            } finally {
+                setHintLoading(false);
+            }
         }
-    };
+    }, [challenge, result, difficulty, streak, addScore, addExperience, updateStreak, loadNewChallenge]);
 
     if (!challenge) return null;
 
@@ -151,7 +163,7 @@ export const IntervalsLevel: React.FC = () => {
                         whileHover={{ scale: 1.02, y: -2 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={() => handleAnswer(interval.name)}
-                        disabled={!!result}
+                        disabled={result === 'correct'}
                         className={`
                             group relative p-6 rounded-3xl border-2 transition-all duration-300
                             ${selectedInterval === interval.name
@@ -168,20 +180,51 @@ export const IntervalsLevel: React.FC = () => {
                 ))}
             </div>
 
-            <div className="h-12 flex items-center justify-center">
-                <AnimatePresence>
-                    {result && (
+            <div className="min-h-[5rem] flex flex-col items-center justify-center gap-3">
+                <AnimatePresence mode="wait">
+                    {result === 'correct' && (
                         <motion.div
+                            key="correct"
                             initial={{ scale: 0.9, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             exit={{ scale: 0.9, opacity: 0 }}
-                            className={`text-2xl font-black italic flex items-center gap-4 ${result === 'correct' ? 'text-emerald-400' : 'text-red-400'}`}
+                            className="text-2xl font-black italic flex items-center gap-4 text-emerald-400"
                         >
-                            {result === 'correct' ? (
-                                <><Activity className="w-6 h-6 animate-pulse" /> SPATIAL FREQUENCY MATCHED</>
-                            ) : (
-                                <><X className="w-6 h-6" /> INTERFERENCE DETECTED</>
-                            )}
+                            <Activity className="w-6 h-6 animate-pulse" /> SPATIAL FREQUENCY MATCHED
+                        </motion.div>
+                    )}
+                    {result === 'incorrect' && (
+                        <motion.div
+                            key="incorrect"
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            className="flex flex-col items-center gap-3 text-center max-w-md"
+                        >
+                            <div className="flex items-center gap-2 text-red-400 font-black italic">
+                                <X className="w-5 h-5" /> Not quite.
+                            </div>
+                            {hintLoading ? (
+                                <span className="text-sm text-white/50">Getting hint...</span>
+                            ) : aiHint ? (
+                                <p className="text-sm text-white/70 italic px-4">{aiHint}</p>
+                            ) : null}
+                            <div className="flex items-center gap-3 mt-1">
+                                <button
+                                    type="button"
+                                    onClick={playAudio}
+                                    className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10 text-white/90 text-xs font-bold uppercase tracking-wider transition-all"
+                                >
+                                    <RotateCcw size={14} /> Listen again
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={loadNewChallenge}
+                                    className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/15 border border-white/10 text-white/60 text-xs font-bold uppercase tracking-wider transition-all"
+                                >
+                                    <SkipForward size={14} /> Skip
+                                </button>
+                            </div>
                         </motion.div>
                     )}
                 </AnimatePresence>
