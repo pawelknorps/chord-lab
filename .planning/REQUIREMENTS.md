@@ -1,29 +1,28 @@
-# v1 Requirements: Jazz Evolution
+# Requirements: Semantic AI Mentor
 
-## Audio & Samples (AUD)
-- **AUD-01**: Refactor `useJazzPlayback` to support multi-sample loading for Piano (`C1-C8`) and Bass (`E1-C5`).
-- **AUD-02**: Implement per-instrument gain and reverb staging to ensure "mix" clarity.
+## v1: Semantic Context & Proactive Advice
 
-## Bass Algorithm (BASS)
-- **BASS-01**: Implement "Ron Carter" walking logic:
-    - Target root on Beat 1.
-    - Chromatic approach from above/below on Beat 4.
-    - Scalaic/Chordal connectivity on Beats 2 and 3.
-- **BASS-02**: Add rhythmic "drops" (octave leaps, triplet ghost notes) at phrase endings.
+### AI-01: Theory Annotation Service
+- **REQ-AI-01-01**: Service must extract functional analysis (II-V-I, V/V, etc.) from `iRealReader` and `Theory` core.
+- **REQ-AI-01-02**: Format data into a "Semantic Block" for the prompt (e.g., `Measure 1: Cmaj7 | I | Release`).
+- **REQ-AI-01-03**: Include "Active Focus" metadata (current drill type and range).
 
-## Piano Algorithm (PIANO)
-- **PIANO-01**: Implement Core Voicing Library:
-    - **A/B Type Rootless Voicings** (3, 5, 7, 9).
-    - **Red Garland Block Chords** (4-way close + octaves).
-    - **Quartal Voicings** (So What chords, 4th stacks).
-- **PIANO-02**: Implement Rhythmic "Interaction" events (syncopated hits, Charleston patterns, Anticipations).
+### AI-02: Proactive Triggers
+- **REQ-AI-02-01**: AI should detect "Pivot Points" (Key changes, Modal Interchanges) and trigger a notification.
+- **REQ-AI-02-02**: Trigger lesson when the user stays on a "Hotspot" (hard measure) for more than 30 seconds.
 
-## Drum Algorithm (DRUMS)
-- **DRUMS-01**: Adaptive Snare/Kick:
-    - Snare "chatter" (ghost notes) on off-beats.
-    - Snare "accents" that mirror Piano rhythmic hits.
-    - Kick "feathering" (consistent low-velocity pulse on 4 on the floor).
+### AI-03: Reactive Chat Sidebar
+- **REQ-AI-03-01**: Implement a persistent sidebar for follow-up questions.
+- **REQ-AI-03-02**: Support "Precision Context" (user selects a bar range, AI analyzes only that).
 
-## System Architecture (SYS)
-- **SYS-01**: Implement a `StyleController` that switches algorithm parameters based on song metadata (Tempo, Jazz style).
-- **SYS-02**: Legacy Fallback: Toggle in UI to switch back to the original simpler algorithm.
+### AI-04: UI Logic Expansion
+- **REQ-AI-04-01**: Support commands: `[[SHOW:SCALE:Dorian]]`, `[[SHOW:AVOID:F]]`, `[[PLAY:LICK]]`.
+- **REQ-AI-04-02**: Voice leading visualization triggered by AI explanation.
+
+## v2: Future Considerations (Deferred)
+- **REQ-AI-05**: Persistent User Weakness Map (Track which scales the user fails at).
+- **REQ-AI-06**: Audio-to-AI (Analyze user's incoming MIDI in real-time for mistakes).
+
+## Out of Scope
+- Real-time video/audio analysis.
+- Generic non-music conversations.

@@ -1,1 +1,7 @@
-{"mode": "Interactive", "depth": "Standard", "parallelization": "Sequential", "commit_docs": true}
+{
+    "mode": "YOLO",
+    "depth": "Standard",
+    "parallelization": "Sequential",
+    "commit_docs": true,
+    "milestone_name": "Semantic AI Mentor"
+}

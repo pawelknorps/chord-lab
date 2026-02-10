@@ -1,32 +1,27 @@
-# Jazz Evolution Roadmap
+# Roadmap: Semantic AI Mentor
 
-## Phase 1: Foundation & High-Quality Audio
-**Success Criteria**: New samples loaded, legacy engine preserved, audio mix improved.
-- [ ] Task 1: Create `useJazzSamples.ts` hook for robust multi-sample loading.
-- [ ] Task 2: Refactor `useJazzPlayback.ts` to separate the "Engine" from the "Playback Loop".
-- [ ] Task 3: Implement the "Legacy Toggle" state.
+## Phase 1: The Semantic Engine (Context Layer)
+*Goal: Provide the AI with rich, annotated music theory data.*
+- **Step 1**: Create `AiContextService.ts` to aggregate theory facts + app state.
+- **Step 2**: Implement "Annotated Markdown" formatter for prompt efficiency.
+- **Step 3**: Re-wire `SmartLessonPane` to use the new Context Service.
+- **Success Criteria**: AI correctly identifies the "Pivot Point" in *Giant Steps* or *Autumn Leaves* consistently.
 
-## Phase 2: The Walking Bass (Ron Carter Style)
-**Success Criteria**: Bass lines feel melodic and connected, moving beyond simple chord tones.
-- [ ] Task 1: Develop `WalkingBassLogic.ts` with chromatic/scale approach strategies.
-- [ ] Task 2: Implement "Ghost Note" and "Triplet Skip" humanization for bass.
+## Phase 2: Proactive Triggers (The Sensei Layer)
+*Goal: AI takes the initiative to help the student.*
+- **Step 4**: Implement "Stay-on-Hotspot" timer to trigger proactive advice.
+- **Step 5**: Create "Pivot Detector" in the Lead Sheet to fire AI alerts when harmonic gravity changes.
+- **Step 6**: Add "AI Assistant" toast notifications for low-friction proactive tips.
+- **Success Criteria**: AI automatically offers a tip when the bridge of a song is reached.
 
-## Phase 3: The Comping Engine (Garland & Hancock)
-**Success Criteria**: Piano plays pro-level voicings with rhythmic awareness.
-- [ ] Task 1: Create `JazzVoicingGenerator.ts` (Rootless, Quartal, Block).
-- [ ] Task 2: Implement rhythmic pattern library (Charleston, Red Garland syncopation).
+## Phase 3: The Interactive Sidebar (Refinement Layer)
+*Goal: Allow the user to drill down and refine AI advice.*
+- **Step 7**: Build the `AiChatPanel` for multi-turn conversations about specific measures.
+- **Step 8**: Implement "Measure Select" context injection (ask about bars 8-12).
+- **Step 9**: Expand UI commands to include visual overlays (Scales/Avoid notes).
+- **Success Criteria**: User can ask "Why is this chord Bb7?" and get a context-aware answer.
 
-## Phase 4: Interactivity & Humanization
-**Success Criteria**: Band feels cohesive (Drums catch Piano hits), micro-timing variations applied.
-- [ ] Task 1: Implement "Event Bus" for instruments to listen to each other.
-- [ ] Task 2: Dynamic Velocity scaling based on tempo and "energy" level.
-
-## Phase 5: UI & Polish
-- [ ] Task 1: Add "Style/Energy" controls to the JazzKiller UI.
-- [ ] Task 2: Final mix balance and performance optimization.
-
----
-## Project State Tracking
-- **Current Phase**: Phase 1
-- **Status**: Initializing
-- **Next Milestone**: Multi-sampled audio engine implementation.
+## Phase 4: Polish & Performance
+- **Step 10**: Optimize token usage to avoid Nano context overflow.
+- **Step 11**: Add "AI Activity" health monitor (is the model thinking? is it stuck?).
+- **Success Criteria**: AI response time < 2s for complex lookups.

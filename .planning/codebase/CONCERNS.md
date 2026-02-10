@@ -1,5 +1,9 @@
 # Concerns & Technical Debt
 
+**Phase 4 (Responsiveness & UX Polish) resolutions**: Horizontal scroll on mobile (Chord Lab Piano/Fretboard and main shell) addressed via `min-w-0`/`max-w-full` on Dashboard outlet and ChordLabDashboard wrapper; lazy-load UX improved with ModuleSkeleton and module-specific fallbacks. See `.planning/phases/04-responsiveness-ux-polish/PRIORITIES.md`.
+
+---
+
 ## Dependencies
 
 - **Bleeding Edge**: React 19 and Tailwind 4 are very new. Documentation and community patterns might be scarce or changing.
@@ -10,7 +14,7 @@
 - **Duplication**: `src/modules` contain their own component libraries (`ChordBuildr/components/ui`) which might duplicate `src/components/ui`. This fragmentation makes consistent design updates harder.
 - **State Complexity**: Mixing Signals and Zustand is powerful but increases cognitive load. Developers need to know when to use which.
 - **Routing & Module Bloat**: The application has a large and growing number of modules (12+). The main router in `App.tsx` handles all of them, which could lead to scalability issues if not managed with deep linking or a more dynamic module loading system.
-- **Lazy Loading Strategy**: While lazy loading is used, there is no explicit prefetching strategy for heavy modules, which may lead to noticeable delays when navigating between different labs.
+- **Lazy Loading Strategy**: While lazy loading is used, there is no explicit prefetching strategy for heavy modules, which may lead to noticeable delays when navigating between different labs. *(Phase 4: ModuleSkeleton + module-specific fallbacks added to reduce perceived jank.)*
 
 ## Performance
 
