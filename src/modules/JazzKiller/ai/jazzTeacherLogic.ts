@@ -3,6 +3,8 @@
  * Supports Chrome Prompt API (window.LanguageModel) and legacy window.ai.languageModel.
  */
 
+import * as Scale from 'tonal-scale';
+
 // --- Gemini Nano session helper (Chrome Prompt API vs legacy window.ai) ---
 
 type SessionLike = { prompt(prompt: string): Promise<string>; destroy(): void };
@@ -192,6 +194,23 @@ export async function generateLessonFromPracticeContext(
     const session = await createGeminiSession(JAZZ_TEACHER_SYSTEM_PROMPT, { temperature: 0.2, topK: 3 });
     if (!session) return 'AI Assistant unavailable. Use Chrome or Edge with Gemini Nano for local lessons.';
 
+    // Stateless atomic path: when focused on a short pattern (1–2 chords), use CONTEXT/TASK/CONSTRAINTS/RESPONSE.
+    if (context.focusedPattern && forFocusedPatternOnly && context.focusedPattern.chords.length >= 1) {
+      const chordSymbol = context.focusedPattern.chords[0];
+      const nextChord = context.focusedPattern.chords[1];
+      const scaleNotes = Scale.notes(context.key, 'major');
+      const atomicPrompt = generateAtomicPrompt({
+        songTitle: context.songTitle,
+        key: context.key,
+        chordSymbol,
+        scaleNotes,
+        nextChord,
+      });
+      const response = await session.prompt(atomicPrompt);
+      session.destroy();
+      return response;
+    }
+
     const patternLines = context.patterns
       .map(
         (p) =>
@@ -240,6 +259,45 @@ TASK: ${task}
     console.error('AI Lesson from context failed:', err);
     return err instanceof Error && err.message ? err.message : 'The teacher is currently deep in a solo. Try again in a second.';
   }
+}
+
+// --- Atomic prompt (stateless, CONTEXT/TASK/CONSTRAINTS/RESPONSE) ---
+
+export interface AtomicTheoryData {
+  songTitle: string;
+  key: string;
+  chordSymbol: string;
+  scaleNotes: string[];
+  nextChord?: string;
+}
+
+/**
+ * Builds an atomic prompt for chord-in-context analysis (Nano stateless pattern).
+ * Use when asking for a short, focused lesson on one chord and its resolution.
+ */
+export function generateAtomicPrompt(theoryData: AtomicTheoryData): string {
+  const { songTitle, key, chordSymbol, scaleNotes, nextChord } = theoryData;
+  const nextLine = nextChord
+    ? `Focus strictly on the transition from ${chordSymbol} to ${nextChord}.`
+    : `Focus on this chord in context.`;
+
+  return `
+### CONTEXT
+SONG: ${songTitle}
+KEY: ${key}
+CURRENT CHORD: ${chordSymbol}
+SCALE DEGREES: ${scaleNotes.join(', ')}
+
+### TASK
+As a jazz tutor, analyze this specific chord in context.
+
+### CONSTRAINTS
+- Answer in 2 short sentences.
+- ${nextLine}
+- Use the provided SCALE DEGREES only.
+
+### RESPONSE
+`.trim();
 }
 
 // --- Original song-based API ---
