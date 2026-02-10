@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import {
     AudioWaveform,
@@ -12,7 +12,9 @@ import {
     ChevronRight,
     Circle,
     Library,
-    Layout
+    Layout,
+    Menu,
+    X
 } from 'lucide-react';
 import { useAudio } from '../../context/AudioContext';
 import { MidiSettings } from '../MidiSettings';
@@ -22,9 +24,33 @@ import { setLanguage } from '../../utils/i18n';
 
 const Dashboard: React.FC = () => {
     const [collapsed, setCollapsed] = useState(false);
+    const [mobileOpen, setMobileOpen] = useState(false);
     const location = useLocation();
     const { isReady } = useAudio();
     const { i18n } = useTranslation();
+
+    // Auto-collapse on small screens
+    useEffect(() => {
+        const handleResize = () => {
+            if (window.innerWidth < 1024) {
+                setCollapsed(true);
+                setMobileOpen(false);
+            } else {
+                setCollapsed(false);
+            }
+        };
+
+        // Initial check
+        handleResize();
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    // Close mobile menu when route changes
+    useEffect(() => {
+        setMobileOpen(false);
+    }, [location.pathname]);
 
     const toggleSidebar = () => setCollapsed(!collapsed);
 
@@ -65,12 +91,23 @@ const Dashboard: React.FC = () => {
 
     return (
         <div className="flex h-screen bg-[var(--bg-app)] text-[var(--text-primary)] font-sans overflow-hidden">
+            {/* Mobile Overlay Backdrop */}
+            {mobileOpen && (
+                <div
+                    className="fixed inset-0 bg-black/50 z-30 lg:hidden"
+                    onClick={() => setMobileOpen(false)}
+                />
+            )}
+
             {/* Sidebar */}
             <aside
                 className={`
-                    relative z-20 flex flex-col border-r border-[var(--border-subtle)] bg-[var(--bg-panel)]
+                    flex flex-col border-r border-[var(--border-subtle)] bg-[var(--bg-panel)]
                     transition-all duration-300 ease-in-out
                     ${collapsed ? 'w-16' : 'w-64'}
+                    lg:relative lg:z-20
+                    fixed z-40 h-full
+                    ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
                 `}
             >
                 {/* Header */}
@@ -139,8 +176,8 @@ const Dashboard: React.FC = () => {
                             <button
                                 onClick={() => setLanguage('en')}
                                 className={`px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded transition-colors ${i18n.language === 'en'
-                                        ? 'bg-[var(--accent)] text-white'
-                                        : 'bg-[var(--bg-surface)] text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+                                    ? 'bg-[var(--accent)] text-white'
+                                    : 'bg-[var(--bg-surface)] text-[var(--text-muted)] hover:text-[var(--text-primary)]'
                                     }`}
                                 title="English"
                             >
@@ -149,8 +186,8 @@ const Dashboard: React.FC = () => {
                             <button
                                 onClick={() => setLanguage('pl')}
                                 className={`px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded transition-colors ${i18n.language === 'pl'
-                                        ? 'bg-[var(--accent)] text-white'
-                                        : 'bg-[var(--bg-surface)] text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+                                    ? 'bg-[var(--accent)] text-white'
+                                    : 'bg-[var(--bg-surface)] text-[var(--text-muted)] hover:text-[var(--text-primary)]'
                                     }`}
                                 title="Polski"
                             >
@@ -168,6 +205,15 @@ const Dashboard: React.FC = () => {
 
             {/* Main Content */}
             <main className="flex-1 flex flex-col bg-[var(--bg-app)] relative overflow-hidden">
+                {/* Mobile Menu Button */}
+                <button
+                    onClick={() => setMobileOpen(true)}
+                    className="lg:hidden fixed top-4 left-4 z-20 p-2 bg-[var(--bg-panel)] border border-[var(--border-subtle)] rounded-lg shadow-lg text-[var(--text-primary)] hover:bg-[var(--bg-surface)] transition-colors"
+                    aria-label="Open menu"
+                >
+                    <Menu size={20} />
+                </button>
+
                 <GlobalSettings />
                 <div className="flex-1 overflow-auto p-0">
                     <Outlet />
