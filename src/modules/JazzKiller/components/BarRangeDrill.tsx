@@ -11,9 +11,8 @@ export function BarRangeDrill() {
 
     if (!currentSong) return null;
 
-    const totalMeasures = currentSong.music.measures.length;
+    const totalMeasures = currentSong.chords?.length || 0;
     const measuresPerRow = 4;
-    const rows = Math.ceil(totalMeasures / measuresPerRow);
 
     const handleMeasureClick = (index: number) => {
         if (!isSelecting) {
@@ -112,8 +111,8 @@ export function BarRangeDrill() {
                             <button
                                 onClick={isDrillActive ? stopDrill : startDrill}
                                 className={`px-6 py-2 rounded-lg font-bold flex items-center gap-2 transition-all ${isDrillActive
-                                        ? 'bg-red-500 hover:bg-red-600'
-                                        : 'bg-blue-500 hover:bg-blue-600'
+                                    ? 'bg-red-500 hover:bg-red-600'
+                                    : 'bg-blue-500 hover:bg-blue-600'
                                     } text-white`}
                             >
                                 {isDrillActive ? (

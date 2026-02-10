@@ -72,7 +72,7 @@ export const usePracticeStore = create<PracticeState>((set, get) => ({
     hotspots: [],
 
     // --- Actions ---
-    loadSong: (song: JazzStandard) => {
+    loadSong: async (song: JazzStandard) => {
         console.log('🎵 Loading song:', song.title);
 
         // Analyze patterns
@@ -89,7 +89,7 @@ export const usePracticeStore = create<PracticeState>((set, get) => ({
         });
 
         // Detect hotspots
-        const { RomanNumeralAnalyzer } = require('../theory/RomanNumeralAnalyzer');
+        const { RomanNumeralAnalyzer } = await import('../theory/RomanNumeralAnalyzer');
         const hotspotData = RomanNumeralAnalyzer.detectHotspots(song.chords, song.key);
         const hotspots = hotspotData.filter((h: any) => h.isHotspot).map((h: any) => h.measureIndex);
 
