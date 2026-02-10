@@ -117,12 +117,25 @@ const Dashboard: React.FC = () => {
                             Chord<span className="text-[var(--text-muted)]">Lab</span>
                         </div>
                     )}
-                    <button
-                        onClick={toggleSidebar}
-                        className="p-1.5 rounded hover:bg-[var(--bg-hover)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-                    >
-                        {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
-                    </button>
+                    <div className="flex items-center gap-2">
+                        {/* Close button for mobile */}
+                        {mobileOpen && (
+                            <button
+                                onClick={() => setMobileOpen(false)}
+                                className="lg:hidden p-1.5 rounded hover:bg-[var(--bg-hover)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                                aria-label="Close menu"
+                            >
+                                <X size={16} />
+                            </button>
+                        )}
+                        {/* Desktop collapse toggle */}
+                        <button
+                            onClick={toggleSidebar}
+                            className="hidden lg:block p-1.5 rounded hover:bg-[var(--bg-hover)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                        >
+                            {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+                        </button>
+                    </div>
                 </div>
 
                 {/* Navigation */}

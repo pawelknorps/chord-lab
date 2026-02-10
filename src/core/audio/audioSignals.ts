@@ -4,6 +4,7 @@ import { signal } from '@preact/signals-react';
 export const isPlayingSignal = signal(false);
 export const currentMeasureIndexSignal = signal(-1);
 export const currentBeatSignal = signal(-1);
+export const bpmSignal = signal(120);
 
 // Volume controls
 export const pianoVolumeSignal = signal(-10);
