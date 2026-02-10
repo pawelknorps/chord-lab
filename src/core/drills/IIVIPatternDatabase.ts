@@ -1,6 +1,5 @@
 import { ConceptAnalyzer } from '../theory/ConceptAnalyzer';
 import type { IIVIPattern } from './IIVIPatternTypes';
-import type { JazzStandard } from '../types/JazzStandard';
 
 export class IIVIPatternDatabase {
     private patterns: IIVIPattern[] = [];
