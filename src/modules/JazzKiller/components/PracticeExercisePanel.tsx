@@ -1,6 +1,41 @@
-import { Target, Play, Check, BookOpen, Lightbulb, GraduationCap } from 'lucide-react';
+import { useState } from 'react';
+import { Target, Play, Check, BookOpen, Lightbulb, GraduationCap, Sparkles } from 'lucide-react';
 import { usePracticeStore } from '../../../core/store/usePracticeStore';
+import { buildPracticeContext, generateLessonFromPracticeContext } from '../ai/jazzTeacherLogic';
+import { validateSuggestedNotes } from '../../../core/services/noteValidator';
+import * as Scale from 'tonal-scale';
 import * as Tone from 'tone';
+
+/** Matches [[DRILL|SET|UI]:ACTION[:PARAM]] - same grammar as SmartLessonPane. */
+const AI_LESSON_COMMAND_REGEX = /\[\[\s*(DRILL|SET|UI)\s*:\s*([^\]\s:]+)\s*(?::\s*([^\]\s]+)\s*)?\]\]/gi;
+
+function parseAndStripAiLessonCommands(lesson: string): { commands: { type: string; action: string; param?: string }[]; strippedText: string } {
+    const commands: { type: string; action: string; param?: string }[] = [];
+    let match;
+    const regex = new RegExp(AI_LESSON_COMMAND_REGEX.source, 'gi');
+    while ((match = regex.exec(lesson)) !== null) {
+        commands.push({
+            type: match[1].toUpperCase(),
+            action: match[2].toUpperCase(),
+            param: match[3]?.trim(),
+        });
+    }
+    const strippedText = lesson.replace(new RegExp(AI_LESSON_COMMAND_REGEX.source, 'gi'), '').trim();
+    return { commands, strippedText };
+}
+
+function executePracticeStudioCommands(commands: { type: string; action: string; param?: string }[]): void {
+    for (const cmd of commands) {
+        const state = usePracticeStore.getState();
+        if (cmd.type === 'SET' && cmd.action === 'BPM' && cmd.param) {
+            const val = parseInt(cmd.param, 10);
+            if (!Number.isNaN(val)) {
+                state.setBpm(Math.max(40, Math.min(300, val)));
+            }
+        }
+        // DRILL:SPOTLIGHT auto-trigger removed for now; SET:KEY/TRANSPOSE not wired yet
+    }
+}
 
 const PATTERN_COLORS: Record<string, string> = {
     'MajorII-V-I': 'border-emerald-500/50 bg-emerald-500/10 text-emerald-300',
@@ -67,6 +102,45 @@ export function PracticeExercisePanel() {
         clearFocus,
     } = usePracticeStore();
 
+    const [aiLessonResult, setAiLessonResult] = useState<string | null>(null);
+    const [aiLessonLoading, setAiLessonLoading] = useState(false);
+
+    const handleGetAiLesson = async () => {
+        const state = usePracticeStore.getState();
+        const context = buildPracticeContext({
+            currentSong: state.currentSong,
+            detectedPatterns: state.detectedPatterns,
+            practiceExercises: state.practiceExercises,
+            guideTones: state.guideTones,
+            activeFocusIndex: state.activeFocusIndex,
+            hotspots: state.hotspots,
+        });
+        if (!context) {
+            setAiLessonResult('Load a tune first to get an AI lesson.');
+            return;
+        }
+        setAiLessonLoading(true);
+        setAiLessonResult(null);
+        try {
+            const rawLesson = await generateLessonFromPracticeContext(context, {
+                forFocusedPatternOnly: activeFocusIndex !== null,
+            });
+            const { commands, strippedText } = parseAndStripAiLessonCommands(rawLesson);
+            executePracticeStudioCommands(commands);
+            const scaleNotes = Scale.notes(context.key, 'major');
+            const validated = validateSuggestedNotes(strippedText, {
+                key: context.key,
+                scaleNotes,
+                chordSymbol: context.focusedPattern?.chords[0],
+            });
+            setAiLessonResult(validated);
+        } catch (e) {
+            setAiLessonResult('Could not get lesson. Try again.');
+        } finally {
+            setAiLessonLoading(false);
+        }
+    };
+
     if (detectedPatterns.length === 0) {
         return (
             <div className="w-full bg-neutral-900/40 backdrop-blur-md border border-white/5 rounded-3xl p-8 flex flex-col items-center justify-center text-center">
@@ -97,15 +171,33 @@ export function PracticeExercisePanel() {
                             </p>
                         </div>
                     </div>
-                    {activeFocusIndex !== null && (
+                    <div className="flex items-center gap-2">
                         <button
-                            onClick={clearFocus}
-                            className="text-[10px] font-black uppercase tracking-widest px-3 py-2 bg-white/5 hover:bg-white/10 rounded-xl transition-all text-neutral-400 hover:text-white border border-white/5"
+                            onClick={handleGetAiLesson}
+                            disabled={aiLessonLoading}
+                            className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest px-3 py-2 bg-amber-500/20 hover:bg-amber-500/30 rounded-xl transition-all text-amber-300 hover:text-amber-200 border border-amber-500/30 disabled:opacity-50"
                         >
-                            Reset Focus
+                            <Sparkles size={14} />
+                            {aiLessonLoading ? '…' : 'Get AI lesson'}
                         </button>
-                    )}
+                        {activeFocusIndex !== null && (
+                            <button
+                                onClick={clearFocus}
+                                className="text-[10px] font-black uppercase tracking-widest px-3 py-2 bg-white/5 hover:bg-white/10 rounded-xl transition-all text-neutral-400 hover:text-white border border-white/5"
+                            >
+                                Reset Focus
+                            </button>
+                        )}
+                    </div>
                 </div>
+                {aiLessonResult && (
+                    <div className="mt-4 p-4 rounded-2xl bg-black/30 border border-amber-500/20 text-sm text-neutral-200 whitespace-pre-wrap">
+                        <div className="flex items-center gap-2 mb-2 text-[10px] font-black uppercase tracking-wider text-amber-400">
+                            <Sparkles size={12} /> AI lesson
+                        </div>
+                        {aiLessonResult}
+                    </div>
+                )}
             </div>
 
             {/* Pattern List */}

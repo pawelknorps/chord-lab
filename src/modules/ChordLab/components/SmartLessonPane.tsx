@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { X, BookOpen, AlertTriangle, Zap, MessageCircle, Mic, Play, Send } from 'lucide-react';
 import { localAgent } from '../../../core/services/LocalAgentService';
 import { buildProgressionBundle, buildChordLabPrompt, stripCommandTokens } from '../../../core/services/progressionContext';
+import { validateSuggestedNotes } from '../../../core/services/noteValidator';
+import * as Scale from 'tonal-scale';
 
 interface ChatMessage {
     role: 'user' | 'assistant';
@@ -121,7 +123,9 @@ export function SmartLessonPane({
                 result = result.replace(fullMatch, '').trim();
             }
 
-            setAgentResponse(result);
+            const scaleNotes = Scale.notes(key, 'major');
+            const validated = validateSuggestedNotes(result, { key, scaleNotes });
+            setAgentResponse(validated);
         } catch (e: any) {
             setAgentResponse(e?.message ? `Agent Error: ${e.message}` : 'Could not get lesson. Try again.');
         } finally {
@@ -143,7 +147,9 @@ export function SmartLessonPane({
             const prompt = buildChordLabPrompt(bundle, text, chatMessages);
             const raw = await localAgent.ask(prompt);
             const cleaned = stripCommandTokens(raw);
-            setChatMessages((prev) => [...prev, { role: 'assistant', content: cleaned }]);
+            const scaleNotes = Scale.notes(key, 'major');
+            const validated = validateSuggestedNotes(cleaned, { key, scaleNotes });
+            setChatMessages((prev) => [...prev, { role: 'assistant', content: validated }]);
         } catch (e: unknown) {
             const errMsg = e instanceof Error ? e.message : 'Agent unavailable. Try again or add chords for context.';
             setChatMessages((prev) => [...prev, { role: 'assistant', content: `Error: ${errMsg}` }]);
