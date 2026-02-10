@@ -15,6 +15,7 @@ interface LeadSheetProps {
 export const LeadSheet = ({ song, filteredPatterns }: LeadSheetProps) => {
     useSignals();
     const activeRef = useRef<HTMLDivElement>(null);
+    const gridRef = useRef<HTMLDivElement>(null);
     const { detectedPatterns, activeFocusIndex, focusOnPattern, showAnalysis } = usePracticeStore();
 
     const patternsToDisplay = filteredPatterns || detectedPatterns;
@@ -58,16 +59,7 @@ export const LeadSheet = ({ song, filteredPatterns }: LeadSheetProps) => {
 
                 {/* Analysis Overlay - Visual Brackets */}
                 <div className="relative">
-                    {showAnalysis && (
-                        <AnalysisOverlay
-                            concepts={patternsToDisplay}
-                            measureCount={song.music.measures.length}
-                            onConceptClick={(concept, index) => focusOnPattern(index)}
-                            activeFocusIndex={activeFocusIndex}
-                        />
-                    )}
-
-                    <div ref={activeRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-y-0 border-t-2 border-b-2 border-black relative">
+                    <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-y-0 border-t-2 border-b-2 border-black relative">
                         {/* Analysis Overlay Needs Access to Grid */}
                         {showAnalysis && (
                             <AnalysisOverlay
@@ -75,7 +67,7 @@ export const LeadSheet = ({ song, filteredPatterns }: LeadSheetProps) => {
                                 measureCount={song.music.measures.length}
                                 onConceptClick={(concept, index) => focusOnPattern(index)}
                                 activeFocusIndex={activeFocusIndex}
-                                gridRef={activeRef}
+                                gridRef={gridRef}
                             />
                         )}
 
