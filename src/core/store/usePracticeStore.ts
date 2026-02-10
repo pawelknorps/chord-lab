@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import * as Tone from 'tone';
 import { ConceptAnalyzer } from '../theory/ConceptAnalyzer';
 import { GuideToneCalculator } from '../theory/GuideToneCalculator';
-import type { AnalysisResult, Concept } from '../theory/AnalysisTypes';
+import type { Concept } from '../theory/AnalysisTypes';
 import type { GuideTone } from '../theory/GuideToneTypes';
 
 interface PracticeExercise {
@@ -34,7 +34,7 @@ interface PracticeState {
     performanceHeatmap: Record<number, number>;
 
     // --- Guide Tones ---
-    guideTones: Map<number, GuideTone>;
+    guideTones: Map<number, GuideTone[]>;
     showGuideTones: boolean;
     showAnalysis: boolean;
     showRomanNumerals: boolean;
@@ -80,11 +80,12 @@ export const usePracticeStore = create<PracticeState>((set, get) => ({
         const exercises = ConceptAnalyzer.generateExercises(analysisResult, song.chords);
 
         // Calculate guide tones
-        const guideTones = new Map<number, GuideTone>();
-        song.chords.forEach((chord, index) => {
-            if (chord && chord !== '') {
-                const gt = GuideToneCalculator.calculate(chord);
-                if (gt) guideTones.set(index, gt);
+        const guideTones = new Map<number, GuideTone[]>();
+        song.chords.forEach((chordString, index) => {
+            if (chordString && chordString !== '') {
+                // Now supports multiple chords per measure
+                const gts = GuideToneCalculator.calculateMeasure(chordString);
+                if (gts.length > 0) guideTones.set(index, gts);
             }
         });
 

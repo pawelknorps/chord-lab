@@ -107,14 +107,18 @@ export const LeadSheet = ({ song, filteredPatterns }: LeadSheetProps) => {
                                     )}
 
                                     {/* Guide Tones (Inline) */}
-                                    {showGuideTones && gt && (
-                                        <div className="flex gap-1.5 text-xs md:text-sm font-bold justify-center items-center mb-1 md:mb-2 z-10 transition-opacity duration-200">
-                                            <span className="text-emerald-600 bg-emerald-50/90 px-2 py-0.5 rounded-md shadow-sm border border-emerald-200/50 backdrop-blur-sm" title="3rd">
-                                                {gt.third}
-                                            </span>
-                                            <span className="text-blue-600 bg-blue-50/90 px-2 py-0.5 rounded-md shadow-sm border border-blue-200/50 backdrop-blur-sm" title="7th">
-                                                {gt.seventh}
-                                            </span>
+                                    {showGuideTones && gt && gt.length > 0 && (
+                                        <div className="flex gap-3 justify-center items-center mb-1 md:mb-2 z-10 transition-opacity duration-200">
+                                            {gt.map((tone: any, i: number) => (
+                                                <div key={i} className="flex gap-1.5 text-xs md:text-sm font-bold items-center">
+                                                    <span className="text-emerald-600 bg-emerald-50/90 px-2 py-0.5 rounded-md shadow-sm border border-emerald-200/50 backdrop-blur-sm" title="3rd">
+                                                        {tone.third}
+                                                    </span>
+                                                    <span className="text-blue-600 bg-blue-50/90 px-2 py-0.5 rounded-md shadow-sm border border-blue-200/50 backdrop-blur-sm" title="7th">
+                                                        {tone.seventh}
+                                                    </span>
+                                                </div>
+                                            ))}
                                         </div>
                                     )}
 

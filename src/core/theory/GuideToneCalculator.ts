@@ -60,4 +60,12 @@ export class GuideToneCalculator {
             return null;
         }
     }
+
+    static calculateMeasure(measureContent: string | string[]): GuideTone[] {
+        const chords = Array.isArray(measureContent)
+            ? measureContent
+            : measureContent.split(/[\s,]+/).filter(c => c && c.length > 0);
+
+        return chords.map(chord => this.calculate(chord)).filter((gt): gt is GuideTone => gt !== null);
+    }
 }
