@@ -56,6 +56,18 @@ export default function JazzKillerModule() {
         totalLoopsSignal
     } = useJazzPlayback(selectedSong);
 
+    // Scan standards for ii-V-I patterns on mount
+    useEffect(() => {
+        const scanPatterns = async () => {
+            const { patternDatabase } = await import('../../core/drills/IIVIPatternDatabase');
+            await patternDatabase.scanStandards(standards);
+        };
+
+        if (standards.length > 0) {
+            scanPatterns();
+        }
+    }, [standards]);
+
     // Track last analyzed song to prevent infinite loops
     const lastAnalyzedSongRef = useRef<string | null>(null);
 
