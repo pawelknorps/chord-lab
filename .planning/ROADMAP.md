@@ -54,3 +54,12 @@
 - [ ] **Step 23**: **Rhythm Scat**: For selected rhythm (e.g. Swing), ask Nano for a 3-word vocalization/scat phrase (e.g. "Doo-dah, doo-dah"); display above metronome. For complex syncopated rhythms, generate scat phrase to internalize time.
 - [ ] **Step 24**: **askNano guardrail**: Ensure all Nano calls use Zero-Shot Context wrapper—re-inject ground truth (JSON from Tonal.js/state); system prompt "Concise Jazz Coach. Limit 15 words" where applicable.
 - **Success Criteria**: Ear Trainer wrong answers show AI hint (no answer); student can retry after hint. Rhythm Trainer shows scat phrase above metronome for selected subdivision. No Nano call assumes prior context.
+
+## Phase 8: Universal Microphone Handler (App-Wide)
+*Goal: Single app-wide mic pipeline that analyses what the student is playing (pitch/notes) or clapping (beat/tempo) so any module can consume it.*
+- [ ] **Step 25**: **Central mic service**: Implement app-wide microphone service (e.g. `MicrophoneService` or Zustand slice + `useMicrophone`) that owns `getUserMedia`, stream lifecycle, and "is active" state; expose start/stop and permission handling.
+- [ ] **Step 26**: **Playing analysis**: Integrate pitch/note onset detection into the service (reuse or generalize BiTonal/ml5 path); expose pitch/MIDI events (and optional confidence) for consumers.
+- [ ] **Step 27**: **Clapping analysis**: Add beat/onset detection and tempo estimation (e.g. BPM, subdivision) from mic input; expose beat events and tempo for consumers.
+- [ ] **Step 28**: **Modes and subscription**: Support "pitch" and "rhythm" modes (or combined); allow modules to subscribe to pitch events and/or beat/tempo events.
+- [ ] **Step 29**: **Migration and integration**: Migrate BiTonal Sandbox to use the shared mic service; wire at least one other module (e.g. Rhythm Architect for clap-tempo or Ear Trainer for play-back).
+- **Success Criteria**: One mic permission and one stream for the app; at least two modules use the handler (e.g. BiTonal + Rhythm or Ear); playing yields pitch/notes, clapping yields beat/tempo.

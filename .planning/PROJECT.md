@@ -130,8 +130,39 @@ Nano can still suggest wrong notes. Use **Tonal.js as validator**: if the model 
 | **Validator** | Tonal.js validates AI-suggested notes; suggestions outside scale/chord are not shown. | [Decided] |
 | **Nano as Metadata Generator** | Use Nano to narrate Tonal.js ground truth (flavor, hints, scat); not as long-form chat. | [Decided] |
 
+## Universal Microphone Handler (New Initiative)
+
+**Goal**: App-wide universal microphone handler that analyses what the student is **playing** (instrument → pitch/notes, rhythm) or **clapping** (hands → beat, tempo, subdivision) so any module can consume live mic input for feedback.
+
+### Vision
+
+A single, app-wide mic pipeline that modules (Chord Lab, JazzKiller, Ear Trainer, Rhythm Architect, BiTonal Sandbox, etc.) can subscribe to. The handler provides **two analysis modes** (or combined): (1) **Playing** — pitch/note onset, optional chord recognition; (2) **Clapping** — beat/tempo, rhythm pattern, subdivision. One permission grant, one stream; multiple consumers via a shared service.
+
+### Value
+
+- **Single permission, single stream**: User grants mic once; all modules use the same handler (no duplicate `getUserMedia` per screen).
+- **Reuse existing work**: BiTonal Sandbox already uses `getUserMedia` + pitch (e.g. ml5); extract and generalize into a core service.
+- **Rhythm from claps**: Beat/tempo and subdivision from hand claps for Rhythm Architect and metronome alignment.
+- **Extensible**: Future modules can request "pitch only", "rhythm only", or "both" without re-opening the mic.
+
+### Scope (High-Level)
+
+- **In scope**: Central mic service (e.g. `MicrophoneService` or `useMicrophone`), permission and stream lifecycle, pitch/note analysis for "playing", beat/onset analysis for "clapping", optional integration in 1–2 modules (e.g. Rhythm Architect for clap-tempo, Ear Trainer or Chord Lab for play-back).
+- **Out of scope for v1**: Full chord recognition from mic, multi-instrument classification, recording/playback of mic audio, offline processing.
+
+### Key Decisions (To Be Locked in Phase Plan)
+
+| Decision | Options | Status |
+| :--- | :--- | :--- |
+| **Service shape** | Zustand slice + hook vs React context vs plain singleton. | TBD |
+| **Pitch source** | Reuse ml5/CREPE (BiTonal) vs Web Audio AnalyserNode + simple pitch vs external lib. | TBD |
+| **Rhythm/clap** | Onset detection (Web Audio / energy threshold) vs dedicated beat-tracking lib. | TBD |
+| **Module consumers** | Which modules get wired first (Rhythm, Ear, Chord Lab, JazzKiller). | TBD |
+
+---
+
 ## Out of Scope
 
 - Cloud-based LLM calls (OpenAI/Anthropic) for this milestone.
 - Multi-user "Learning Memory" sync.
-- Real-time audio/MIDI analysis in Chord Lab for v1.
+- Real-time audio/MIDI analysis in Chord Lab for v1 (separate from universal mic handler).

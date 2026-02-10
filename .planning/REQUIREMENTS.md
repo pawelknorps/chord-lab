@@ -62,10 +62,19 @@
 ### NANO-GUARD: Zero-Shot Context Wrapper
 - **REQ-NANO-08**: **askNano wrapper**: All Nano calls must re-inject ground truth. Implement or use a wrapper: `askNano(context, question)` with systemPrompt "You are a concise Jazz Coach. Limit answers to 15 words." Context must be JSON.stringify(context) from Tonal.js/state; never assume the model remembers the previous chord.
 
+### MIC: Universal Microphone Handler (App-Wide)
+- **REQ-MIC-01**: **Single app-wide mic service**: One central service (e.g. `MicrophoneService` or store + hook) that owns `getUserMedia`, stream lifecycle, and analysis; all modules consume this service rather than opening their own mic.
+- **REQ-MIC-02**: **Permission and lifecycle**: Request mic permission once per session; expose start/stop and "is active" state; release stream when no consumer needs it (or on explicit user stop).
+- **REQ-MIC-03**: **Playing analysis**: From mic input, support pitch/note onset detection (e.g. MIDI note or frequency + confidence) so modules can compare "what the student played" to a target (e.g. Ear Trainer, Chord Lab play-back). Reuse or generalize existing pitch path (e.g. BiTonal Sandbox / ml5) into the central service.
+- **REQ-MIC-04**: **Clapping analysis**: From mic input, support beat/onset detection and tempo estimation (e.g. BPM, subdivision) so modules can use "clapped tempo" or rhythm (e.g. Rhythm Architect, metronome alignment).
+- **REQ-MIC-05**: **Modes**: Service supports at least two logical modes (or combined): "pitch" (playing) and "rhythm" (clapping); consumers subscribe to the outputs they need (pitch events, beat events, tempo).
+- **REQ-MIC-06**: **Integration**: At least one module beyond BiTonal Sandbox uses the universal handler (e.g. Rhythm Architect for clap-tempo, or Ear Trainer for sing-back). BiTonal Sandbox to migrate to the shared service where feasible.
+
 ## v2: Future Considerations (Deferred)
 - **REQ-AI-05**: Persistent User Weakness Map (Track which scales the user fails at).
 - **REQ-AI-06**: Audio-to-AI (Analyze user's incoming MIDI in real-time for mistakes).
 
 ## Out of Scope
-- Real-time video/audio analysis.
+- Real-time video/audio analysis (beyond mic for playing/clapping).
 - Generic non-music conversations.
+- **MIC v1**: Full chord recognition from mic, multi-instrument classification, recording/playback of mic audio, offline processing.
