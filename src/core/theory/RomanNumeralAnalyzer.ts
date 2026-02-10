@@ -1,4 +1,4 @@
-import * as Tonal from '@tonaljs/tonal';
+import { Note, Distance } from 'tonal';
 import * as Chord from '@tonaljs/chord';
 import type { RomanNumeralAnalysis, HotspotData } from './RomanNumeralTypes';
 
