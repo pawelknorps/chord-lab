@@ -67,7 +67,18 @@ export const LeadSheet = ({ song, filteredPatterns }: LeadSheetProps) => {
                         />
                     )}
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-y-0 border-t-2 border-b-2 border-black">
+                    <div ref={activeRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-y-0 border-t-2 border-b-2 border-black relative">
+                        {/* Analysis Overlay Needs Access to Grid */}
+                        {showAnalysis && (
+                            <AnalysisOverlay
+                                concepts={patternsToDisplay}
+                                measureCount={song.music.measures.length}
+                                onConceptClick={(concept, index) => focusOnPattern(index)}
+                                activeFocusIndex={activeFocusIndex}
+                                gridRef={activeRef}
+                            />
+                        )}
+
                         {song.music.measures.map((measure: any, index: number) => {
                             const isActive = index === currentMeasureIndexSignal.value;
                             const isSystemStart = index % 4 === 0;
