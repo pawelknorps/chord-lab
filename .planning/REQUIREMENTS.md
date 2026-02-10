@@ -1,53 +1,29 @@
-# Requirements: Codebase Health & Scalability
+# v1 Requirements: Jazz Evolution
 
-### v1 Milestone: The Pre-Baked Intelligence (AOT)
+## Audio & Samples (AUD)
+- **AUD-01**: Refactor `useJazzPlayback` to support multi-sample loading for Piano (`C1-C8`) and Bass (`E1-C5`).
+- **AUD-02**: Implement per-instrument gain and reverb staging to ensure "mix" clarity.
 
-#### AI Pipeline (AOT)
-- **REQ-AI-01**: Create a Node.js script `scripts/generate-lessons.js` to iterate through all 1,300 standards.
-- **REQ-AI-02**: Implement LLM prompting logic (using temporary API key) to analyze each song:
-    - Identify ii-V-I hotspots.
-    - Suggest "Avoid Notes".
-    - Provide "Pro-Level" substitutions.
-    - Generate "Golden Lick" (ABC/MIDI).
-- **REQ-AI-03**: Output valid JSON files to `public/lessons/{songId}.json` (target ~10MB total compressed).
+## Bass Algorithm (BASS)
+- **BASS-01**: Implement "Ron Carter" walking logic:
+    - Target root on Beat 1.
+    - Chromatic approach from above/below on Beat 4.
+    - Scalaic/Chordal connectivity on Beats 2 and 3.
+- **BASS-02**: Add rhythmic "drops" (octave leaps, triplet ghost notes) at phrase endings.
 
-#### Lesson Player UI
-- **REQ-UI-01**: Create a `SmartLessonPane` component in `ChordLab` to display the specific lesson data.
-- **REQ-UI-02**: Implement "Harmonic Roadmap" visualization (highlighting analysis on the timeline).
-- **REQ-UI-03**: Interactive "Spotlight Drill": Button to auto-loop specific sections (e.g., "Practice the Turnaround").
+## Piano Algorithm (PIANO)
+- **PIANO-01**: Implement Core Voicing Library:
+    - **A/B Type Rootless Voicings** (3, 5, 7, 9).
+    - **Red Garland Block Chords** (4-way close + octaves).
+    - **Quartal Voicings** (So What chords, 4th stacks).
+- **PIANO-02**: Implement Rhythmic "Interaction" events (syncopated hits, Charleston patterns, Anticipations).
 
-#### Performance
-- **REQ-PERF-01**: Use dynamic imports (`await import(...)`) for fetching lesson JSONs to avoid bundling them.
-- **REQ-PERF-02**: Ensure Gzip/Brotli compression is active for `.json` assets in Vercel config.
+## Drum Algorithm (DRUMS)
+- **DRUMS-01**: Adaptive Snare/Kick:
+    - Snare "chatter" (ghost notes) on off-beats.
+    - Snare "accents" that mirror Piano rhythmic hits.
+    - Kick "feathering" (consistent low-velocity pulse on 4 on the floor).
 
-### v1.5 Milestone: The Local Agent (Window AI)
-
-#### Browser Integration
-- **REQ-AGENT-01**: Implement `window.ai` capability check (`canCreateTextSession`).
-- **REQ-AGENT-02**: Create `LocalAgentService` to abstract the `window.ai` interaction.
-- **REQ-AGENT-03**: Fallback strategy: If `window.ai` is unavailable, rely solely on AOT JSONs.
-
-#### Interactive Drills
-- **REQ-DRILL-01**: "Blindfold Challenge": Agent can hide chord symbols for specific sections.
-- **REQ-DRILL-02**: "Variable Accompaniment": Agent can mute specific tracks (piano/bass) to force ear training.
-
-
-## v1.1 Milestone: Chord Lab UX Refinement
-
-- **REQ-CL-01**: Toggles for hide/show Piano & Fretboard in Chord Lab.
-- **REQ-CL-02**: Legato Visuals in Chord Lab (visuals persist until next chord).
-- **REQ-CL-03**: Persist visualization preferences in global settings.
-- **REQ-CL-04**: Guided Practice Mode - Visuals synced to progression slots rather than raw audio triggers for maximum clarity.
-- **REQ-CL-05**: Color-coded chord tone visualization (Root=Blue, 3rd=Green, 5th=Yellow, 7th=Red, Extensions=Purple).
-- **REQ-CL-06**: Interactive Chord Builder - Click piano keys/frets to build custom chords and add to progression.
-- **REQ-CL-07**: Chord tone labels on all keys/frets showing their function (R, 3, 5, 7, 9, 11, 13).
-
-## v2 / Deferred
-
-- **REQ-EXT-01**: Full E2E regression suite using Vitest + Playwright.
-- **REQ-EXT-02**: Dynamic Plugin Routing (loading modules from dedicated JSON manifests).
-
-## Out of Scope
-
-- Redesigning the core navigation dashboard.
-- Modifying the iReal Pro parsing logic.
+## System Architecture (SYS)
+- **SYS-01**: Implement a `StyleController` that switches algorithm parameters based on song metadata (Tempo, Jazz style).
+- **SYS-02**: Legacy Fallback: Toggle in UI to switch back to the original simpler algorithm.

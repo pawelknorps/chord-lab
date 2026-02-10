@@ -1,28 +1,28 @@
-# Project Milestone: The Incredible Teaching Machine (AI-Powered Jazz Mentor)
+# Project: Jazz Evolution Sound Engine & Comping Algorithm
 
-## Vision Statement
-To transform the Chord-Lab from a practice tool into an intelligent, proactive jazz mentor. By leveraging a hybrid **Local-First AI** and **Ahead-of-Time (AOT)** architecture, we will deliver personalized, deep harmonic analysis and interactive guidance without incurring real-time API costs. The goal is to democratize high-level jazz education using the browser's built-in capabilities (Gemini Nano) and pre-computed intelligence.
+## Vision
+Transform the existing MIDI-style playback into a premium, interactive "Virtual Jazz Trio" that feels like a real band. The engine will utilize high-quality samples and a complex behavioral algorithm to simulate professional jazz performance (Red Garland, Ron Carter, Nate Smith styles).
 
 ## Core Value Proposition
-- **Zero-Cost Intelligence**: No per-token fees for the user or developer. Uses `window.ai` (local Gemini Nano) or pre-baked JSON lessons.
-- **Deep Harmonic Context**: "Agents" that understand voice leading, avoid notes, and common improv traps, not just chord symbols.
-- **Interactive Pedagogy**: The Agent allows tailored practice routines (Spotlight Drills, Blindfold Challenges) that manipulate the app's state.
-- **Instant Availability**: "Pre-baked" lessons for 1,300+ standards ensure immediate, high-quality analysis even without a powerful local GPU.
+- **Authenticity**: Professional-grade jazz voicings (Rootless, Quartal) and rhythms.
+- **Interactivity**: Simulated "listening" between instruments where drum accents respond to piano comping rhythms.
+- **Dynamic feel**: Evolution of the performance based on tempo, vibe, and historical styles.
 
-## Key Targets
-1. **AOT Lesson Vault**: A Node.js pipeline to pre-generate "Pro-Level" analysis for all 1,300 standards using high-end LLMs (Claude 3.5/Gemini 1.5 Pro).
-2. **Local Agent Interface**: A `window.ai` integration to provide real-time, context-aware advice ("Bridge Theory") directly in the browser.
-3. **Smart Lesson Player**: A UI that fetches and displays the "Harmonic Roadmap" (hooks, traps, analysis) seamlessly.
-4. **Agent-Driven UX**: The ability for the Agent to control the app (looping sections, muting tracks, hiding chords).
+## High-Level Requirements
+- **AUD-01**: Support for high-quality multi-sampled Piano and Bass.
+- **ALG-01**: Implementation of "Ron Carter" style walking bass (chromatic approaches, scale connectivity, rhythmic variations).
+- **ALG-02**: Pro-level Piano comping engine supporting "Red Garland" block chords and "Herbie Hancock" quartal voicings.
+- **ALG-03**: Interactive Drum engine that adapts snare/kick accents based on the piano's rhythmic vocabulary.
+- **FEEL-01**: Humanization engine (dynamic velocity curves, micro-timing pushes/pulls).
+- **ARCH-01**: Preservation of the legacy algorithm as a fallback mode.
 
-## Architectural Decisions
-- **Hybrid AI Strategy**:
-    - **Tier 1 (Instant/Low-End)**: Fetch statically generated `public/lessons/{id}.json`.
-    - **Tier 2 (High-End/Future)**: Use `window.ai` for conversational, ad-hoc coaching.
-- **Data persistence**: `IndexedDB` (via `dexie.js`) for storing user progress and interaction history.
-- **Deployment**: Static export (Vercel) with efficient data compression (Brotli/Gzip) for the JSON vault.
+## Key Decisions
+| Decision | Rationale | Status |
+| :--- | :--- | :--- |
+| **Rootless Voicings** | Industrial standard for jazz piano to avoid clashing with the bass. | Validated |
+| **Interactive Accenting** | Drums responding to piano hits creates the "real band" cohesion. | Validated |
+| **Multi-Style Engine** | Allows different standards to trigger historically appropriate comping styles. | Validated |
 
 ## Out of Scope
-- Real-time cloud LLM API calls (unless user provides own key, but focus is on free/local).
-- Social features or backend user accounts (Local-First philosophy).
-
+- Real-time user input listening (focus is on backing track generation).
+- Multi-track exporting (for now).
