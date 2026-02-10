@@ -97,13 +97,13 @@ export default function JazzKillerModule() {
 
             // Only analyze if this is a different song or transposition
             if (lastAnalyzedSongRef.current !== songKey) {
-                const chords = selectedSong.music.measures
-                    .flatMap(m => m.chords)
-                    .filter(c => c && c !== "");
+                const measures = selectedSong.music.measures.map((m: any) =>
+                    m.chords.filter((c: string) => c && c !== "")
+                );
 
                 loadSong({
                     title: selectedSong.title,
-                    chords,
+                    measures,
                     key: selectedSong.key,
                     bars: selectedSong.music.measures.length
                 });

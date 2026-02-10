@@ -15,7 +15,7 @@ interface PracticeExercise {
 
 interface JazzStandard {
     title: string;
-    chords: string[];
+    measures: string[][];
     key: string;
     bars?: number;
 }
@@ -75,32 +75,49 @@ export const usePracticeStore = create<PracticeState>((set, get) => ({
     loadSong: async (song: JazzStandard) => {
         console.log('🎵 Loading song:', song.title);
 
-        // Analyze patterns
-        const analysisResult = ConceptAnalyzer.analyze(song.chords, song.key);
-        const exercises = ConceptAnalyzer.generateExercises(analysisResult, song.chords);
+        const flattenedChords = song.measures.flat();
 
-        // Calculate guide tones
+        // Create mapping from chord index to measure index
+        const chordToMeasureMap: number[] = [];
+        song.measures.forEach((measureChords, mIndex) => {
+            measureChords.forEach(() => {
+                chordToMeasureMap.push(mIndex);
+            });
+        });
+
+        // Analyze patterns and remap indices
+        const analysisResult = ConceptAnalyzer.analyze(flattenedChords, song.key);
+        const mappedConcepts = analysisResult.concepts.map(c => ({
+            ...c,
+            startIndex: chordToMeasureMap[c.startIndex] ?? c.startIndex,
+            endIndex: chordToMeasureMap[c.endIndex] ?? c.endIndex
+        }));
+
+        const exercises = ConceptAnalyzer.generateExercises({ ...analysisResult, concepts: mappedConcepts }, flattenedChords);
+
+        // Calculate guide tones per measure
         const guideTones = new Map<number, GuideTone[]>();
-        song.chords.forEach((chordString, index) => {
-            if (chordString && chordString !== '') {
-                // Now supports multiple chords per measure
-                const gts = GuideToneCalculator.calculateMeasure(chordString);
-                if (gts.length > 0) guideTones.set(index, gts);
-            }
+        song.measures.forEach((measureChords, index) => {
+            const gts = measureChords
+                .map(chord => chord && chord !== '' ? GuideToneCalculator.calculate(chord) : null)
+                .filter((gt): gt is GuideTone => gt !== null);
+
+            if (gts.length > 0) guideTones.set(index, gts);
         });
 
         // Detect hotspots
         const { RomanNumeralAnalyzer } = await import('../theory/RomanNumeralAnalyzer');
-        const hotspotData = RomanNumeralAnalyzer.detectHotspots(song.chords, song.key);
+        const hotspotData = RomanNumeralAnalyzer.detectHotspots(flattenedChords, song.key);
         const hotspots = hotspotData.filter((h: any) => h.isHotspot).map((h: any) => h.measureIndex);
 
         console.log(`✨ Detected ${analysisResult.concepts.length} patterns`);
-        console.log(`🎯 Calculated ${guideTones.size} guide tones`);
+        console.log(`🎯 Calculated guide tones for ${guideTones.size} measures`);
         console.log(`🔥 Found ${hotspots.length} hotspots`);
 
         set({
+
             currentSong: song,
-            detectedPatterns: analysisResult.concepts,
+            detectedPatterns: mappedConcepts,
             practiceExercises: exercises,
             activeFocusIndex: null,
             performanceHeatmap: {},
