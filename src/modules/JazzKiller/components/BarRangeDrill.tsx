@@ -1,4 +1,4 @@
-import { Play, Square } from 'lucide-react';
+import { Play, Square, X } from 'lucide-react';
 import { usePracticeStore } from '../../../core/store/usePracticeStore';
 import * as Tone from 'tone';
 import { useState } from 'react';
@@ -12,7 +12,6 @@ export function BarRangeDrill() {
     if (!currentSong) return null;
 
     const totalMeasures = currentSong.chords?.length || 0;
-    const measuresPerRow = 4;
 
     const handleMeasureClick = (index: number) => {
         if (!isSelecting) {
@@ -50,86 +49,108 @@ export function BarRangeDrill() {
         setIsDrillActive(false);
     };
 
+    const handleClose = () => {
+        if (isDrillActive) stopDrill();
+        setSelectedRange(null);
+        setIsSelecting(false);
+        // Close the drill mode
+        const closeButton = document.querySelector('[title="Bar Range Drill"]') as HTMLButtonElement;
+        closeButton?.click();
+    };
+
     return (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-8">
-            <div className="bg-neutral-900 border border-white/10 rounded-2xl p-8 max-w-4xl w-full max-h-[80vh] overflow-y-auto">
-                <h2 className="text-2xl font-bold text-white mb-2">Custom Bar Range Drill</h2>
-                <p className="text-sm text-neutral-400 mb-6">
-                    {isSelecting ? 'Click end measure' : 'Click start measure'}
-                </p>
-
-                {/* Measure Grid */}
-                <div className="grid gap-2 mb-6" style={{ gridTemplateColumns: `repeat(${measuresPerRow}, 1fr)` }}>
-                    {Array.from({ length: totalMeasures }).map((_, i) => {
-                        const isHotspot = hotspots.includes(i);
-                        const isInRange = selectedRange && i >= selectedRange[0] && i <= selectedRange[1];
-                        const isStart = selectedRange && i === selectedRange[0];
-                        const isEnd = selectedRange && i === selectedRange[1];
-
-                        return (
-                            <button
-                                key={i}
-                                onClick={() => handleMeasureClick(i)}
-                                className={`
-                  relative p-4 rounded-lg border-2 transition-all
-                  ${isInRange ? 'bg-blue-500/20 border-blue-500' : 'bg-neutral-800 border-white/10'}
-                  ${isStart || isEnd ? 'ring-4 ring-blue-400' : ''}
-                  ${isHotspot ? 'border-red-500/50' : ''}
-                  hover:border-blue-400
-                `}
-                            >
-                                <div className="text-sm font-bold text-white">{i + 1}</div>
-                                {isHotspot && (
-                                    <div className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
-                                )}
-                            </button>
-                        );
-                    })}
-                </div>
-
-                {/* Controls */}
-                <div className="flex items-center justify-between">
-                    <div className="text-sm text-neutral-400">
-                        {selectedRange && !isSelecting && (
-                            <span>Selected: Measures {selectedRange[0] + 1} - {selectedRange[1] + 1}</span>
-                        )}
+        <div className="fixed inset-0 bg-gradient-to-b from-orange-500/20 via-transparent to-transparent pointer-events-none z-40">
+            {/* Overlay instruction banner */}
+            <div className="absolute top-24 left-1/2 -translate-x-1/2 bg-orange-500/95 backdrop-blur-md border border-orange-400/50 rounded-2xl px-8 py-4 shadow-2xl pointer-events-auto">
+                <div className="flex items-center gap-4">
+                    <div className="flex-1">
+                        <h3 className="text-lg font-bold text-white mb-1">
+                            {isSelecting ? '📍 Click End Measure' : '📍 Click Start Measure'}
+                        </h3>
+                        <p className="text-sm text-orange-100">
+                            {selectedRange && !isSelecting
+                                ? `Selected: Measures ${selectedRange[0] + 1} - ${selectedRange[1] + 1}`
+                                : 'Select a range of measures to loop and practice'
+                            }
+                        </p>
                     </div>
 
-                    <div className="flex gap-3">
-                        <button
-                            onClick={() => {
-                                setSelectedRange(null);
-                                setIsSelecting(false);
-                                if (isDrillActive) stopDrill();
-                            }}
-                            className="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 rounded-lg text-white transition-all"
-                        >
-                            Cancel
-                        </button>
-
+                    {/* Controls */}
+                    <div className="flex items-center gap-2">
                         {selectedRange && !isSelecting && (
                             <button
                                 onClick={isDrillActive ? stopDrill : startDrill}
-                                className={`px-6 py-2 rounded-lg font-bold flex items-center gap-2 transition-all ${isDrillActive
-                                    ? 'bg-red-500 hover:bg-red-600'
-                                    : 'bg-blue-500 hover:bg-blue-600'
-                                    } text-white`}
+                                className={`px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all shadow-lg ${isDrillActive
+                                        ? 'bg-red-500 hover:bg-red-600 text-white'
+                                        : 'bg-white hover:bg-orange-50 text-orange-600'
+                                    }`}
                             >
                                 {isDrillActive ? (
                                     <>
-                                        <Square size={16} />
-                                        Stop Drill
+                                        <Square size={18} fill="currentColor" />
+                                        Stop
                                     </>
                                 ) : (
                                     <>
-                                        <Play size={16} />
-                                        Start Drill
+                                        <Play size={18} fill="currentColor" />
+                                        Start Loop
                                     </>
                                 )}
                             </button>
                         )}
+
+                        <button
+                            onClick={handleClose}
+                            className="p-3 bg-white/20 hover:bg-white/30 rounded-xl text-white transition-all"
+                            title="Close"
+                        >
+                            <X size={20} />
+                        </button>
                     </div>
                 </div>
+            </div>
+
+            {/* Measure overlays - positioned over the lead sheet */}
+            <div className="absolute inset-0 pointer-events-none">
+                {Array.from({ length: totalMeasures }).map((_, i) => {
+                    const isHotspot = hotspots.includes(i);
+                    const isInRange = selectedRange && i >= selectedRange[0] && i <= selectedRange[1];
+                    const isStart = selectedRange && i === selectedRange[0];
+                    const isEnd = selectedRange && i === selectedRange[1];
+
+                    return (
+                        <div
+                            key={i}
+                            onClick={() => handleMeasureClick(i)}
+                            className={`
+                absolute pointer-events-auto cursor-pointer transition-all duration-200
+                ${isInRange ? 'bg-orange-400/30 border-2 border-orange-500' : 'hover:bg-orange-300/20 border border-orange-400/30'}
+                ${isStart ? 'ring-4 ring-orange-400 shadow-lg' : ''}
+                ${isEnd ? 'ring-4 ring-orange-400 shadow-lg' : ''}
+                ${isHotspot ? 'border-red-500/50' : ''}
+                rounded-lg
+              `}
+                            style={{
+                                // Position based on measure index - this will need to be calculated based on your lead sheet layout
+                                // For now, using a simple grid layout as placeholder
+                                top: `${200 + Math.floor(i / 4) * 120}px`,
+                                left: `${100 + (i % 4) * 250}px`,
+                                width: '240px',
+                                height: '100px',
+                            }}
+                        >
+                            {/* Measure number indicator */}
+                            <div className="absolute -top-2 -left-2 w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-lg">
+                                {i + 1}
+                            </div>
+
+                            {/* Hotspot indicator */}
+                            {isHotspot && (
+                                <div className="absolute top-1 right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse" />
+                            )}
+                        </div>
+                    );
+                })}
             </div>
         </div>
     );
