@@ -37,6 +37,8 @@ interface PracticeState {
     guideTones: Map<number, GuideTone>;
     showGuideTones: boolean;
     showAnalysis: boolean;
+    showRomanNumerals: boolean;
+    hotspots: number[];
 
     // --- Actions ---
     loadSong: (song: JazzStandard) => void;
@@ -66,6 +68,8 @@ export const usePracticeStore = create<PracticeState>((set, get) => ({
     guideTones: new Map(),
     showGuideTones: false,
     showAnalysis: false,
+    showRomanNumerals: false,
+    hotspots: [],
 
     // --- Actions ---
     loadSong: (song: JazzStandard) => {
@@ -84,8 +88,14 @@ export const usePracticeStore = create<PracticeState>((set, get) => ({
             }
         });
 
+        // Detect hotspots
+        const { RomanNumeralAnalyzer } = await import('../theory/RomanNumeralAnalyzer');
+        const hotspotData = RomanNumeralAnalyzer.detectHotspots(song.chords, song.key);
+        const hotspots = hotspotData.filter(h => h.isHotspot).map(h => h.measureIndex);
+
         console.log(`✨ Detected ${analysisResult.concepts.length} patterns`);
         console.log(`🎯 Calculated ${guideTones.size} guide tones`);
+        console.log(`🔥 Found ${hotspots.length} hotspots`);
 
         set({
             currentSong: song,
@@ -94,6 +104,7 @@ export const usePracticeStore = create<PracticeState>((set, get) => ({
             activeFocusIndex: null,
             performanceHeatmap: {},
             guideTones,
+            hotspots,
         });
     },
 
