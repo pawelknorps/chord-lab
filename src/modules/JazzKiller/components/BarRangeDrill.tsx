@@ -1,13 +1,35 @@
 import { Play, Square, X } from 'lucide-react';
 import { usePracticeStore } from '../../../core/store/usePracticeStore';
 import * as Tone from 'tone';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 export function BarRangeDrill() {
     const { currentSong, hotspots } = usePracticeStore();
     const [selectedRange, setSelectedRange] = useState<[number, number] | null>(null);
     const [isSelecting, setIsSelecting] = useState(false);
     const [isDrillActive, setIsDrillActive] = useState(false);
+    const [measurePositions, setMeasurePositions] = useState<DOMRect[]>([]);
+
+    useEffect(() => {
+        // Get positions of all measure elements
+        const updatePositions = () => {
+            const leadSheetGrid = document.querySelector('.grid.grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-4');
+            if (leadSheetGrid) {
+                const measureElements = leadSheetGrid.querySelectorAll(':scope > div');
+                const positions = Array.from(measureElements).map(el => el.getBoundingClientRect());
+                setMeasurePositions(positions);
+            }
+        };
+
+        updatePositions();
+        window.addEventListener('resize', updatePositions);
+        window.addEventListener('scroll', updatePositions);
+
+        return () => {
+            window.removeEventListener('resize', updatePositions);
+            window.removeEventListener('scroll', updatePositions);
+        };
+    }, [currentSong]);
 
     if (!currentSong) return null;
 
@@ -59,9 +81,9 @@ export function BarRangeDrill() {
     };
 
     return (
-        <div className="fixed inset-0 bg-gradient-to-b from-orange-500/20 via-transparent to-transparent pointer-events-none z-40">
-            {/* Overlay instruction banner */}
-            <div className="absolute top-24 left-1/2 -translate-x-1/2 bg-orange-500/95 backdrop-blur-md border border-orange-400/50 rounded-2xl px-8 py-4 shadow-2xl pointer-events-auto">
+        <>
+            {/* Top instruction banner */}
+            <div className="fixed top-24 left-1/2 -translate-x-1/2 bg-orange-500/95 backdrop-blur-md border border-orange-400/50 rounded-2xl px-8 py-4 shadow-2xl z-50 pointer-events-auto">
                 <div className="flex items-center gap-4">
                     <div className="flex-1">
                         <h3 className="text-lg font-bold text-white mb-1">
@@ -110,48 +132,51 @@ export function BarRangeDrill() {
                 </div>
             </div>
 
-            {/* Measure overlays - positioned over the lead sheet */}
-            <div className="absolute inset-0 pointer-events-none">
-                {Array.from({ length: totalMeasures }).map((_, i) => {
-                    const isHotspot = hotspots.includes(i);
-                    const isInRange = selectedRange && i >= selectedRange[0] && i <= selectedRange[1];
-                    const isStart = selectedRange && i === selectedRange[0];
-                    const isEnd = selectedRange && i === selectedRange[1];
+            {/* Measure overlays - positioned over actual measures */}
+            {measurePositions.map((rect, i) => {
+                if (i >= totalMeasures) return null;
 
-                    return (
-                        <div
-                            key={i}
-                            onClick={() => handleMeasureClick(i)}
-                            className={`
-                absolute pointer-events-auto cursor-pointer transition-all duration-200
-                ${isInRange ? 'bg-orange-400/30 border-2 border-orange-500' : 'hover:bg-orange-300/20 border border-orange-400/30'}
-                ${isStart ? 'ring-4 ring-orange-400 shadow-lg' : ''}
-                ${isEnd ? 'ring-4 ring-orange-400 shadow-lg' : ''}
-                ${isHotspot ? 'border-red-500/50' : ''}
-                rounded-lg
-              `}
-                            style={{
-                                // Position based on measure index - this will need to be calculated based on your lead sheet layout
-                                // For now, using a simple grid layout as placeholder
-                                top: `${200 + Math.floor(i / 4) * 120}px`,
-                                left: `${100 + (i % 4) * 250}px`,
-                                width: '240px',
-                                height: '100px',
-                            }}
-                        >
-                            {/* Measure number indicator */}
-                            <div className="absolute -top-2 -left-2 w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-lg">
+                const isHotspot = hotspots.includes(i);
+                const isInRange = selectedRange && i >= selectedRange[0] && i <= selectedRange[1];
+                const isStart = selectedRange && i === selectedRange[0];
+                const isEnd = selectedRange && i === selectedRange[1];
+
+                return (
+                    <div
+                        key={i}
+                        onClick={() => handleMeasureClick(i)}
+                        className={`
+              fixed cursor-pointer transition-all duration-200 z-40 rounded-lg
+              ${isInRange
+                                ? 'bg-orange-400/40 border-4 border-orange-500 shadow-lg'
+                                : 'hover:bg-orange-300/30 border-2 border-orange-400/40'
+                            }
+              ${isStart ? 'ring-4 ring-orange-400 shadow-2xl' : ''}
+              ${isEnd ? 'ring-4 ring-orange-400 shadow-2xl' : ''}
+              ${isHotspot ? 'border-red-500/60' : ''}
+            `}
+                        style={{
+                            top: `${rect.top}px`,
+                            left: `${rect.left}px`,
+                            width: `${rect.width}px`,
+                            height: `${rect.height}px`,
+                            pointerEvents: 'auto',
+                        }}
+                    >
+                        {/* Measure number indicator */}
+                        {(isStart || isEnd || (isInRange && i % 4 === 0)) && (
+                            <div className="absolute -top-3 -left-3 w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-lg border-2 border-white">
                                 {i + 1}
                             </div>
+                        )}
 
-                            {/* Hotspot indicator */}
-                            {isHotspot && (
-                                <div className="absolute top-1 right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse" />
-                            )}
-                        </div>
-                    );
-                })}
-            </div>
-        </div>
+                        {/* Hotspot indicator */}
+                        {isHotspot && (
+                            <div className="absolute top-2 right-2 w-4 h-4 bg-red-500 rounded-full animate-pulse shadow-lg" title="Practice Hotspot" />
+                        )}
+                    </div>
+                );
+            })}
+        </>
     );
 }
