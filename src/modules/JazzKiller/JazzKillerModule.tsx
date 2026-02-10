@@ -451,14 +451,7 @@ export default function JazzKillerModule() {
 
             {selectedSong && (
                 <div className="flex-1 overflow-hidden flex flex-col p-2 bg-white/5 rounded-[40px] border border-white/5">
-                    {/* Analysis Toolbar */}
-                    {detectedPatterns.length > 0 && (
-                        <AnalysisToolbar
-                            filters={analysisFilters}
-                            onFiltersChange={setAnalysisFilters}
-                            totalPatterns={detectedPatterns.length}
-                        />
-                    )}
+
 
                     <div className="px-8 py-6 flex flex-col">
                         <div className="flex items-center gap-2 mb-1">
@@ -469,13 +462,26 @@ export default function JazzKillerModule() {
                     </div>
 
                     <div className="flex-1 overflow-hidden flex flex-row p-6 gap-6">
-                        {/* Guided Practice Sidebar (Original) - LEFT */}
-                        {showPracticeTips && !showPracticePanel && (
-                            <PracticeTips
-                                song={selectedSong}
-                                onClose={() => setShowPracticeTips(false)}
-                            />
-                        )}
+                        {/* LEFT SIDEBAR AREA */}
+                        <div className="flex flex-col gap-4 max-h-full overflow-hidden">
+                            {/* Analysis Filters - Vertical */}
+                            {detectedPatterns.length > 0 && showAnalysis && (
+                                <AnalysisToolbar
+                                    orientation="vertical"
+                                    filters={analysisFilters}
+                                    onFiltersChange={setAnalysisFilters}
+                                    totalPatterns={detectedPatterns.length}
+                                />
+                            )}
+
+                            {/* Guided Practice Sidebar (Original) - LEFT */}
+                            {showPracticeTips && !showPracticePanel && (
+                                <PracticeTips
+                                    song={selectedSong}
+                                    onClose={() => setShowPracticeTips(false)}
+                                />
+                            )}
+                        </div>
 
                         <div className={`flex-1 overflow-y-auto pr-2 custom-scrollbar transition-all duration-300`}>
                             <LeadSheet song={selectedSong} filteredPatterns={filteredPatterns} />
