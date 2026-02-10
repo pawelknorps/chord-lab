@@ -20,6 +20,7 @@ import { AnalysisToolbar, AnalysisFilters } from './components/AnalysisToolbar';
 import { PracticeExercisePanel } from './components/PracticeExercisePanel';
 import { DrillDashboard } from './components/DrillDashboard';
 import { ProfilePanel } from './components/ProfilePanel';
+import { BarRangeDrill } from './components/BarRangeDrill';
 
 export default function JazzKillerModule() {
     useAudioCleanup('jazz-killer');
@@ -31,6 +32,7 @@ export default function JazzKillerModule() {
     const [showPracticePanel, setShowPracticePanel] = useState(false);
     const [showDrillMode, setShowDrillMode] = useState(false);
     const [showProfilePanel, setShowProfilePanel] = useState(false);
+    const [showBarRangeDrill, setShowBarRangeDrill] = useState(false);
     const { standards, getSongAsIRealFormat } = useJazzLibrary();
 
     // Practice Store integration
@@ -281,6 +283,13 @@ export default function JazzKillerModule() {
                             title="Student Profile"
                         >
                             👤
+                        </button>
+                        <button
+                            onClick={() => setShowBarRangeDrill(!showBarRangeDrill)}
+                            className={`px-4 py-2 rounded-xl transition-all ${showBarRangeDrill ? 'bg-orange-500 text-black' : 'bg-white/5 hover:bg-white/10 text-white'}`}
+                            title="Bar Range Drill"
+                        >
+                            🎯
                         </button>
                         <button
                             onClick={() => setShowMixer(!showMixer)}
@@ -598,6 +607,8 @@ export default function JazzKillerModule() {
             
             {/* Drill Dashboard */}
             {showDrillMode && <DrillDashboard />}
+            {showProfilePanel && <ProfilePanel />}
+            {showBarRangeDrill && <BarRangeDrill />}
         </div>
     );
 }
