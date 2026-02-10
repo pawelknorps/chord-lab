@@ -7,6 +7,15 @@
 - **REQ-AI-01-02**: Format data into a "Semantic Block" for the prompt (e.g., `Measure 1: Cmaj7 | I | Release`).
 - **REQ-AI-01-03**: Include "Active Focus" metadata (current drill type and range).
 
+### NANO: Gemini Nano Stateless Logic & Prompt Hardening
+- **REQ-NANO-01**: **State slice**: Every Nano call receives a fresh state slice (e.g. current 4 bars + next 4 bars from Zustand); no reliance on conversation history for correctness.
+- **REQ-NANO-02**: **Theory grounding**: Use Tonal.js to compute intervals, key centers, and scale degrees before prompting; inject this "ground truth" into the prompt (e.g. as CONTEXT block).
+- **REQ-NANO-03**: **Atomic prompt**: Use a structured template (CONTEXT / TASK / CONSTRAINTS / RESPONSE) so the model follows a fixed chain and stays on-topic.
+- **REQ-NANO-04**: **Few-shot**: Include 2–3 "perfect response" examples in system prompt or start of message for jazz-tutor answers (e.g. chord-in-context → short teacher reply).
+- **REQ-NANO-05**: **Chain-of-Thought**: For complex progressions, instruct step-by-step (e.g. "First Roman numeral, then target note, then lick"); CoT improves accuracy.
+- **REQ-NANO-06**: **Guardrails**: Use `temperature: 0.2` and `topK: 3` for theory calls; call `session.destroy()` periodically and create fresh sessions to avoid context drift.
+- **REQ-NANO-07**: **Validator**: If Nano suggests a note (e.g. "Play C#"), validate against Tonal.js scale/chord; do not display suggestions that are not in the current scale/chord.
+
 ### AI-02: Proactive Triggers
 - **REQ-AI-02-01**: AI should detect "Pivot Points" (Key changes, Modal Interchanges) and trigger a notification.
 - **REQ-AI-02-02**: Trigger lesson when the user stays on a "Hotspot" (hard measure) for more than 30 seconds.

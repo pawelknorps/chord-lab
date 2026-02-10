@@ -26,6 +26,35 @@ Evolve the AI integration from a generic text generator into a **local-first Mus
 - **Chatbot UI**: A conversational panel (sidebar or inline) where the user can ask questions and get answers about the current progression, request continuations/alternatives, or explanations.
 - **Local-only**: Same stack as JazzKiller—Gemini Nano / LocalAgentService; no cloud LLM for v1.
 
+## Gemini Nano Architecture (Stateless Logic + Prompt Hardening)
+
+To handle Nano’s limited context and tendency to "hallucinate" logic, the AI is treated as a **Stateless Logic Function**, not a long-form conversational agent.
+
+### 1. State-to-Prompt Mapping
+- **Do not** ask Nano to "remember" the song. Every call receives the minimum necessary state as a fresh payload.
+- **Workflow**: (1) **State slice**: current 4 bars + next 4 bars from Zustand. (2) **Theory grounding**: Tonal.js for intervals, key centers, scale degrees. (3) **Injection**: pass that "ground truth" JSON into the prompt.
+
+### 2. Atomic Prompt Pattern
+Use a structured template so the model follows a fixed chain (CONTEXT → TASK → CONSTRAINTS → RESPONSE). Example:
+- **CONTEXT**: SONG, KEY, CURRENT CHORD, SCALE DEGREES (from Tonal.js).
+- **TASK**: "As a jazz tutor, analyze this specific chord in context."
+- **CONSTRAINTS**: e.g. "Answer in 2 short sentences; focus on transition to next chord; use provided SCALE DEGREES only."
+- **RESPONSE**: (model fills).
+
+### 3. Few-Shot Prompting
+Include 2–3 "perfect response" examples in the system prompt or at the start of the message so Nano mimics format and accuracy (e.g. "Input: Dm7 in C Major → Teacher: This is the ii chord. Aim for F (minor 3rd) to lead into B (3rd of G7).").
+
+### 4. Chain-of-Thought (CoT) for Complex Progressions
+For multi-step reasoning, instruct step-by-step: "First, identify the Roman numeral. Second, identify the target note of the resolution. Third, suggest a lick." CoT reduces hallucination and improves theory accuracy.
+
+### 5. Technical Guardrails (2026 / window.ai)
+- **temperature**: `0.2` for theory (reduce creative hallucinations).
+- **topK**: `3` so the model picks among the most probable (accurate) tokens.
+- **Session reset**: Call `session.destroy()` periodically; fresh sessions avoid context drift. Prefer one-shot prompts with full context over long-lived sessions.
+
+### 6. Validator Pattern
+Nano can still suggest wrong notes. Use **Tonal.js as validator**: if the model suggests a note (e.g. "Play C#") that Tonal.js says is not in the current scale/chord, do **not** display that suggestion. Code provides the truth; AI provides the flavor.
+
 ## Key Decisions
 
 | Decision | Rationale | Status |
@@ -35,6 +64,8 @@ Evolve the AI integration from a generic text generator into a **local-first Mus
 | **Local-First** | Strictly Gemini Nano to keep zero-cost and low latency. | [Decided] |
 | **Drill commands** | Parse/execute in Practice Studio; shared grammar with SmartLessonPane where applicable. | [Decided] |
 | **Chord Lab context** | Reuse theory core (Roman numerals, scales, chord tones) and a small "progression bundle" formatter for Chord Lab–specific prompts. | [Decided] |
+| **Stateless AI** | Every Nano call gets fresh state slice (e.g. 4+4 bars) and theory grounding; no reliance on conversation history for correctness. | [Decided] |
+| **Validator** | Tonal.js validates AI-suggested notes; suggestions outside scale/chord are not shown. | [Decided] |
 
 ## Out of Scope
 
