@@ -20,7 +20,6 @@ const FunctionalEarTraining = lazy(() => import('./modules/FunctionalEarTraining
 const CircleChords = lazy(() => import('./modules/CircleChords/CircleChordsModule'));
 const MidiLibrary = lazy(() => import('./pages/MidiLibraryPage'));
 
-const ChordBuildr = lazy(() => import('./modules/ChordBuildr/ChordBuildrModule'));
 const ProgressionsPage = lazy(() => import('./pages/ProgressionsPage'));
 const JazzKiller = lazy(() => import('./modules/JazzKiller/JazzKillerModule'));
 
@@ -94,11 +93,6 @@ function App() {
                                 <Route path="midi-library" element={
                                     <Suspense fallback={<LoadingScreen label="Loading Library..." />}>
                                         <MidiLibrary />
-                                    </Suspense>
-                                } />
-                                <Route path="chord-buildr" element={
-                                    <Suspense fallback={<LoadingScreen label="Loading Chord Builder..." />}>
-                                        <ChordBuildr />
                                     </Suspense>
                                 } />
                                 <Route path="progressions" element={

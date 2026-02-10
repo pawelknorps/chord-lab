@@ -17,26 +17,29 @@ import {
 import { useAudio } from '../../context/AudioContext';
 import { MidiSettings } from '../MidiSettings';
 import { GlobalSettings } from '../shared/GlobalSettings';
+import { useTranslation } from 'react-i18next';
+import { setLanguage } from '../../utils/i18n';
 
 const Dashboard: React.FC = () => {
     const [collapsed, setCollapsed] = useState(false);
     const location = useLocation();
-    const { isReady, startAudio } = useAudio();
+    const { isReady } = useAudio();
+    const { i18n } = useTranslation();
 
     const toggleSidebar = () => setCollapsed(!collapsed);
 
     const navGroups = [
         {
-            title: "Studio",
+            title: "Main",
             items: [
                 { to: "/", icon: Layout, label: "Workbench" },
-                { to: "/chord-buildr", icon: Grid3X3, label: "Chord Builder" },
-                { to: "/progressions", icon: Music, label: "Progressions" },
+                { to: "/jazz-standards", icon: Music, label: "Standards" },
             ]
         },
         {
             title: "Analysis",
             items: [
+                { to: "/progressions", icon: Music, label: "Progressions" },
                 { to: "/bi-tonal", icon: AudioWaveform, label: "Bi-Tonal" },
                 { to: "/tonnetz", icon: Share2, label: "Tonnetz" },
                 { to: "/negative-harmony", icon: RefreshCw, label: "Negative Mirror" },
@@ -48,7 +51,6 @@ const Dashboard: React.FC = () => {
             items: [
                 { to: "/functional-ear-training", icon: Activity, label: "Ear Training" },
                 { to: "/rhythm-architect", icon: Activity, label: "Rhythm" },
-                { to: "/jazz-standards", icon: Music, label: "Standards" },
                 { to: "/barry-harris", icon: Piano, label: "Barry Harris" },
                 { to: "/grips", icon: Grid3X3, label: "Grips" },
             ]
@@ -126,29 +128,41 @@ const Dashboard: React.FC = () => {
                 <div className="p-3 border-t border-[var(--border-subtle)] bg-[var(--bg-panel)]">
                     {!collapsed && <MidiSettings />}
 
-                    <button
-                        onClick={!isReady ? () => startAudio() : undefined}
-                        className={`
-                            mt-2 w-full flex items-center justify-center gap-2 py-2 rounded-md text-xs font-bold uppercase tracking-wider transition-all
-                            ${!isReady
-                                ? 'bg-red-500/10 text-red-500 hover:bg-red-500/20'
-                                : 'bg-transparent text-[var(--text-muted)] cursor-default'
-                            }
-                        `}
-                    >
-                        {isReady ? (
-                            <div className="w-2 h-2 rounded-full bg-green-500" title="Audio Engine Ready" />
-                        ) : (
-                            <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                    {/* Language Switcher */}
+                    <div className={`mt-2 flex items-center ${collapsed ? 'justify-center' : 'justify-start gap-2'}`}>
+                        {!collapsed && (
+                            <span className="text-[10px] uppercase font-bold tracking-wider text-[var(--text-muted)] mr-1">
+                                Lang:
+                            </span>
                         )}
-                        {!collapsed && <span>{isReady ? "Engine Active" : "Start Engine"}</span>}
-                    </button>
-
-                    {collapsed && (
-                        <div className={`mt-2 flex justify-center ${isReady ? 'opacity-50' : ''}`}>
-                            <div className={`w-2 h-2 rounded-full ${isReady ? 'bg-green-500' : 'bg-red-500 animate-pulse'}`} />
+                        <div className="flex gap-1">
+                            <button
+                                onClick={() => setLanguage('en')}
+                                className={`px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded transition-colors ${i18n.language === 'en'
+                                        ? 'bg-[var(--accent)] text-white'
+                                        : 'bg-[var(--bg-surface)] text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+                                    }`}
+                                title="English"
+                            >
+                                EN
+                            </button>
+                            <button
+                                onClick={() => setLanguage('pl')}
+                                className={`px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded transition-colors ${i18n.language === 'pl'
+                                        ? 'bg-[var(--accent)] text-white'
+                                        : 'bg-[var(--bg-surface)] text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+                                    }`}
+                                title="Polski"
+                            >
+                                PL
+                            </button>
                         </div>
-                    )}
+                    </div>
+
+                    <div className={`mt-2 flex items-center ${collapsed ? 'justify-center' : 'justify-start gap-2'} text-xs text-[var(--text-muted)]`}>
+                        <div className={`w-2 h-2 rounded-full ${isReady ? 'bg-green-500' : 'bg-amber-500 animate-pulse'}`} title={isReady ? 'Audio Ready' : 'Waiting for interaction...'} />
+                        {!collapsed && <span className="uppercase tracking-wider font-semibold">{isReady ? 'Engine Active' : 'Standby'}</span>}
+                    </div>
                 </div>
             </aside>
 

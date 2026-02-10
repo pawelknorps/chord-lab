@@ -7,6 +7,7 @@ import { ProgressionBuilder } from '../modules/ChordLab/components/ProgressionBu
 import { ConstantStructureTool } from '../modules/ChordLab/components/ConstantStructureTool';
 import { SmartLibrary } from '../modules/ChordLab/components/SoundLibrary/SmartLibrary';
 import type { ChordInfo, Progression } from '../core/theory';
+import { midiToNoteName } from '../core/theory';
 import type { Style } from '../core/audio/globalAudio';
 import { Mixer } from '../modules/ChordLab/components/Mixer';
 import { PracticeTips } from '../modules/ChordLab/components/PracticeTips';
@@ -70,6 +71,7 @@ export function ChordLabDashboard({
     isLooping, onLoopToggle, transposeSettings, onTransposeSettingsChange,
     onKeyChange, onScaleChange, onVoicingChange, onStyleChange, onBpmChange, onPlay, onStop, onExportMidi,
     onSlotClick, onRemoveChord, onClearProgression, onAddStructureChord, onSelectPreset, onImportMidi, onAddChord,
+    buildingNotes, builtChord, onNoteToggle, onAddBuiltChord, onClearBuilder,
     availableChords, userPresets, onSaveUserPreset
 }: ChordLabDashboardProps) {
 
@@ -169,6 +171,47 @@ export function ChordLabDashboard({
             {(showPiano || showFretboard) && (
                 <div className="w-full">
                     <div className="bg-[var(--bg-panel)] border border-[var(--border-subtle)] rounded-lg p-6 relative overflow-x-auto flex flex-col justify-center min-h-[160px] shadow-sm">
+                        {/* Chord Builder Panel */}
+                        {buildingNotes.length > 0 && (
+                            <div className="absolute top-4 right-6 z-20 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-lg p-4 shadow-lg min-w-[200px]">
+                                <div className="flex items-center justify-between mb-3">
+                                    <h3 className="text-xs uppercase font-bold text-[var(--text-muted)] tracking-widest">Building ({buildingNotes.length})</h3>
+                                    <button
+                                        onClick={onClearBuilder}
+                                        className="text-xs text-[var(--text-muted)] hover:text-red-500 transition-colors"
+                                    >
+                                        Clear
+                                    </button>
+                                </div>
+                                <div className="flex flex-wrap gap-2 mb-3">
+                                    {buildingNotes.map(note => (
+                                        <div
+                                            key={note}
+                                            className="px-2 py-1 bg-[var(--accent)]/10 border border-[var(--accent)]/30 rounded text-xs font-bold text-[var(--accent)]"
+                                        >
+                                            {midiToNoteName(note).replace(/[0-9-]/g, '')}
+                                        </div>
+                                    ))}
+                                </div>
+                                {builtChord && buildingNotes.length >= 3 && (
+                                    <>
+                                        <div className="text-2xl font-bold text-white mb-3">
+                                            {builtChord.root}{builtChord.quality === 'maj' ? '' : builtChord.quality}
+                                        </div>
+                                        <button
+                                            onClick={onAddBuiltChord}
+                                            className="w-full px-4 py-2 bg-[var(--accent)] text-white font-bold text-xs uppercase tracking-wider rounded hover:bg-[var(--accent)]/90 transition-colors"
+                                        >
+                                            Add to Progression
+                                        </button>
+                                    </>
+                                )}
+                                {buildingNotes.length > 0 && buildingNotes.length < 3 && (
+                                    <p className="text-xs text-[var(--text-muted)] italic">Select {3 - buildingNotes.length} more note{3 - buildingNotes.length > 1 ? 's' : ''}</p>
+                                )}
+                            </div>
+                        )}
+
                         <div className="absolute top-4 left-6 flex items-center gap-2 pointer-events-none z-10 sticky left-0">
                             <div className="text-[10px] font-bold bg-[var(--bg-surface)] px-2 py-0.5 rounded text-[var(--text-muted)] border border-[var(--border-subtle)]">
                                 {selectedKey} {selectedScale}
@@ -180,14 +223,10 @@ export function ChordLabDashboard({
                                     <UnifiedPiano
                                         mode="input"
                                         activeNotes={displayedNotes}
-                                        highlightedNotes={highlightedNotes}
+                                        highlightedNotes={[...highlightedNotes, ...buildingNotes]}
                                         showLabels="chord-tone"
-                                        rootNote={displayedNotes.length > 0 ? Math.min(...displayedNotes) : undefined}
-                                        onNoteClick={(note) => {
-                                            // Interactive chord building - collect notes and add to progression
-                                            console.log('Note clicked:', note);
-                                            // TODO: Implement chord building logic
-                                        }}
+                                        rootNote={buildingNotes.length > 0 ? Math.min(...buildingNotes) : (displayedNotes.length > 0 ? Math.min(...displayedNotes) : undefined)}
+                                        onNoteClick={onNoteToggle}
                                     />
                                 </div>
                             )}
@@ -197,16 +236,13 @@ export function ChordLabDashboard({
                                     <UnifiedFretboard
                                         mode="chord-tones"
                                         activeNotes={displayedNotes}
-                                        highlightedNotes={highlightedNotes}
+                                        highlightedNotes={[...highlightedNotes, ...buildingNotes]}
                                         fretRange={[0, 15]}
                                         showFretNumbers={true}
                                         showStringNames={true}
                                         interactive={true}
-                                        rootNote={displayedNotes.length > 0 ? Math.min(...displayedNotes) : undefined}
-                                        onNoteClick={(note) => {
-                                            console.log('Fret clicked:', note);
-                                            // TODO: Implement chord building logic
-                                        }}
+                                        rootNote={buildingNotes.length > 0 ? Math.min(...buildingNotes) : (displayedNotes.length > 0 ? Math.min(...displayedNotes) : undefined)}
+                                        onNoteClick={onNoteToggle}
                                     />
                                 </div>
                             )}

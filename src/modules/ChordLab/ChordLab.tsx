@@ -802,6 +802,12 @@ function ChordLab() {
           onImportMidi={handleLoadExternalMidi}
           onAddChord={handleChordClick}
 
+          buildingNotes={buildingNotes}
+          builtChord={builtChord}
+          onNoteToggle={handleNoteToggle}
+          onAddBuiltChord={handleAddBuiltChord}
+          onClearBuilder={handleClearBuilder}
+
           userPresets={userPresets}
 
           onSaveUserPreset={handleSaveUserPreset}

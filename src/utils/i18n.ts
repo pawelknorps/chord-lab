@@ -13,13 +13,12 @@ const resources = {
 };
 
 const stored = typeof window !== 'undefined' ? localStorage.getItem('language') : undefined;
-const browser = typeof navigator !== 'undefined' ? navigator.language.slice(0, 2) : 'en';
 const fallbackLng = 'en';
 
-// Simple heuristic for initial language
+// Default to English, only use stored language if explicitly set
 const initialLng = stored && resources[stored as keyof typeof resources]
     ? stored
-    : (resources[browser as keyof typeof resources] ? browser : fallbackLng);
+    : fallbackLng;
 
 i18n
     .use(initReactI18next)

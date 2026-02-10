@@ -24,6 +24,7 @@ import { DrillDashboard } from './components/DrillDashboard';
 import { BarRangeDrill } from './components/BarRangeDrill';
 import { WalkthroughPanel } from './components/TheoryWalkthrough/WalkthroughPanel';
 import { ChordScalePanel } from './components/ChordScaleExplorer/ChordScalePanel';
+import { SmartLessonPane } from './components/SmartLessonPane';
 
 export default function JazzKillerModule() {
     useAudioCleanup('jazz-killer');
@@ -623,6 +624,10 @@ export default function JazzKillerModule() {
                                             song={selectedSong}
                                             onClose={() => setShowPracticeTips(false)}
                                         />
+                                    )}
+
+                                    {selectedStandard && (
+                                        <SmartLessonPane songId={selectedStandard.Title.toLowerCase().replace(/\s+/g, '-')} />
                                     )}
                                 </div>
                             </>
