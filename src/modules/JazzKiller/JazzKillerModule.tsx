@@ -12,7 +12,7 @@ import {
     pianoReverbSignal,
     reverbVolumeSignal
 } from './state/jazzSignals';
-import { Play, Volume2, Search, X, Target, Music, StopCircle, Sliders, ChevronDown, ChevronUp } from 'lucide-react';
+import { Play, Volume2, Search, X, Target, Music, StopCircle, Sliders, ChevronDown, ChevronUp, Lock } from 'lucide-react';
 import { SendToMenu } from '../../components/shared/SendToMenu';
 import { useAudioCleanup } from '../../hooks/useAudioManager';
 import { usePracticeStore } from '../../core/store/usePracticeStore';
@@ -404,24 +404,64 @@ export default function JazzKillerModule() {
                         )}
 
                         {!searchQuery && (
-                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 py-4">
-                                {['Autumn Leaves', 'Blue Bossa', 'Solar', 'Tune Up', 'Summertime', 'All The Things You Are'].map(title => {
-                                    const song = standards.find(s => s.Title === title);
-                                    if (!song) return null;
-                                    return (
-                                        <button
-                                            key={title}
-                                            onClick={() => handleSelectSong(song)}
-                                            className="p-6 bg-neutral-900/50 border border-white/5 rounded-3xl text-left hover:bg-neutral-800 transition-all group"
-                                        >
-                                            <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center mb-4 group-hover:bg-amber-500 group-hover:text-black transition-all">
-                                                <Music size={18} />
+                            <div className="flex flex-col gap-10 py-6 w-full animate-in slide-in-from-bottom-4 duration-500">
+
+                                {/* Featured / Available Now */}
+                                <div>
+                                    <div className="flex items-center gap-3 mb-6 px-2">
+                                        <div className="h-px bg-gradient-to-r from-transparent via-amber-500/30 to-transparent flex-1" />
+                                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-amber-500/80">Featured Standards</span>
+                                        <div className="h-px bg-gradient-to-r from-transparent via-amber-500/30 to-transparent flex-1" />
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                        {standards.slice(0, 9).map((song, i) => (
+                                            <button
+                                                key={i}
+                                                onClick={() => handleSelectSong(song)}
+                                                className="relative overflow-hidden p-5 bg-neutral-900/40 border border-white/5 hover:border-amber-500/30 rounded-2xl text-left hover:bg-neutral-800/60 transition-all group duration-300"
+                                            >
+                                                <div className="absolute inset-0 bg-gradient-to-br from-amber-500/0 via-amber-500/0 to-amber-500/5 group-hover:via-amber-500/5 group-hover:to-amber-500/10 transition-all duration-500" />
+
+                                                <div className="relative flex items-start justify-between">
+                                                    <div>
+                                                        <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center mb-3 group-hover:bg-amber-500 group-hover:text-black transition-all duration-300 shadow-lg shadow-black/20">
+                                                            <Music size={18} />
+                                                        </div>
+                                                        <h3 className="font-bold text-neutral-200 group-hover:text-amber-100 text-lg leading-tight mb-1 transition-colors">{song.Title}</h3>
+                                                        <p className="text-xs text-neutral-500 group-hover:text-neutral-400 transition-colors uppercase tracking-wider font-medium">{song.Composer}</p>
+                                                    </div>
+                                                    <div className="opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
+                                                        <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center border border-white/10">
+                                                            <Play size={12} className="ml-0.5 text-amber-500" fill="currentColor" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Coming Soon */}
+                                <div className="opacity-60 hover:opacity-100 transition-opacity duration-500">
+                                    <div className="flex items-center gap-3 mb-6 px-2">
+                                        <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent flex-1" />
+                                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-neutral-600">Coming Soon</span>
+                                        <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent flex-1" />
+                                    </div>
+
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                        {['Rhythm Changes', 'Giant Steps', 'Stella By Starlight', 'So What'].map((title, i) => (
+                                            <div key={i} className="p-4 rounded-2xl border border-white/5 bg-white/5 flex flex-col items-center justify-center text-center gap-2 group cursor-not-allowed hover:bg-white/10 transition-colors">
+                                                <div className="w-8 h-8 rounded-full bg-black/20 flex items-center justify-center mb-1 group-hover:scale-110 transition-transform">
+                                                    <Lock size={14} className="text-neutral-600" />
+                                                </div>
+                                                <span className="text-xs font-bold text-neutral-400 group-hover:text-neutral-300 transition-colors">{title}</span>
                                             </div>
-                                            <h3 className="font-bold text-neutral-200 group-hover:text-white">{song.Title}</h3>
-                                            <p className="text-xs text-neutral-600 mt-1">{song.Composer}</p>
-                                        </button>
-                                    );
-                                })}
+                                        ))}
+                                    </div>
+                                </div>
+
                             </div>
                         )}
 
@@ -441,7 +481,9 @@ export default function JazzKillerModule() {
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-3">
-                                    <Play size={16} className="text-amber-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    <div className="px-3 py-1 bg-white/5 rounded-full text-[10px] font-bold uppercase tracking-wider text-neutral-500 group-hover:text-neutral-300 transition-colors border border-transparent group-hover:border-white/10">
+                                        Analyze
+                                    </div>
                                 </div>
                             </button>
                         ))}
