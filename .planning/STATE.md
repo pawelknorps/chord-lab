@@ -25,7 +25,8 @@
 - [x] Defined Chord Lab AI chatbot and AI drill actions in PROJECT.md, REQUIREMENTS.md, ROADMAP.md.
 
 ## Currently Working On
-- **Next**: Phase 5 (AI Drill Actions) when needed; Phase 4 complete. Phase 6 complete.
+- **Focus**: Make the Chord Lab AI assistant work—verify end-to-end flow (open Smart Lesson → Progression Assistant chat → ask about progression → get answer); improve discoverability if needed; fix any bugs (e.g. chord format, LocalAgentService init); ensure clear UX (loading, errors, Nano banner).
+- Phase 5 (AI Drill Actions) deferred; Phase 4 and Phase 6 complete.
 
 ## Blockers
 - None.

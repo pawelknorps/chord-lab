@@ -1,5 +1,8 @@
 # Project: Semantic AI Mentor (Theory-Augmented Local AI)
 
+## Current focus
+**Make the Chord Lab AI assistant work**: Ensure the Progression Assistant (local AI chatbot in Chord Lab) is discoverable, reliable, and gives clear UX—e.g. user can open Smart Lesson, use the chat to ask about the progression and get coherent answers; Gemini Nano availability and fallbacks are clear.
+
 ## Vision Statement
 
 Evolve the AI integration from a generic text generator into a **local-first Music Theory specialist** used across the app: in **JazzKiller** for song-focused pedagogy and proactive advice, and in **Chord Lab** as a **progression chatbot** that answers questions, suggests continuations/alternatives, and explains harmony. By pre-processing context into structured "Theory Bundles" (or progression summaries) before prompting, Gemini Nano delivers deep, context-aware insights without cloud cost.

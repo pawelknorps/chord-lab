@@ -41,6 +41,7 @@
 - **REQ-CL-AI-03**: **Q&A and explanations**: AI answers questions about the current progression (e.g. "Why does this work?", "What scale over this chord?", "Explain the ii–V here").
 - **REQ-CL-AI-04**: **Continuations and alternatives**: AI suggests next chords or alternative progressions (e.g. "What could follow?", "Give me a ii–V in Ab", "Substitute for the G7").
 - **REQ-CL-AI-05**: Use existing LocalAgentService (Gemini Nano); reuse theory core (RomanNumeralAnalyzer, ChordScaleEngine, etc.) for context. No cloud LLM in v1.
+- **REQ-CL-AI-06**: **Make it work**: Chord Lab AI assistant is discoverable and works end-to-end—user can open Smart Lesson, use Progression Assistant chat, ask about the progression, and get coherent answers; loading and error states are clear; Gemini Nano availability (or fallback) is communicated (e.g. banner).
 
 ## v2: Future Considerations (Deferred)
 - **REQ-AI-05**: Persistent User Weakness Map (Track which scales the user fails at).
