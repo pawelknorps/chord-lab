@@ -16,7 +16,38 @@ interface AnalysisToolbarProps {
     orientation?: 'horizontal' | 'vertical';
 }
 
-// ... existing config ...
+const FILTER_CONFIG = [
+    {
+        key: 'showMajorTwoFiveOne' as keyof AnalysisFilters,
+        label: 'ii-V-I',
+        color: 'emerald',
+        description: 'Major ii-V-I progressions',
+    },
+    {
+        key: 'showMinorTwoFiveOne' as keyof AnalysisFilters,
+        label: 'iiø-V-i',
+        color: 'purple',
+        description: 'Minor ii-V-i progressions',
+    },
+    {
+        key: 'showSecondaryDominants' as keyof AnalysisFilters,
+        label: 'V/x',
+        color: 'amber',
+        description: 'Secondary dominants',
+    },
+    {
+        key: 'showTritoneSubstitutions' as keyof AnalysisFilters,
+        label: '♭II⁷',
+        color: 'rose',
+        description: 'Tritone substitutions',
+    },
+    {
+        key: 'showColtraneChanges' as keyof AnalysisFilters,
+        label: 'Giant Steps',
+        color: 'cyan',
+        description: 'Coltrane changes',
+    },
+];
 
 export function AnalysisToolbar({
     filters,
