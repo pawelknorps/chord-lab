@@ -12,7 +12,7 @@ import {
     pianoReverbSignal,
     reverbVolumeSignal
 } from './state/jazzSignals';
-import { Play, Pause, SkipBack, SkipForward, Volume2, Search, X, ChevronDown, ChevronUp, Sliders, Target, Music, StopCircle } from 'lucide-react';
+import { Play, Volume2, Search, X, Target, Music, StopCircle, Sliders } from 'lucide-react';
 import { SendToMenu } from '../../components/shared/SendToMenu';
 import { useAudioCleanup } from '../../hooks/useAudioManager';
 import { usePracticeStore } from '../../core/store/usePracticeStore';
@@ -33,7 +33,6 @@ export default function JazzKillerModule() {
     const [showDrillMode, setShowDrillMode] = useState(false);
     const [showProfilePanel, setShowProfilePanel] = useState(false);
     const [showBarRangeDrill, setShowBarRangeDrill] = useState(false);
-    const [showRelated, setShowRelated] = useState(false);
     const { standards, getSongAsIRealFormat } = useJazzLibrary();
 
     // Practice Store integration
