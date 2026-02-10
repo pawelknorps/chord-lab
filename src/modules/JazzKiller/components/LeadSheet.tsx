@@ -10,12 +10,15 @@ import { GuideToneOverlay } from './GuideToneOverlay';
 
 interface LeadSheetProps {
     song: any;
+    filteredPatterns?: any[];
 }
 
-export const LeadSheet = ({ song }: LeadSheetProps) => {
+export const LeadSheet = ({ song, filteredPatterns }: LeadSheetProps) => {
     useSignals();
     const activeRef = useRef<HTMLDivElement>(null);
     const { detectedPatterns, activeFocusIndex, focusOnPattern, showAnalysis } = usePracticeStore();
+
+    const patternsToDisplay = filteredPatterns || detectedPatterns;
 
     useEffect(() => {
         // Automatic scroll to active measure (React-based scroll is fine for measure changes)
@@ -59,7 +62,7 @@ export const LeadSheet = ({ song }: LeadSheetProps) => {
                     <GuideToneOverlay />
                     {showAnalysis && (
                         <AnalysisOverlay
-                            concepts={detectedPatterns}
+                            concepts={patternsToDisplay}
                             measureCount={song.music.measures.length}
                             onConceptClick={(concept, index) => focusOnPattern(index)}
                             activeFocusIndex={activeFocusIndex}
