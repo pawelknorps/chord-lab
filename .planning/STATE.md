@@ -10,10 +10,11 @@
 - **Phase 3: Interactive Sidebar**: 70% (Reactive Chat, Range Focus selection)
 - **Phase 4: Polish & Theory Calibration & Nano Hardening**: In progress (token optimization, theory validation; **new**: stateless prompts, atomic template, guardrails temp/topK/session reset, Tonal.js validator)
 - **Phase 5: AI Drill Actions (Practice Studio)**: 0% (parse/execute/strip `[[DRILL:SPOTLIGHT]]` etc. in "Get AI lesson")
-- **Phase 6: Chord Lab Progression Chatbot**: 0% (progression context, chatbot UI, Q&A and continuations)
+- **Phase 6: Chord Lab Progression Chatbot**: 100% (progression bundle, chatbot UI, Q&A and continuations)
 
 ## Recently Completed / Updated
-- [x] **Project refinement**: PROJECT.md, REQUIREMENTS.md, ROADMAP.md updated with Gemini Nano Stateless Logic, Prompt Hardening (State-to-Prompt, Atomic Prompt, Few-Shot, CoT), Technical Guardrails (temp 0.2, topK 3, session reset), and Validator pattern (Tonal.js validates AI-suggested notes).
+- [x] **Phase 6 – Chord Lab Progression Chatbot**: `progressionContext.ts` (bundle, prompt, strip); SmartLessonPane chat section (Progression Assistant) wired to LocalAgentService; scale prop passed from ChordLab.
+- [x] **Project refinement**: PROJECT.md, REQUIREMENTS.md, ROADMAP.md updated with Gemini Nano Stateless Logic, Prompt Hardening, etc.
 - [x] Implemented `AiContextService.ts` with Semantic Markdown output.
 - [x] Updated `jazzTeacherLogic.ts` to consume high-density theory data.
 - [x] Created `useAiTeacher.ts` hook for proactive prompts.
@@ -23,7 +24,7 @@
 - [x] Defined Chord Lab AI chatbot and AI drill actions in PROJECT.md, REQUIREMENTS.md, ROADMAP.md.
 
 ## Currently Working On
-- **Next**: Phase 4 Nano hardening (atomic prompts, state slice 4+4 bars, theory grounding, guardrails temp/topK/session reset, validator) and/or Phase 5 (AI Drill Actions) and/or Phase 6 (Chord Lab chatbot). PROJECT/REQUIREMENTS/ROADMAP updated with Stateless Logic, Prompt Hardening, and Validator pattern; ready for phase planning (e.g. `/gsd-plan-phase 4` or `/gsd-plan-phase 5` or `/gsd-plan-phase 6`).
+- **Next**: Phase 4 Nano hardening and/or Phase 5 (AI Drill Actions in Practice Studio). Phase 6 complete.
 
 ## Blockers
 - None.

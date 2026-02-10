@@ -37,10 +37,10 @@
 - [ ] **Step 15**: Shared parser/grammar for SmartLessonPane and Practice Studio (optional but recommended).
 - **Success Criteria**: Lesson ending with `[[DRILL:SPOTLIGHT]]` starts the loop and hides the token; `[[SET:BPM:120]]` sets BPM.
 
-## Phase 6: Chord Lab Progression Chatbot
+## Phase 6: Chord Lab Progression Chatbot ✅
 *Goal: Local AI in Chord Lab as a chatbot that answers questions about progressions, suggests continuations/alternatives, and explains.*
-- [ ] **Step 16**: Build "progression bundle" from Chord Lab state (chords, key, scale, Roman numerals) for prompt context.
-- [ ] **Step 17**: Add Chord Lab–specific system prompt and optional `ChordLabContextService` (or extend AiContextService) for progression-only context.
-- [ ] **Step 18**: Chatbot UI in Chord Lab (sidebar or collapsible panel): input + message history, wired to LocalAgentService with progression context.
-- [ ] **Step 19**: Support Q&A ("Why does this work?", "Scale over G7?"), continuations ("What could follow?"), and alternatives ("Substitute for the G7").
+- [x] **Step 16**: Build "progression bundle" from Chord Lab state (chords, key, scale, Roman numerals) for prompt context.
+- [x] **Step 17**: Add Chord Lab–specific system prompt and optional `ChordLabContextService` (or extend AiContextService) for progression-only context.
+- [x] **Step 18**: Chatbot UI in Chord Lab (sidebar or collapsible panel): input + message history, wired to LocalAgentService with progression context.
+- [x] **Step 19**: Support Q&A ("Why does this work?", "Scale over G7?"), continuations ("What could follow?"), and alternatives ("Substitute for the G7").
 - **Success Criteria**: User can ask about the current progression and get coherent answers and suggestions; no raw `[[...]]` in Chord Lab chat (or define a minimal command set later).
