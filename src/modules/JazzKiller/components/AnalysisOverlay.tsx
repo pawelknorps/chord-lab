@@ -1,5 +1,259 @@
 import { Concept } from '../../../core/theory/AnalysisTypes';
+import { useState, useEffect, RefObject } from 'react';
 
+interface AnalysisOverlayProps {
+    concepts: Concept[];
+    measureCount: number;
+    onConceptClick?: (concept: Concept, index: number) => void;
+    activeFocusIndex?: number | null;
+    gridRef?: RefObject<HTMLDivElement | null>;
+}
+
+const CONCEPT_COLORS: Record<string, { bg: string; border: string; text: string; label: string }> = {
+    'MajorII-V-I': {
+        bg: 'bg-emerald-500/10',
+        border: 'border-emerald-500',
+        text: 'text-emerald-400',
+        label: '2-5-1',
+    },
+    'MinorII-V-i': {
+        bg: 'bg-purple-500/10',
+        border: 'border-purple-500',
+        text: 'text-purple-400',
+        label: '2-5-1 (minor)',
+    },
+    'SecondaryDominant': {
+        bg: 'bg-amber-500/10',
+        border: 'border-amber-500',
+        text: 'text-amber-400',
+        label: 'V/x',
+    },
+    'TritoneSubstitution': {
+        bg: 'bg-rose-500/10',
+        border: 'border-rose-500',
+        text: 'text-rose-400',
+        label: '♭II⁷',
+    },
+    'ColtraneChanges': {
+        bg: 'bg-cyan-500/10',
+        border: 'border-cyan-500',
+        text: 'text-cyan-400',
+        label: 'Giant Steps',
+    },
+};
+
+export function AnalysisOverlay({
+    concepts,
+    measureCount,
+    onConceptClick,
+    activeFocusIndex,
+    gridRef
+}: AnalysisOverlayProps) {
+    if (concepts.length === 0) return null;
+
+    return (
+        <div className="absolute inset-0 pointer-events-none z-10">
+            {concepts.map((concept, index) => {
+                const colorScheme = CONCEPT_COLORS[concept.type] || CONCEPT_COLORS['MajorII-V-I'];
+                const isActive = activeFocusIndex === index;
+
+                return (
+                    <AnalysisBracket
+                        key={`${concept.type}-${index}`}
+                        concept={concept}
+                        index={index}
+                        isActive={isActive}
+                        colorScheme={colorScheme}
+                        onConceptClick={onConceptClick}
+                        gridRef={gridRef}
+                    />
+                );
+            })}
+        </div>
+    );
+}
+
+interface Segment {
+    top: number;
+    left: number;
+    width: number;
+    height: number;
+}
+
+function AnalysisBracket({ concept, index, isActive, colorScheme, onConceptClick, gridRef }: any) {
+    const [segments, setSegments] = useState<Segment[]>([]);
+    const [hidden, setHidden] = useState(true);
+
+    useEffect(() => {
+        const updatePosition = () => {
+            if (!gridRef?.current) return;
+
+            const containerRect = gridRef.current.getBoundingClientRect();
+            // Get all direct children (measures)
+            const measureElements = Array.from(gridRef.current.children).filter(el => !el.classList.contains('pointer-events-none')) as HTMLElement[];
+            // Filter out the overlay itself if it's a child. The overlay has 'pointer-events-none' usually, but check carefully.
+            // Actually, the overlay is inside gridRef.current? Yes.
+            // The overlay is absolute. The measures are static/grid items.
+            // Measures usually have border classes.
+
+            const validMeasures = measureElements.filter(el => el.classList.contains('border-black') || el.classList.contains('border-r') || el.tagName === 'DIV');
+            // Assuming measures are the main children. The overlay is absolute so it doesn't participate in flow, but it is in 'children'.
+
+            // To be safe, let's use index directly on filtered children.
+            // LeadSheet structure: {overlay} {measure} {measure}...
+            // So overlay is index 0 if rendered first.
+            // Step 884: overlay is first child.
+            // So indices are off by 1?
+            // "song.music.measures.map" renders measures.
+            // Better selector: ':scope > div:not(.absolute)'? Measures have 'relative' class usually.
+
+            // Let's rely on the fact that measures have specific classes.
+            // Or simpler: gridRef children starting from index 1 (if overlay is 0).
+            // But if overlay is conditional...
+
+            // Let's querySelectorAll direct children that are measures.
+            // Measures have 'border-black'.
+            const correctMeasureElements = Array.from(gridRef.current.querySelectorAll(':scope > div.border-black'));
+
+            if (correctMeasureElements.length === 0) return;
+
+            const rects: DOMRect[] = [];
+            for (let i = concept.startIndex; i <= concept.endIndex; i++) {
+                const el = correctMeasureElements[i];
+                if (el) {
+                    rects.push(el.getBoundingClientRect());
+                }
+            }
+
+            if (rects.length === 0) return;
+
+            // Compute segments
+            const newSegments: Segment[] = [];
+            let currentSegment: { top: number; left: number; right: number; bottom: number } | null = null;
+
+            rects.forEach(rect => {
+                const rTop = rect.top - containerRect.top;
+                const rLeft = rect.left - containerRect.left;
+                const rRight = rect.right - containerRect.left;
+                const rBottom = rect.bottom - containerRect.top;
+
+                if (!currentSegment) {
+                    currentSegment = { top: rTop, left: rLeft, right: rRight, bottom: rBottom };
+                } else {
+                    // Check if on same row (within small tolerance)
+                    if (Math.abs(rTop - currentSegment.top) < 10) {
+                        // Extend
+                        currentSegment.right = Math.max(currentSegment.right, rRight);
+                        currentSegment.bottom = Math.max(currentSegment.bottom, rBottom);
+                        // Left stays same (min)
+                    } else {
+                        // Push and start new
+                        newSegments.push({
+                            top: currentSegment.top,
+                            left: currentSegment.left,
+                            width: currentSegment.right - currentSegment.left,
+                            height: currentSegment.bottom - currentSegment.top
+                        });
+                        currentSegment = { top: rTop, left: rLeft, right: rRight, bottom: rBottom };
+                    }
+                }
+            });
+
+            if (currentSegment) {
+                newSegments.push({
+                    top: currentSegment.top,
+                    left: currentSegment.left,
+                    width: currentSegment.right - currentSegment.left,
+                    height: currentSegment.bottom - currentSegment.top
+                });
+            }
+
+            setSegments(newSegments);
+            setHidden(false);
+        };
+
+        const resizeObserver = new ResizeObserver(updatePosition);
+        if (gridRef?.current) {
+            resizeObserver.observe(gridRef.current);
+        }
+
+        // Also update on window resize/scroll just in case
+        window.addEventListener('resize', updatePosition);
+        // Initial
+        requestAnimationFrame(updatePosition);
+
+        return () => {
+            window.removeEventListener('resize', updatePosition);
+            resizeObserver.disconnect();
+        };
+    }, [concept.startIndex, concept.endIndex, gridRef]);
+
+    if (hidden || segments.length === 0) return null;
+
+    return (
+        <>
+            {segments.map((style, segIndex) => (
+                <button
+                    key={segIndex}
+                    onClick={() => onConceptClick?.(concept, index)}
+                    className={`
+                        absolute pointer-events-auto
+                        border-2 
+                        transition-all duration-300
+                        ${colorScheme.bg} ${colorScheme.border}
+                        ${isActive ? 'ring-4 ring-amber-500/50 scale-[1.01] z-30' : 'hover:scale-[1.005] z-20'}
+                        cursor-pointer group
+                        ${segIndex === 0 ? 'rounded-tl-xl rounded-bl-xl' : ''}
+                        ${segIndex === segments.length - 1 ? 'rounded-tr-xl rounded-br-xl' : ''}
+                        ${segments.length === 1 ? 'rounded-xl' : ''}
+                    `}
+                    style={{
+                        top: `${style.top}px`,
+                        left: `${style.left}px`,
+                        width: `${style.width}px`,
+                        height: `${style.height}px`,
+                    }}
+                >
+                    {/* Label only on first segment */}
+                    {segIndex === 0 && (
+                        <div
+                            className={`
+                                absolute -top-5 left-2
+                                px-2 py-0.5 rounded-md
+                                text-[10px] font-black uppercase tracking-wider
+                                ${colorScheme.bg} ${colorScheme.text}
+                                border ${colorScheme.border}
+                                shadow-lg backdrop-blur-sm
+                                ${isActive ? 'animate-pulse' : ''}
+                                z-40 whitespace-nowrap
+                            `}
+                        >
+                            {colorScheme.label}
+                        </div>
+                    )}
+
+                    {/* Corner brackets */}
+                    <div className={`absolute inset-0 ${colorScheme.text} opacity-50`}>
+                        {/* Only show corners relevant to segment position */}
+                        {(segIndex === 0 || segments.length === 1) && (
+                            <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-current" />
+                        )}
+                        {(segIndex === 0 || segments.length === 1) && (
+                            <div className="absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-current" />
+                        )}
+
+                        {(segIndex === segments.length - 1 || segments.length === 1) && (
+                            <div className="absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-current" />
+                        )}
+                        {(segIndex === segments.length - 1 || segments.length === 1) && (
+                            <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-current" />
+                        )}
+                    </div>
+                </button>
+            ))}
+        </>
+    );
+}
 interface AnalysisOverlayProps {
     concepts: Concept[];
     measureCount: number;
