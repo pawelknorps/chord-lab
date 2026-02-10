@@ -6,7 +6,6 @@ import {
 } from '../state/jazzSignals';
 import { usePracticeStore } from '../../../core/store/usePracticeStore';
 import { AnalysisOverlay } from './AnalysisOverlay';
-import { GuideToneOverlay } from './GuideToneOverlay';
 
 interface LeadSheetProps {
     song: any;
@@ -59,7 +58,6 @@ export const LeadSheet = ({ song, filteredPatterns }: LeadSheetProps) => {
 
                 {/* Analysis Overlay - Visual Brackets */}
                 <div className="relative">
-                    <GuideToneOverlay />
                     {showAnalysis && (
                         <AnalysisOverlay
                             concepts={patternsToDisplay}
@@ -75,12 +73,16 @@ export const LeadSheet = ({ song, filteredPatterns }: LeadSheetProps) => {
                             const isSystemStart = index % 4 === 0;
                             const isSystemEnd = index % 4 === 3;
 
+                            // Guide Tones for this measure
+                            const { guideTones, showGuideTones } = usePracticeStore();
+                            const gt = guideTones.get(index);
+
                             return (
                                 <div
                                     key={index}
                                     ref={isActive ? activeRef : null}
                                     className={`
-                                    relative h-24 md:h-32 p-2 flex items-center justify-center
+                                    relative h-24 md:h-32 p-2 flex flex-col items-center justify-center
                                     border-black
                                     ${!isSystemEnd ? 'border-r-2 md:border-r' : 'border-r-0'} 
                                     ${index >= 4 ? 'border-t' : ''}
@@ -101,8 +103,20 @@ export const LeadSheet = ({ song, filteredPatterns }: LeadSheetProps) => {
                                         />
                                     )}
 
+                                    {/* Guide Tones (Inline) */}
+                                    {showGuideTones && gt && (
+                                        <div className="flex gap-1 text-[10px] font-bold justify-center items-center mb-1 z-10 transition-opacity duration-200">
+                                            <span className="text-emerald-600 bg-emerald-50/90 px-1.5 py-0.5 rounded shadow-sm border border-emerald-200/50 backdrop-blur-sm">
+                                                3: {gt.third}
+                                            </span>
+                                            <span className="text-blue-600 bg-blue-50/90 px-1.5 py-0.5 rounded shadow-sm border border-blue-200/50 backdrop-blur-sm">
+                                                7: {gt.seventh}
+                                            </span>
+                                        </div>
+                                    )}
+
                                     {/* Chords */}
-                                    <div className="text-2xl md:text-3xl font-bold font-jazz w-full text-center">
+                                    <div className="text-2xl md:text-3xl font-bold font-jazz w-full text-center z-10 relative">
                                         {renderMeasureChords(measure)}
                                     </div>
                                 </div>
