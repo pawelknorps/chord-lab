@@ -33,6 +33,7 @@ export default function JazzKillerModule() {
     const [showDrillMode, setShowDrillMode] = useState(false);
     const [showProfilePanel, setShowProfilePanel] = useState(false);
     const [showBarRangeDrill, setShowBarRangeDrill] = useState(false);
+    const [showRelated, setShowRelated] = useState(false);
     const { standards, getSongAsIRealFormat } = useJazzLibrary();
 
     // Practice Store integration
@@ -601,26 +602,37 @@ export default function JazzKillerModule() {
                             </div>
                         )}
 
-                        {/* Related Standards - Right Sidebar */}
-                        {!isPlayingSignal.value && !showMixer && !showPracticePanel && (
-                            <div className="w-64 bg-neutral-900/40 backdrop-blur-md border border-white/5 p-4 flex flex-col gap-4 animate-in slide-in-from-right duration-500 rounded-3xl overflow-y-auto max-h-full custom-scrollbar">
-                                <div className="flex items-center justify-between">
-                                    <h3 className="text-xs font-bold text-neutral-500 uppercase tracking-widest flex items-center gap-2">
-                                        <Music size={14} className="text-amber-500" />
-                                        Up Next
-                                    </h3>
-                                </div>
-                                <div className="flex flex-col gap-2">
-                                    {nextStandards.map((std, i) => (
-                                        <button
-                                            key={i}
-                                            onClick={() => handleSelectSong(std)}
-                                            className="p-3 bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl text-left transition-all group"
-                                        >
-                                            <h4 className="text-sm font-bold text-neutral-200 group-hover:text-amber-400 truncate">{std.Title}</h4>
-                                            <p className="text-[10px] text-neutral-600 truncate">{std.Composer}</p>
-                                        </button>
-                                    ))}
+                        {/* Footer Widget - Up Next (Bottom Left) */}
+                        {!isPlayingSignal.value && (
+                            <div className="absolute bottom-6 left-6 z-30">
+                                <div className="w-64 bg-neutral-900/80 backdrop-blur-xl border border-white/10 rounded-2xl p-3 shadow-2xl transition-all duration-300">
+                                    <button
+                                        onClick={() => setShowRelated(!showRelated)}
+                                        className="w-full flex items-center justify-between group p-1"
+                                    >
+                                        <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-widest flex items-center gap-2 group-hover:text-amber-500 transition-colors">
+                                            <Music size={14} />
+                                            Up Next
+                                        </h3>
+                                        <div className={`text-neutral-500 transition-transform duration-300 ${showRelated ? '' : 'rotate-180'}`}>
+                                            <ChevronDown size={14} />
+                                        </div>
+                                    </button>
+
+                                    {showRelated && (
+                                        <div className="mt-3 flex flex-col gap-2 max-h-64 overflow-y-auto custom-scrollbar animate-in slide-in-from-bottom-2 duration-300 pt-2 border-t border-white/5">
+                                            {nextStandards.map((std, i) => (
+                                                <button
+                                                    key={i}
+                                                    onClick={() => handleSelectSong(std)}
+                                                    className="p-3 bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl text-left transition-all group"
+                                                >
+                                                    <h4 className="text-sm font-bold text-neutral-200 group-hover:text-amber-400 truncate">{std.Title}</h4>
+                                                    <p className="text-[10px] text-neutral-600 truncate">{std.Composer}</p>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         )}
