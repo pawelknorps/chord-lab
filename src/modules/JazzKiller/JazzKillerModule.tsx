@@ -33,6 +33,7 @@ export default function JazzKillerModule() {
     const [showDrillMode, setShowDrillMode] = useState(false);
     const [showProfilePanel, setShowProfilePanel] = useState(false);
     const [showBarRangeDrill, setShowBarRangeDrill] = useState(false);
+    const [showRelated, setShowRelated] = useState(false);
     const { standards, getSongAsIRealFormat } = useJazzLibrary();
 
     // Practice Store integration
@@ -597,21 +598,36 @@ export default function JazzKillerModule() {
                     </div>
 
                     {/* Next Standards Section - Hidden when playing to save space */}
+                    {/* Next Standards Section */}
                     {!isPlayingSignal.value && (
-                        <div className="px-8 py-6 border-t border-white/5 bg-neutral-900/30 animate-in slide-in-from-bottom duration-500">
-                            <h3 className="text-xs font-bold text-neutral-500 uppercase tracking-widest mb-4">Up Next • Related Standards</h3>
-                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-                                {nextStandards.map((std, i) => (
-                                    <button
-                                        key={i}
-                                        onClick={() => handleSelectSong(std)}
-                                        className="p-3 bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl text-left transition-all group"
-                                    >
-                                        <h4 className="text-sm font-bold text-neutral-200 group-hover:text-amber-400 truncate">{std.Title}</h4>
-                                        <p className="text-[10px] text-neutral-600 truncate">{std.Composer}</p>
-                                    </button>
-                                ))}
-                            </div>
+                        <div className="px-8 py-4 border-t border-white/5 bg-neutral-900/30 transition-all duration-300">
+                            <button
+                                onClick={() => setShowRelated(!showRelated)}
+                                className="w-full flex items-center justify-between group py-2"
+                            >
+                                <h3 className="text-xs font-bold text-neutral-500 uppercase tracking-widest flex items-center gap-2 group-hover:text-amber-500 transition-colors">
+                                    <Music size={14} />
+                                    Up Next • Related Standards
+                                </h3>
+                                <div className={`text-neutral-500 transition-transform duration-300 ${showRelated ? 'rotate-180' : ''}`}>
+                                    <ChevronDown size={16} />
+                                </div>
+                            </button>
+
+                            {showRelated && (
+                                <div className="mt-2 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 animate-in slide-in-from-top duration-300">
+                                    {nextStandards.map((std, i) => (
+                                        <button
+                                            key={i}
+                                            onClick={() => handleSelectSong(std)}
+                                            className="p-3 bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl text-left transition-all group"
+                                        >
+                                            <h4 className="text-sm font-bold text-neutral-200 group-hover:text-amber-400 truncate">{std.Title}</h4>
+                                            <p className="text-[10px] text-neutral-600 truncate">{std.Composer}</p>
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
