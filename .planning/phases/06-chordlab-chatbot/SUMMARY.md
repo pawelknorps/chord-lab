@@ -28,3 +28,6 @@ Local AI in Chord Lab as a chatbot that answers questions about progressions, su
 ## Files Touched
 - **New**: `src/core/services/progressionContext.ts`
 - **Modified**: `src/modules/ChordLab/components/SmartLessonPane.tsx`, `src/modules/ChordLab/ChordLab.tsx`
+
+## Later integration (Phase 4)
+- Chord Lab Progression Assistant chat responses now pass through `validateSuggestedNotes` (Tonal.js validator) so out-of-scale note suggestions are sanitized before display.
