@@ -47,6 +47,17 @@ export default function JazzKillerModule() {
         showColtraneChanges: true,
     });
 
+    const filteredPatterns = useMemo(() => {
+        return detectedPatterns.filter(pattern => {
+            if (pattern.type === 'MajorII-V-I') return analysisFilters.showMajorTwoFiveOne;
+            if (pattern.type === 'MinorII-V-i') return analysisFilters.showMinorTwoFiveOne;
+            if (pattern.type === 'SecondaryDominant') return analysisFilters.showSecondaryDominants;
+            if (pattern.type === 'TritoneSubstitution') return analysisFilters.showTritoneSubstitutions;
+            if (pattern.type === 'ColtraneChanges') return analysisFilters.showColtraneChanges;
+            return true;
+        });
+    }, [detectedPatterns, analysisFilters]);
+
     const selectedSong = useMemo(() => {
         if (!selectedStandard) return null;
         return getSongAsIRealFormat(selectedStandard, transposeSignal.value);
@@ -466,7 +477,7 @@ export default function JazzKillerModule() {
                         )}
 
                         <div className={`flex-1 overflow-y-auto pr-2 custom-scrollbar transition-all duration-300`}>
-                            <LeadSheet song={selectedSong} />
+                            <LeadSheet song={selectedSong} filteredPatterns={filteredPatterns} />
                         </div>
 
                         {/* Practice Exercise Panel (New Teaching Machine) - RIGHT */}
