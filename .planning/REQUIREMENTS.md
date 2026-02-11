@@ -1,39 +1,54 @@
-# Resonance AI Requirements
+# ITM Requirements (2026 Roadmap)
 
-## v1: The Radial Tonal Grid (Experimental UI)
+## Phase 1: The "Feedback" Engine
 
-### GRID-01: Visual Layout
-- **Requirement**: Create a radial UI where the Tonic (1) is in the absolute center.
-- **Spectrum**: Other intervals (b2 through 7) should be placed on concentric circles or at distances representing their relative stability.
-- **Visuals**: Use colors that represent "tonal color" (e.g., bright for Major, dark for Minor, sharp/electric for dissonant intervals).
+### REQ-FB-01: Guided Practice Sessions
+- **Requirement**: Implement "Guided Mode" where Gemini Nano narrates a 15-minute routine for a specific song.
+- **Components**: Scales (5 mins), Guide Tones (5 mins), Soloing (5 mins).
 
-### GRID-02: Interactive Logic
-- **Requirement**: Tapping a "node" on the grid plays that interval relative to the established tonal center.
-- **Feedback**: Sustained visual resonance (glow/pulse) when a node is active.
+### REQ-FB-02: Active Scoring Logic
+- **Requirement**: Use pitch detection to calculate an "Accuracy Score" (0-100%) in real-time.
+- **Bonus**: Implement "Target Note mastery" bonuses (hitting 3rds and 7ths on downbeats).
 
-### GRID-03: Functional Drill Mode
-- **Requirement**: Establish a key center (cadence) then prompt the user to find a specific function (e.g., "Find the Dominant").
-- **Success Criteria**: Correct node hit triggers a "resolution" animation and sound.
+### REQ-FB-03: Nano-Powered Critique
+- **Requirement**: Post-session analysis by Gemini Nano identifying specific strengths and weaknesses (e.g., "Consistently flat on the Bridge's II-V").
 
-## v2: Generative Context & AI Integration
+## Phase 2: The "Mastery Tree"
 
-### GEN-01: Gemini Nano MIDI Seeds
-- **Requirement**: Use Gemini Nano to generate a structured JSON object containing a 4-bar progression and a target melody note.
-- **Prompting**: Structured prompts that define "Genre", "Key", and "Function".
+### REQ-MT-01: Skill-Based Tagging
+- **Requirement**: Categorize 1,300+ standards by harmonic complexity (Diatonic, Secondary Dominants, Modal Interchange, etc.).
 
-### GEN-02: Multi-Timbral Rendering
-- **Requirement**: Use existing SoundFont/Sampler architecture to play the generative seeds with variety (Piano, Rhodes, Wurli, Synth).
+### REQ-MT-02: The Progress Map
+- **Requirement**: Create a visual tree (Duolingo style) where students must "Pass" a song at specific BPM/Accuracy thresholds to unlock the next.
 
-## v3: Vocal Harmonic Mirror
+### REQ-MT-03: Key Cycles (Rollins Routine)
+- **Requirement**: Automate "Mastery" tracking across multiple keys (e.g., must master in C, F, Bb, Eb to "Pass").
 
-### VOC-01: High-Precision Pitch Detection
-- **Requirement**: Connect the Universal Mic Handler to the Resonance engine.
-- **Accuracy**: Detection must be stable enough for students to sing into the app and get instant confirmation.
+## Phase 3: The "Sonic" Layer
 
-### VOC-02: Calibrated Feedback
-- **Requirement**: Provide "too sharp" or "too flat" feedback relative to the target functional note.
+### REQ-SL-01: Dynamic Mixer
+- **Requirement**: 3-track faders for Aebersold Stems (Drums, Bass, Piano).
+- **Functionality**: Allow soloing/muting specific instruments for targeted practice.
 
-## Out of Scope
-- Wearable haptics.
-- Multi-user collaboration.
-- Complex rhythmic dictation (for now).
+### REQ-SL-02: Visual Transcription
+- **Requirement**: Real-time "Note Waterfall" showing the shapes of jazz licks as they are played.
+
+### REQ-SL-03: Tone Matching
+- **Requirement**: Analyze mic input spectrum to detect tone quality (e.g., "honking" saxophone or "muddy" guitar).
+
+## Phase 4: Cloud & Community
+
+### REQ-CC-01: Teacher Dashboard
+- **Requirement**: Implementation of "Classrooms" via Supabase where teachers can monitor student progress (BPM, Heatmaps).
+
+### REQ-CC-02: Lick Sharing
+- **Requirement**: Allow students to publish/subscribe to Lick formulas from the Lick Converter.
+
+### REQ-CC-03: Mobile PWA
+- **Requirement**: Ensure full PWA compatibility for offline practice room use.
+
+## Technical Priorities
+1. **High**: Pitch-to-Theory Sync (Turns app from book into teacher).
+2. **Medium**: Gemini Nano Hint Loop (Ear training "AHA!" moments).
+3. **Medium**: Cloudflare R2 Audio Hosting (Fast stem loading).
+4. **Low**: Visual Geometry (p5.js aesthetics).

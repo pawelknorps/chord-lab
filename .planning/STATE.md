@@ -1,20 +1,22 @@
-# Resonance AI Project State
+# ITM Project State
 
-## Current Phase: Phase 1 (The Radial Tonal Grid)
-**Status**: Initializing
+## Current Phase: Phase 1: The "Feedback" Engine
+**Milestone**: Transitioning to active listening and scoring.
 
-### Completed (v0.1)
-- [x] Project Vision Defined (`PROJECT.md`)
-- [x] Requirements Scoped (`REQUIREMENTS.md`)
-- [x] Roadmap Outlined (`ROADMAP.md`)
+### Progress Summary
+- [x] Initial Vision & Roadmap defined for ITM 2026.
+- [ ] Implement Zustand Scoring Logic (Starting).
 
-### Active Tasks
-- [ ] Bootstrap `ResonanceModule` component structure.
-- [ ] Create the SVG-based `RadialGrid` foundation.
+### Active Requirements
+| ID | Description | Status |
+| :--- | :--- | :--- |
+| REQ-FB-01 | Guided Practice Sessions | Not Started |
+| REQ-FB-02 | Active Scoring Logic | Starting |
+| REQ-FB-03 | Nano-Powered Critique | Not Started |
+
+### Recent Achievements
+- Defined the 4-phase roadmap for ITM 2026.
+- Established the core tech stack for scoring (Zustand + Tonal.js + Pitch Detection).
 
 ### Blockers
 - None.
-
-### Upcoming Milestones
-- **MS1: Gravity Grid**: Functional radial layout with interactive notes.
-- **MS2: Functional Drills**: Cadence-based ear training on the grid.

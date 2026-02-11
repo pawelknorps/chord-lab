@@ -1,38 +1,40 @@
-# Resonance AI Roadmap
+# ITM Roadmap 2026
 
-## Phase 1: The Radial Tonal Grid (Current)
-*Focus: The "Visualizing Sound" pillar.*
+## Phase 1: The "Feedback" Engine
+*Focus: Turning the app into an active listener and teacher.*
 
-- **Success Criteria**: A working experimental module where a user can identify scale degrees on a radial grid after a cadence.
+- **Success Criteria**: Student can play along to a song and receive a numerical accuracy score based on microphone input.
 - **Tasks**:
-  - [ ] Initialize `ResonanceModule` folder structure.
-  - [ ] Implement `RadialGrid` UI component using SVG/Framer Motion.
-  - [ ] Integrate with `Tonal.js` for functional interval logic.
-  - [ ] Add basic "Tonal Center" setup (cadence player).
-  - [ ] First "Search & Find" drill implemented.
+  - [ ] Implement **Zustand Scoring Logic**: Real-time comparison of Mic Pitch to Tonal.js Chord Tones.
+  - [ ] Build **Guided Practice UI**: Component to manage the 15-minute routine timer and narrations.
+  - [ ] Integrate **Gemini Nano Analysis**: Hook that summarizes session performance into a pedagogical critique.
+  - [ ] Create **Performance Heatmap**: Visualization of where in the song the student succeeded/failed.
 
-## Phase 2: AI Generative Seeds
-*Focus: Crossing the bridge from exercises to "Real Music."*
+## Phase 2: The "Mastery Tree"
+*Focus: Standardizing the 1,300 standards into a learning path.*
 
-- **Success Criteria**: Ear training questions are based on AI-generated "songs" rather than static MIDI.
+- **Success Criteria**: A user can navigate a visual tree and unlock songs based on their performance data.
 - **Tasks**:
-  - [ ] Create `GeminiMusicService` to wrap Nano calls for musical data.
-  - [ ] Build "Song-to-Sampler" pipeline (rendering AI JSON to Tone.js).
-  - [ ] Implement "Contextual Identification" levels.
+  - [ ] Implement **Song Tagging System**: Metadata for harmonic complexity.
+  - [ ] Build **Visual Progress Tree**: UI component (SVG/Canvas) for song progression.
+  - [ ] Implement **Key Cycle Routine**: Logic for tracking mastery across keys (Sonny Rollins approach).
 
-## Phase 3: Vocal Internalization
-*Focus: The "Harmonic Mirror."*
+## Phase 3: The "Sonic" Layer
+*Focus: Moving from prototype audio to high-fidelity practice.*
 
-- **Success Criteria**: User can sing the answer to an ear training question.
+- **Success Criteria**: High-quality stems loaded via Cloudflare R2 with a 3-track mixer for user control.
 - **Tasks**:
-  - [ ] Enable Universal Microphone Handler within the Resonance module.
-  - [ ] Build `VocalDetectionOverlay` for real-time pitch feedback.
-  - [ ] Implement "Sight-Singing" and "Call & Response" modes.
+  - [ ] Configure **Cloudflare R2** for stem storage and fast delivery.
+  - [ ] Build **Dynamic Mixer Component**: Separate volume controls for Bass, Drums, and Piano.
+  - [ ] Implement **Note Waterfall**: Real-time MIDI-to-Visual transcription layer.
+  - [ ] Add **Tone Selection Spectrum**: Basic mic analysis feedback for instrument quality.
 
-## Phase 4: Integration & Polish
-*Focus: Unifying the experience.*
+## Phase 4: Cloud & Community
+*Focus: Scaling from local-first to a connected ecosystem.*
 
+- **Success Criteria**: Students can share licks and teachers can see their dashboards remotely.
 - **Tasks**:
-  - [ ] Integrate Resonance Grid into the main Workbench.
-  - [ ] Add "Daily Tune-Up" adaptive logic.
-  - [ ] Performance and UI polish (2026 aesthetics).
+  - [ ] Integrate **Supabase** for user profiles and progress synchronization.
+  - [ ] Build **Teacher Dashboard UI**: Classroom management and student analytics.
+  - [ ] Implement **Lick Social Feed**: Publishing system for converted licks.
+  - [ ] Final **PWA Optimization**: Service workers and offline manifest.

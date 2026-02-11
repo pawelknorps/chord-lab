@@ -1,53 +1,46 @@
-# Project: Resonance AI (The 2026 Methodology)
-
-## Current Focus
-**Experimental Phase: The Radial Tonal Grid**: Develop a new experimental module that visualizes the "gravity" of the tonal center. This is the first pillar of the Resonance AI phase, moving away from static piano/fretboard layouts towards a functional, feel-based interface.
+# Project: The Incredible Teaching Machine (ITM) 2026
 
 ## Vision Statement
-To build the world's most effective music learning system by merging the **tonal center methodology** (FET) with **generative AI intelligence** and **vocal production**. Resonance AI treats music like language acquisition—focusing on internalization, recall, and context rather than abstract calculations.
-
-## Resonance Pillars (2026)
-
-### 1. Radial Tonal Grid (Current Pillar)
-- **Concept**: A non-linear visualizer where the Tonic is the center of gravity. Intervals radiate outwards based on their stability vs. tension.
-- **Goal**: Internalize the "feel" of a note's function within a key without relying on physical keyboard layouts.
-- **Tech**: Framer Motion for gravity animations, Tone.js for state-aware playback.
-
-### 2. Generative Contextual Learning (Next)
-- **Concept**: AI generates 4-bar mini-songs in various genres (Jazz, Pop, Techno) to establish a tonal center.
-- **Methodology**: Instead of a dry cadence, the user hears "real music," and identify the function of highlighted melody/bass notes.
-- **Tech**: Gemini Nano generates the structural MIDI seed; the app's sampler renders it.
-
-### 3. Harmonic Production (Vocal/Aural Mirror)
-- **Concept**: Proving internalization through production. The student sings the target function.
-- **Methodology**: App provides a functional prompt (e.g., "Sing the Major 7th"); the Universal Mic Handler verifies the pitch.
-- **Tech**: Universal Microphone Handler (Pitch-to-Theory Pipe).
+Transition from a music theory prototype to a full-scale "Incredible Teaching Machine" by perfecting the **Feedback Loop**—the dynamic cycle where the student plays, the app listens, and the AI corrects. ITM aims to facilitate true mastery through guided routines, active scoring, and AI-powered performance critique.
 
 ## Core Value Proposition
-- **High Semantic Density**: Using Gemini Nano to turn raw theory data into pedagogical stories.
-- **Zero Friction**: AI-driven "Daily Tune-Up" that launches immediately upon opening.
-- **Aural Internalization**: Building "Muscles of the Ear" through active production (singing/playing) rather than just tapping buttons.
+- **Adaptive Pedagogy**: Real-time AI analysis (Gemini Nano) that identifies specific student weaknesses and adapts the routine.
+- **Measurable Progress**: A gamified "Mastery Tree" that enforces standards and skill acquisition (BPM, Accuracy, Key Cycles).
+- **Immersive Performance**: Studio-quality stems and visual feedback that bridge the gap between "practice" and "performance."
+- **Social Connectivity**: A shared ecosystem for students and teachers to track progress and share knowledge.
+
+## Key Pillars
+
+### 1. The "Feedback" Engine (Refining Core Logic)
+- **Concept**: Solidifying the connection between student instrument and AI.
+- **Goal**: Real-time correction and structured guided sessions.
+- **Tech**: Pitch detection logic, Gemini Nano for performance analysis, Zustand for scoring state.
+
+### 2. The "Mastery Tree" (Progressive Curriculum)
+- **Concept**: A logical, standardized learning path for over 1,300 standards.
+- **Goal**: Prevent student overwhelm and ensure deep internalization (Sonny Rollins routine).
+- **Tech**: Skill-based tagging, visual progress tree (Duolingo style), unlock milestones.
+
+### 3. The "Sonic" Layer (High-Fidelity Experience)
+- **Concept**: Moving from "playable" to "immersive."
+- **Goal**: Provide the best-in-class practice environment with high-fidelity stems and visual cues.
+- **Tech**: 3-track Dynamic Mixer, Visual Transcription (Note Waterfall), Tone Matching.
+
+### 4. Cloud & Community (The Ecosystem)
+- **Concept**: Moving from a local tool to a shared platform.
+- **Goal**: Teacher-student synchronization and community lick sharing.
+- **Tech**: Supabase for progress tracking, PWA for offline/mobile use.
 
 ## Key Decisions
 
-| Decision                 | Rationale                                                                                            | Status    |
-| :----------------------- | :--------------------------------------------------------------------------------------------------- | :-------- |
-| **Local AI Only**        | Use the established Gemini Nano architecture for zero latency and privacy.                           | [Decided] |
-| **New Resonance Module** | The Radial Tonal Grid will live in its own experimental module to avoid breaking existing workflows. | [Decided] |
-| **Data over Audio**      | AI generates MIDI/Structure; existing samplers render audio for high quality.                        | [Decided] |
-| **No Wearables**         | Focus on mobile/web experience first.                                                                | [Decided] |
+| Decision | Rationale | Status |
+| :--- | :--- | :--- |
+| **Zustand for Scoring** | Centralized, performant state management for real-time microphone analysis. | [Decided] |
+| **Local-First AI** | Use Gemini Nano for instantaneous narration and performance critique feedback. | [Decided] |
+| **PWA over Native** | Maximize accessibility on iPads and phones without app store friction. | [Decided] |
+| **Supabase for Backend** | Reliable, real-time database for teacher dashboards and lick sharing. | [Proposed] |
 
-## High-Level Requirements
-
-### Resonance Grid (v1)
-- **REQ-RES-01**: Implement the Radial Tonal Grid UI.
-- **REQ-RES-02**: Tonic as center, with distance representing dissonance/tension.
-- **REQ-RES-03**: Interactive play/feedback loop within the grid.
-
-### Generative Context (v2)
-- **REQ-RES-04**: Prompt Gemini Nano for "short musical seeds" (chord progressions + melody).
-- **REQ-RES-05**: Render AI seeds using the Chord Lab sampler engines.
-
-### Vocal Mirror (v3)
-- **REQ-RES-06**: Integrate Universal Mic Handler into the Resonance workflow.
-- **REQ-RES-07**: Real-time feedback on sung pitch accuracy vs functional target.
+## Out of Scope
+- Direct VR/AR implementation (focus on PWA first).
+- Professional DAW integration (keep it a teaching/practice tool).
+- Multitrack recording/exporting (focus on real-time feedback).
