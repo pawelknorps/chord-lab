@@ -120,9 +120,10 @@
 - **Delivered**: ExerciseInputAdapter (mic/MIDI → getCurrentNote), StandardsExerciseEngine (getTargetSet + scoreNote), useStandardsExercise hook, StandardsExercisesPanel, JazzKiller integration (Exercises button, sidebar, panel). Unit tests: StandardsExerciseEngine.test.ts (8 passing).
 - **Planning**: `.planning/phases/13-standards-exercises/PLAN.md`, SUMMARY.md, VERIFICATION.md.
 
-## Phase 15: Standards Exercises — Error Heatmaps, Transcription & AI Analysis 🚀
+## Phase 15: Standards Exercises — Error Heatmaps, Transcription & AI Analysis ✅
 
-- **Status**: Planned.
+- **Status**: Completed.
 - **Goal**: Extend Phase 13 with error heatmaps (per measure, per exercise type: Scales • Guide Tones • Arpeggios), option to record written transcription of solo (mic or MIDI), and AI analysis of performance with advice and development suggestions.
 - **Requirements**: REQ-SBE-06 (error heatmaps), REQ-SBE-07 (record + written transcription), REQ-SBE-08 (AI analysis with advice and development suggestions).
-- **Planning**: `.planning/phases/15-standards-exercises-heatmaps-transcription-ai/PLAN.md`.
+- **Delivered**: useStandardsExercise exposes statsByMeasure and exerciseType; StandardsExerciseHeatmapOverlay + useStandardsExerciseHeatmapStore; Lead Sheet shows exercise heatmap when Exercises panel open; useSoloTranscription + SoloTranscriptionPanel (Record solo → note list + Copy); generateStandardsExerciseAnalysis in jazzTeacherLogic; "Analyze performance" button in StandardsExercisesPanel; unit tests for generateStandardsExerciseAnalysis.
+- **Planning**: `.planning/phases/15-standards-exercises-heatmaps-transcription-ai/PLAN.md`, SUMMARY.md, VERIFICATION.md.

@@ -151,12 +151,12 @@
   - [x] **Pre-allocated buffers**: tempNative, downsampled, nsdf; no allocations in process().
   - [x] **CREPE-Tiny/Small swap path**: Document in RESEARCH; when WASM integrated, use Tiny/Small for ~10x speed vs Full.
 
-## Phase 15: Standards Exercises — Error Heatmaps, Transcription & AI Analysis 🚀
+## Phase 15: Standards Exercises — Error Heatmaps, Transcription & AI Analysis ✅
 
 *Focus: Extend Phase 13 with error heatmaps (Scales • Guide Tones • Arpeggios), optional written transcription of the solo, and AI analysis with advice and development suggestions.*
 
 - **Success Criteria**: When playing over a standard (mic or MIDI), user can view error heatmaps by exercise type; optionally record a solo and get a written transcription; after a session (or on demand), receive AI analysis with advice and development suggestions.
 - **Tasks**:
-  - [ ] **Error heatmaps**: Expose per-measure hit/miss (and optionally per-chord) from useStandardsExercise; show heatmap on lead sheet (overlay per measure: green/amber/red) or in dedicated panel (bar chart/grid); filter by exercise type (Scales, Guide Tones, Arpeggios). Optional: persist per standard + exercise type.
-  - [ ] **Record solo & transcription**: In Standards Exercises (or "Solo over standard" mode), add "Record solo"; capture timestamped notes (pitch + rhythm) from mic or MIDI; at end of recording produce written transcription (note list and/or notation). Tie to current standard and transport for chart alignment.
-  - [ ] **AI analysis**: Extend jazzTeacherLogic with `generateStandardsExerciseAnalysis(sessionData)`: input heatmap, optional transcription, accuracy, exercise type, standard, key; output AI text (Gemini Nano or API) with strengths/weaknesses, advice, and development suggestions. Wire to post-session modal or "Analyze" button in Exercises panel.
+  - [x] **Error heatmaps**: Expose per-measure hit/miss from useStandardsExercise; show heatmap on lead sheet (overlay per measure: green/amber/red) via StandardsExerciseHeatmapOverlay and useStandardsExerciseHeatmapStore; filter by exercise type (Scales, Guide Tones, Arpeggios).
+  - [x] **Record solo & transcription**: In Standards Exercises, add "Record solo" (SoloTranscriptionPanel); capture timestamped notes (pitch + measure/beat) from mic or MIDI via useSoloTranscription; at end of recording produce written note list (Tonal.js). Tie to current standard and transport.
+  - [x] **AI analysis**: generateStandardsExerciseAnalysis(sessionData) in jazzTeacherLogic: input heatmap (hits/misses), optional transcription, accuracy, exercise type, standard, key; output AI text (Gemini Nano) with strengths/weaknesses, advice, development suggestions. "Analyze performance" button in StandardsExercisesPanel.
