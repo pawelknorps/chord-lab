@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { noteNameToMidi } from '../../../../core/theory';
 import { playChordPart, triggerAttack, triggerRelease } from '../../../../core/audio/globalAudio';
 import { useMasteryStore } from '../../../../core/store/useMasteryStore';
-import { useEarPerformanceStore } from '../../state/useEarPerformanceStore';
+import { useEarPerformanceStore, type DifficultyTier } from '../../state/useEarPerformanceStore';
 import { useMidi } from '../../../../context/MidiContext';
 import { Brain, Target, RotateCw, Play } from 'lucide-react';
 import { useFunctionalEarTrainingStore } from '../../state/useFunctionalEarTrainingStore';
@@ -12,16 +12,23 @@ import { UnifiedPiano } from '../../../../components/shared/UnifiedPiano';
 import { QuickExerciseJump } from '../../../../components/widgets/QuickExerciseJump';
 
 type DrillMode = 'Extensions' | 'Triads' | 'Sevenths';
-type Difficulty = 'Novice' | 'Advanced' | 'Pro';
+
+/** Map FET difficulty to ChordQualities tier (Novice/Advanced/Pro). */
+function toTier(d: string): DifficultyTier {
+  if (d === 'Novice' || d === 'Advanced' || d === 'Pro') return d;
+  return d === 'Intermediate' ? 'Advanced' : 'Pro';
+}
 
 export function ChordQualitiesLevel() {
     const { t } = useTranslation();
     const { addExperience, updateStreak } = useMasteryStore();
     const { lastNote } = useMidi();
     const recordAttempt = useEarPerformanceStore((s) => s.recordAttempt);
-    const { externalData, setExternalData } = useFunctionalEarTrainingStore();
+    const { externalData, setExternalData, difficulty, setDifficulty } = useFunctionalEarTrainingStore();
+    const shouldPromoteDifficulty = useEarPerformanceStore((s) => s.shouldPromoteDifficulty);
 
-    const [difficulty, setDifficulty] = useState<Difficulty>('Novice');
+    const [levelUpMessage, setLevelUpMessage] = useState<string | null>(null);
+    const tier = toTier(difficulty);
     const [currentMode, setCurrentMode] = useState<DrillMode>('Triads');
     const [currentRoot] = useState('C');
     const [feedback, setFeedback] = useState<string | null>(null);
@@ -57,16 +64,16 @@ export function ChordQualitiesLevel() {
     ];
 
     useEffect(() => {
-        if (difficulty === 'Novice' && currentMode === 'Extensions') setCurrentMode('Triads');
-        if (difficulty === 'Novice' && currentMode === 'Sevenths') setCurrentMode('Triads');
-        if (difficulty === 'Advanced' && currentMode === 'Extensions') setCurrentMode('Sevenths');
-    }, [difficulty, currentMode]);
+        if (tier === 'Novice' && currentMode === 'Extensions') setCurrentMode('Triads');
+        if (tier === 'Novice' && currentMode === 'Sevenths') setCurrentMode('Triads');
+        if (tier === 'Advanced' && currentMode === 'Extensions') setCurrentMode('Sevenths');
+    }, [tier, currentMode]);
 
     useEffect(() => {
         if (!quizMode || !lastNote) return;
-        const midiAllowed = difficulty === 'Pro' ||
-            (difficulty === 'Advanced' && currentMode === 'Sevenths') ||
-            (difficulty === 'Novice' && currentMode === 'Triads');
+        const midiAllowed = tier === 'Pro' ||
+            (tier === 'Advanced' && currentMode === 'Sevenths') ||
+            (tier === 'Novice' && currentMode === 'Triads');
         if (!midiAllowed) return;
 
         if (lastNote.type === 'noteon') {
@@ -83,7 +90,7 @@ export function ChordQualitiesLevel() {
         } else {
             triggerRelease(lastNote.note);
         }
-    }, [lastNote, quizMode, difficulty, currentMode]);
+    }, [lastNote, quizMode, tier, currentMode]);
 
     const checkProAnswer = (input: number[]) => {
         if (input.length < targetIntervals.length) return;
@@ -111,7 +118,7 @@ export function ChordQualitiesLevel() {
             return;
         }
         const data = currentMode === 'Triads' ? TRIADS : currentMode === 'Sevenths' ? SEVENTHS : EXTENSIONS;
-        const extended = difficulty === 'Pro' && currentMode === 'Sevenths' ? EXTENSIONS : null;
+        const extended = tier === 'Pro' && currentMode === 'Sevenths' ? EXTENSIONS : null;
         const randomItem = getNextChallenge('ChordQualities', data as { name: string }[], extended as { name: string }[] | null, targetAnswer);
         setTargetAnswer(randomItem.name);
         playDrillItem(randomItem);
@@ -121,8 +128,15 @@ export function ChordQualitiesLevel() {
         if (!quizMode || !targetAnswer) return;
         if (answer === targetAnswer || (externalData && answer.toLowerCase() === targetAnswer.toLowerCase())) {
             recordAttempt('ChordQualities', targetAnswer, true);
+            const currentDiff = tier;
+            const nextDiff = shouldPromoteDifficulty('ChordQualities', currentDiff);
+            if (nextDiff && nextDiff !== currentDiff) {
+                setDifficulty(nextDiff);
+                setLevelUpMessage(`Level up! You're now ${nextDiff}`);
+                setTimeout(() => setLevelUpMessage(null), 4000);
+            }
             setFeedback('Correct! 🎉');
-            const multiplier = difficulty === 'Novice' ? 1 : difficulty === 'Advanced' ? 2 : 5;
+            const multiplier = tier === 'Novice' ? 1 : tier === 'Advanced' ? 2 : 5;
             setScore(s => ({ ...s, correct: s.correct + multiplier, total: s.total + 1 }));
             addExperience('ChordLab', multiplier * 20);
             updateStreak('ChordLab', score.correct / 5);
@@ -133,7 +147,7 @@ export function ChordQualitiesLevel() {
             setFeedback(`Try again! (It was ${targetAnswer})`);
             setScore(s => ({ ...s, total: s.total + 1 }));
         }
-    }, [quizMode, targetAnswer, difficulty, score.correct, addExperience, updateStreak, externalData, setExternalData, nextQuestion, recordAttempt]);
+    }, [quizMode, targetAnswer, tier, score.correct, addExperience, updateStreak, externalData, setExternalData, nextQuestion, recordAttempt, shouldPromoteDifficulty, setDifficulty]);
 
     const playDrillItem = useCallback((item: any) => {
         const rootMidi = noteNameToMidi(currentRoot + '4');
@@ -169,20 +183,25 @@ export function ChordQualitiesLevel() {
                     <div>
                         <h2 className="text-xl font-bold text-white tracking-tight">Ear Training Labs</h2>
                         <div className="flex gap-2 mt-1">
-                            {(['Novice', 'Advanced', 'Pro'] as Difficulty[]).map(d => (
-                                <button key={d} onClick={() => setDifficulty(d)} className={`px-2 py-0.5 rounded text-[10px] uppercase font-black transition-all ${difficulty === d ? 'bg-purple-500 text-white shadow-lg shadow-purple-500/20' : 'bg-white/5 text-white/40 hover:text-white'}`}>{d}</button>
+                            {(['Novice', 'Advanced', 'Pro'] as const).map(d => (
+                                <button key={d} onClick={() => setDifficulty(d)} className={`px-2 py-0.5 rounded text-[10px] uppercase font-black transition-all ${tier === d ? 'bg-purple-500 text-white shadow-lg shadow-purple-500/20' : 'bg-white/5 text-white/40 hover:text-white'}`}>{d}</button>
                             ))}
                         </div>
                     </div>
                 </div>
                 <div className="flex gap-2 bg-black/40 p-1 rounded-xl">
                     {(['Extensions', 'Triads', 'Sevenths'] as DrillMode[])
-                        .filter(m => difficulty === 'Novice' ? m === 'Triads' : difficulty === 'Advanced' ? m !== 'Extensions' : true)
+                        .filter(m => tier === 'Novice' ? m === 'Triads' : tier === 'Advanced' ? m !== 'Extensions' : true)
                         .map(mode => (
                             <button key={mode} onClick={() => { setCurrentMode(mode); setQuizMode(false); setFeedback(null); }} className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${currentMode === mode ? 'bg-purple-600 text-white shadow-lg' : 'bg-transparent text-white/40 hover:text-white'}`}>{t(`earTraining.modes.${mode}`)}</button>
                         ))}
                 </div>
                 <div className="flex items-center gap-6">
+                    {levelUpMessage && (
+                        <div className="text-emerald-400 font-black text-xs uppercase tracking-wider animate-pulse">
+                            {levelUpMessage}
+                        </div>
+                    )}
                     <div className="text-right">
                         <div className="text-[10px] text-white/30 uppercase tracking-[0.2em] font-bold mb-0.5">Points</div>
                         <div className="text-2xl font-mono text-emerald-400 leading-none">{score.correct}</div>
@@ -194,7 +213,7 @@ export function ChordQualitiesLevel() {
                 <div className="space-y-6">
                     <div className="p-6 bg-white/5 rounded-2xl border border-white/5 space-y-4">
                         <h3 className="text-white text-sm font-bold flex items-center justify-between"><span className="flex items-center gap-2"><Target size={16} className="text-purple-400" />{quizMode ? 'Identify Target' : 'Explore Relationships'}</span></h3>
-                        {(difficulty === 'Pro' || (difficulty === 'Advanced' && currentMode === 'Sevenths') || (difficulty === 'Novice' && currentMode === 'Triads')) && quizMode ? (
+                        {(tier === 'Pro' || (tier === 'Advanced' && currentMode === 'Sevenths') || (tier === 'Novice' && currentMode === 'Triads')) && quizMode ? (
                             <div className="flex flex-col items-center gap-6 py-4">
                                 <UnifiedPiano mode="highlight" highlightedNotes={inputBuffer.map(i => noteNameToMidi(currentRoot + '4') + i)} octaveRange={[4, 5]} showLabels="none" />
                                 <div className="text-[10px] text-white/20 font-mono uppercase tracking-widest">Playing: {inputBuffer.map(i => i === 0 ? 'R' : i).join(' - ')}</div>

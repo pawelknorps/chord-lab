@@ -1,30 +1,29 @@
 {
   "meta": {
     "title": "9.20 Special",
-    "source": "MOCK_GENERATOR",
-    "promptUsed": 772
+    "source": "AOT_TEMPLATE",
+    "promptUsed": 0
   },
   "harmonicAnalysis": [
     {
       "barRange": "1-4",
-      "analysis": "The tune opens with a standard ii-V-I progression.",
-      "function": "Tonal Center Establishment"
-    },
-    {
-      "barRange": "5-8",
-      "analysis": "Unexpected modulation to the relative minor.",
-      "function": "Modulation"
+      "analysis": "Template for \"9.20 Special\" (key C). Use \"Ask Local Agent\" in the app for AI analysis (Gemini Nano in Chrome).",
+      "function": "Tonal Center"
     }
   ],
   "commonTraps": [
-    "Rushing the tempo during the B section.",
-    "Ignoring the dynamic shift in bar 12."
+    "Use \"Ask Local Agent\" in the app for personalized tips."
   ],
   "proTips": [
-    "Try tritone substitution on the dominant chords in the A section."
+    "Open Smart Lesson and click \"Ask Local Agent\" for real-time jazz pedagogy (Chrome with Gemini Nano)."
   ],
   "goldenLick": {
-    "notation": "C D E F G A B c",
-    "description": "A scalar run to connect the measure."
-  }
+    "notation": "C E G Bb",
+    "description": "Use \"Ask Local Agent\" in the app for a golden lick tailored to this tune."
+  },
+  "hotspots": [],
+  "avoidNotes": [],
+  "substitutions": [],
+  "practicePoints": [],
+  "commonMistakes": []
 }

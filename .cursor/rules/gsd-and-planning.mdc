@@ -1,0 +1,47 @@
+---
+description: Use GSD workflows from .agent and project state from .planning
+alwaysApply: true
+---
+
+# GSD Workflows and Planning Context
+
+This project uses **GSD (Get Shit Done)** workflows and a **.planning** folder. Use them for project setup, planning, and execution.
+
+## Where Things Live
+
+- **Workflows**: `.agent/workflows/*.md` — step-by-step procedures (read the relevant workflow first when the user asks for GSD actions).
+- **Project state**: `.planning/` — vision, roadmap, requirements, phase plans, codebase map.
+
+## When to Use What
+
+| User intent | Do this |
+|-------------|--------|
+| Status / what's next | Run `/gsd-progress` — read `.agent/workflows/gsd-progress.md`, then `node rules/get-shit-done/bin/gsd-tools.cjs init progress --include state,roadmap,project,config` and summarize. |
+| Plan a phase | Read `.agent/workflows/gsd-plan-phase.md`, run `gsd-tools.cjs init plan-phase <N>`, create/update PLAN.md in `.planning/phases/`. |
+| Execute a phase | Read `.agent/workflows/gsd-execute-phase.md`, load phase context, run plans by waves. |
+| New project / milestone | Read `.agent/workflows/gsd-new-project.md`; create/update PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md in `.planning/`. |
+| Map codebase | Read `.agent/workflows/gsd-map-codebase.md`; write STACK, ARCHITECTURE, etc. into `.planning/codebase/`. |
+| Help / commands | Read `.agent/workflows/gsd-help.md` and show the command reference. |
+
+## Planning Context to Load
+
+When doing GSD or project tasks, load as needed:
+
+- **Vision & scope**: `.planning/PROJECT.md`
+- **Requirements**: `.planning/REQUIREMENTS.md`
+- **Phases & progress**: `.planning/ROADMAP.md`, `.planning/STATE.md`
+- **Config**: `.planning/config.json` (mode, depth, parallelization)
+- **Codebase map**: `.planning/codebase/*.md` (ARCHITECTURE, STACK, STRUCTURE, etc.)
+- **Current phase**: `.planning/phases/<phase-name>/` (PLAN.md, SUMMARY.md, VERIFICATION.md)
+
+## GSD Tools
+
+All workflows use:
+
+```bash
+node rules/get-shit-done/bin/gsd-tools.cjs <command> [args]
+```
+
+Examples: `init new-project`, `init plan-phase 1`, `init execute-phase 1`, `init progress`, `commit "message" --files <paths>`.
+
+Always read the relevant workflow file from `.agent/workflows/` before executing a GSD command so you follow the full procedure.

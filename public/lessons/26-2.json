@@ -1,30 +1,29 @@
 {
   "meta": {
     "title": "26-2",
-    "source": "MOCK_GENERATOR",
-    "promptUsed": 946
+    "source": "AOT_STUB",
+    "promptUsed": 0
   },
   "harmonicAnalysis": [
     {
       "barRange": "1-4",
-      "analysis": "The tune opens with a standard ii-V-I progression.",
-      "function": "Tonal Center Establishment"
-    },
-    {
-      "barRange": "5-8",
-      "analysis": "Unexpected modulation to the relative minor.",
-      "function": "Modulation"
+      "analysis": "Analysis for \"26-2\" (key F). Set OPENAI_API_KEY and re-run to generate.",
+      "function": "Tonal Center"
     }
   ],
   "commonTraps": [
-    "Rushing the tempo during the B section.",
-    "Ignoring the dynamic shift in bar 12."
+    "Stub: add OPENAI_API_KEY and run again for real analysis."
   ],
   "proTips": [
-    "Try tritone substitution on the dominant chords in the A section."
+    "Use the \"Ask Local Agent\" button in the app for on-the-fly advice."
   ],
   "goldenLick": {
-    "notation": "C D E F G A B c",
-    "description": "A scalar run to connect the measure."
-  }
+    "notation": "C E G Bb",
+    "description": "Stub golden lick. Enable LLM for real output."
+  },
+  "hotspots": [],
+  "avoidNotes": [],
+  "substitutions": [],
+  "practicePoints": [],
+  "commonMistakes": []
 }

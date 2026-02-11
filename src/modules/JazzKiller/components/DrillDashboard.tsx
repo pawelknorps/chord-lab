@@ -1,8 +1,7 @@
-import { ChevronLeft, ChevronRight, Shuffle, RotateCcw } from 'lucide-react';
+import { ChevronLeft, ChevronRight, RotateCcw } from 'lucide-react';
 import { useIIVIDrillStore } from '../../../core/drills/useIIVIDrillStore';
 import { patternDatabase } from '../../../core/drills/IIVIPatternDatabase';
 import { usePracticeStore } from '../../../core/store/usePracticeStore';
-import * as Tone from 'tone';
 
 export function DrillDashboard() {
     const { drillSequence, currentPatternIndex, currentDrillMode, setDrillMode, setDrillSequence, nextPattern, prevPattern, reset } = useIIVIDrillStore();
@@ -25,13 +24,13 @@ export function DrillDashboard() {
 
     if (!currentDrillMode) {
         return (
-            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-neutral-900/95 backdrop-blur-md border border-white/10 rounded-2xl p-6 shadow-2xl z-50">
+            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100vw-2rem)] md:w-auto md:min-w-[400px] bg-neutral-900/95 backdrop-blur-md border border-white/10 rounded-2xl p-4 md:p-6 shadow-2xl z-50 animate-in slide-in-from-bottom-4">
                 <h3 className="text-lg font-bold text-white mb-4">ii-V-I Drill Modes</h3>
-                <div className="flex gap-3">
-                    <button onClick={startCycleOfFifths} className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold transition-all">
+                <div className="flex flex-col sm:flex-row gap-3">
+                    <button onClick={startCycleOfFifths} className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold transition-all text-sm md:text-base">
                         Cycle of Fifths
                     </button>
-                    <button onClick={startRandomDrill} className="px-6 py-3 bg-purple-600 hover:bg-purple-500 text-white rounded-xl font-bold transition-all">
+                    <button onClick={startRandomDrill} className="px-6 py-3 bg-purple-600 hover:bg-purple-500 text-white rounded-xl font-bold transition-all text-sm md:text-base">
                         Random Drill
                     </button>
                 </div>
@@ -40,7 +39,7 @@ export function DrillDashboard() {
     }
 
     return (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-neutral-900/95 backdrop-blur-md border border-white/10 rounded-2xl p-6 shadow-2xl z-50 min-w-[500px]">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100vw-2rem)] md:min-w-[500px] md:w-auto bg-neutral-900/95 backdrop-blur-md border border-white/10 rounded-2xl p-4 md:p-6 shadow-2xl z-50 animate-in slide-in-from-bottom-4">
             <div className="flex items-center justify-between mb-4">
                 <div>
                     <h3 className="text-sm font-black uppercase tracking-wider text-neutral-400">

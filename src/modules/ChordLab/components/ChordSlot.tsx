@@ -9,17 +9,18 @@ interface ChordSlotProps {
   isPlaying?: boolean;
   onRemove?: () => void;
   onClick?: () => void;
+  /** Optional drag handle element (e.g. grip icon) for reordering - only shown when chord exists */
+  dragHandle?: React.ReactNode;
+  /** When true, slot is used as overlay (no playhead, simplified) */
+  isOverlay?: boolean;
 }
 
-export function ChordSlot({ chord, index, isPlaying, onRemove, onClick }: ChordSlotProps) {
+export function ChordSlot({ chord, index, isPlaying, onRemove, onClick, dragHandle, isOverlay }: ChordSlotProps) {
   useSignals();
 
   // Determine if this specific slot is currently active in the playback
-  // We need to compare with the global measure index signal
-  // NOTE: index passed here is 0-based index in the progression array.
-  // currentMeasureIndexSignal seems to track the index of the chord being played.
   const isCurrentMeasure = currentMeasureIndexSignal.value === index;
-  const isActuallyPlaying = isPlaying && isCurrentMeasure;
+  const isActuallyPlaying = !isOverlay && isPlaying && isCurrentMeasure;
   const currentBeat = currentBeatSignal.value;
 
   const getNotesDisplay = (notes: string[]) => {
@@ -73,6 +74,13 @@ export function ChordSlot({ chord, index, isPlaying, onRemove, onClick }: ChordS
         </div>
       )}
 
+      {/* Drag Handle - for reordering */}
+      {dragHandle && (
+        <div className="absolute top-1 left-1 z-20 cursor-grab active:cursor-grabbing" onClick={(e) => e.stopPropagation()}>
+          {dragHandle}
+        </div>
+      )}
+
       {/* Remove Button - Visible on Group Hover */}
       <button
         onClick={(e) => {
@@ -95,7 +103,7 @@ export function ChordSlot({ chord, index, isPlaying, onRemove, onClick }: ChordS
       <div className="flex-1 flex flex-col p-3 relative z-10">
 
         {/* Index Badge */}
-        <div className="absolute top-2 left-2 text-[10px] font-mono text-[var(--text-muted)]">
+        <div className={`absolute top-2 text-[10px] font-mono text-[var(--text-muted)] ${dragHandle ? 'left-6' : 'left-2'}`}>
           {index + 1}
         </div>
 
@@ -115,7 +123,7 @@ export function ChordSlot({ chord, index, isPlaying, onRemove, onClick }: ChordS
             <div className="flex items-baseline gap-1">
               <span className="text-sm font-bold text-[var(--text-primary)]">{chord.root}</span>
               <span className="text-[10px] font-medium text-[var(--text-muted)] uppercase tracking-wide">
-                {chord.quality === 'maj' ? '' : chord.quality}
+                {chord.quality === 'maj' ? '' : chord.quality === 'min' ? 'm' : chord.quality}{chord.bass ? `/${chord.bass}` : ''}
               </span>
             </div>
             <div className="text-[9px] font-mono text-[var(--text-muted)] tracking-tighter opacity-70">

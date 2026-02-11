@@ -64,11 +64,13 @@ export const CHORD_INTERVALS: Record<string, number[]> = {
   'min7': [0, 3, 7, 10],
   'dom7': [0, 4, 7, 10],
   'dim7': [0, 3, 6, 9],
-  'm7b5': [0, 3, 6, 10], // Half-diminished
-  'aug7': [0, 4, 8, 10], // 7#5
-  'mM7': [0, 3, 7, 11], // Minor-Major 7
+  'm7b5': [0, 3, 6, 10],
+  'aug7': [0, 4, 8, 10],
+  'mM7': [0, 3, 7, 11],
   '6': [0, 4, 7, 9],
   'm6': [0, 3, 7, 9],
+  '69': [0, 4, 7, 9, 14],
+  'm69': [0, 3, 7, 9, 14],
 
   // Extended / Altered Dom
   '9': [0, 4, 7, 10, 14],
@@ -77,6 +79,7 @@ export const CHORD_INTERVALS: Record<string, number[]> = {
   '11': [0, 4, 7, 10, 14, 17],
   'min11': [0, 3, 7, 10, 14, 17],
   '13': [0, 4, 7, 10, 14, 21],
+  '13#11': [0, 4, 7, 10, 14, 18, 21],
   'maj13': [0, 4, 7, 11, 14, 21],
   'min13': [0, 3, 7, 10, 14, 21],
 
@@ -84,13 +87,16 @@ export const CHORD_INTERVALS: Record<string, number[]> = {
   '7b9': [0, 4, 7, 10, 13],
   '7#9': [0, 4, 7, 10, 15],
   '7b5': [0, 4, 6, 10],
-  '7#5': [0, 4, 8, 10], // Alias for aug7
-  '7alt': [0, 4, 10, 13, 20], // Simplified Alt (b9, b13)
+  '7#5': [0, 4, 8, 10],
+  '7b13': [0, 4, 10, 14, 20],
+  '7#11': [0, 4, 7, 10, 14, 18],
+  '7alt': [0, 4, 10, 13, 20],
 
   // Sus variations
   '7sus4': [0, 5, 7, 10],
   '9sus4': [0, 5, 7, 10, 14],
-  'b9sus4': [0, 5, 7, 10, 13], // Phrygian chord
+  '13sus4': [0, 5, 7, 10, 14, 21],
+  'b9sus4': [0, 5, 7, 10, 13],
 };
 
 // Helper for enharmonic spelling
@@ -145,36 +151,21 @@ export function midiToNoteName(midi: number, context?: string | boolean): string
   const functionalOverride = getFunctionalPitchClassOverride(pc, tonic);
   if (functionalOverride) return `${functionalOverride}${octave}`;
 
-  // Determine flat preference based on tonic
+  // Determine flat vs sharp preference from key (tonic).
   const FLAT_KEYS = ['F', 'Bb', 'Eb', 'Ab', 'Db', 'Gb', 'Cb', 'Dm', 'Gm', 'Cm', 'Fm', 'Bbm', 'Ebm', 'Abm'];
-  let prefersFlats = FLAT_KEYS.includes(tonic) || tonic.includes('b');
-
-  // Enharmonic Preference Logic for Neutral/Ambiguous Contexts
-  // If we are in 'C' (neutral) or unknown context, we prefer commonly used jazz/pop keys.
-  // Jazz heavily leans towards flats.
-
-  // Specific Pitch Class Overrides
-  const SHARP_HEAVY_KEYS = ['B', 'F#', 'C#', 'G#', 'D#', 'A#', 'E']; // Keys that MUST use sharps
+  // Sharp keys: major and minor keys that use sharp key signatures (e.g. B/D# not B/Eb).
+  const SHARP_HEAVY_KEYS = ['B', 'F#', 'C#', 'G#', 'D#', 'A#', 'E', 'Bm', 'F#m', 'C#m', 'G#m', 'D#m', 'A#m', 'Em'];
 
   const isSharpKey = SHARP_HEAVY_KEYS.includes(tonic);
+  let prefersFlats = !isSharpKey && (FLAT_KEYS.includes(tonic) || tonic.includes('b'));
 
-  if (!isSharpKey) {
-    // Bb (10) vs A#
-    // A# is only diatonic in B Major and F# Major.
+  if (isSharpKey) {
+    prefersFlats = false;
+  } else {
+    // Flat / neutral keys: specific pitch-class overrides.
     if (pc === 10) prefersFlats = true;
-
-    // Eb (3) vs D#
-    // D# is only diatonic in E Major and B Major.
     if (pc === 3 && !['E', 'B'].includes(tonic)) prefersFlats = true;
-
-    // Ab (8) vs G#
-    // G# is only diatonic in A Major and E Major.
     if (pc === 8 && !['A', 'E', 'B'].includes(tonic)) prefersFlats = true;
-
-    // Db (1) vs C#
-    // User requested explicitly: Flats circle is F -> Gb. This includes Db.
-    // C# is only diatonic in D Major, A Major, E Major, B Major, F# Major.
-    // So unless we are explicitly in D/A/E/B/F#, it should be Db.
     if (pc === 1 && !['D', 'A', 'E', 'B', 'F#', 'C#'].includes(tonic)) prefersFlats = true;
   }
 
@@ -287,6 +278,8 @@ export interface ChordInfo {
   degree: number;
   notes: string[];
   midiNotes: number[];
+  /** Bass note for inversions/slash chords (e.g. "E" for C/E) */
+  bass?: string;
 }
 
 export interface Progression {
@@ -295,6 +288,7 @@ export interface Progression {
   degrees?: number[];
   description?: string;
   chords?: string[]; // Optional explicit chord list for non-diatonic progressions
+  compStyle?: string; // Optional stylistic guide for the rhythm section
 }
 
 // Common chord progressions
@@ -395,10 +389,14 @@ export function parseChord(chordName: string): { root: string; quality: string; 
   // Normalize Logic
   if (!quality) quality = 'maj';
 
-  // 1. Handle Diminished / Half-Diminished symbols first
+  // 1. Handle Shorthand Aliases & Symbols
+  if (quality.includes('h') || quality.includes('ø')) quality = quality.replace('h', 'ø').replace('ø7', 'ø');
+  if (quality.includes('o') || quality.includes('°')) quality = quality.replace('o', '°').replace('°7', '°');
+  if (quality.includes('^') || quality.includes('Δ')) quality = quality.replace('^', 'Δ').replace('Δ7', 'Δ');
+
   if (quality === '°' || quality === 'dim') quality = 'dim';
   else if (quality === '°7' || quality === 'dim7') quality = 'dim7';
-  else if (quality === 'ø' || quality === 'ø7' || quality === 'm7b5' || quality === '-7b5') quality = 'm7b5';
+  else if (quality === 'ø' || quality === 'm7b5' || quality === '-7b5') quality = 'm7b5';
 
   // 2. Handle Augmented
   else if (quality === '+' || quality === 'aug') quality = 'aug';
@@ -407,22 +405,22 @@ export function parseChord(chordName: string): { root: string; quality: string; 
   // 3. Handle Minor
   else if ((quality.startsWith('m') && !quality.startsWith('maj')) || quality.startsWith('-')) {
     // Remove the 'm' or '-' indicator
-    const rest = quality.substring(quality.startsWith('min') ? 3 : 1);
+    const rest = quality.startsWith('min') ? quality.substring(3) : quality.substring(1);
 
     if (!rest) quality = 'min';
     else if (rest === '7') quality = 'min7';
     else if (rest === '9') quality = 'min9';
     else if (rest === '11') quality = 'min11';
     else if (rest === '6') quality = 'm6';
-    else if (rest === 'maj7' || rest === 'M7' || rest === 'Δ7') quality = 'mM7';
-    else quality = 'min' + rest; // Fallback e.g. min13
+    else if (rest === 'maj7' || rest === 'M7' || rest === 'Δ' || rest === 'Δ7') quality = 'mM7';
+    else quality = 'min' + rest;
   }
 
   // 4. Handle Major
   else if (quality.startsWith('M') || quality.startsWith('maj') || quality.startsWith('Δ')) {
     const rest = quality.replace(/^(M|maj|Δ)/, '');
     if (!rest) quality = 'maj';
-    else if (rest === '7') quality = 'maj7';
+    else if (rest === '7' || rest === '') quality = 'maj7'; // Δ or Δ7
     else if (rest === '9') quality = 'maj9';
     else if (rest === '13') quality = 'maj13';
     else quality = 'maj' + rest;
@@ -456,6 +454,66 @@ export function parseChord(chordName: string): { root: string; quality: string; 
 
   return { root, quality, bass };
 }
+
+/** Chord pc-set templates: quality -> sorted unique pitch classes (0–11) from root */
+const CHORD_PC_TEMPLATES: { quality: string; pcs: number[] }[] = (() => {
+  const out: { quality: string; pcs: number[] }[] = [];
+  for (const [quality, intervals] of Object.entries(CHORD_INTERVALS)) {
+    const pcs = [...new Set(intervals.map((i) => i % 12))].sort((a, b) => a - b);
+    out.push({ quality, pcs });
+  }
+  return out;
+})();
+
+/**
+ * Spell a pitch class (0–11) using music-theory enharmonic rules for the given key.
+ * Uses the same logic as midiToNoteName (flat keys vs sharp keys).
+ */
+export function spellPitchClassInKey(pc: number, keyContext: string): string {
+  return midiToNoteName(pc + 60, keyContext).replace(/[0-9-]/g, '');
+}
+
+/**
+ * Analyze a set of MIDI notes into chord root, quality, and optional bass (inversion).
+ * Does not assume the lowest note is the root; detects inversions and slash chords.
+ * When keyContext is provided, root and bass use correct enharmonic spelling (e.g. Bb not A# in F).
+ */
+export function analyzeChordFromNotes(notes: number[], keyContext?: string): { root: string; quality: string; bass?: string } | null {
+  if (notes.length < 3) return null;
+
+  const sorted = [...notes].sort((a, b) => a - b);
+  const bassMidi = sorted[0];
+  const bassPc = bassMidi % 12;
+  const pitchClasses = [...new Set(notes.map((n) => n % 12))].sort((a, b) => a - b);
+
+  const pcToName = keyContext
+    ? (pc: number) => spellPitchClassInKey(pc, keyContext)
+    : (pc: number) => NOTE_NAMES[pc];
+
+  let best: { rootPc: number; quality: string } | null = null;
+
+  for (const candidateRoot of pitchClasses) {
+    const intervalsFromRoot = pitchClasses.map((pc) => (pc - candidateRoot + 12) % 12).sort((a, b) => a - b);
+
+    for (const { quality, pcs } of CHORD_PC_TEMPLATES) {
+      if (pcs.length !== intervalsFromRoot.length) continue;
+      if (!pcs.every((p, i) => p === intervalsFromRoot[i])) continue;
+
+      if (!best || candidateRoot === bassPc) {
+        best = { rootPc: candidateRoot, quality };
+        if (candidateRoot === bassPc) break; // prefer root position when valid
+      }
+    }
+    if (best?.rootPc === bassPc) break;
+  }
+
+  if (!best) return null;
+
+  const rootName = pcToName(best.rootPc);
+  const bassName = bassPc !== best.rootPc ? pcToName(bassPc) : undefined;
+  return { root: rootName, quality: best.quality, bass: bassName };
+}
+
 // Transpose a chord symbol by a specified number of semitones
 export function transposeChordSymbol(chordSymbol: string, semitones: number, keyContext?: string): string {
   if (semitones === 0 || !chordSymbol || chordSymbol === "") return chordSymbol;
@@ -508,4 +566,12 @@ export function getScaleDegree(root: number, note: number): string {
   const semitones = (note - root) % 12;
   const degrees = ['1', 'b2', '2', 'b3', '3', '4', 'b5', '5', 'b6', '6', 'b7', '7'];
   return degrees[(semitones + 12) % 12];
+}
+
+/** Chord-tone labels (R, M3, 11, b7, etc.) from chord root — use for inversions. */
+export const CHORD_TONE_LABELS = ['R', 'b9', '9', 'm3', 'M3', '11', 'b5', '5', '#5', '13', 'b7', 'M7'] as const;
+
+export function getChordToneLabel(chordRootMidi: number, noteMidi: number): string {
+  const semitones = (noteMidi - chordRootMidi + 12) % 12;
+  return CHORD_TONE_LABELS[semitones];
 }

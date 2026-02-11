@@ -17,6 +17,8 @@ interface JazzStandard {
     Rhythm?: string;
     TimeSignature?: string;
     Sections: JazzSection[];
+    CompStyle?: string;
+    Tempo?: number;
 }
 
 export function getAllJazzStandards(): Progression[] {
@@ -28,28 +30,39 @@ export function getAllJazzStandards(): Progression[] {
         const key = standard.Key || 'C';
 
         standard.Sections.forEach(section => {
-            // Logic from useJazzLibrary to parse chords
-            if (section.MainSegment.Chords) {
-                const measureStrings = section.MainSegment.Chords.split('|');
-                measureStrings.forEach(ms => {
-                    if (ms.trim() || ms === "") {
-                        // Split by comma for beats
-                        const beatChords = ms.split(',').filter(c => c !== "");
-                        // No transposition needed here, we want the original chords for the preset
-                        // But wait, the standards might use relative notation? No, they look absolute in JSON (D9, Fm6)
-                        // But they map to the Key.
-                        // Let's keep them as is.
-                        beatChords.forEach(c => allChords.push(c));
-                    }
-                });
+            const iterations = section.Endings ? section.Endings.length : (section.Repeats ? section.Repeats + 1 : 1);
+
+            for (let i = 0; i < iterations; i++) {
+                // Add MainSegment Chords
+                if (section.MainSegment.Chords) {
+                    const measureStrings = section.MainSegment.Chords.split('|');
+                    measureStrings.forEach(ms => {
+                        if (ms.trim() || ms === "") {
+                            const beatChords = ms.split(',').filter(c => c !== "");
+                            beatChords.forEach(c => allChords.push(c));
+                        }
+                    });
+                }
+
+                // Add Ending Chords for this iteration
+                if (section.Endings && section.Endings[i]) {
+                    const endingMeasureStrings = section.Endings[i].Chords.split('|');
+                    endingMeasureStrings.forEach(ms => {
+                        if (ms.trim() || ms === "") {
+                            const beatChords = ms.split(',').filter(c => c !== "");
+                            beatChords.forEach(c => allChords.push(c));
+                        }
+                    });
+                }
             }
         });
 
         return {
             name: standard.Title,
             genre: 'Jazz Standard',
-            description: `${standard.Composer || 'Unknown'} • ${standard.Rhythm || 'Swing'} • Key of ${key}`,
+            description: `${standard.Composer || 'Unknown'} • ${standard.Rhythm || 'Swing'} • Key of ${key}${standard.Tempo ? ` • ${standard.Tempo} BPM` : ''}`,
             chords: allChords,
+            compStyle: standard.CompStyle,
             // We store metadata in description or could extend Progression if needed
             // Currently PresetsPanel displays description.
         };

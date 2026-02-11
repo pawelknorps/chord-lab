@@ -3,39 +3,57 @@ import * as Note from '@tonaljs/note';
 import { useSignals } from '@preact/signals-react/runtime';
 import { currentMeasureIndexSignal } from '../state/jazzSignals';
 import { usePracticeStore } from '../../../core/store/usePracticeStore';
-import { useAuralMirror } from '../../../hooks/useAuralMirror';
+import { useHighPerformancePitch } from '../../ITM/hooks/useHighPerformancePitch';
+import { useMicrophone } from '../../../hooks/useMicrophone';
 
 /**
  * When Guide Tone Spotlight is on and mic is active, compares live note to the 3rd
  * of the current chord for the current measure; marks bar as hit when they match (REQ-MIC-12).
+ * Uses high-performance WASM pitch detection (2026).
  */
 export function GuideToneSpotlightEffect(): null {
   useSignals();
   const { guideToneSpotlightMode, guideTones, currentSong, addGuideToneBarHit } = usePracticeStore();
-  const { isActive, liveNote } = useAuralMirror();
+  const { stream, isActive: micActive } = useMicrophone();
+  const { isReady, getLatestPitch } = useHighPerformancePitch(stream);
   const lastHitMeasureRef = useRef<number | null>(null);
 
   useEffect(() => {
-    if (!guideToneSpotlightMode || !isActive || !liveNote || !currentSong) return;
+    if (!guideToneSpotlightMode || !isReady || !micActive || !currentSong) return;
 
-    const measureIndex = currentMeasureIndexSignal.value;
-    if (measureIndex < 0) return;
+    let rafId: number;
 
-    const gts = guideTones.get(measureIndex);
-    const targetThird = gts?.[0]?.third; // 3rd of first chord in measure
-    if (!targetThird) return;
+    const loop = () => {
+      const result = getLatestPitch();
 
-    // Compare pitch class (ignore octave)
-    const livePc = Note.chroma(liveNote);
-    const targetPc = Note.chroma(targetThird.length === 1 ? targetThird + '4' : targetThird);
-    if (livePc === undefined || targetPc === undefined) return;
-    if (livePc !== targetPc) return;
+      if (result && result.clarity > 0.9) {
+        const liveNote = Note.fromFreq(result.frequency);
+        const measureIndex = currentMeasureIndexSignal.value;
 
-    // Avoid re-firing for same measure within a short window
-    if (lastHitMeasureRef.current === measureIndex) return;
-    lastHitMeasureRef.current = measureIndex;
-    addGuideToneBarHit(measureIndex);
-  }, [guideToneSpotlightMode, isActive, liveNote, guideTones, currentSong, addGuideToneBarHit]);
+        if (measureIndex >= 0) {
+          const gts = guideTones.get(measureIndex);
+          const targetThird = gts?.[0]?.third;
+
+          if (targetThird) {
+            const livePc = Note.chroma(liveNote);
+            const targetPc = Note.chroma(targetThird.length === 1 ? targetThird + '4' : targetThird);
+
+            if (livePc !== undefined && targetPc !== undefined && livePc === targetPc) {
+              if (lastHitMeasureRef.current !== measureIndex) {
+                addGuideToneBarHit(measureIndex);
+                lastHitMeasureRef.current = measureIndex;
+              }
+            }
+          }
+        }
+      }
+
+      rafId = requestAnimationFrame(loop);
+    };
+
+    rafId = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(rafId);
+  }, [guideToneSpotlightMode, isReady, micActive, guideTones, currentSong, addGuideToneBarHit, getLatestPitch]);
 
   return null;
 }

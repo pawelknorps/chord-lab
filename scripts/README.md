@@ -1,3 +1,35 @@
+# Scripts
+
+## Update standards Tempo from iReal playlist
+
+`update-standards-tempo-from-ireal.cjs` reads an iReal Pro playlist URL and writes **Tempo** (BPM) into `src/modules/JazzKiller/utils/standards.json` by matching song titles.
+
+```bash
+# From a file containing an irealb:// URL (e.g. exported from iReal)
+node scripts/update-standards-tempo-from-ireal.cjs path/to/playlist.txt
+
+# Or pass the URL directly (quote it)
+node scripts/update-standards-tempo-from-ireal.cjs "irealb://..."
+
+# npm script
+npm run update:standards-tempo -- path/to/playlist.txt
+```
+
+Requires the `ireal-reader` dependency. Only entries that match a title in the playlist get `Tempo` set; positive BPM from iReal is required.
+
+### Merge missing standards from iReal
+
+`merge-standards-from-ireal.cjs` adds tunes that appear in an iReal playlist but are not yet in `standards.json`, and can update Tempo for existing entries. Converts iReal chord data into the app’s JSON schema.
+
+```bash
+node scripts/merge-standards-from-ireal.cjs path/to/playlist.txt
+node scripts/merge-standards-from-ireal.cjs path/to/playlist.txt --dry-run   # preview only
+
+npm run merge:standards-from-ireal -- path/to/playlist.txt
+```
+
+---
+
 # Lesson Generation Pipeline
 
 ## Overview

@@ -101,13 +101,13 @@ export function BarRangeDrill({ onClose }: BarRangeDrillProps) {
     return (
         <>
             {/* Top instruction banner */}
-            <div className="fixed top-24 left-1/2 -translate-x-1/2 bg-orange-600 border border-orange-400/50 rounded-2xl px-8 py-4 shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-[60] pointer-events-auto min-w-[400px]">
-                <div className="flex items-center gap-6">
-                    <div className="flex-1">
-                        <h3 className="text-lg font-black uppercase tracking-tight text-white mb-0.5">
+            <div className="fixed top-24 left-1/2 -translate-x-1/2 w-[calc(100vw-2rem)] md:w-auto md:min-w-[400px] bg-orange-600 border border-orange-400/50 rounded-2xl px-4 md:px-8 py-3 md:py-4 shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-[60] pointer-events-auto animate-in slide-in-from-top-4">
+                <div className="flex flex-col sm:flex-row items-center gap-3 md:gap-6">
+                    <div className="flex-1 text-center sm:text-left">
+                        <h3 className="text-base md:text-lg font-black uppercase tracking-tight text-white mb-0.5 whitespace-nowrap">
                             {isSelecting ? '📍 Select End Bar' : '📍 Select Start Bar'}
                         </h3>
-                        <p className="text-xs font-bold text-orange-200 uppercase tracking-widest opacity-80">
+                        <p className="text-[10px] md:text-xs font-bold text-orange-200 uppercase tracking-widest opacity-80 whitespace-nowrap">
                             {selectedRange && !isSelecting
                                 ? `Practice Loop: Bars ${selectedRange[0] + 1} - ${selectedRange[1] + 1}`
                                 : 'Choose a section to master'
@@ -116,11 +116,11 @@ export function BarRangeDrill({ onClose }: BarRangeDrillProps) {
                     </div>
 
                     {/* Controls */}
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 w-full sm:w-auto justify-center">
                         {selectedRange && !isSelecting && (
                             <button
                                 onClick={isDrillActive ? stopDrill : startDrill}
-                                className={`px-6 py-2.5 rounded-xl font-black uppercase tracking-widest text-xs flex items-center gap-2 transition-all shadow-xl hover:scale-105 active:scale-95 ${isDrillActive
+                                className={`flex-1 sm:flex-none px-4 md:px-6 py-2 md:py-2.5 rounded-xl font-black uppercase tracking-widest text-[10px] md:text-xs flex items-center justify-center gap-2 transition-all shadow-xl hover:scale-105 active:scale-95 ${isDrillActive
                                     ? 'bg-white text-orange-600'
                                     : 'bg-orange-400 text-white hover:bg-orange-300'
                                     }`}
@@ -128,7 +128,7 @@ export function BarRangeDrill({ onClose }: BarRangeDrillProps) {
                                 {isDrillActive ? (
                                     <>
                                         <Square size={14} fill="currentColor" />
-                                        Stop Drill
+                                        Stop
                                     </>
                                 ) : (
                                     <>
@@ -141,10 +141,10 @@ export function BarRangeDrill({ onClose }: BarRangeDrillProps) {
 
                         <button
                             onClick={handleCloseInternal}
-                            className="p-2.5 bg-black/20 hover:bg-black/40 rounded-xl text-white transition-all hover:rotate-90"
+                            className="p-2 md:p-2.5 bg-black/20 hover:bg-black/40 rounded-xl text-white transition-all hover:rotate-90"
                             title="Exit Drill Mode"
                         >
-                            <X size={20} />
+                            <X size={18} />
                         </button>
                     </div>
                 </div>

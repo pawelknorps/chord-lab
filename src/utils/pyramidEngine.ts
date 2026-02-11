@@ -56,8 +56,8 @@ export class PyramidEngine {
 
             for (let i = 0; i < sub; i++) {
                 const t = time + (i * subInterval);
-                const freq = 100 + (sub * 30);
-                synth.triggerAttackRelease(freq, "32n", t, sub === 1 ? 1.0 : 0.6);
+                const freq = 150 + (sub * 50);
+                synth.triggerAttackRelease(freq, "64n", t, sub === 1 ? 1.0 : 0.8);
             }
         }, '4n');
 

@@ -3,7 +3,7 @@ import { UnifiedFretboardProps } from './types';
 import styles from './UnifiedFretboard.module.css';
 import * as Tone from 'tone';
 import { audioManager } from '../../core/services';
-import { midiToNoteName, getIntervalName, getScaleDegree } from '../../core/theory';
+import { midiToNoteName, getIntervalName, getScaleDegree, getChordToneLabel } from '../../core/theory';
 
 const TUNINGS: Record<string, string[]> = {
     standard: ['E2', 'A2', 'D3', 'G3', 'B3', 'E4'],
@@ -19,6 +19,7 @@ export const UnifiedFretboard: React.FC<UnifiedFretboardProps> = ({
     tuning = 'standard',
     highlightedNotes = [],
     activeNotes = [],
+    highlightByPitchClass = false,
     onNoteClick,
     showFretNumbers = true,
     showStringNames = true,
@@ -45,8 +46,7 @@ export const UnifiedFretboard: React.FC<UnifiedFretboardProps> = ({
             case 'scale-degrees':
                 return rootNote !== undefined ? getScaleDegree(rootNote, note) : '';
             case 'chord-tones':
-                // For simplicity, we can reuse intervals or a specific chord tone logic
-                return rootNote !== undefined ? getIntervalName(rootNote, note) : '';
+                return rootNote !== undefined ? getChordToneLabel(rootNote, note) : '';
             case 'notes':
             default:
                 return midiToNoteName(note, rootNote !== undefined ? midiToNoteName(rootNote).replace(/[0-9]/g, '') : 'C').replace(/[0-9]/g, '');
@@ -55,6 +55,8 @@ export const UnifiedFretboard: React.FC<UnifiedFretboardProps> = ({
 
     const handleFretClick = (stringIdx: number, fret: number, note: number) => {
         if (!interactive) return;
+
+        Tone.start();
 
         if (playSound) {
             audioManager.playNote(note, '4n', 0.7);
@@ -72,6 +74,13 @@ export const UnifiedFretboard: React.FC<UnifiedFretboardProps> = ({
         }
         return nums;
     }, [fretRange]);
+
+    const highlightedPitchClasses = useMemo(() => {
+        if (!highlightByPitchClass) return null;
+        const combined = [...highlightedNotes, ...activeNotes];
+        if (combined.length === 0) return new Set<number>();
+        return new Set(combined.map((n) => n % 12));
+    }, [highlightByPitchClass, highlightedNotes, activeNotes]);
 
     return (
         <div className={`${styles.container} ${className}`}>
@@ -104,9 +113,13 @@ export const UnifiedFretboard: React.FC<UnifiedFretboardProps> = ({
                             <div className={styles.stringFrets}>
                                 {fretNumbers.map((fret) => {
                                     const note = calculateNote(baseNote, fret);
-                                    const isHighlighted = highlightedNotes.includes(note);
-                                    const isActive = activeNotes.includes(note);
-                                    const isRoot = rootNote !== undefined && (note % 12 === rootNote % 12);
+                                    const isHighlighted = highlightByPitchClass && highlightedPitchClasses !== null
+                                        ? highlightedPitchClasses.has(note % 12)
+                                        : highlightedNotes.includes(note);
+                                    const isActive = highlightByPitchClass && highlightedPitchClasses !== null
+                                        ? highlightedPitchClasses.has(note % 12)
+                                        : activeNotes.includes(note);
+                                    const isRoot = rootNote !== undefined && (note % 12 === rootNote % 12) && (isHighlighted || isActive);
                                     const isMarkerFret = FRET_MARKERS.includes(fret);
                                     const isDoubleMarker = DOUBLE_MARKERS.includes(fret);
 

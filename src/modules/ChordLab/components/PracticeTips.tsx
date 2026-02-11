@@ -26,7 +26,7 @@ export const PracticeTips = ({ progression, selectedKey, onClose }: PracticeTips
         return Array.from(uniqueMap.values()).map(chord => {
             const suggestions = generateSuggestions(chord.root, chord.quality, selectedKey);
             return {
-                chordSymbol: `${chord.root}${chord.quality === 'maj' ? '' : chord.quality === 'min' ? 'm' : chord.quality}`,
+                chordSymbol: `${chord.root}${chord.quality === 'maj' ? '' : chord.quality === 'min' ? 'm' : chord.quality}${chord.bass ? `/${chord.bass}` : ''}`,
                 ...suggestions
             };
         }).slice(0, 8);

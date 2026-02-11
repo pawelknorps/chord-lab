@@ -3,15 +3,24 @@
 ## Phase 1: The "Feedback" Engine
 
 ### REQ-FB-01: Guided Practice Sessions
+
 - **Requirement**: Implement "Guided Mode" where Gemini Nano narrates a 15-minute routine for a specific song.
 - **Components**: Scales (5 mins), Guide Tones (5 mins), Soloing (5 mins).
 
 ### REQ-FB-02: Active Scoring Logic
+
 - **Requirement**: Use pitch detection to calculate an "Accuracy Score" (0-100%) in real-time.
 - **Bonus**: Implement "Target Note mastery" bonuses (hitting 3rds and 7ths on downbeats).
 
 ### REQ-FB-03: Nano-Powered Critique
+
 - **Requirement**: Post-session analysis by Gemini Nano identifying specific strengths and weaknesses (e.g., "Consistently flat on the Bridge's II-V").
+
+### REQ-FB-04: High-Performance Pitch Engine
+
+- **Requirement**: Implement a WASM-based pitch detector (Pitchy v3 or CREPE) in an Audio Worklet.
+- **Performance**: Use `SharedArrayBuffer` for zero-latency communication with the React UI.
+- **Input Quality**: Enable `voiceIsolation` constraints on microphone streams to filter out practice room noise.
 
 ## Phase 2: The "Mastery Tree"
 

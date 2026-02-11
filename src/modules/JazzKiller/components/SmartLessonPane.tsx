@@ -107,7 +107,6 @@ export function SmartLessonPane({
                 return ''; // Successfully stripped the command
             }).trim();
 
-            const key = songKey ?? 'C';
             const scaleNotes = Scale.notes(key, 'major');
             const validated = validateSuggestedNotes(processedResult, { key, scaleNotes });
             setAgentResponse(validated);

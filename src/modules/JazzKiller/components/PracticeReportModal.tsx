@@ -1,7 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useScoringStore } from '../../../core/store/useScoringStore';
+import { useMasteryTreeStore } from '../../../core/store/useMasteryTreeStore';
+import { usePracticeStore } from '../../../core/store/usePracticeStore';
+import { CurriculumAnalysisService, XPContribution } from '../../../core/theory/CurriculumAnalysisService';
 import { generatePerformanceCritique } from '../ai/jazzTeacherLogic';
-import { X, Target, TrendingUp, Sparkles, RefreshCw, ChevronRight } from 'lucide-react';
+import { X, Sparkles, RefreshCw, ChevronRight, Award, Trophy } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface PracticeReportModalProps {
     songTitle: string;
@@ -11,6 +15,7 @@ interface PracticeReportModalProps {
 
 /**
  * Summarizes the practice session with AI feedback and detailed metrics (REQ-FB-04).
+ * Now integrated with the Mastery Tree (REQ-MT-01).
  */
 export function PracticeReportModal({ songTitle, songKey, onClose }: PracticeReportModalProps) {
     const {
@@ -23,8 +28,14 @@ export function PracticeReportModal({ songTitle, songKey, onClose }: PracticeRep
         resetScore
     } = useScoringStore();
 
+    const { detectedPatterns } = usePracticeStore();
+    const { addNodeXP, nodes } = useMasteryTreeStore();
+
     const [critique, setCritique] = useState<string>('');
     const [isLoading, setIsLoading] = useState(true);
+    const [xpContributions, setXpContributions] = useState<XPContribution[]>([]);
+    const [masteredNodeNames, setMasteredNodeNames] = useState<string[]>([]);
+    const hasSyncExecuted = useRef(false);
 
     useEffect(() => {
         async function fetchCritique() {
@@ -42,6 +53,37 @@ export function PracticeReportModal({ songTitle, songKey, onClose }: PracticeRep
             setCritique(feedback);
             setIsLoading(false);
         }
+
+        // --- Mastery Tree Sync Engine ---
+        if (!hasSyncExecuted.current && score > 0) {
+            const contributions = CurriculumAnalysisService.calculateXPRewards(
+                detectedPatterns,
+                heatmap,
+                songTitle
+            );
+
+            setXpContributions(contributions);
+
+            const newlyMastered: string[] = [];
+
+            contributions.forEach(c => {
+                addNodeXP(c.nodeId, c.points);
+
+                // Check if this contribution pushed the node to mastered
+                // (This is a simplified check as the store update is async-ish)
+                const node = nodes[c.nodeId];
+                if (node && node.unlockStatus !== 'mastered') {
+                    const currentXP = useMasteryTreeStore.getState().xpByNode[c.nodeId] || 0;
+                    if (currentXP + c.points >= node.requiredPoints) {
+                        newlyMastered.push(node.label);
+                    }
+                }
+            });
+
+            setMasteredNodeNames(newlyMastered);
+            hasSyncExecuted.current = true;
+        }
+
         fetchCritique();
     }, []);
 
@@ -59,7 +101,7 @@ export function PracticeReportModal({ songTitle, songKey, onClose }: PracticeRep
                 <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-indigo-500/10 to-transparent pointer-events-none" />
                 <div className="absolute top-10 right-10 w-40 h-40 bg-indigo-500/10 blur-[60px] rounded-full pointer-events-none" />
 
-                <div className="p-8 flex flex-col gap-8 relative z-10">
+                <div className="p-8 flex flex-col gap-6 relative z-10">
                     <div className="flex justify-between items-start">
                         <div className="flex flex-col">
                             <h2 className="text-3xl font-black tracking-tighter text-white">Session Summary</h2>
@@ -74,6 +116,26 @@ export function PracticeReportModal({ songTitle, songKey, onClose }: PracticeRep
                             <X size={20} />
                         </button>
                     </div>
+
+                    {/* Notification for Mastered Nodes */}
+                    <AnimatePresence>
+                        {masteredNodeNames.map((name) => (
+                            <motion.div
+                                key={name}
+                                initial={{ opacity: 0, scale: 0.8, y: -20 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                className="bg-gradient-to-r from-yellow-400 to-orange-500 p-4 rounded-2xl flex items-center gap-4 shadow-lg"
+                            >
+                                <div className="bg-white/20 p-2 rounded-xl">
+                                    <Trophy size={20} className="text-white" />
+                                </div>
+                                <div>
+                                    <h4 className="text-sm font-black text-white uppercase tracking-tighter">Level Up!</h4>
+                                    <p className="text-xs text-white/90">You mastered <strong>{name}</strong></p>
+                                </div>
+                            </motion.div>
+                        ))}
+                    </AnimatePresence>
 
                     {/* Stats Grid */}
                     <div className="grid grid-cols-2 gap-4">
@@ -98,23 +160,27 @@ export function PracticeReportModal({ songTitle, songKey, onClose }: PracticeRep
                         </div>
                     </div>
 
-                    {/* Detailed Metrics */}
-                    <div className="flex flex-col gap-3">
-                        <div className="flex items-center justify-between px-4 py-3 bg-white/5 rounded-2xl border border-white/5">
-                            <div className="flex items-center gap-3">
-                                <Target size={16} className="text-emerald-400" />
-                                <span className="text-xs font-bold text-neutral-300">Mastery Bonus (3rds/7ths)</span>
-                            </div>
-                            <span className="text-sm font-mono font-black text-emerald-400">+{perfectNotesCount} pts</span>
+                    {/* Mastery Tree Contributions */}
+                    {xpContributions.length > 0 && (
+                        <div className="flex flex-col gap-2">
+                            <span className="text-[9px] font-black text-neutral-500 uppercase tracking-[0.2em] px-1">Mastery Progress</span>
+                            {xpContributions.map((cont, idx) => (
+                                <motion.div
+                                    key={idx}
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: idx * 0.1 }}
+                                    className="flex items-center justify-between px-4 py-3 bg-white/5 rounded-2xl border border-white/5"
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <Award size={14} className="text-purple-400" />
+                                        <span className="text-[11px] font-bold text-neutral-300">{cont.reason}</span>
+                                    </div>
+                                    <span className="text-xs font-mono font-black text-purple-400">+{cont.points} XP</span>
+                                </motion.div>
+                            ))}
                         </div>
-                        <div className="flex items-center justify-between px-4 py-3 bg-white/5 rounded-2xl border border-white/5">
-                            <div className="flex items-center gap-3">
-                                <TrendingUp size={16} className="text-blue-400" />
-                                <span className="text-xs font-bold text-neutral-300">Total Samples Analyzed</span>
-                            </div>
-                            <span className="text-sm font-mono font-black text-blue-400">{totalNotesProcessed}</span>
-                        </div>
-                    </div>
+                    )}
 
                     {/* AI Sensei Critique */}
                     <div className="bg-indigo-900/20 border border-indigo-500/20 rounded-[32px] p-6 relative group">

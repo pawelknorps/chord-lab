@@ -13,6 +13,8 @@ export class AudioManager {
     private modules: Map<string, ModuleAudioState> = new Map();
     private currentGlobalInstrument: string = 'piano';
     private initialized = false;
+    private initPromise: Promise<void> | null = null;
+    private fallbackSynth: any = null;
 
     private visualizationCallback: ((notes: number[]) => void) | null = null;
 
@@ -46,30 +48,50 @@ export class AudioManager {
     }
 
     async initialize(): Promise<void> {
-        if (this.initialized) return;
+        if (this.initialized) return Promise.resolve();
+        if (this.initPromise) return this.initPromise;
 
-        try {
-            if (Tone.context.state !== 'running') {
-                await Tone.start();
+        this.initPromise = (async () => {
+            try {
+                if (Tone.context.state !== 'running') {
+                    await Tone.start();
+                }
+                Tone.Transport.bpm.value = 120;
+
+                // Load default instruments via InstrumentService
+                const [piano, epiano, synth] = await Promise.all([
+                    instrumentService.getInstrument('piano-salamander'),
+                    instrumentService.getInstrument('epiano-casio'),
+                    instrumentService.getInstrument('synth-plumber')
+                ]);
+
+                this.instruments.set('piano', piano);
+                this.instruments.set('epiano', epiano);
+                this.instruments.set('synth', synth);
+
+                this.initialized = true;
+                console.log('AudioManager: Initialized with shared instruments');
+            } catch (error) {
+                console.error('AudioManager initialization failed:', error);
+                this.initPromise = null;
             }
-            Tone.Transport.bpm.value = 120;
+        })();
 
-            // Load default instruments via InstrumentService
-            const [piano, epiano, synth] = await Promise.all([
-                instrumentService.getInstrument('piano-salamander'),
-                instrumentService.getInstrument('epiano-casio'),
-                instrumentService.getInstrument('synth-plumber')
-            ]);
+        return this.initPromise;
+    }
 
-            this.instruments.set('piano', piano);
-            this.instruments.set('epiano', epiano);
-            this.instruments.set('synth', synth);
+    /** Ensures instruments are loaded before playing. Call before playNote/playChord when init may not have run yet. */
+    private ensureInitialized(): Promise<void> {
+        if (this.initialized) return Promise.resolve();
+        if (!this.initPromise) this.initPromise = this.initialize();
+        return this.initPromise;
+    }
 
-            this.initialized = true;
-            console.log('AudioManager: Initialized with shared instruments');
-        } catch (error) {
-            console.error('AudioManager initialization failed:', error);
-        }
+    /** Instant synth for feedback before samples load; no network, works as soon as context is running. */
+    private getFallbackSynth(): any {
+        if (this.fallbackSynth) return this.fallbackSynth;
+        this.fallbackSynth = new Tone.PolySynth(Tone.Synth).toDestination();
+        return this.fallbackSynth;
     }
 
     private async preloadInstrument(name: string) {
@@ -117,19 +139,33 @@ export class AudioManager {
         velocity: number = 0.8,
         instrument?: string
     ): void {
-        const instName = instrument || this.currentGlobalInstrument;
-        const inst = this.instruments.get(instName) || this.instruments.get('piano');
-        if (!inst) return;
-
         const midiNote = typeof note === 'string' ? Tone.Frequency(note).toMidi() : note;
         const noteName = typeof note === 'number' ? Tone.Frequency(note, 'midi').toNote() : note;
 
-        this.emitVisualization([midiNote]);
-        inst.triggerAttackRelease(noteName, duration, undefined, velocity);
+        if (this.initialized) {
+            const instName = instrument || this.currentGlobalInstrument;
+            const inst = this.instruments.get(instName) || this.instruments.get('piano');
+            if (inst) {
+                this.emitVisualization([midiNote]);
+                inst.triggerAttackRelease(noteName, duration, undefined, velocity);
+                const durSec = Tone.Time(duration).toSeconds();
+                setTimeout(() => this.emitVisualization([]), durSec * 1000);
+            }
+            return;
+        }
 
-        // Clear visualization after duration
-        const durSec = Tone.Time(duration).toSeconds();
-        setTimeout(() => this.emitVisualization([]), durSec * 1000);
+        // Not initialized: play immediately with fallback synth so user hears something
+        this.ensureInitialized(); // load real instruments in background
+        try {
+            const fallback = this.getFallbackSynth();
+            this.emitVisualization([midiNote]);
+            fallback.triggerAttackRelease(noteName, duration, undefined, velocity);
+            const durSec = Tone.Time(duration).toSeconds();
+            setTimeout(() => this.emitVisualization([]), durSec * 1000);
+        } catch (err) {
+            // Context may not be running yet; play when init completes
+            this.ensureInitialized().then(() => this.playNote(note, duration, velocity, instrument));
+        }
     }
 
     playChord(
@@ -138,10 +174,6 @@ export class AudioManager {
         velocity: number = 0.8,
         instrument?: string
     ): void {
-        const instName = instrument || this.currentGlobalInstrument;
-        const inst = this.instruments.get(instName) || this.instruments.get('piano');
-        if (!inst) return;
-
         const midiNotes = notes.map(n =>
             typeof n === 'string' ? Tone.Frequency(n).toMidi() : n
         );
@@ -149,14 +181,32 @@ export class AudioManager {
             typeof n === 'number' ? Tone.Frequency(n, 'midi').toNote() : n
         );
 
-        this.emitVisualization(midiNotes);
-        noteNames.forEach(note => {
-            inst.triggerAttackRelease(note, duration, undefined, velocity);
-        });
+        if (this.initialized) {
+            const instName = instrument || this.currentGlobalInstrument;
+            const inst = this.instruments.get(instName) || this.instruments.get('piano');
+            if (inst) {
+                this.emitVisualization(midiNotes);
+                noteNames.forEach(note => {
+                    inst.triggerAttackRelease(note, duration, undefined, velocity);
+                });
+                const durSec = Tone.Time(duration).toSeconds();
+                setTimeout(() => this.emitVisualization([]), durSec * 1000);
+            }
+            return;
+        }
 
-        // Clear visualization after duration
-        const durSec = Tone.Time(duration).toSeconds();
-        setTimeout(() => this.emitVisualization([]), durSec * 1000);
+        this.ensureInitialized();
+        try {
+            const fallback = this.getFallbackSynth();
+            this.emitVisualization(midiNotes);
+            noteNames.forEach(note => {
+                fallback.triggerAttackRelease(note, duration, undefined, velocity);
+            });
+            const durSec = Tone.Time(duration).toSeconds();
+            setTimeout(() => this.emitVisualization([]), durSec * 1000);
+        } catch (_) {
+            this.ensureInitialized().then(() => this.playChord(notes, duration, velocity, instrument));
+        }
     }
 
     stopNote(note: string | number, instrument: string = 'piano'): void {
@@ -188,7 +238,10 @@ export class AudioManager {
 
     dispose(): void {
         this.cleanup();
+        if (this.fallbackSynth?.dispose) this.fallbackSynth.dispose();
+        this.fallbackSynth = null;
         this.initialized = false;
+        this.initPromise = null;
     }
 }
 

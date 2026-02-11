@@ -161,7 +161,8 @@ export async function initAudio(): Promise<void> {
       "C8": "C8.mp3"
     },
     release: 1,
-    baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/piano/"
+    baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/piano/",
+    onload: () => console.log('Piano loaded')
   }).connect(pianoVol);
 
   // 2. Shell Synth (Left - Warm)
@@ -313,6 +314,14 @@ export function triggerRelease(midiNote: number) {
   const noteName = midiToNoteName(midiNote);
   if (noteName) {
     piano.triggerRelease(noteName, Tone.now());
+  }
+}
+
+export function triggerAttackRelease(midiNote: number, duration: string | number, time?: number | string, velocity?: number) {
+  if (!piano || !isInitialized) return;
+  const noteName = midiToNoteName(midiNote);
+  if (noteName) {
+    piano.triggerAttackRelease(noteName, duration, time, velocity);
   }
 }
 

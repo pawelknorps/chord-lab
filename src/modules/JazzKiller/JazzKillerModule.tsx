@@ -18,7 +18,7 @@ import {
 } from './state/jazzSignals';
 import { useAiTeacher } from './hooks/useAiTeacher';
 import {
-    Play, Volume2, Search, X, Target, Music, StopCircle, Sliders, ChevronDown, ChevronUp, Layers, Zap, Info, Activity, BookOpen, BookMarked, Keyboard, Sparkles, Mic
+    Play, Volume2, Search, X, Target, Music, StopCircle, Sliders, ChevronDown, ChevronUp, Layers, Zap, Info, Activity, BookOpen, BookMarked, Keyboard, Sparkles, Mic, Trophy
 } from 'lucide-react';
 import { SendToMenu } from '../../components/shared/SendToMenu';
 import { useAudioCleanup } from '../../hooks/useAudioManager';
@@ -39,7 +39,9 @@ import { PerformanceScoringOverlay } from './components/PerformanceScoringOverla
 import { PracticeReportModal } from './components/PracticeReportModal';
 import { GuidedPracticePane } from './components/GuidedPracticePane';
 import { useGuidedPracticeStore } from '../../core/store/useGuidedPracticeStore';
+import { useMasteryTreeStore } from '../../core/store/useMasteryTreeStore';
 import * as MicrophoneService from '../../core/audio/MicrophoneService';
+import { MasteryTreeView } from '../../components/MasteryTree/MasteryTreeView';
 
 export default function JazzKillerModule() {
     useAudioCleanup('jazz-killer');
@@ -73,6 +75,23 @@ export default function JazzKillerModule() {
     // Practice Store integration
     const { loadSong, detectedPatterns, showGuideTones, toggleGuideTones, showAnalysis, toggleAnalysis, guideToneSpotlightMode, setGuideToneSpotlightMode } = usePracticeStore();
     const { isFinished: isRoutineFinished, resetRoutine } = useGuidedPracticeStore();
+    const { nodes } = useMasteryTreeStore();
+    const [showMasteryTree, setShowMasteryTree] = useState(false);
+
+    const getSongMasteryStatus = (title: string) => {
+        const associatedNodes = Object.values(nodes).filter(n => n.standards.includes(title));
+        if (associatedNodes.length === 0) return 'unlocked';
+
+        const statuses = associatedNodes.map(n => n.unlockStatus);
+        if (statuses.includes('mastered')) return 'mastered';
+        if (statuses.includes('unlocked')) return 'unlocked';
+        return 'locked';
+    };
+
+    const getSongNodeLabel = (title: string) => {
+        const node = Object.values(nodes).find(n => n.standards.includes(title));
+        return node?.label;
+    };
 
     // Analysis filters
     const [analysisFilters, setAnalysisFilters] = useState<AnalysisFilters>({
@@ -475,6 +494,14 @@ export default function JazzKillerModule() {
                             >
                                 <Zap size={18} />
                             </button>
+                            <div className="w-px h-4 md:h-6 bg-white/10 mx-0.5" />
+                            <button
+                                onClick={() => setShowMasteryTree(!showMasteryTree)}
+                                className={`p-1.5 md:p-2.5 rounded-lg md:rounded-xl transition-all ${showMasteryTree ? 'bg-indigo-500 text-white shadow-[0_0_20px_rgba(99,102,241,0.4)]' : 'text-neutral-500 hover:text-white'} ${showToolHints ? 'animate-hint-pulse text-indigo-400' : ''}`}
+                                title="Mastery Tree"
+                            >
+                                <Trophy size={18} />
+                            </button>
                         </div>
                     </div>
                 )}
@@ -499,31 +526,49 @@ export default function JazzKillerModule() {
                     <div className="w-full flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-2">
                         {searchQuery && filteredStandards.length > 0 && (
                             <div className="flex flex-col gap-2 py-4">
-                                {filteredStandards.map((std, i) => (
-                                    <button
-                                        key={i}
-                                        onClick={() => handleSelectSong(std)}
-                                        className="w-full flex items-center justify-between p-4 bg-neutral-900/60 border border-white/5 hover:border-amber-500/50 rounded-2xl transition-all group hover:bg-neutral-800"
-                                    >
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-neutral-500 group-hover:bg-amber-500 group-hover:text-black transition-all">
-                                                <Music size={20} />
+                                {filteredStandards.map((std, i) => {
+                                    const status = getSongMasteryStatus(std.Title);
+                                    const isLocked = status === 'locked';
+
+                                    return (
+                                        <button
+                                            key={i}
+                                            onClick={() => !isLocked && handleSelectSong(std)}
+                                            disabled={isLocked}
+                                            className={`w-full flex items-center justify-between p-4 bg-neutral-900/60 border border-white/5  rounded-2xl transition-all group hover:bg-neutral-800 ${isLocked ? 'opacity-40 cursor-not-allowed' : 'hover:border-amber-500/50'}`}
+                                        >
+                                            <div className="flex items-center gap-4">
+                                                <div className={`w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center transition-all ${isLocked ? 'text-neutral-700' : 'text-neutral-500 group-hover:bg-amber-500 group-hover:text-black'}`}>
+                                                    {isLocked ? <Lock size={16} /> : <Music size={20} />}
+                                                </div>
+                                                <div className="text-left">
+                                                    <div className="flex items-center gap-2">
+                                                        <h4 className="font-bold text-lg leading-tight">{std.Title}</h4>
+                                                        {status === 'mastered' && <Trophy size={14} className="text-yellow-500" />}
+                                                        {status === 'unlocked' && Object.values(nodes).some(n => n.standards.includes(std.Title) && n.unlockStatus === 'unlocked') && (
+                                                            <span className="bg-purple-500/20 text-purple-400 text-[8px] font-black px-1.5 py-0.5 rounded border border-purple-500/30">🎯 NEXT STEP</span>
+                                                        )}
+                                                    </div>
+                                                    <p className="text-sm text-neutral-500">{std.Composer}{std.Tempo != null ? ` • ${std.Tempo} BPM` : ''}</p>
+                                                </div>
                                             </div>
-                                            <div className="text-left">
-                                                <h4 className="font-bold text-lg leading-tight">{std.Title}</h4>
-                                                <p className="text-sm text-neutral-500">{std.Composer}{std.Tempo != null ? ` • ${std.Tempo} BPM` : ''}</p>
+                                            <div className="flex items-center gap-3">
+                                                {isLocked ? (
+                                                    <span className="text-[10px] font-bold text-red-500/50 uppercase tracking-widest">{getSongNodeLabel(std.Title)} Locked</span>
+                                                ) : (
+                                                    <>
+                                                        {std.Tempo != null && (
+                                                            <span className="text-[10px] font-bold text-amber-500/90 tabular-nums">{std.Tempo} BPM</span>
+                                                        )}
+                                                        <div className="px-3 py-1 bg-white/5 rounded-full text-[10px] font-bold uppercase tracking-wider text-neutral-500 group-hover:text-neutral-300 transition-colors border border-transparent group-hover:border-white/10">
+                                                            Analyze
+                                                        </div>
+                                                    </>
+                                                )}
                                             </div>
-                                        </div>
-                                        <div className="flex items-center gap-3">
-                                            {std.Tempo != null && (
-                                                <span className="text-[10px] font-bold text-amber-500/90 tabular-nums">{std.Tempo} BPM</span>
-                                            )}
-                                            <div className="px-3 py-1 bg-white/5 rounded-full text-[10px] font-bold uppercase tracking-wider text-neutral-500 group-hover:text-neutral-300 transition-colors border border-transparent group-hover:border-white/10">
-                                                Analyze
-                                            </div>
-                                        </div>
-                                    </button>
-                                ))}
+                                        </button>
+                                    );
+                                })}
                             </div>
                         )}
 
@@ -537,24 +582,40 @@ export default function JazzKillerModule() {
                         {!searchQuery && (
                             <div className="flex flex-col gap-10 py-6 w-full animate-in slide-in-from-bottom-4 duration-500">
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                                    {standards.slice(0, 9).map((song, i) => (
-                                        <button
-                                            key={i}
-                                            onClick={() => handleSelectSong(song)}
-                                            className="relative overflow-hidden p-5 bg-neutral-900/40 border border-white/5 hover:border-amber-500/30 rounded-2xl text-left hover:bg-neutral-800/60 transition-all group duration-300"
-                                        >
-                                            <div className="absolute inset-0 bg-gradient-to-br from-amber-500/0 via-amber-500/0 to-amber-500/5 group-hover:via-amber-500/5 group-hover:to-amber-500/10 transition-all duration-500" />
-                                            <div className="relative flex items-start justify-between">
-                                                <div>
-                                                    <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center mb-3 group-hover:bg-amber-500 group-hover:text-black transition-all duration-300 shadow-lg shadow-black/20">
-                                                        <Music size={18} />
+                                    {standards.slice(0, 9).map((song, i) => {
+                                        const status = getSongMasteryStatus(song.Title);
+                                        const isLocked = status === 'locked';
+
+                                        return (
+                                            <button
+                                                key={i}
+                                                onClick={() => !isLocked && handleSelectSong(song)}
+                                                disabled={isLocked}
+                                                className={`relative overflow-hidden p-5 bg-neutral-900/40 border border-white/5 rounded-2xl text-left transition-all group duration-300 ${isLocked ? 'opacity-40 cursor-not-allowed grayscale' : 'hover:border-amber-500/30 hover:bg-neutral-800/60'}`}
+                                            >
+                                                <div className="absolute inset-0 bg-gradient-to-br from-amber-500/0 via-amber-500/0 to-amber-500/5 group-hover:via-amber-500/5 group-hover:to-amber-500/10 transition-all duration-500" />
+                                                <div className="relative flex items-start justify-between">
+                                                    <div>
+                                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 transition-all duration-300 shadow-lg shadow-black/20 ${isLocked ? 'bg-neutral-800 text-neutral-600' : 'bg-amber-500/10 group-hover:bg-amber-500 group-hover:text-black'}`}>
+                                                            {isLocked ? <Lock size={16} /> : <Music size={18} />}
+                                                        </div>
+                                                        <div className="flex items-center gap-2 mb-1">
+                                                            <h3 className="font-bold text-neutral-200 group-hover:text-amber-100 text-lg leading-tight transition-colors truncate">{song.Title}</h3>
+                                                            {status === 'mastered' && <Trophy size={14} className="text-yellow-500 shrink-0" />}
+                                                        </div>
+                                                        <p className="text-xs text-neutral-500 group-hover:text-neutral-400 transition-colors uppercase tracking-wider font-medium truncate">{song.Composer}{song.Tempo != null ? ` • ${song.Tempo} BPM` : ''}</p>
+
+                                                        {status === 'unlocked' && Object.values(nodes).some(n => n.standards.includes(song.Title) && n.unlockStatus === 'unlocked') && (
+                                                            <div className="mt-2 inline-block bg-purple-500/20 text-purple-400 text-[8px] font-black px-1.5 py-0.5 rounded border border-purple-500/30">🎯 NEXT STEP</div>
+                                                        )}
+                                                        {isLocked && (
+                                                            <div className="mt-2 inline-block bg-red-500/10 text-red-500/60 text-[8px] font-black px-1.5 py-0.5 rounded border border-red-500/20 uppercase tracking-tighter">Locked: {getSongNodeLabel(song.Title)}</div>
+                                                        )}
                                                     </div>
-                                                    <h3 className="font-bold text-neutral-200 group-hover:text-amber-100 text-lg leading-tight mb-1 transition-colors">{song.Title}</h3>
-                                                    <p className="text-xs text-neutral-500 group-hover:text-neutral-400 transition-colors uppercase tracking-wider font-medium">{song.Composer}{song.Tempo != null ? ` • ${song.Tempo} BPM` : ''}</p>
                                                 </div>
-                                            </div>
-                                        </button>
-                                    ))}
+                                            </button>
+                                        );
+                                    })}
                                 </div>
 
                                 {/* Detailed How-To Instructions */}
@@ -909,6 +970,43 @@ export default function JazzKillerModule() {
                     onClose={resetRoutine}
                 />
             )}
+            {/* Mastery Tree View */}
+            {showMasteryTree && (
+                <div className="fixed inset-0 z-[250] p-6 lg:p-12 pb-24 md:pb-12 bg-black flex flex-col animate-in fade-in duration-300 overflow-hidden">
+                    <div className="flex justify-between items-center mb-6">
+                        <div className="flex flex-col">
+                            <h2 className="text-3xl font-black text-white tracking-tighter uppercase italic">Curriculum</h2>
+                            <p className="text-xs font-bold text-neutral-500 tracking-[0.2em] uppercase">Master the Standards</p>
+                        </div>
+                        <button
+                            onClick={() => setShowMasteryTree(false)}
+                            className="bg-white/5 hover:bg-white/10 text-white p-3 rounded-2xl border border-white/10 transition-all"
+                        >
+                            <X size={24} />
+                        </button>
+                    </div>
+                    <div className="flex-1 min-h-0 bg-neutral-900/50 rounded-[40px] border border-white/5 overflow-hidden">
+                        <MasteryTreeView />
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
+
+const Lock: React.FC<{ size?: number; className?: string }> = ({ size = 20, className }) => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className={className}
+    >
+        <rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
+    </svg>
+);

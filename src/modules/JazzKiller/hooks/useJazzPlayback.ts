@@ -31,7 +31,8 @@ import {
     bassVolumeSignal,
     drumsVolumeSignal,
     reverbVolumeSignal,
-    pianoReverbSignal
+    pianoReverbSignal,
+    currentChordSymbolSignal
 } from '../state/jazzSignals';
 
 import { Signal } from "@preact/signals-react";
@@ -49,7 +50,7 @@ interface JazzPlaybackState {
     playChord: (symbol: string) => void;
 }
 
-export const useJazzPlayback = (song: any): JazzPlaybackState => {
+export const useJazzPlayback = (song: any, isActive: boolean = true): JazzPlaybackState => {
     const pianoRef = useRef<Tone.Sampler | null>(null);
     const bassRef = useRef<Tone.Sampler | null>(null);
     const drumsRef = useRef<{
@@ -76,34 +77,30 @@ export const useJazzPlayback = (song: any): JazzPlaybackState => {
             wet: pianoReverbSignal.value
         }).toDestination();
 
+        // Piano: High-quality AAC (New HD Engine Samples)
         pianoRef.current = new Tone.Sampler({
             urls: {
-                "C1": "C1.mp3", "D#1": "Ds1.mp3", "F#1": "Fs1.mp3",
-                "A1": "A1.mp3", "C2": "C2.mp3", "D#2": "Ds2.mp3", "F#2": "Fs2.mp3",
-                "A2": "A2.mp3", "C3": "C3.mp3", "D#3": "Ds3.mp3", "F#3": "Fs3.mp3",
-                "A3": "A3.mp3", "C4": "C4.mp3", "D#4": "Ds4.mp3", "F#4": "Fs4.mp3",
-                "A4": "A4.mp3", "C5": "C5.mp3", "D#5": "Ds5.mp3", "F#5": "Fs5.mp3",
-                "A5": "A5.mp3", "C6": "C6.mp3", "D#6": "Ds6.mp3", "F#6": "Fs6.mp3",
-                "A6": "A6.mp3", "C7": "C7.mp3", "D#7": "Ds7.mp3", "F#7": "Fs7.mp3",
-                "A7": "A7.mp3", "C8": "C8.mp3"
+                "C2": "C2.m4a", "F#2": "Fs2.m4a",
+                "C3": "C3.m4a", "F#3": "Fs3.m4a",
+                "C4": "C4.m4a", "F#4": "Fs4.m4a",
+                "C5": "C5.m4a"
             },
-            release: 1,
-            baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/piano/",
+            release: 1.2,
+            baseUrl: "/audio/piano/",
             volume: pianoVolumeSignal.value,
             onload: () => {
                 if (bassRef.current?.loaded) isLoadedSignal.value = true;
             }
         }).connect(pianoReverbRef.current);
 
+        // Bass: High-quality AAC (New HD Engine Samples)
         bassRef.current = new Tone.Sampler({
             urls: {
-                "A#1": "As1.mp3", "C#1": "Cs1.mp3", "E1": "E1.mp3", "G1": "G1.mp3",
-                "A#2": "As2.mp3", "C#2": "Cs2.mp3", "E2": "E2.mp3", "G2": "G2.mp3",
-                "A#3": "As3.mp3", "C#3": "Cs3.mp3", "E3": "E3.mp3", "G3": "G3.mp3",
-                "A#4": "As4.mp3", "C#4": "Cs4.mp3", "E4": "E4.mp3", "G4": "G4.mp3",
-                "C#5": "Cs5.mp3"
+                "E1": "E1.m4a", "A#1": "As1.m4a",
+                "E2": "E2.m4a", "A#2": "As2.m4a",
+                "E3": "E3.m4a", "A#3": "As3.m4a"
             },
-            baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/bass-electric/",
+            baseUrl: "/audio/bass/",
             volume: bassVolumeSignal.value,
             release: 0.8,
             onload: () => {
@@ -201,7 +198,7 @@ export const useJazzPlayback = (song: any): JazzPlaybackState => {
     }, [pianoReverbSignal.value]);
 
     useEffect(() => {
-        if (!song || !song.music || !song.music.measures) return;
+        if (!isActive || !song || !song.music || !song.music.measures) return;
 
         Tone.Transport.cancel();
         currentMeasureIndexSignal.value = -1;
@@ -211,8 +208,12 @@ export const useJazzPlayback = (song: any): JazzPlaybackState => {
             const bar = parseInt(position[0]);
             const beat = parseInt(position[1]);
 
-            const measureIndex = bar % song.music.measures.length;
-            const currentLoop = Math.floor(bar / song.music.measures.length);
+            const plan = song.music.playbackPlan || [];
+            if (plan.length === 0) return;
+
+            const logicalBar = bar % plan.length;
+            const measureIndex = plan[logicalBar];
+            const currentLoop = Math.floor(bar / plan.length);
 
             if (currentLoop >= totalLoopsSignal.value) {
                 Tone.Transport.stop();
@@ -229,7 +230,9 @@ export const useJazzPlayback = (song: any): JazzPlaybackState => {
             }, time);
 
             const measure = song.music.measures[measureIndex];
-            const nextMeasure = song.music.measures[(measureIndex + 1) % song.music.measures.length];
+            const nextLogicalBar = (logicalBar * 4 + beat + 1) / 4;
+            const nextMeasureIndex = plan[Math.floor(nextLogicalBar) % plan.length];
+            const nextMeasure = song.music.measures[nextMeasureIndex];
             const chords = measure.chords || [];
 
             let currentChordSymbol = "";
@@ -244,6 +247,11 @@ export const useJazzPlayback = (song: any): JazzPlaybackState => {
             } else {
                 currentChordSymbol = chords[Math.min(beat, chords.length - 1)];
                 nextChordSymbol = chords[Math.min(beat + 1, chords.length - 1)] || nextMeasure.chords?.[0];
+            }
+
+            // Update global signal for scoring/UI tools
+            if (currentChordSymbol !== currentChordSymbolSignal.value) {
+                currentChordSymbolSignal.value = currentChordSymbol;
             }
 
             if (currentChordSymbol) {
@@ -324,7 +332,7 @@ export const useJazzPlayback = (song: any): JazzPlaybackState => {
         return () => {
             loop.dispose();
         };
-    }, [song]);
+    }, [song, isActive]);
 
     const playChord = (symbol: string, time: number = Tone.now(), duration: string = "2n") => {
         if (!pianoRef.current?.loaded) return;
@@ -358,6 +366,8 @@ export const useJazzPlayback = (song: any): JazzPlaybackState => {
         if (isPlayingSignal.value) {
             Tone.Transport.stop();
             isPlayingSignal.value = false;
+            currentMeasureIndexSignal.value = -1;
+            currentBeatSignal.value = -1;
         } else {
             await Tone.start();
             Tone.Transport.start();

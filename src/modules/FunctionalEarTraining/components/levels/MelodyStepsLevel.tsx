@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useFunctionalEarTrainingStore } from '../../state/useFunctionalEarTrainingStore';
 import { useMidiLibrary } from '../../../../hooks/useMidiLibrary';
 import { useMidi } from '../../../../context/MidiContext';
@@ -18,10 +18,19 @@ const ALL_INTERVALS = [
     { label: 'b13', value: 20, semitones: 8, difficulty: ['Advanced', 'Pro'] },
 ];
 
+const SYNTHETIC_ROOTS = [60, 62, 64, 65, 67, 69, 71]; // C, D, E, F, G, A, B
+function buildSyntheticChord() {
+    const rootMidi = SYNTHETIC_ROOTS[Math.floor(Math.random() * SYNTHETIC_ROOTS.length)];
+    const chordTones = [0, 4, 7].map(s => rootMidi + s);
+    const notes = chordTones.map(midi => ({ midi, name: Tone.Frequency(midi, 'midi').toNote() }));
+    const root = notes[0];
+    return { notes, root, file: { name: 'Practice' } };
+}
+
 export const MelodyStepsLevel: React.FC = () => {
     const { addScore, setPlaying, difficulty, streak } = useFunctionalEarTrainingStore();
     const { addExperience, updateStreak } = useMasteryStore();
-    const { files } = useMidiLibrary();
+    const { files, loading: libraryLoading } = useMidiLibrary();
     const { lastNote } = useMidi();
 
     const [currentChord, setCurrentChord] = useState<any>(null);
@@ -32,12 +41,35 @@ export const MelodyStepsLevel: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [history, setHistory] = useState<string[]>([]);
     const [midiFeedback, setMidiFeedback] = useState<string | null>(null);
+    const [loadError, setLoadError] = useState<string | null>(null);
+    const [syntheticMode, setSyntheticMode] = useState(false);
 
-    const validFiles = files.filter((f: any) => f.progression && f.progression.length > 0);
+    const validFiles = useMemo(() => files.filter((f: any) => f.progression && f.progression.length > 0), [files]);
+    const currentPool = useMemo(() => ALL_INTERVALS.filter(i => i.difficulty.includes(difficulty)), [difficulty]);
+
+    const loadSyntheticChallenge = useCallback(() => {
+        if (currentPool.length === 0) return;
+        setResult(null);
+        setSelectedOption(null);
+        setMidiFeedback(null);
+        setLoadError(null);
+        setSyntheticMode(true);
+        const chord = buildSyntheticChord();
+        const randomInterval = currentPool[Math.floor(Math.random() * currentPool.length)];
+        const distractors = currentPool.filter(i => i.label !== randomInterval.label)
+            .sort(() => 0.5 - Math.random())
+            .slice(0, 3);
+        const allOptions = [randomInterval, ...distractors].sort(() => 0.5 - Math.random());
+        setCurrentChord(chord);
+        setTargetInterval(randomInterval);
+        setOptions(allOptions);
+        setLoading(false);
+    }, [currentPool]);
 
     const loadNewChallenge = useCallback(async (retryCountOrEvent: number | React.MouseEvent = 0) => {
         const retryCount = typeof retryCountOrEvent === 'number' ? retryCountOrEvent : 0;
-        if (validFiles.length === 0 || retryCount > 5) {
+
+        if (currentPool.length === 0) {
             setLoading(false);
             return;
         }
@@ -46,11 +78,11 @@ export const MelodyStepsLevel: React.FC = () => {
         setResult(null);
         setSelectedOption(null);
         setMidiFeedback(null);
+        setLoadError(null);
+        setSyntheticMode(false);
 
-        const currentPool = ALL_INTERVALS.filter(i => i.difficulty.includes(difficulty));
-        if (currentPool.length === 0) {
-            console.error("No intervals found for difficulty:", difficulty);
-            setLoading(false);
+        if (validFiles.length === 0) {
+            loadSyntheticChallenge();
             return;
         }
 
@@ -68,7 +100,16 @@ export const MelodyStepsLevel: React.FC = () => {
             }
 
             const url = await randomFile.loadUrl();
-            const midi = await Midi.fromUrl(url);
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`MIDI file not found (${response.status}): ${randomFile.name}`);
+            }
+            const contentType = response.headers.get('content-type') || '';
+            if (contentType && !contentType.includes('midi') && !contentType.includes('octet-stream') && contentType.includes('text/html')) {
+                throw new Error(`Server returned HTML instead of MIDI. The MIDI library may not be deployed at /midi_progressions/.`);
+            }
+            const arrayBuffer = await response.arrayBuffer();
+            const midi = new Midi(arrayBuffer);
 
             if (!midi.tracks || midi.tracks.length === 0) {
                 throw new Error("No tracks found in MIDI file");
@@ -79,7 +120,12 @@ export const MelodyStepsLevel: React.FC = () => {
 
             if (!notes || notes.length < 3) {
                 console.warn("MIDI file too short, skipping:", randomFile.name);
-                setTimeout(() => loadNewChallenge(retryCount + 1), 50);
+                setLoading(false);
+                if (retryCount < 3) {
+                    setTimeout(() => loadNewChallenge(retryCount + 1), 50);
+                } else {
+                    loadSyntheticChallenge();
+                }
                 return;
             }
 
@@ -121,17 +167,23 @@ export const MelodyStepsLevel: React.FC = () => {
             setLoading(false);
 
         } catch (e) {
+            const message = e instanceof Error ? e.message : String(e);
             console.error("Error loading MIDI context:", e);
             setLoading(false);
-            if (retryCount < 5) {
-                setTimeout(() => loadNewChallenge(retryCount + 1), 100);
+            if (retryCount < 2) {
+                setTimeout(() => loadNewChallenge(retryCount + 1), 150);
+            } else {
+                loadSyntheticChallenge();
             }
         }
-    }, [validFiles, difficulty, history]);
+    }, [validFiles, difficulty, history, currentPool, loadSyntheticChallenge]);
 
     useEffect(() => {
-        if (files.length > 0 && !currentChord) loadNewChallenge();
-    }, [files, currentChord, loadNewChallenge]);
+        if (!currentChord && currentPool.length > 0) {
+            if (files.length > 0) loadNewChallenge();
+            else if (!libraryLoading) loadSyntheticChallenge();
+        }
+    }, [files.length, libraryLoading, currentChord, currentPool.length, loadNewChallenge, loadSyntheticChallenge]);
 
     const playAudio = async () => {
         if (!currentChord || !targetInterval) return;
@@ -223,12 +275,42 @@ export const MelodyStepsLevel: React.FC = () => {
         }
     }, [lastNote, result, currentChord, targetInterval, handleCorrectAnswer, handleIncorrectAnswer]);
 
-    if (!currentChord) return (
-        <div className="flex flex-col items-center justify-center p-12 glass-panel rounded-3xl animate-pulse">
-            <div className="w-16 h-16 rounded-full border-4 border-cyan-500/20 border-t-cyan-500 animate-spin mb-6" />
-            <div className="text-cyan-400 font-black uppercase tracking-[0.2em] text-sm italic">Curating Harmonic Challenges...</div>
-        </div>
-    );
+    if (!currentChord) {
+        if (files.length === 0 && !libraryLoading) {
+            return (
+                <div className="flex flex-col items-center justify-center p-12 glass-panel rounded-3xl max-w-lg text-center gap-6">
+                    <div className="text-amber-400/90 font-bold text-sm uppercase tracking-wider">MIDI library could not be loaded.</div>
+                    <button
+                        className="px-6 py-3 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10 font-black uppercase tracking-wider text-sm text-white transition-colors"
+                        onClick={loadSyntheticChallenge}
+                    >
+                        Start with practice mode
+                    </button>
+                </div>
+            );
+        }
+        if (loadError) {
+            return (
+                <div className="flex flex-col items-center justify-center p-12 glass-panel rounded-3xl max-w-lg text-center gap-6">
+                    <div className="text-red-400/90 font-bold text-sm uppercase tracking-wider">{loadError}</div>
+                    <button
+                        className="px-6 py-3 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10 font-black uppercase tracking-wider text-sm text-white transition-colors"
+                        onClick={() => { setLoadError(null); loadNewChallenge(0); }}
+                    >
+                        Try again
+                    </button>
+                </div>
+            );
+        }
+        return (
+            <div className="flex flex-col items-center justify-center p-12 glass-panel rounded-3xl animate-pulse">
+                <div className="w-16 h-16 rounded-full border-4 border-cyan-500/20 border-t-cyan-500 animate-spin mb-6" />
+                <div className="text-cyan-400 font-black uppercase tracking-[0.2em] text-sm italic">
+                    {libraryLoading && files.length === 0 ? 'Loading MIDI library...' : 'Curating Harmonic Challenges...'}
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="flex flex-col items-center gap-12 w-full max-w-4xl fade-in relative z-10">
@@ -277,7 +359,7 @@ export const MelodyStepsLevel: React.FC = () => {
                     {/* Source label */}
                     <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 whitespace-nowrap px-4 py-1.5 bg-black/40 border border-white/5 rounded-full text-[10px] uppercase font-black tracking-tighter text-white/30 backdrop-blur-sm">
                         <Music2 size={10} className="inline mr-2 text-cyan-500" />
-                        Source: {currentChord.file.name}
+                        Source: {currentChord.file.name}{syntheticMode ? ' (practice)' : ''}
                     </div>
                 </div>
             </div>

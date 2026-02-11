@@ -283,7 +283,9 @@ export class ConceptAnalyzer {
     }
 
     /**
-     * Generate practice exercises from detected patterns
+     * Generate practice exercises from detected patterns.
+     * Expects concepts with chord indices (startIndex/endIndex into chords array).
+     * Returns one exercise per concept so indices align with detectedPatterns (which use measure indices elsewhere).
      */
     static generateExercises(analysisResult: AnalysisResult, chords: string[]) {
         const exercises: Array<{
@@ -300,28 +302,33 @@ export class ConceptAnalyzer {
             if (concept.type === 'MajorII-V-I' || concept.type === 'MinorII-V-i') {
                 try {
                     const iiChord = Chord.get(conceptChords[0]);
-
-                    if (iiChord.tonic) {
-                        exercises.push({
-                            type: concept.type,
-                            startIndex: concept.startIndex,
-                            chords: conceptChords,
-                            practiceScale: `${iiChord.tonic} Dorian`,
-                            practiceArpeggio: iiChord.notes.join(', '),
-                        });
-                    }
+                    exercises.push({
+                        type: concept.type,
+                        startIndex: concept.startIndex,
+                        chords: conceptChords,
+                        practiceScale: iiChord?.tonic ? `${iiChord.tonic} Dorian` : undefined,
+                        practiceArpeggio: iiChord?.notes?.join(', '),
+                    });
                 } catch (e) {
-                    // Skip if chord parsing fails
+                    exercises.push({
+                        type: concept.type,
+                        startIndex: concept.startIndex,
+                        chords: conceptChords,
+                    });
                 }
-            }
-
-            if (concept.type === 'ColtraneChanges') {
+            } else if (concept.type === 'ColtraneChanges') {
                 exercises.push({
                     type: concept.type,
                     startIndex: concept.startIndex,
                     chords: conceptChords,
                     practiceScale: 'Major third cycles',
                     practiceArpeggio: 'Practice each tonal center separately',
+                });
+            } else if (concept.type === 'SecondaryDominant' || concept.type === 'TritoneSubstitution') {
+                exercises.push({
+                    type: concept.type,
+                    startIndex: concept.startIndex,
+                    chords: conceptChords,
                 });
             }
         }

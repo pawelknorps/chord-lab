@@ -8,6 +8,7 @@ import {
 } from '../state/jazzSignals';
 import { usePracticeStore } from '../../../core/store/usePracticeStore';
 import { AnalysisOverlay } from './AnalysisOverlay';
+import { PerformanceHeatmapOverlay } from './PerformanceHeatmapOverlay';
 
 interface LeadSheetProps {
     song: any;
@@ -122,6 +123,7 @@ export const LeadSheet = ({ song, filteredPatterns, onChordClick }: LeadSheetPro
                                     hover:bg-black/5 transition-all
                                 `}
                                 >
+                                    <PerformanceHeatmapOverlay measureIndex={index} />
                                     {/* Selection Glow */}
                                     {isInSelectedRange && (
                                         <div className="absolute inset-0 bg-cyan-500/5 animate-pulse pointer-events-none" />

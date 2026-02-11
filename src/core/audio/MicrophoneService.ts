@@ -25,7 +25,17 @@ export async function start(): Promise<void> {
     stream.getTracks().forEach((t) => t.stop());
     stream = null;
   }
-  stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+  const constraints: MediaStreamConstraints = {
+    audio: {
+      // @ts-expect-error - voiceIsolation is a 2026/modern browser feature
+      voiceIsolation: true,
+      echoCancellation: true,
+      noiseSuppression: true,
+      autoGainControl: true,
+    },
+    video: false,
+  };
+  stream = await navigator.mediaDevices.getUserMedia(constraints);
   notify();
 }
 

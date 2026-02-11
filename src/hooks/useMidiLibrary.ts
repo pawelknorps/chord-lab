@@ -43,7 +43,7 @@ export function useMidiLibrary() {
                 .then(res => res.json())
                 .then((data: any[]) => {
                     const processed = data.map((item: any) => {
-                        const filePath = item.path || `/midi_progressions/${item.category}/${item.style}/${item.name}.mid`;
+                        const filePath = item.path || `/midi_progressions/${encodeURIComponent(item.category)}/${encodeURIComponent(item.style)}/${encodeURIComponent(item.name)}.mid`;
                         return {
                             ...item,
                             path: filePath,

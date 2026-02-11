@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import * as Note from '@tonaljs/note';
 import * as Tone from 'tone';
 import { Mic, Play, Check, X } from 'lucide-react';
-import { useAuralMirror } from '../../../hooks/useAuralMirror';
+import { useHighPerformancePitch } from '../../ITM/hooks/useHighPerformancePitch';
+import { useMicrophone } from '../../../hooks/useMicrophone';
 import { askNano } from '../../../core/services/nanoHelpers';
 
 /** Default 4-note motif (C4 E4 G4 C5) for Call and Response (REQ-MIC-13). */
@@ -15,10 +16,32 @@ type Phase = 'idle' | 'playing' | 'listening' | 'match' | 'miss';
 export function CallAndResponseDrill(): React.ReactElement {
   const [phase, setPhase] = useState<Phase>('idle');
   const [nanoTip, setNanoTip] = useState<string | null>(null);
-  const { start, stop, isActive, liveNote, midi } = useAuralMirror();
+  const { start, isActive, stream } = useMicrophone();
+  const { isReady, getLatestPitch } = useHighPerformancePitch(stream);
   const bufferRef = useRef<number[]>([]);
   const expectedRef = useRef<number[]>(DEFAULT_MOTIF_MIDI);
   const listenEndRef = useRef<ReturnType<typeof setTimeout>>(0);
+
+  // Track live midi in a separate effect for 120Hz reactivity
+  useEffect(() => {
+    if (phase !== 'listening' || !isReady) return;
+
+    let rafId: number;
+    const loop = () => {
+      const result = getLatestPitch();
+      if (result && result.clarity > 0.9) {
+        const midiNum = Note.midi(Note.fromFreq(result.frequency));
+        if (midiNum !== null) {
+          const last = bufferRef.current[bufferRef.current.length - 1];
+          if (last !== midiNum) bufferRef.current.push(midiNum);
+        }
+      }
+      rafId = requestAnimationFrame(loop);
+    };
+
+    rafId = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(rafId);
+  }, [phase, isReady, getLatestPitch]);
 
   const playMotif = async () => {
     setNanoTip(null);
@@ -27,18 +50,18 @@ export function CallAndResponseDrill(): React.ReactElement {
     bufferRef.current = [];
 
     if (Tone.context.state !== 'running') await Tone.start();
-    const { default: globalAudio } = await import('../../../core/audio/globalAudio');
-    if (!globalAudio.triggerAttackRelease) {
+    const GlobalAudio = await import('../../../core/audio/globalAudio');
+    if (!GlobalAudio || !GlobalAudio.triggerAttackRelease) {
       setPhase('idle');
       return;
     }
     const noteDuration = 0.4;
     for (let i = 0; i < DEFAULT_MOTIF_MIDI.length; i++) {
-      globalAudio.triggerAttackRelease(DEFAULT_MOTIF_MIDI[i], noteDuration);
+      GlobalAudio.triggerAttackRelease(DEFAULT_MOTIF_MIDI[i], noteDuration);
       await new Promise((r) => setTimeout(r, noteDuration * 1000 + 80));
     }
     setPhase('listening');
-    if (!isActive) start();
+    if (!isActive) void start();
     listenEndRef.current = setTimeout(() => {
       const expected = expectedRef.current;
       const buffer = bufferRef.current;
@@ -62,18 +85,6 @@ export function CallAndResponseDrill(): React.ReactElement {
       }
     }, LISTEN_SECONDS * 1000);
   };
-
-  useEffect(() => {
-    if (phase !== 'listening' || !midi) return;
-    const last = bufferRef.current[bufferRef.current.length - 1];
-    if (last !== midi) bufferRef.current.push(midi);
-  }, [phase, midi]);
-
-  useEffect(() => {
-    return () => {
-      if (listenEndRef.current) clearTimeout(listenEndRef.current);
-    };
-  }, []);
 
   const cancel = () => {
     if (listenEndRef.current) clearTimeout(listenEndRef.current);

@@ -2,9 +2,11 @@
  * Ear performance store: tracks success/failure per level and item (interval/quality)
  * for adaptive curriculum and AI focus-area suggestions.
  * Phase 9 Steps 33-34; REQ-ADAPT-EAR-02.
+ * Auto-promotion: after enough attempts + accuracy, suggest moving difficulty up.
  */
 
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import type { EarDiagnosis } from '../utils/earDiagnosis';
 
 export interface ItemStats {
@@ -21,6 +23,21 @@ export interface EarPerformanceProfile {
   totalAttempts: number;
 }
 
+export interface LevelStats {
+  attempts: number;
+  success: number;
+  fail: number;
+  accuracy: number;
+}
+
+/** Minimum attempts before considering promotion. */
+export const PROMOTION_MIN_ATTEMPTS_NOVICE = 12;
+export const PROMOTION_MIN_ATTEMPTS_ADVANCED = 20;
+/** Accuracy threshold (0–1) to promote. */
+export const PROMOTION_ACCURACY_THRESHOLD = 0.85;
+
+export type DifficultyTier = 'Novice' | 'Advanced' | 'Pro';
+
 interface EarPerformanceState {
   byLevel: Record<string, Record<string, ItemStats>>;
   sessionStart: number;
@@ -35,10 +52,14 @@ interface EarPerformanceState {
     diagnosis?: EarDiagnosis | null
   ) => void;
   getProfile: () => EarPerformanceProfile;
+  getStatsForLevel: (level: string) => LevelStats;
+  shouldPromoteDifficulty: (level: string, current: DifficultyTier | string) => DifficultyTier | null;
   resetSession: () => void;
 }
 
-export const useEarPerformanceStore = create<EarPerformanceState>((set, get) => ({
+export const useEarPerformanceStore = create<EarPerformanceState>()(
+  persist(
+    (set, get) => ({
   byLevel: {},
   sessionStart: Date.now(),
   consecutiveMistakes: 0,
@@ -69,6 +90,40 @@ export const useEarPerformanceStore = create<EarPerformanceState>((set, get) => 
         lastChallengeType: itemKey,
       };
     });
+  },
+
+  getStatsForLevel(level: string): LevelStats {
+    const state = get();
+    const byLevel = state.byLevel[level];
+    if (!byLevel) return { attempts: 0, success: 0, fail: 0, accuracy: 0 };
+    let success = 0;
+    let fail = 0;
+    for (const item of Object.values(byLevel)) {
+      success += item.success;
+      fail += item.fail;
+    }
+    const attempts = success + fail;
+    return {
+      attempts,
+      success,
+      fail,
+      accuracy: attempts > 0 ? success / attempts : 0,
+    };
+  },
+
+  shouldPromoteDifficulty(level: string, current: DifficultyTier | string): DifficultyTier | null {
+    const stats = get().getStatsForLevel(level);
+    const tier: DifficultyTier = (current === 'Intermediate' ? 'Advanced' : current === 'Virtuoso' ? 'Pro' : current) as DifficultyTier;
+    if (tier === 'Novice') {
+      if (stats.attempts >= PROMOTION_MIN_ATTEMPTS_NOVICE && stats.accuracy >= PROMOTION_ACCURACY_THRESHOLD) {
+        return 'Advanced';
+      }
+    } else if (tier === 'Advanced') {
+      if (stats.attempts >= PROMOTION_MIN_ATTEMPTS_ADVANCED && stats.accuracy >= PROMOTION_ACCURACY_THRESHOLD) {
+        return 'Pro';
+      }
+    }
+    return null;
   },
 
   getProfile(): EarPerformanceProfile {
@@ -118,4 +173,10 @@ export const useEarPerformanceStore = create<EarPerformanceState>((set, get) => 
       lastChallengeType: null,
     });
   },
-}));
+}),
+    {
+      name: 'ear-performance',
+      partialize: (s) => ({ byLevel: s.byLevel }),
+    }
+  )
+);

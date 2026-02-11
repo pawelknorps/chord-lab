@@ -33,6 +33,8 @@ export interface UnifiedFretboardProps {
     tuning?: FretboardTuning | string[];
     highlightedNotes?: number[];
     activeNotes?: number[];
+    /** When true, highlight all fret positions that match the pitch classes of the given notes (full neck). */
+    highlightByPitchClass?: boolean;
     onNoteClick?: (note: number, string: number, fret: number) => void;
     showFretNumbers?: boolean;
     showStringNames?: boolean;

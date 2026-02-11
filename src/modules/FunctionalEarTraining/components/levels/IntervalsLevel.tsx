@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useFunctionalEarTrainingStore } from '../../state/useFunctionalEarTrainingStore';
 import { useEarPerformanceStore } from '../../state/useEarPerformanceStore';
+import type { DifficultyTier } from '../../state/useEarPerformanceStore';
 import { useMasteryStore } from '../../../../core/store/useMasteryStore';
 import { useMidi } from '../../../../context/MidiContext';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -29,10 +30,11 @@ const BASE_INTERVALS = ALL_INTERVALS.filter((i) => !['m2', 'M7', 'P8'].includes(
 const MIDI_DEBOUNCE_MS = 300;
 
 export const IntervalsLevel: React.FC = () => {
-    const { addScore, setPlaying, difficulty, streak } = useFunctionalEarTrainingStore();
+    const { addScore, setPlaying, difficulty, streak, setDifficulty } = useFunctionalEarTrainingStore();
     const { addExperience, updateStreak } = useMasteryStore();
     const { lastNote } = useMidi();
     const recordAttempt = useEarPerformanceStore((s) => s.recordAttempt);
+    const shouldPromoteDifficulty = useEarPerformanceStore((s) => s.shouldPromoteDifficulty);
 
     const [challenge, setChallenge] = useState<any>(null);
     const [selectedInterval, setSelectedInterval] = useState<string | null>(null);
@@ -41,6 +43,7 @@ export const IntervalsLevel: React.FC = () => {
     const [aiHint, setAiHint] = useState<string | null>(null);
     const [hintLoading, setHintLoading] = useState(false);
     const [midiFeedback, setMidiFeedback] = useState<string | null>(null);
+    const [levelUpMessage, setLevelUpMessage] = useState<string | null>(null);
     const lastMidiGradedRef = useRef<{ note: number; ts: number } | null>(null);
 
     const loadNewChallenge = useCallback((prevChallenge?: { interval: { name: string } } | null) => {
@@ -98,6 +101,12 @@ export const IntervalsLevel: React.FC = () => {
         if (intervalName === challenge.interval.name) {
             setResult('correct');
             recordAttempt('Intervals', challenge.interval.name, true);
+            const nextDiff = shouldPromoteDifficulty('Intervals', difficulty as DifficultyTier);
+            if (nextDiff && nextDiff !== difficulty) {
+                setDifficulty(nextDiff);
+                setLevelUpMessage(`Level up! You're now ${nextDiff}`);
+                setTimeout(() => setLevelUpMessage(null), 4000);
+            }
             const multiplier = difficulty === 'Novice' ? 1 : difficulty === 'Advanced' ? 1.5 : 3;
             const points = Math.floor(100 * multiplier) + streak * 5;
             addScore(points);
@@ -120,7 +129,7 @@ export const IntervalsLevel: React.FC = () => {
                 setHintLoading(false);
             }
         }
-    }, [challenge, result, difficulty, streak, addScore, addExperience, updateStreak, loadNewChallenge, recordAttempt]);
+    }, [challenge, result, difficulty, streak, addScore, addExperience, updateStreak, loadNewChallenge, recordAttempt, shouldPromoteDifficulty, setDifficulty]);
 
     useEffect(() => {
         if (!lastNote || lastNote.type !== 'noteon' || !challenge || result === 'correct') return;
@@ -169,6 +178,11 @@ export const IntervalsLevel: React.FC = () => {
                 </div>
                 {midiFeedback && (
                     <div className="text-amber-400/90 font-bold text-sm uppercase tracking-wider">{midiFeedback}</div>
+                )}
+                {levelUpMessage && (
+                    <div className="text-emerald-400 font-black text-sm uppercase tracking-wider animate-pulse">
+                        {levelUpMessage}
+                    </div>
                 )}
             </div>
 

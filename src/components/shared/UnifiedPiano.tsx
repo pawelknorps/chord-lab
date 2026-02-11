@@ -1,10 +1,11 @@
 import { useMemo, useCallback } from 'react';
+import * as Tone from 'tone';
 import { UnifiedPianoProps, PianoKey } from './types';
 import styles from './UnifiedPiano.module.css';
+import { getChordToneLabel, CHORD_TONE_LABELS } from '../../core/theory';
 
 const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 const INTERVALS = ['P1', 'm2', 'M2', 'm3', 'M3', 'P4', 'TT', 'P5', 'm6', 'M6', 'm7', 'M7'];
-const CHORD_TONE_LABELS = ['R', 'b9', '9', 'm3', 'M3', '11', 'b5', '5', '#5', '13', 'b7', 'M7'];
 const CHORD_TONE_COLORS = {
     0: '#3b82f6',   // Root - Blue
     3: '#10b981',   // Minor 3rd - Green
@@ -75,8 +76,7 @@ export function UnifiedPiano({
         }
 
         if (showLabels === 'chord-tone' && rootNote !== undefined) {
-            const interval = (note - rootNote + 12) % 12;
-            return CHORD_TONE_LABELS[interval];
+            return getChordToneLabel(rootNote, note);
         }
 
         return '';
@@ -84,6 +84,8 @@ export function UnifiedPiano({
 
     const handleKeyClick = useCallback((note: number) => {
         if (disabled || mode === 'display' || mode === 'playback') return;
+        // Resume AudioContext in same user gesture so playback is allowed
+        Tone.start();
         onNoteClick?.(note);
         onNotePress?.(note);
     }, [disabled, mode, onNoteClick, onNotePress]);
@@ -99,7 +101,7 @@ export function UnifiedPiano({
                 {whiteKeys.map((key) => {
                     const isHighlighted = highlightedNotes.includes(key.note);
                     const isActive = activeNotes.includes(key.note);
-                    const isRoot = rootNote === key.note;
+                    const isRoot = rootNote !== undefined && (key.note % 12 === rootNote % 12) && (isHighlighted || isActive);
                     const chordToneColor = getChordToneColor(key.note);
                     const shouldShowLabel = isHighlighted || isActive;
 
@@ -129,7 +131,7 @@ export function UnifiedPiano({
                 {blackKeys.map((key) => {
                     const isHighlighted = highlightedNotes.includes(key.note);
                     const isActive = activeNotes.includes(key.note);
-                    const isRoot = rootNote === key.note;
+                    const isRoot = rootNote !== undefined && (key.note % 12 === rootNote % 12) && (isHighlighted || isActive);
                     const chordToneColor = getChordToneColor(key.note);
                     const shouldShowLabel = isHighlighted || isActive;
                     const whiteKeyIndex = whiteKeys.findIndex(k => k.note > key.note) - 1;
