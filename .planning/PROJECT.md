@@ -43,6 +43,12 @@ Transition from a music theory prototype to a full-scale "Incredible Teaching Ma
 - **Goal**: Beat 4 as chromatic or dominant approach into the next bar’s root; Beat 1 anchor, Beats 2–3 bridge.
 - **Tech**: WalkingBassEngine (tonal.js), 4-note line per bar, E1–G3 range.
 
+### 6. Standards-Based Exercises (Scales, Guide Tones, Arpeggios)
+
+- **Concept**: Use existing mic detection and jazz standards to run timed exercises in sync with playback and the chart.
+- **Goal**: Student plays appropriate scales, guide tones, or arpeggios for each chord; real-time evaluation; works for both mic and MIDI input.
+- **Tech**: ChordScaleEngine, GuideToneCalculator, unified input adapter, StandardsExerciseEngine; JazzKiller chart + playback sync.
+
 ## Key Decisions
 
 | Decision | Rationale | Status |
