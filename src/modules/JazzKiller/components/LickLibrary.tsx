@@ -1,6 +1,9 @@
 import { useState, useMemo } from 'react';
-import { BookMarked, Plus, Trash2, X } from 'lucide-react';
+import { BookMarked, CloudUpload, Plus, Trash2, X } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { applyLickToChords, type LickResult } from '../utils/lickConverter';
+import { useAuth } from '../../../context/AuthContext';
+import { useLickFeed } from '../../../hooks/useLickFeed';
 
 const STORAGE_KEY = 'chord-lab-lick-library';
 
@@ -29,6 +32,12 @@ function generateId() {
   return `lick-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
+/** Add a lick to local library (used by Lick Feed "Copy to my library"). */
+export function addLickToLocalLibrary(name: string, template: string): void {
+  const next = [...loadLicks(), { id: generateId(), name, template }];
+  saveLicks(next);
+}
+
 interface LickLibraryProps {
   /** All chord symbols from the current song (e.g. from music.measures) */
   currentSongChords: string[];
@@ -41,6 +50,9 @@ export function LickLibrary({ currentSongChords, onClose }: LickLibraryProps) {
   const [newName, setNewName] = useState('');
   const [newTemplate, setNewTemplate] = useState('1 2 b3 5');
   const [showAdd, setShowAdd] = useState(false);
+  const [publishStatus, setPublishStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const { session, isConfigured } = useAuth();
+  const { publishLick } = useLickFeed();
 
   const selectedLick = licks.find(l => l.id === selectedId);
   const appliedResults = useMemo(() => {
@@ -68,12 +80,26 @@ export function LickLibrary({ currentSongChords, onClose }: LickLibraryProps) {
     if (selectedId === id) setSelectedId(next[0]?.id ?? null);
   };
 
+  const handlePublishToFeed = async () => {
+    if (!selectedLick || !isConfigured) return;
+    if (!session) {
+      setPublishStatus('error');
+      return;
+    }
+    setPublishStatus('idle');
+    const { error } = await publishLick(selectedLick.name, selectedLick.template);
+    setPublishStatus(error ? 'error' : 'success');
+  };
+
   return (
     <div className="flex flex-col h-full max-h-[70vh] overflow-hidden bg-neutral-900/95 rounded-2xl border border-white/10 shadow-2xl">
       <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 shrink-0">
         <h3 className="font-bold text-sm uppercase tracking-widest text-neutral-400 flex items-center gap-2">
           <BookMarked size={18} className="text-amber-400" />
           Lick Library
+          <Link to="/lick-feed" className="ml-auto text-[10px] font-bold text-amber-500 hover:text-amber-400">
+            Browse feed
+          </Link>
         </h3>
         {onClose && (
           <button
@@ -91,13 +117,28 @@ export function LickLibrary({ currentSongChords, onClose }: LickLibraryProps) {
         <div>
           <div className="flex items-center justify-between mb-2">
             <span className="text-[10px] font-black uppercase tracking-wider text-neutral-500">Saved formulas</span>
-            <button
-              type="button"
-              onClick={() => setShowAdd(true)}
-              className="flex items-center gap-1 px-2 py-1 text-xs font-bold text-amber-500 hover:text-amber-400"
-            >
-              <Plus size={14} /> Add
-            </button>
+            <div className="flex items-center gap-1">
+              {selectedLick && isConfigured && (
+                <button
+                  type="button"
+                  onClick={handlePublishToFeed}
+                  title={session ? 'Publish to feed' : 'Sign in to publish'}
+                  className="flex items-center gap-1 px-2 py-1 text-xs font-bold text-amber-500 hover:text-amber-400 disabled:opacity-50"
+                  disabled={!session}
+                >
+                  <CloudUpload size={14} /> Publish
+                </button>
+              )}
+              {publishStatus === 'success' && <span className="text-[10px] text-green-400">Published</span>}
+              {publishStatus === 'error' && <span className="text-[10px] text-red-400">Failed</span>}
+              <button
+                type="button"
+                onClick={() => setShowAdd(true)}
+                className="flex items-center gap-1 px-2 py-1 text-xs font-bold text-amber-500 hover:text-amber-400"
+              >
+                <Plus size={14} /> Add
+              </button>
+            </div>
           </div>
           {licks.length === 0 ? (
             <p className="text-xs text-neutral-600 py-2">No licks saved. Add a formula (e.g. 1 2 b3 5) to see it applied to every chord.</p>
