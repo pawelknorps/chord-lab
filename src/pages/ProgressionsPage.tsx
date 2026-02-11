@@ -56,7 +56,7 @@ export default function ProgressionsPage() {
     if (!activeLesson) {
         // --- Browse View ---
         return (
-            <div className="max-w-7xl mx-auto p-8 fade-in pb-20">
+            <div className="max-w-7xl min-w-0 mx-auto p-8 fade-in pb-20">
                 <div className="space-y-4">
                     <h2 className="text-4xl font-bold bg-gradient-to-r from-amber-200 to-orange-400 bg-clip-text text-transparent mb-6">
                         The Architectonics of Advanced Jazz
@@ -111,7 +111,7 @@ export default function ProgressionsPage() {
     const progressPercent = ((currentStep + 1) / activeLesson.content.length) * 100;
 
     return (
-        <div className="max-w-4xl mx-auto pb-20 fade-in">
+        <div className="max-w-4xl min-w-0 mx-auto pb-20 fade-in">
             {/* Header Bar */}
             <div className="flex items-center justify-between mb-8">
                 <button onClick={handleBack} className="text-white/50 hover:text-white transition">← Back to Menu</button>

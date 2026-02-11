@@ -208,7 +208,7 @@ const BarryHarris: React.FC = () => {
     };
 
     return (
-        <div className="h-full flex flex-col items-center justify-start bg-[#0a0a0f] text-white p-8 overflow-y-auto">
+        <div className="h-full min-w-0 flex flex-col items-center justify-start bg-[#0a0a0f] text-white p-8 overflow-y-auto">
             {/* Header / Nav */}
             <div className="w-full max-w-5xl flex justify-between items-center mb-8">
                 <div>

@@ -49,8 +49,8 @@ const MidiLibrary: React.FC = () => {
     };
 
     return (
-        <div className="h-full flex flex-col bg-black text-white p-6 md:p-10 overflow-hidden font-sans">
-            <div className="max-w-7xl mx-auto w-full flex flex-col h-full">
+        <div className="h-full min-w-0 flex flex-col bg-black text-white p-6 md:p-10 overflow-hidden font-sans">
+            <div className="max-w-7xl mx-auto w-full min-w-0 flex flex-col h-full">
                 <div className="flex justify-between items-end mb-10">
                     <div>
                         <h2 className="text-5xl font-black bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent mb-2">MIDI Library</h2>
@@ -71,7 +71,7 @@ const MidiLibrary: React.FC = () => {
 
                 {/* Filters */}
                 <div className="flex flex-wrap gap-4 mb-8 bg-white/5 p-6 rounded-3xl border border-white/10 backdrop-blur-xl">
-                    <div className="flex-1 min-w-[300px] relative">
+                    <div className="flex-1 min-w-[200px] relative">
                         <input
                             type="text"
                             placeholder="Search progressions or moods..."

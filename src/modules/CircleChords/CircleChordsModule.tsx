@@ -176,7 +176,7 @@ export default function CircleChordsModule() {
     }
 
     return (
-        <div className="min-h-screen p-4 md:p-8 bg-black/60 text-white fade-in">
+        <div className="min-h-screen min-w-0 w-full max-w-full p-4 md:p-8 bg-black/60 text-white fade-in">
             <header className="max-w-6xl mx-auto mb-10 flex flex-col md:flex-row justify-between items-end md:items-center gap-6">
                 <div>
                     <div className="flex items-center gap-2 mb-1">

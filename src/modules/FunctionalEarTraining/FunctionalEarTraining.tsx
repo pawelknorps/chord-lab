@@ -92,7 +92,7 @@ export function FunctionalEarTraining() {
     ] as const;
 
     return (
-        <div className="flex h-full w-full bg-[var(--bg-app)] relative overflow-hidden">
+        <div className="flex h-full w-full min-w-0 bg-[var(--bg-app)] relative overflow-hidden">
             {/* Minimalist Side Navigation for Levels */}
             <aside className="w-64 flex flex-col border-r border-[var(--border-subtle)] bg-[var(--bg-panel)] z-20">
                 <div className="h-14 flex items-center justify-between px-6 border-b border-[var(--border-subtle)]">
@@ -149,7 +149,7 @@ export function FunctionalEarTraining() {
                             className="w-full h-full flex items-center justify-center p-8 active-area-container"
                         >
                             {/* Inner wrapper to contain the heavy visual components without them stretching full width if they aren't designed to */}
-                            <div className="w-full max-w-5xl h-full flex flex-col items-center justify-center">
+                            <div className="w-full max-w-5xl min-w-0 h-full flex flex-col items-center justify-center px-2 md:px-4">
                                 {level === 'Tendency' && <TendencyLevel />}
                                 {level === 'Modulation' && <ModulationLevel />}
                                 {level === 'Bass' && <BassLevel />}

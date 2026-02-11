@@ -243,7 +243,7 @@ const Tonnetz: React.FC = () => {
     }, [rootCoord]);
 
     return (
-        <div className="h-full w-full flex flex-col bg-[var(--bg-app)] text-[var(--text-primary)] relative">
+        <div className="h-full w-full min-w-0 flex flex-col bg-[var(--bg-app)] text-[var(--text-primary)] relative">
             {/* 3D Scene */}
             <div className="flex-1">
                 <Canvas camera={{ position: [0, 0, 10], fov: 50 }}>

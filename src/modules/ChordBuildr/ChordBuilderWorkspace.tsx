@@ -114,8 +114,8 @@ export default function ChordBuilderWorkspace() {
     };
 
     return (
-        <div className="min-h-screen bg-[var(--bg-app)] text-[var(--text-primary)] p-4 md:p-8">
-            <div className="max-w-6xl mx-auto">
+        <div className="min-h-screen min-w-0 w-full max-w-full bg-[var(--bg-app)] text-[var(--text-primary)] p-4 md:p-8">
+            <div className="max-w-6xl mx-auto min-w-0">
                 <header className="mb-8">
                     <h1 className="text-3xl font-bold mb-2">Chord Builder</h1>
                     <p className="text-[var(--text-muted)] text-sm">
@@ -154,7 +154,7 @@ export default function ChordBuilderWorkspace() {
                     </div>
 
                     <div className="space-y-12 py-4">
-                        <div className="overflow-x-auto no-scrollbar">
+                        <div className="overflow-x-auto no-scrollbar max-w-full">
                             <div className="min-w-max mx-auto">
                                 <UnifiedPiano
                                     mode="highlight"

@@ -34,7 +34,7 @@ export default function RhythmArchitect() {
     }, [level]);
 
     return (
-        <div className="flex h-full w-full bg-black text-white relative overflow-hidden font-sans selection:bg-indigo-500/30">
+        <div className="flex h-full w-full min-w-0 bg-black text-white relative overflow-hidden font-sans selection:bg-indigo-500/30">
             {/* Ambient Background */}
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(99,102,241,0.08),transparent_50%),radial-gradient(circle_at_bottom_left,rgba(16,185,129,0.05),transparent_50%)] z-0" />
 
@@ -74,7 +74,7 @@ export default function RhythmArchitect() {
             </aside>
 
             {/* Main Work Area */}
-            <main className="flex-1 flex flex-col relative z-10 bg-black">
+            <main className="flex-1 min-w-0 flex flex-col relative z-10 bg-black">
                 {/* Top Toolbar (HUD) */}
                 <header className="h-14 flex items-center justify-between px-8 border-b border-white/5 bg-black">
                     <div className="flex items-center gap-2 text-white/90">
@@ -104,7 +104,7 @@ export default function RhythmArchitect() {
                                 transition={{ duration: 0.2 }}
                                 className="w-full h-full flex items-center justify-center p-8"
                             >
-                                <div className="w-full max-w-6xl">
+                                <div className="w-full max-w-6xl min-w-0">
                                     {level === 'Subdivision' && <SubdivisionPyramid />}
                                     {level === 'Syncopation' && <SyncopationBuilder />}
                                     {level === 'Polyrhythm' && <PolyrhythmGenerator />}

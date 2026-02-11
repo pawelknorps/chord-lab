@@ -123,7 +123,7 @@ const BiTonalSandbox: React.FC = () => {
     if (!exercise) return <div>Loading...</div>;
 
     return (
-        <div className="flex flex-col h-full bg-[var(--bg-app)] text-[var(--text-primary)] p-8">
+        <div className="flex flex-col h-full min-w-0 bg-[var(--bg-app)] text-[var(--text-primary)] p-8">
             {/* Header */}
             <div className="flex justify-between items-center mb-6">
                 <h2 className="text-3xl font-bold tracking-tight">

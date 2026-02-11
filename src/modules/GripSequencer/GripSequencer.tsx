@@ -93,7 +93,7 @@ const GripSequencer: React.FC = () => {
     }, []);
 
     return (
-        <div className="h-full flex flex-col p-4 md:p-8 bg-[var(--bg-app)] text-[var(--text-primary)] overflow-y-auto">
+        <div className="h-full min-w-0 flex flex-col p-4 md:p-8 bg-[var(--bg-app)] text-[var(--text-primary)] overflow-y-auto">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6">
                 <div>
                     <h2 className="text-4xl font-black italic tracking-tighter uppercase mb-2">Grip Sequencer</h2>

@@ -32,7 +32,7 @@ export const PositionsLevel: React.FC = () => {
     };
 
     return (
-        <div className="flex flex-col items-center gap-10 w-full max-w-5xl fade-in relative z-10">
+        <div className="flex flex-col items-center gap-10 w-full max-w-5xl min-w-0 fade-in relative z-10 px-4">
             <div className="text-center space-y-4">
                 <motion.h2
                     initial={{ y: -20, opacity: 0 }}
@@ -95,7 +95,7 @@ export const PositionsLevel: React.FC = () => {
             </div>
 
             {/* Fretboard Explorer */}
-            <div className="w-full glass-panel p-8 rounded-[40px] border border-white/10 overflow-x-auto no-scrollbar">
+            <div className="w-full max-w-full min-w-0 glass-panel p-8 rounded-[40px] border border-white/10 overflow-x-auto no-scrollbar">
                 <div className="relative min-w-[800px]">
                     <div className="flex ml-12 mb-4">
                         {Array.from({ length: 16 }).map((_, i) => (

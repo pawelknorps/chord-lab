@@ -13,19 +13,19 @@ Target viewport: 375px and 320px (mobile). Check: overflow-x, min-width on wide 
 
 | Module / Page | Horizontal scroll issue? | Note |
 |---------------|--------------------------|------|
-| ChordLab | Yes (Piano/Fretboard row) | Container had min-w-max; fixed with max-w-full + overflow-x-auto on wrapper, min-w-0 on flex child. |
-| ChordBuildr | To verify | Has own piano/fretboard; may need same pattern. |
-| BiTonalSandbox | To verify | |
-| GripSequencer | To verify | |
-| Tonnetz | To verify | |
-| NegativeMirror | To verify | |
-| BarryHarris | To verify | |
-| RhythmArchitect | To verify | |
-| FunctionalEarTraining | To verify | |
-| CircleChords | To verify | |
-| MidiLibrary (page) | To verify | |
-| JazzKiller (Standards) | To verify | |
-| ProgressionsPage | To verify | |
+| ChordLab | Fixed | Phase 4 + 4b: ChordLabDashboard min-w-0 max-w-full; Piano/Fretboard overflow-x-auto. |
+| ChordBuildr | Fixed | min-w-0, max-w-full on root; overflow-x-auto max-w-full on Piano container. Phase 4b. |
+| BiTonalSandbox | Fixed | min-w-0 on root. Phase 4b. |
+| GripSequencer | OK | Already has min-w-0, overflow-x-auto. Phase 4b verified. |
+| Tonnetz | Fixed | min-w-0 on root. Phase 4b. |
+| NegativeMirror | Fixed | min-w-0 on root. Phase 4b. |
+| BarryHarris | Fixed | min-w-0 on root. Phase 4b. |
+| RhythmArchitect | Fixed | min-w-0 on root, main, max-w-6xl. Phase 4b. |
+| FunctionalEarTraining | Fixed | min-w-0 on root; PositionsLevel overflow-x-auto max-w-full; inner px-4. Phase 4b. |
+| CircleChords | Fixed | min-w-0 w-full max-w-full on root. Phase 4b. |
+| MidiLibrary (page) | Fixed | min-w-0 on root + inner; min-w-[200px] on search. Phase 4b. |
+| JazzKiller (Standards) | Fixed | Wave 2: min-w-0, LeadSheet overflow-auto. |
+| ProgressionsPage | Fixed | min-w-0 on both view containers. Phase 4b. |
 
 **Shell**: App.tsx and Dashboard.tsx — main content area given `min-w-0` and `overflow-hidden` so child modules cannot force body scroll. Outlet wrapper has `overflow-auto` and `min-w-0`.
 

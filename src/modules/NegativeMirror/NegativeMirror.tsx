@@ -130,7 +130,7 @@ const NegativeMirror: React.FC = () => {
     };
 
     return (
-        <div className="h-full flex flex-col bg-[#0a0a0c] text-slate-200 overflow-hidden font-sans relative">
+        <div className="h-full min-w-0 flex flex-col bg-[#0a0a0c] text-slate-200 overflow-hidden font-sans relative">
             {/* Header */}
             <header className="p-6 border-b border-white/5 flex items-center justify-between bg-black/40 backdrop-blur-xl z-20">
                 <div>
