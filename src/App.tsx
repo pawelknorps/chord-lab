@@ -25,7 +25,13 @@ const ProgressionsPage = lazy(() => import('./pages/ProgressionsPage'));
 const JazzKiller = lazy(() => import('./modules/JazzKiller/JazzKillerModule'));
 
 import { useSettingsStore } from './core/store/useSettingsStore';
+import { useSupabaseProgressSync } from './hooks/useSupabaseProgressSync';
 import { useEffect } from 'react';
+
+function SyncBridge() {
+    useSupabaseProgressSync();
+    return null;
+}
 
 function App() {
     const theme = useSettingsStore(state => state.theme);
@@ -42,6 +48,7 @@ function App() {
                 <BrowserRouter>
                     <div className="h-screen w-screen flex flex-col bg-[var(--bg-app)] text-[var(--text-primary)] overflow-hidden font-sans">
                         <SessionHUD />
+                        <SyncBridge />
 
                         <div className="flex-1 min-h-0 overflow-hidden">
                             <Routes>
