@@ -18,6 +18,13 @@
 - In Audio Worklet, avoid: `array.push()`, `array.shift()`, `new Float32Array()` inside `process()`.
 - Use: one pre-allocated circular buffer, `buffer.set(input, ptr)`, and `ptr = (ptr + 128) % size`; pre-allocated temp and downsampled buffers for the 16 kHz frame.
 
+## CREPE-WASM swap path (when integrated)
+
+- **Input**: Same 1024 samples at 16 kHz (use existing `downsampled` buffer from worklet).
+- **Output**: Same SAB layout: `sharedView[0] = frequency`, `sharedView[1] = confidence` (map CREPE confidence to 0–1).
+- **Swap**: In `runInference()`, replace `this.detectPitch(out, this.effectiveSampleRate)` with a call to the CREPE-Tiny or CREPE-Small WASM module passing `out` (Float32Array of 1024) and read frequency + confidence from the module output; keep existing stabilizer and SAB write.
+- Prefer **CREPE-Tiny** or **CREPE-Small** for real-time; Full model adds ~50 ms compute latency.
+
 ## Overlap and batching (future)
 
 - With multi-threaded WASM, "previous" frame can run while "current" frame is still filling, masking compute latency behind collection latency. Not required for Phase 14; document for a later phase.

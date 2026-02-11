@@ -35,6 +35,10 @@
 
 ## Recent Achievements
 
+- **Completed Phase 14: Pitch Detection Latency (Break the Latency Wall)**:
+  - 16 kHz downsampling in worklet (native circular buffer, linear-interp to 1024); MPM at effective 16 kHz.
+  - Zero-copy circular buffer; hop size 128; inference every block once buffer full; pre-allocated tempNative, downsampled, nsdf.
+  - Optional hopBlocks throttle; CREPE-Tiny/Small swap path documented in RESEARCH.md; no console in worklet.
 - **Completed Phase 11: Pro Drum Engine (DeJohnette-Style)**:
   - Implemented `DrumEngine` with "Elastic" Ride, "Chatter" Snare/Kick, and "Hi-Hat" Anchor.
   - Added collaborative dynamics: drummer listens and simplifies when piano density is high.
@@ -95,12 +99,12 @@
 - **Scope**: CrepeStabilizer (confidence gate, running median, hysteresis); in-worklet stabilization; usePitchTracker/ITM consume stabilized SAB; frequencyToNote + perfect intonation (±10 cents); jazz instrument presets (frequency clamping); tests.
 - **Planning**: `.planning/phases/09-mic-algorithm-upgrade/PLAN.md`, RESEARCH.md. ROADMAP and REQUIREMENTS updated (REQ-MA-01–REQ-MA-05).
 
-## Phase 14: Pitch Detection Latency (Break the Latency Wall) 🚀
+## Phase 14: Pitch Detection Latency (Break the Latency Wall) ✅
 
-- **Status**: In progress.
+- **Status**: Completed.
 - **Scope**: 16 kHz downsampling in worklet; zero-copy circular buffer; hop size 128; pre-allocated buffers; optional hopBlocks throttle; CREPE-Tiny/Small swap path documented.
-- **Planning**: `.planning/phases/14-pitch-latency/PLAN.md`, RESEARCH.md.
-- **Delivered**: pitch-processor.js updated with native circular buffer, linear-interp downsampler, MPM at 16 kHz effective, inference every block (or every hopBlocks); no GC in hot path; no console in worklet.
+- **Planning**: `.planning/phases/14-pitch-latency/PLAN.md`, RESEARCH.md, SUMMARY.md, VERIFICATION.md.
+- **Delivered**: pitch-processor.js updated with native circular buffer, linear-interp downsampler, MPM at 16 kHz effective, inference every block (or every hopBlocks); no GC in hot path; no console in worklet. CREPE swap path in RESEARCH.md.
 
 ## Phase 12: Walking Bass Engine (Target & Approach)
 

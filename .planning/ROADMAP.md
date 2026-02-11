@@ -139,7 +139,7 @@
   - [x] **Unified input**: Single exercise engine consuming either mic pitch (useITMPitchStore / existing pipeline) or MIDI; same scoring logic for both.
   - [x] **JazzKiller Exercises module**: New view/panel **inside JazzKiller** (same standard picker, same chart, same playback); select exercise type + standard, start playback, show real-time feedback; optional Director/FSRS integration.
 
-## Phase 14: Pitch Detection Latency (Break the Latency Wall) 🚀
+## Phase 14: Pitch Detection Latency (Break the Latency Wall) ✅
 
 *Focus: Reduce delay between playing a note and UI updating; target ~15–25 ms with MPM; CREPE-Tiny/Small-ready.*
 
@@ -149,4 +149,4 @@
   - [x] **Zero-copy circular buffer**: TypedArray + ptr; buffer.set(input, ptr) with wrap; no push/shift.
   - [x] **Hop size 128**: Run inference every block (or every hopBlocks) once buffer is full; overlapping frames.
   - [x] **Pre-allocated buffers**: tempNative, downsampled, nsdf; no allocations in process().
-  - [ ] **CREPE-Tiny/Small swap path**: Document in RESEARCH; when WASM integrated, use Tiny/Small for ~10x speed vs Full.
+  - [x] **CREPE-Tiny/Small swap path**: Document in RESEARCH; when WASM integrated, use Tiny/Small for ~10x speed vs Full.
