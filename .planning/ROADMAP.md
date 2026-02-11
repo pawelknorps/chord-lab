@@ -87,18 +87,18 @@
   - [ ] Implement **Dynamic Articulation**: Automatically adjust note length (staccato vs legato) based on tempo.
   - [ ] Implement **Energy Bias System**: Scale pattern probability based on the "Energy" parameter (0.0 - 1.0).
 
-## Phase 9: Mic Algorithm Upgrade (Stabilization & CREPE-Ready)
+## Phase 9: Mic Algorithm Upgrade (Stabilization & CREPE-Ready) ✅
 
 *Focus: Eliminate neural jitter, octave jumps, and UI flicker in real-time pitch detection.*
 
 - **Success Criteria**: Stabilized pitch (confidence gate, running median, hysteresis) in Audio Worklet; usePitchTracker and ITM store consume smooth values; optional note + cents and instrument presets.
 - **Tasks**:
-  - [ ] **CrepeStabilizer**: Confidence gate (confidence < 0.85 → hold last); running median (window 5); hysteresis (update only if |centDiff| > 20).
-  - [ ] **Worklet integration**: Run stabilizer inside pitch-processor.js; write stabilized frequency + confidence to SAB.
-  - [ ] **usePitchTracker / useITMPitchStore**: Read stabilized SAB; optional mic constraints (echoCancellation/noiseSuppression/autoGainControl false for jazz).
-  - [ ] **frequencyToNote**: Tonal.js-based note name + cents deviation; "perfect intonation" (±10 cents) for UI.
-  - [ ] **Instrument presets**: Clamp frequency by instrument (e.g. Double Bass 30–400 Hz, Trumpet 160–1100, Sax 100–900); optional Gemini hint for consistent sharp/flat.
-  - [ ] **Tests**: CrepeStabilizer, frequencyToNote, instrument presets; verification that UI no longer flickers and octave jumps are suppressed.
+  - [✅] **CrepeStabilizer**: Confidence gate (confidence < 0.85 → hold last); running median (window 5); hysteresis (update only if |centDiff| > 20).
+  - [✅] **Worklet integration**: Run stabilizer inside pitch-processor.js; write stabilized frequency + confidence to SAB.
+  - [✅] **usePitchTracker / useITMPitchStore**: Read stabilized SAB; optional mic constraints (echoCancellation/noiseSuppression/autoGainControl false for jazz).
+  - [✅] **frequencyToNote**: Tonal.js-based note name + cents deviation; "perfect intonation" (±10 cents) for UI.
+  - [✅] **Instrument presets**: Clamp frequency by instrument (e.g. Double Bass 30–400 Hz, Trumpet 160–1100, Sax 100–900); optional Gemini hint for consistent sharp/flat.
+  - [✅] **Tests**: CrepeStabilizer, frequencyToNote, instrument presets; verification that UI no longer flickers and octave jumps are suppressed.
 
 ## Phase 10: State-Machine Rhythmic Phrasing
 

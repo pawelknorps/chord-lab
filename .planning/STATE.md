@@ -5,15 +5,15 @@
 - **Phase**: Phase 7: Advanced Piano Engine
 - **Status**: 🟢 Initializing Phase 7
 - **Next Milestone**: Advanced Piano Engine (Voice Leading + Taxi Cab)
-- **Overall Progress**: ~75%
+- **Overall Progress**: ~80%
 
 ## Active Requirements
 
-- [ ] REQ-MA-01: Pitch Stabilization (Confidence + Median + Hysteresis)
-- [ ] REQ-MA-02: Worklet Writes Stabilized Pitch
-- [ ] REQ-MA-03: Frequency-to-Note and Perfect Intonation
-- [ ] REQ-MA-04: Jazz Instrument Presets
-- [ ] REQ-MA-05: Optional Center-of-Gravity / Viterbi (doc)
+- [✅] REQ-MA-01: Pitch Stabilization (Confidence + Median + Hysteresis)
+- [✅] REQ-MA-02: Worklet Writes Stabilized Pitch
+- [✅] REQ-MA-03: Frequency-to-Note and Perfect Intonation
+- [✅] REQ-MA-04: Jazz Instrument Presets
+- [✅] REQ-MA-05: Optional Center-of-Gravity / Viterbi (doc)
 - [ ] REQ-SMR-01: Repetition Penalty System
 - [ ] REQ-SMR-02: Pattern-Specific Resilience
 - [ ] REQ-SMR-03: Stateful Weighted Selection
@@ -37,6 +37,12 @@
 - Automated AI-driven performance critique using Gemini Nano.
 - **Implemented Professional Microphone Pipe**: Audio Worklet + SharedArrayBuffer + McLeod Pitch Method.
 - **Enabled Zero-Latency Feedback**: 120Hz React bridge to the background audio thread.
+- **Completed Phase 9: Mic Algorithm Upgrade**:
+    - Implemented `CrepeStabilizer` (confidence gate, median filter, hysteresis) in TypeScript and Audio Worklet.
+    - Added `frequencyToNote` metadata (note name, cents deviation, perfect intonation indicator).
+    - Integrated Jazz Instrument Presets (Double Bass, Sax, Trumpet, etc.) with frequency clamping.
+    - Upgraded `useITMPitchStore` and `useHighPerformancePitch` for stabilized data.
+    - Verified stabilization logic with unit tests.
 - **Completed Phase 2: The "Mastery Tree"**:
   - Implemented Song Tagging System for harmonic complexity.
   - Built Visual Progress Tree UI component for song progression.
