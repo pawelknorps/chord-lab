@@ -17,6 +17,19 @@ class PitchProcessor extends AudioWorkletProcessor {
     this.ptr = 0;
     this.runCount = 0; // run MPM every 2nd full buffer to reduce CPU on audio thread
 
+    // Instrument presets (inlined for Worklet)
+    const presets = {
+      auto: { min: 20, max: 4000 },
+      bass: { min: 30, max: 400 },
+      guitar: { min: 80, max: 1200 },
+      trumpet: { min: 160, max: 1200 },
+      saxophone: { min: 100, max: 1100 },
+      voice: { min: 80, max: 1200 },
+    };
+    const preset = presets[opts.instrumentId] || presets.auto;
+    this.minHz = preset.min;
+    this.maxHz = preset.max;
+
     // Stabilization state (inlined logic for Worklet)
     this.lastStablePitch = 0;
     this.pitchHistory = [];
@@ -112,7 +125,7 @@ class PitchProcessor extends AudioWorkletProcessor {
     const p = x1 + (y0 - y2) / (2 * (y0 - 2 * y1 + y2) || 1e-6);
     const frequency = this.sampleRate / p;
     const clarity = nsdf[targetPeak];
-    if (frequency < 20 || frequency > 4000) return [0, 0];
+    if (frequency < this.minHz || frequency > this.maxHz) return [0, 0];
     return [frequency, clarity];
   }
 }

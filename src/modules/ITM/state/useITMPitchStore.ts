@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { createPitchMemory, isPitchMemorySupported } from '../../../core/audio/PitchMemory';
+import { getSharedAudioContext } from '../../../core/audio/sharedAudioContext';
 
 const WORKLET_URL = '/worklets/pitch-processor.js';
 
@@ -8,8 +9,10 @@ interface PitchState {
     stream: MediaStream | null;
     sharedBuffer: Float32Array | null;
     audioContext: AudioContext | null;
+    contextOwned: boolean;
+    mediaStreamSource: MediaStreamAudioSourceNode | null;
     workletNode: AudioWorkletNode | null;
-    initialize: (stream: MediaStream) => Promise<void>;
+    initialize: (stream: MediaStream, instrumentId?: string) => Promise<void>;
     cleanup: () => void;
     getLatestPitch: () => { frequency: number; clarity: number } | null;
 }
@@ -23,9 +26,11 @@ export const useITMPitchStore = create<PitchState>((set, get) => ({
     stream: null,
     sharedBuffer: null,
     audioContext: null,
+    contextOwned: false,
+    mediaStreamSource: null,
     workletNode: null,
 
-    initialize: async (stream: MediaStream) => {
+    initialize: async (stream: MediaStream, instrumentId: string = 'auto') => {
         if (get().isReady && get().stream === stream) return;
 
         get().cleanup();
@@ -37,47 +42,50 @@ export const useITMPitchStore = create<PitchState>((set, get) => ({
 
         try {
             const { sab, view: sharedBuffer } = createPitchMemory();
-            const audioContext = new AudioContext({
-                latencyHint: 'interactive',
-                sampleRate: 44100,
-            });
+            const { context: audioContext, owned: contextOwned } = getSharedAudioContext();
 
             await audioContext.audioWorklet.addModule(WORKLET_URL);
 
-            const source = audioContext.createMediaStreamSource(stream);
+            const mediaStreamSource = audioContext.createMediaStreamSource(stream);
             const workletNode = new AudioWorkletNode(audioContext, 'pitch-processor', {
                 processorOptions: {
                     sab,
                     sampleRate: audioContext.sampleRate,
+                    instrumentId,
                 },
             });
 
-            source.connect(workletNode);
+            mediaStreamSource.connect(workletNode);
 
             set({
                 isReady: true,
                 stream,
                 sharedBuffer,
                 audioContext,
+                contextOwned,
+                mediaStreamSource,
                 workletNode,
             });
 
-            console.log('[ITM] High-Performance Pitch Store Ready (SAB + Worklet)');
+            console.log('[ITM] High-Performance Pitch Store Ready (SAB + Worklet, shared context)');
         } catch (err) {
             console.error('[ITM] Failed to initialize Pitch Store:', err);
         }
     },
 
     cleanup: () => {
-        const { audioContext, workletNode } = get();
+        const { audioContext, contextOwned, mediaStreamSource, workletNode } = get();
+        if (mediaStreamSource) mediaStreamSource.disconnect();
         if (workletNode) workletNode.disconnect();
-        if (audioContext) void audioContext.close();
+        if (audioContext && contextOwned) void audioContext.close();
 
         set({
             isReady: false,
             stream: null,
             sharedBuffer: null,
             audioContext: null,
+            contextOwned: false,
+            mediaStreamSource: null,
             workletNode: null,
         });
     },
