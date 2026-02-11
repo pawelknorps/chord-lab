@@ -5,7 +5,7 @@
 - **Phase**: Phase 7: Advanced Piano Engine
 - **Status**: 🟢 Initializing Phase 7
 - **Next Milestone**: Advanced Piano Engine (Voice Leading + Taxi Cab)
-- **Overall Progress**: ~80%
+- **Overall Progress**: ~85%
 
 ## Active Requirements
 
@@ -14,10 +14,15 @@
 - [✅] REQ-MA-03: Frequency-to-Note and Perfect Intonation
 - [✅] REQ-MA-04: Jazz Instrument Presets
 - [✅] REQ-MA-05: Optional Center-of-Gravity / Viterbi (doc)
-- [ ] REQ-SMR-01: Repetition Penalty System
-- [ ] REQ-SMR-02: Pattern-Specific Resilience
-- [ ] REQ-SMR-03: Stateful Weighted Selection
-- [ ] REQ-ARE-01: BPM-Aware Pattern Selection
+- [✅] REQ-SMR-01: Repetition Penalty System
+- [✅] REQ-SMR-02: Pattern-Specific Resilience
+- [✅] REQ-SMR-03: Stateful Weighted Selection
+- [✅] REQ-PRO-01: Grip Dictionary Harmony
+- [✅] REQ-PRO-02: Phrase Template Rhythm
+- [✅] REQ-PRO-03: Rhythmic Anticipation (The "Push")
+- [✅] REQ-PRO-04: Bass-Assist Integration
+- [✅] REQ-PRO-05: Pivot Rule Normalization
+- [✅] REQ-ARE-01: BPM-Aware Pattern Selection
 - [ ] REQ-APE-01: Voice-Leading Engine
 - [ ] REQ-APE-02: Chord DNA Model
 - [ ] REQ-APE-03: Register Management (Soprano Anchor)
@@ -30,6 +35,11 @@
 
 ## Recent Achievements
 
+- **Completed Phase 10: State-Machine Rhythmic Phrasing**:
+    - Upgraded `RhythmEngine` with a deep pattern history and Markov transition biases.
+    - Implemented exponential repetition penalties to force varied phrasing.
+    - Integrated adaptive energy/activity levels from the UI to drive rhythmic density.
+    - Verified rhythmic variety and "Push" (anticipation) logic with automated Vitest suite.
 - Defined the 4-phase roadmap for ITM 2026.
 - Established the core tech stack for scoring (Zustand + Tonal.js + Pitch Detection).
 - Built the "Teaching Machine" 15-minute routine engine.

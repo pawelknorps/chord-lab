@@ -66,26 +66,21 @@
   - [ ] **Onboarding & first-run**: Guided first-time experience (e.g. pick instrument, try one song or lick).
   - [ ] **Launch checklist**: Error boundaries, offline messaging, and doc/runbook for deploy and support.
 
-## Phase 7: Advanced Piano Engine
+## Phase 7, 8, 10: Early Piano Engine Experiments (Superseded) 🔄
 
-*Focus: Professional-grade voice leading and harmonic substitutions.*
+*Status: Reaches 'robotic' limitation. Logic moved to Phase 11.*
 
-- **Success Criteria**: The piano engine generates smooth transitions (Type A/B) between chords using the "Taxi Cab" metric and supports tritone substitutions.
+## Phase 11: Pro Comping Engine (Templates & Grips) 🚀
+
+*Focus: Professional jazz piano feel via template-based rhythm and hand-shape (grip) dictionaries.*
+
+- **Success Criteria**: Engine plays 2-bar phrases (Standard, Sustain, Driving) using pre-curated rootless "grips." Supports "And of 4" anticipation (next-chord peeking).
 - **Tasks**:
-  - [ ] Implement **Chord DNA Parser**: Map complex jazz symbols to essential color tones.
-  - [ ] Implement **Voice-Leading Engine**: Generate Type A/B rootless voicings.
-  - [ ] Implement **Taxi Cab Solver**: Minimize finger movement between chord changes.
-  - [ ] Implement **Soprano Anchor**: Prevent voicing "creep" by penalizing high-register transitions.
-## Phase 8: Advanced Rhythm Engine
-
-*Focus: BPM-aware rhythmic density and articulation.*
-
-- **Success Criteria**: The piano engine adjusts comping patterns and note duration based on BPM, ensuring clarity at fast tempos and richness at slow tempos.
-- **Tasks**:
-  - [ ] Implement **BPM Zone Logic**: Define specific rhythmic behaviors for Slow (<110), Medium (110-180), and Fast (>180) BPM.
-  - [ ] Implement **Rhythmic Pattern Library**: Integrate Charleston, RedGarland, Pedal, Anticipation, and SparseStab patterns.
-  - [ ] Implement **Dynamic Articulation**: Automatically adjust note length (staccato vs legato) based on tempo.
-  - [ ] Implement **Energy Bias System**: Scale pattern probability based on the "Energy" parameter (0.0 - 1.0).
+  - [ ] **Grip Dictionary**: Implement `VOICING_LIBRARY` for Major, Minor, Dominant, Altered, and Half-Diminished.
+  - [ ] **Phrase-Template Logic**: Transition from random hit probabilities to 2-bar rhythmic templates.
+  - [ ] **Anticipation "Push"**: Implement look-ahead logic to steal chords from the next bar on 'and of 4' hits.
+  - [ ] **Bass-Aware Voicing**: Add automatic root-note support when the bass track is muted.
+  - [ ] **The "Pivot Rule"**: Normalize A/B form selection to keep voicings in "The Pocket" (C3-C5).
 
 ## Phase 9: Mic Algorithm Upgrade (Stabilization & CREPE-Ready) ✅
 
@@ -100,12 +95,13 @@
   - [✅] **Instrument presets**: Clamp frequency by instrument (e.g. Double Bass 30–400 Hz, Trumpet 160–1100, Sax 100–900); optional Gemini hint for consistent sharp/flat.
   - [✅] **Tests**: CrepeStabilizer, frequencyToNote, instrument presets; verification that UI no longer flickers and octave jumps are suppressed.
 
-## Phase 10: State-Machine Rhythmic Phrasing
+## Phase 10: State-Machine Rhythmic Phrasing ✅
 
-*Focus: Avoiding robotic loops via repetition penalties.*
+*Focus: Avoiding robotic loops via repetition penalties and Markov transitions.*
 
 - **Success Criteria**: The engine tracks its previous performance and actively penalizes repeating the same pattern, resulting in organic "phrasing."
 - **Tasks**:
-  - [ ] Implement **Pattern Memory**: Track the `lastRhythmType` in the engine.
-  - [ ] Implement **Repetition Penalty Logic**: Apply a weight multiplier (e.g. 0.2) to the previously played pattern.
-  - [ ] Add **Special Case Handlers**: Allow certain patterns (like "Pedal") to repeat with less penalty (0.8) for "pad" effects.
+  - [✅] **Pattern Memory**: Track deep history (last 4 patterns) in the engine.
+  - [✅] **Repetition Penalty Logic**: Apply exponential weight multipliers to recently played patterns.
+  - [✅] **The "Push" Awareness**: Correctly anticipate chord changes on the "and of 4".
+  - [✅] **Markov Transition Matrix**: Favor desirable rhythmic sequences (e.g. Sustain -> Standard).
