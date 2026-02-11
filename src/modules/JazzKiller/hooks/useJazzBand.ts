@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import * as Tone from 'tone';
 import { JazzTheoryService, JazzVoicingType } from '../utils/JazzTheoryService';
+import { getChordDna, CompingEngine, RhythmEngine, type RhythmPattern } from '../../../core/theory';
 import {
     currentMeasureIndexSignal,
     currentBeatSignal,
@@ -52,10 +53,13 @@ export const useJazzBand = (song: any, isActive: boolean = true): JazzPlaybackSt
     // AI Performance State
     const lastBassNoteRef = useRef<number>(36);
     const lastVoicingRef = useRef<number[]>([]);
+    const lastChordRef = useRef<string>("");
     const voicingTypeRef = useRef<JazzVoicingType>('rootless');
-    const pianoLastHitTimeRef = useRef<number>(0);
     const tensionCycleRef = useRef<number>(0);
-    const onNoteRef = useRef<(note: any) => void>();
+    const onNoteRef = useRef<(note: any) => void | undefined>(undefined);
+    const compingEngineRef = useRef<CompingEngine>(new CompingEngine());
+    const rhythmEngineRef = useRef<RhythmEngine>(new RhythmEngine());
+    const currentPatternRef = useRef<RhythmPattern | null>(null);
 
     useEffect(() => {
         const checkLoaded = () => { if (pianoRef.current?.loaded && bassRef.current?.loaded && drumsRef.current?.ride.loaded) isLoadedSignal.value = true; };
@@ -66,6 +70,7 @@ export const useJazzBand = (song: any, isActive: boolean = true): JazzPlaybackSt
         pianoRef.current = new Tone.Sampler({
             urls: { "C2": "C2.m4a", "F#2": "Fs2.m4a", "C3": "C3.m4a", "F#3": "Fs3.m4a", "C4": "C4.m4a", "F#4": "Fs4.m4a", "C5": "C5.m4a" },
             baseUrl: "/audio/piano/",
+            release: 1.2,
             onload: checkLoaded,
             volume: pianoVolumeSignal.value
         }).connect(pianoReverbRef.current);
@@ -73,6 +78,7 @@ export const useJazzBand = (song: any, isActive: boolean = true): JazzPlaybackSt
         bassRef.current = new Tone.Sampler({
             urls: { "E1": "E1.m4a", "A#1": "As1.m4a", "E2": "E2.m4a", "A#2": "As2.m4a", "E3": "E3.m4a", "A#3": "As3.m4a" },
             baseUrl: "/audio/bass/",
+            release: 0.8,
             onload: checkLoaded,
             volume: bassVolumeSignal.value
         }).connect(reverbRef.current);
@@ -172,6 +178,10 @@ export const useJazzBand = (song: any, isActive: boolean = true): JazzPlaybackSt
 
             tensionCycleRef.current = (bar * 4 + beat) / 16;
             const currentTension = 0.5 + Math.sin(tensionCycleRef.current) * 0.3 + (activityLevelSignal.value * 0.2);
+            const activity = activityLevelSignal.value;
+
+            // Voicing type follows tension + activity (increasing intensity/reactivity of the band)
+            voicingTypeRef.current = JazzTheoryService.getNextLogicalVoicingType(voicingTypeRef.current, activity, currentTension, currentTension > 0.6);
 
             // BASS: one note per quarter (loop runs every 4n = walking bass)
             if (currentChord && bassRef.current?.loaded) {
@@ -183,31 +193,84 @@ export const useJazzBand = (song: any, isActive: boolean = true): JazzPlaybackSt
                 onNoteRef.current?.({ midi: safeBass, velocity: vel, instrument: 'bass', type: 'root', duration: 1 });
             }
 
-            // PIANO: comp on downbeat and mid-bar when two chords, with probability
-            const isDownbeat = beat === 0;
-            const isMidBar = chords.length >= 2 && beat === 2;
-            const shouldComp = currentChord && (isDownbeat || isMidBar) && (Math.random() < 0.5 + activityLevelSignal.value * 0.3);
-            if (shouldComp && pianoRef.current?.loaded) {
-                const voicing = JazzTheoryService.getPianoVoicing(currentChord, voicingTypeRef.current, 3, lastVoicingRef.current, currentTension, false, lastBassNoteRef.current);
-                if (voicing.length > 0) {
-                    lastVoicingRef.current = voicing;
-                    const duration = isDownbeat ? "2n" : "4n";
-                    const baseVel = 0.5 + Math.random() * 0.15;
-                    voicing.forEach((n, i) => {
-                        const t = time + i * 0.008;
-                        const vel = baseVel * (0.95 + Math.random() * 0.1);
-                        pianoRef.current?.triggerAttackRelease(Tone.Frequency(n, "midi").toNote(), duration, t, vel);
-                        onNoteRef.current?.({ midi: n, velocity: vel, instrument: 'piano', type: JazzTheoryService.getNoteFunction(n, currentChord), duration: duration === "2n" ? 2 : 1 });
+            // PIANO PRO: Phrase-Based Template Engine (Phase 11)
+            const bpm = bpmSignal.value;
+
+            // 1. Select a 1-bar Phrase Template at the start of each bar
+            if (beat === 0) {
+                currentPatternRef.current = rhythmEngineRef.current.getRhythmPattern(bpm, activityLevelSignal.value);
+            }
+
+            const pattern = currentPatternRef.current;
+            const isNewChord = currentChord && currentChord !== lastChordRef.current;
+            if (isNewChord) lastChordRef.current = currentChord;
+
+            if (currentChord && pianoRef.current?.loaded && !pianoMutedSignal.value) {
+                // 2. Check if the current beat matches a step in the phrase template
+                const currentStep = pattern?.steps.find(s => {
+                    const parts = s.time.split(':');
+                    const patternBeat = parseInt(parts[1], 10);
+                    // For now, simple beat match. In 2026 update, move loop to 16n for syncopated steps.
+                    return patternBeat === beat;
+                });
+
+                // RULE: Always play at least once on a chord change to act as a reliable backing track
+                const shouldPlay = currentStep || isNewChord;
+
+                if (shouldPlay) {
+                    // 3. Anticipation Logic (Push): If step is anticipation, "steal" the next chord
+                    const targetChord = (currentStep && currentStep.isAnticipation && nextChord) ? nextChord : currentChord;
+
+                    // 4. Harmony Solution: Pro Grip Dictionary + Pivot Rule
+                    // BASS-ASSIST: Add root note if the bass instrument is muted
+                    const voicing = compingEngineRef.current.getNextVoicing(targetChord, {
+                        addRoot: bassMutedSignal.value
                     });
+
+                    if (voicing.length > 0) {
+                        lastVoicingRef.current = voicing;
+
+                        // 5. Articulation & Dynamics
+                        const baseVel = 0.55 + (activityLevelSignal.value * 0.2) + (Math.random() * 0.1);
+                        const duration = currentStep?.duration || "4n";
+
+                        voicing.forEach((n, i) => {
+                            const t = time + i * 0.008;
+                            const vel = baseVel * (0.95 + Math.random() * 0.1);
+                            pianoRef.current?.triggerAttackRelease(Tone.Frequency(n, "midi").toNote(), duration, t, vel);
+                            onNoteRef.current?.({
+                                midi: n,
+                                velocity: vel,
+                                instrument: 'piano',
+                                type: JazzTheoryService.getNoteFunction(n, targetChord),
+                                duration: 1
+                            });
+                        });
+                    }
                 }
             }
 
-            // DRUMS: simple and on-grid to avoid lag (one ride per beat, hihat 2&4, light snare/kick)
+            // DRUMS: energy match — if Extension layer has >2 alterations (e.g. alt), increase ride bell probability
             if (drumsRef.current) {
-                drumsRef.current.ride.triggerAttack("C1", time, 0.65);
-                if (beat === 1 || beat === 3) drumsRef.current.hihat.triggerAttack("C1", time, 0.5);
-                if (beat === 0) drumsRef.current.kick.triggerAttack("C1", time, 0.25);
-                if (beat === 2 && Math.random() < 0.4) drumsRef.current.snare.triggerAttack("C1", time, 0.2);
+                const isStrongBeat = beat === 0 || beat === 2;
+                const dna = currentChord ? getChordDna(JazzTheoryService.normalizeChordSymbolForTheory(currentChord)) : null;
+                const altHeavy = (dna?.extension.alterationCount ?? 0) > 2;
+                const rideNote = (activity > 0.5 && Math.random() > 0.7) || (altHeavy && Math.random() > 0.5) ? "E1" : (activity > 0.3 && Math.random() > 0.5 ? "D1" : "C1");
+                const rideVel = (isStrongBeat ? 0.6 : 0.4) + (Math.random() * 0.1) + (activity * 0.1);
+                drumsRef.current.ride.triggerAttack(rideNote, time, Math.min(1, rideVel));
+
+                if (activity > 0.4 && (beat === 1 || beat === 3 || Math.random() > 0.6)) {
+                    const skipTime = time + quarterTime * 0.66;
+                    drumsRef.current.ride.triggerAttack(rideNote, skipTime, 0.2 + Math.random() * 0.15 + activity * 0.1);
+                }
+
+                if (beat === 1 || beat === 3) drumsRef.current.hihat.triggerAttack("C1", time, 0.5 + activity * 0.15);
+                if (beat === 0) drumsRef.current.kick.triggerAttack("C1", time, 0.2 + activity * 0.15);
+                const snareChance = 0.3 + activity * 0.5;
+                if ((beat === 2 || (beat === 1 && activity > 0.6)) && Math.random() < snareChance) {
+                    const snareOffset = activity > 0.5 ? (Math.random() > 0.5 ? Tone.Time("8t").toSeconds() : Tone.Time("8t").toSeconds() * 2) : 0;
+                    drumsRef.current.snare.triggerAttack("C1", time + snareOffset, 0.1 + Math.random() * 0.2 + activity * 0.1);
+                }
             }
         }, "4n");
 
@@ -220,8 +283,8 @@ export const useJazzBand = (song: any, isActive: boolean = true): JazzPlaybackSt
             Tone.Transport.stop();
             isPlayingSignal.value = false;
         } else {
-            await Tone.start();
             if (!isAudioReady()) await initGlobalAudio();
+            await Tone.start();
             Tone.Transport.start();
             isPlayingSignal.value = true;
         }
