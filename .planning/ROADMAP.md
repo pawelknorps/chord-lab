@@ -55,11 +55,14 @@
 - [x] **Step 24**: **askNano guardrail**: nanoHelpers.askNano used by getEarHint and getScatForSubdivision; context re-injected; one-shot session.
 - **Success Criteria**: Ear Trainer wrong answers show AI hint (no answer); student can retry after hint. Rhythm Trainer shows scat phrase above metronome for selected subdivision. No Nano call assumes prior context.
 
-## Phase 8: Universal Microphone Handler (App-Wide)
-*Goal: Single app-wide mic pipeline that analyses what the student is playing (pitch/notes) or clapping (beat/tempo) so any module can consume it.*
+## Phase 8: Universal Microphone Handler (App-Wide) & Harmonic Mirror
+*Goal: Single app-wide mic pipeline; prioritize Harmonic Mirror (pitch/note accuracy, "teacher that listens") over rhythm grading. Clapping/beat secondary.*
 - [ ] **Step 25**: **Central mic service**: Implement app-wide microphone service (e.g. `MicrophoneService` or Zustand slice + `useMicrophone`) that owns `getUserMedia`, stream lifecycle, and "is active" state; expose start/stop and permission handling.
-- [ ] **Step 26**: **Playing analysis**: Integrate pitch/note onset detection into the service (reuse or generalize BiTonal/ml5 path); expose pitch/MIDI events (and optional confidence) for consumers.
-- [ ] **Step 27**: **Clapping analysis**: Add beat/onset detection and tempo estimation (e.g. BPM, subdivision) from mic input; expose beat events and tempo for consumers.
-- [ ] **Step 28**: **Modes and subscription**: Support "pitch" and "rhythm" modes (or combined); allow modules to subscribe to pitch events and/or beat/tempo events.
-- [ ] **Step 29**: **Migration and integration**: Migrate BiTonal Sandbox to use the shared mic service; wire at least one other module (e.g. Rhythm Architect for clap-tempo or Ear Trainer for play-back).
-- **Success Criteria**: One mic permission and one stream for the app; at least two modules use the handler (e.g. BiTonal + Rhythm or Ear); playing yields pitch/notes, clapping yields beat/tempo.
+- [ ] **Step 26**: **Playing analysis (Pitch-to-Theory Pipe)**: Integrate pitch detection (YIN/MPM e.g. Pitchy or crepe) and Tonal.js validation; expose pitch/MIDI and clarity; Audio Worklet or AnalyserNode for raw PCM.
+- [ ] **Step 27**: **useAuralMirror hook**: Expose hook that returns "Live Note" with clarity threshold (> 90%) and optional ~100 ms debounce; noise gate (~-40 dB); always show "Live Note" indicator in UI.
+- [ ] **Step 28**: **Guide Tone Spotlight**: Mode where app plays drums/bass; target = 3rd of current chord (Tonal.Chord.get(currentChord).notes[1]); when student hits 3rd, bar on chart lights up green; wire in JazzKiller/Practice Studio.
+- [ ] **Step 29**: **Call and Response**: App plays short motif (Tone.js); app listens; student plays back; mic verifies pitches; Nano tip on miss ("You missed the b7 on G7...").
+- [ ] **Step 30**: **Modes and subscription**: Support "pitch" (Harmonic Mirror) and optional "rhythm" (clapping) modes; consumers subscribe to pitch events and/or beat/tempo.
+- [ ] **Step 31**: **Clapping analysis** (secondary): Beat/onset and tempo from mic for modules that need it (e.g. Rhythm Architect).
+- [ ] **Step 32**: **Migration and integration**: Migrate BiTonal Sandbox to shared mic service; at least one other module uses handler (Guide Tone or Call & Response).
+- **Success Criteria**: One mic permission and one stream; Harmonic Mirror in use (Guide Tone or Call & Response); Live Note indicator and noise gate; "Ignore Rhythm" UX; playing yields pitch/notes validated by Tonal.js; optional clapping yields beat/tempo.

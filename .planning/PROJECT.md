@@ -150,14 +150,55 @@ A single, app-wide mic pipeline that modules (Chord Lab, JazzKiller, Ear Trainer
 - **In scope**: Central mic service (e.g. `MicrophoneService` or `useMicrophone`), permission and stream lifecycle, pitch/note analysis for "playing", beat/onset analysis for "clapping", optional integration in 1–2 modules (e.g. Rhythm Architect for clap-tempo, Ear Trainer or Chord Lab for play-back).
 - **Out of scope for v1**: Full chord recognition from mic, multi-instrument classification, recording/playback of mic audio, offline processing.
 
+### Harmonic Mirror: Mic as "Teacher That Listens" (Not Rhythm Judge)
+
+To avoid the messiness of web-based timing, the microphone is used as a **Harmonic Mirror** rather than a rhythm judge. Focus on **frequency accuracy** and **structural milestones** (e.g. "did they hit the 3rd of the chord?") so the app is a teacher that actually listens.
+
+- **Ignore Rhythm rule**: Tell the student: "Don't worry about the beat; just focus on hitting the right notes." This manages expectations regarding web latency. Real-time rhythm grading is deferred; mic v1 is for **Note Accuracy (Pitch)** and optional **Tone Quality (Timbre)**.
+- **Pitch-to-Theory Pipe**: Separate physical audio (mic) from musical logic (app). (1) **Ear**: Audio Worklet or AnalyserNode for raw PCM. (2) **Pitch**: YIN or MPM algorithm (e.g. Pitchy, crepe) → frequency. (3) **Brain**: Tonal.js converts frequency to MIDI/note and validates against current chord.
+- **useAuralMirror hook** (concept): Handles mic stream; returns the "Live Note" the student is playing. Use clarity threshold (e.g. > 90%) so UI doesn't flicker; optional ~100ms debounce for stable display. Tonal.js `Note.fromFreq(pitch)` for note name; validate against chord tones.
+
+### Pedagogical Modes (Harmonic Mirror)
+
+1. **Guide Tone Spotlight (Active Listening)**  
+   App plays Aebersold-style drums and bass; student plays **only the 3rd** of every chord (the key color note).  
+   - **Target note**: `Tonal.Chord.get(currentChord).notes[1]` (the 3rd).  
+   - **useAuralMirror** detects student pitch; when they hit the 3rd, the bar on the chart **lights up green**.  
+   - Trains ear to find the "meat" of the changes, not just scales.
+
+2. **Call and Response (Aural Mimicry)**  
+   Simulates a private lesson: master plays a lick, student repeats.  
+   - App (Tone.js Sampler) plays a short jazz motif (e.g. 4-note ii–V–I lick).  
+   - App goes silent and listens; student plays it back; mic verifies pitches.  
+   - **Nano layer**: If student misses a note, Gemini Nano gives a specific tip: e.g. "You missed the b7 on the G7 chord. Listen for that 'bluesy' tension before it resolves."
+
+3. **Smart Implementation Table (Mic Goals)**
+
+| Feature | Tech Used | Pedagogical Goal |
+| --- | --- | --- |
+| Target Practice | Pitch detection + Tonal.js | Learning chord tones (1, 3, 5, 7) |
+| Drone Tuning | Mic input + sine wave | Practicing "straightness" of tone against reference |
+| Lick Validation | Pitch buffering | Verifying memory of jazz vocabulary |
+| Energy Tracker | Amplitude (RMS) detection | Teaching dynamics—too loud/soft vs track |
+
+### Technical Sanity Rules (Web Mic)
+
+- **Noise gate**: Do not trigger logic if volume is below ~-40 dB; prevents ghost notes from room noise.
+- **Live Note indicator**: Always show a small "Live Note" in the corner so the student knows the app is hearing them.
+- **Clarity threshold**: Only show/use the detected note when pitch clarity is above ~90% (jazz-ready); avoids flicker from background noise.
+- **Visual smoothing**: Optional ~100 ms debounce before updating UI note (stable, tuner-like feel).
+- **Latency**: Since we are not grading rhythm, time-delay is ignored; if pitch matches the current bar, count it as success.
+- **Tone Quality (v2)**: Use `AnalyserNode.getByteFrequencyData()` for "brightness"; feedback on too thin (lack of low-end) or too harsh (high-end) for jazz sound.
+
 ### Key Decisions (To Be Locked in Phase Plan)
 
 | Decision | Options | Status |
 | :--- | :--- | :--- |
 | **Service shape** | Zustand slice + hook vs React context vs plain singleton. | TBD |
-| **Pitch source** | Reuse ml5/CREPE (BiTonal) vs Web Audio AnalyserNode + simple pitch vs external lib. | TBD |
-| **Rhythm/clap** | Onset detection (Web Audio / energy threshold) vs dedicated beat-tracking lib. | TBD |
-| **Module consumers** | Which modules get wired first (Rhythm, Ear, Chord Lab, JazzKiller). | TBD |
+| **Pitch source** | Pitchy / YIN/MPM vs ml5/CREPE (BiTonal) vs Web Audio AnalyserNode. | TBD |
+| **Harmonic Mirror first** | Prioritize pitch/note accuracy and Guide Tone + Call & Response; defer rhythm grading. | [Decided] |
+| **Rhythm/clap** | Onset detection (Web Audio / energy threshold) vs dedicated beat-tracking lib; secondary to Harmonic Mirror. | TBD |
+| **Module consumers** | Guide Tone in JazzKiller/Practice Studio; Call & Response in Ear Trainer or dedicated drill; BiTonal migration. | TBD |
 
 ---
 

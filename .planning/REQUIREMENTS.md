@@ -66,9 +66,20 @@
 - **REQ-MIC-01**: **Single app-wide mic service**: One central service (e.g. `MicrophoneService` or store + hook) that owns `getUserMedia`, stream lifecycle, and analysis; all modules consume this service rather than opening their own mic.
 - **REQ-MIC-02**: **Permission and lifecycle**: Request mic permission once per session; expose start/stop and "is active" state; release stream when no consumer needs it (or on explicit user stop).
 - **REQ-MIC-03**: **Playing analysis**: From mic input, support pitch/note onset detection (e.g. MIDI note or frequency + confidence) so modules can compare "what the student played" to a target (e.g. Ear Trainer, Chord Lab play-back). Reuse or generalize existing pitch path (e.g. BiTonal Sandbox / ml5) into the central service.
-- **REQ-MIC-04**: **Clapping analysis**: From mic input, support beat/onset detection and tempo estimation (e.g. BPM, subdivision) so modules can use "clapped tempo" or rhythm (e.g. Rhythm Architect, metronome alignment).
+- **REQ-MIC-04**: **Clapping analysis** (secondary): From mic input, support beat/onset detection and tempo estimation (e.g. BPM, subdivision) for modules that need clapped tempo (e.g. Rhythm Architect); secondary to Harmonic Mirror in v1.
 - **REQ-MIC-05**: **Modes**: Service supports at least two logical modes (or combined): "pitch" (playing) and "rhythm" (clapping); consumers subscribe to the outputs they need (pitch events, beat events, tempo).
 - **REQ-MIC-06**: **Integration**: At least one module beyond BiTonal Sandbox uses the universal handler (e.g. Rhythm Architect for clap-tempo, or Ear Trainer for sing-back). BiTonal Sandbox to migrate to the shared service where feasible.
+
+### MIC-HM: Harmonic Mirror (Mic as "Teacher That Listens")
+- **REQ-MIC-07**: **Harmonic Mirror focus**: Use mic for **frequency accuracy** and **structural milestones** (e.g. "did they hit the 3rd?"); do not grade rhythm in v1. UX: tell the student "Don't worry about the beat; just focus on hitting the right notes."
+- **REQ-MIC-08**: **Pitch-to-Theory Pipe**: (1) Ear: Audio Worklet or AnalyserNode for raw PCM. (2) Pitch: YIN/MPM (e.g. Pitchy, crepe) → frequency. (3) Brain: Tonal.js converts frequency to MIDI/note and validates against current chord.
+- **REQ-MIC-09**: **useAuralMirror hook**: Expose a hook (or equivalent) that returns the "Live Note" the student is playing; use clarity threshold (e.g. > 90%) before updating; optional ~100 ms debounce for stable UI.
+- **REQ-MIC-10**: **Noise gate**: Do not trigger logic if volume is below ~-40 dB; prevents ghost notes from room noise.
+- **REQ-MIC-11**: **Live Note indicator**: Always show a small "Live Note" indicator (e.g. corner of screen) so the student knows the app is hearing them.
+- **REQ-MIC-12**: **Guide Tone Spotlight**: Mode where app plays drums/bass; student plays only the 3rd of every chord; target from `Tonal.Chord.get(currentChord).notes[1]`; when student hits the 3rd, bar on chart lights up green.
+- **REQ-MIC-13**: **Call and Response**: App plays short motif (e.g. 4-note lick via Tone.js); app listens; student plays back; mic verifies pitches. If student misses a note, Gemini Nano gives a specific tip (e.g. "You missed the b7 on the G7 chord...").
+- **REQ-MIC-14**: **Smart mic goals**: Support (or plan) Target Practice (pitch + Tonal.js → chord tones), Drone Tuning (mic + sine reference), Lick Validation (pitch buffering), Energy Tracker (RMS → dynamics feedback).
+- **REQ-MIC-15**: **Tone Quality (v2)**: Optional: use `AnalyserNode.getByteFrequencyData()` for brightness feedback (too thin vs too harsh) for jazz sound.
 
 ## v2: Future Considerations (Deferred)
 - **REQ-AI-05**: Persistent User Weakness Map (Track which scales the user fails at).
