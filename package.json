@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "test": "vitest",
+    "test:run": "vitest run",
     "lint": "eslint .",
     "preview": "vite preview",
     "generate:midi": "node scripts/generate_midi_index.cjs",
@@ -67,6 +69,7 @@
     "tonejs-instrument-guitar-electric-mp3": "^1.1.1",
     "tonejs-instrument-guitar-nylon-mp3": "^1.1.1",
     "tonejs-instrument-harp-mp3": "^1.1.1",
+    "ts-fsrs": "^5.2.3",
     "vexflow": "^5.0.0",
     "zustand": "^5.0.11"
   },
@@ -82,6 +85,7 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.5.0",
+    "jsdom": "^28.0.0",
     "patch-package": "^8.0.1",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",

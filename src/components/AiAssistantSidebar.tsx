@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Sparkles, Info, X, ExternalLink } from 'lucide-react';
+import { checkAiAvailability } from '../core/services/aiDetection';
 
 const SUPPORTED_BROWSERS = [
     { name: 'Google Chrome', version: '128+', note: 'Recommended' },
@@ -23,35 +24,7 @@ export function AiAssistantSidebar() {
     });
 
     useEffect(() => {
-        const checkAi = async () => {
-            const w = window as any;
-            // Chrome Prompt API (global LanguageModel)
-            if (w.LanguageModel?.availability) {
-                try {
-                    const avail = await w.LanguageModel.availability({
-                        expectedInputs: [{ type: 'text', languages: ['en'] }],
-                        expectedOutputs: [{ type: 'text', languages: ['en'] }],
-                    });
-                    setAiStatus(avail === 'unavailable' ? 'unsupported' : 'supported');
-                    return;
-                } catch (e) {
-                    console.warn('LanguageModel.availability check failed', e);
-                }
-            }
-            // Legacy window.ai.languageModel
-            if (w.ai?.languageModel) {
-                try {
-                    const capabilities = await w.ai.languageModel.capabilities();
-                    setAiStatus(capabilities.available === 'no' ? 'unsupported' : 'supported');
-                    return;
-                } catch (e) {
-                    console.warn('AI capabilities check failed', e);
-                }
-            }
-            setAiStatus('unsupported');
-        };
-
-        checkAi();
+        checkAiAvailability().then((status) => setAiStatus(status));
     }, []);
 
     const handleDismiss = () => {

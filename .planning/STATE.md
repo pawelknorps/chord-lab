@@ -2,10 +2,10 @@
 
 ## Current Status
 
-- **Phase**: Phase 5: The "Director" Engine
-- **Status**: ✅ Phase 4 complete
-- **Next Milestone**: Phase 5: The Director Engine
-- **Overall Progress**: ~75%
+- **Phase**: Phase 6: Polish, Analytics & Launch
+- **Status**: ✅ Phase 5 complete
+- **Next Milestone**: Phase 6: Polish, Analytics & Launch
+- **Overall Progress**: ~80%
 
 ## Active Requirements
 
@@ -38,3 +38,13 @@
   - Teacher Dashboard (classrooms, invite code, StudentProgressView), teacher nav when role=teacher.
   - Lick Feed (publish from LickLibrary, LickFeed + Copy to library, /lick-feed route).
   - PWA: manifest (Chord Lab, icons), vite-plugin-pwa service worker.
+- **Completed Phase 5: The Director Engine**:
+  - FSRS (ts-fsrs): directorTypes, useDirectorStore (persist), fsrsBridge (getState, recordReview, recordReviewFromOutcome, getDueItems, getNextNewItems).
+  - DirectorService.getNextDecision; useDirector hook; JazzKiller "Suggested next" button (song + key from Director).
+  - directorInstrumentSignal; globalAudio celloSynth, getGuideInstrument, playGuideChord; JazzKiller band uses guide instrument (Piano → Cello → Synth rotation).
+
+## Stabilization (Phase 6 prep)
+
+- **JazzKiller audio playback**: Await Tone.start() in premium engine; ensure globalAudio init when starting playback (Director guide instrument); legacy engine fallback when playbackPlan missing (use measures indices).
+- **AI detection**: Shared `checkAiAvailability()` in `core/services/aiDetection.ts`; Banner and Sidebar use it; supports Chrome Prompt API (availability "available"|"downloadable"|"downloading") and legacy window.ai.
+- **Automated tests**: Vitest config in vite.config.ts; `npm run test` / `npm run test:run`; tests for aiDetection (8) and JazzKiller playback plan fallback (3). Pre-existing failures remain in ConceptAnalyzer.test.ts and theoryEngine.test.ts (sharp-key spelling).

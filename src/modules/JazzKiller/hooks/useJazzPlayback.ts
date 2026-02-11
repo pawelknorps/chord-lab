@@ -48,6 +48,7 @@ interface JazzPlaybackState {
     togglePlayback: () => void;
     setBpm: (bpm: number) => void;
     playChord: (symbol: string) => void;
+    onNote: (cb: (note: { midi: number, velocity: number, instrument: string, type: 'root' | 'third' | 'fifth' | 'seventh' | 'extension', duration?: number }) => void) => void;
 }
 
 export const useJazzPlayback = (song: any, isActive: boolean = true): JazzPlaybackState => {
@@ -203,13 +204,16 @@ export const useJazzPlayback = (song: any, isActive: boolean = true): JazzPlayba
         Tone.Transport.cancel();
         currentMeasureIndexSignal.value = -1;
 
+        const plan: number[] =
+            song.music.playbackPlan?.length > 0
+                ? song.music.playbackPlan
+                : song.music.measures?.map((_: unknown, i: number) => i) ?? [];
+        if (plan.length === 0) return;
+
         const loop = new Tone.Loop((time) => {
             const position = Tone.Transport.position.toString().split(':');
             const bar = parseInt(position[0]);
             const beat = parseInt(position[1]);
-
-            const plan = song.music.playbackPlan || [];
-            if (plan.length === 0) return;
 
             const logicalBar = bar % plan.length;
             const measureIndex = plan[logicalBar];
@@ -385,6 +389,7 @@ export const useJazzPlayback = (song: any, isActive: boolean = true): JazzPlayba
         totalLoopsSignal,
         togglePlayback,
         playChord,
-        setBpm: (val: number) => bpmSignal.value = val
+        setBpm: (val: number) => bpmSignal.value = val,
+        onNote: () => { }
     };
 };
