@@ -1,4 +1,4 @@
-import { Note } from '@tonaljs/tonal';
+import * as Note from '@tonaljs/note';
 
 export interface NoteInfo {
     noteName: string;

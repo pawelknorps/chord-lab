@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useITMPitchStore } from '../state/useITMPitchStore';
+import { frequencyToNote, NoteInfo } from '../../../core/audio/frequencyToNote';
 
 /**
  * Hook to consume the High-Performance Pitch Engine (2026 Pattern).
@@ -18,6 +19,11 @@ export function useHighPerformancePitch(stream: MediaStream | null) {
 
     return {
         isReady,
-        getLatestPitch
+        getLatestPitch,
+        getLatestNoteInfo: (): NoteInfo | null => {
+            const pitch = getLatestPitch();
+            if (!pitch || pitch.frequency <= 0) return null;
+            return frequencyToNote(pitch.frequency);
+        }
     };
 }
