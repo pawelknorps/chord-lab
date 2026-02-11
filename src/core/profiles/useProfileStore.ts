@@ -2,6 +2,16 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { StudentProfile, SongProgress, ProfileStats } from './ProfileTypes';
 
+/** Cloud progress row shape (e.g. from Supabase) for hydration */
+export interface SongProgressRow {
+    song_title: string;
+    max_bpm: number;
+    attempts: number;
+    last_practiced: number;
+    mastered: boolean;
+    hotspot_scores?: Record<string, number>;
+}
+
 interface ProfileStore {
     currentProfile: StudentProfile | null;
     profiles: StudentProfile[];
@@ -11,6 +21,8 @@ interface ProfileStore {
     updateSongProgress: (songTitle: string, bpm: number, hotspotIndex?: number, score?: number) => void;
     markSongMastered: (songTitle: string) => void;
     getStats: () => ProfileStats;
+    /** Merge cloud progress rows into current profile (Phase 4 sync). */
+    mergeProgressFromCloud: (rows: SongProgressRow[]) => void;
 }
 
 export const useProfileStore = create<ProfileStore>()(
@@ -91,6 +103,30 @@ export const useProfileStore = create<ProfileStore>()(
                 const averageBpm = songs.reduce((sum, s) => sum + s.maxBpm, 0) / (totalSongs || 1);
 
                 return { totalSongs, masteredSongs, averageBpm, practiceStreak: 0 };
+            },
+
+            mergeProgressFromCloud: (rows) => {
+                const { currentProfile } = get();
+                if (!currentProfile || rows.length === 0) return;
+                const next = new Map(currentProfile.songProgress);
+                for (const row of rows) {
+                    const hotspotScores = new Map<number, number>();
+                    if (row.hotspot_scores && typeof row.hotspot_scores === 'object') {
+                        for (const [k, v] of Object.entries(row.hotspot_scores)) {
+                            const idx = Number(k);
+                            if (!Number.isNaN(idx)) hotspotScores.set(idx, v);
+                        }
+                    }
+                    next.set(row.song_title, {
+                        songTitle: row.song_title,
+                        maxBpm: row.max_bpm,
+                        attempts: row.attempts,
+                        lastPracticed: row.last_practiced,
+                        mastered: row.mastered,
+                        hotspotScores,
+                    });
+                }
+                set({ currentProfile: { ...currentProfile, songProgress: next } });
             },
         }),
         {
