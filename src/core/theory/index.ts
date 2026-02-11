@@ -1,10 +1,13 @@
-// All note names (Sharps)
-import { getFunctionalPitchClassOverride } from './functionalRules';
+import { spellPitchClassInKey as spellPitchClassInKeyFromEnharmonic, NOTE_NAMES as ENHARMONIC_NOTE_NAMES, NOTE_NAMES_FLAT as ENHARMONIC_NOTE_NAMES_FLAT } from './enharmonicSpelling';
 export * from './analysis';
+import { getChordDna, getChordDnaIntervals, getChordToneLabelMap, type ChordDnaResult } from './ChordDna';
+import { CompingEngine, type Voicing } from './CompingEngine';
+import { RhythmEngine, type RhythmPattern, type RhythmTemplateName } from './RhythmEngine';
+import { DrumEngine, type DrumHit, type DrumInstrument } from './DrumEngine';
+export { getChordDna, getChordDnaIntervals, getChordToneLabelMap, type ChordDnaResult, CompingEngine, type Voicing, RhythmEngine, type RhythmPattern, type RhythmTemplateName, DrumEngine, type DrumHit, type DrumInstrument };
 
-export const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] as const;
-// All note names (Flats)
-export const NOTE_NAMES_FLAT = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'] as const;
+export const NOTE_NAMES = ENHARMONIC_NOTE_NAMES;
+export const NOTE_NAMES_FLAT = ENHARMONIC_NOTE_NAMES_FLAT;
 
 // Comprehensive list of keys for UI
 export const ALL_KEYS = [
@@ -151,32 +154,9 @@ export function midiToNoteName(midi: number, context?: string | boolean): string
     return (context ? NOTE_NAMES_FLAT[pc] : NOTE_NAMES[pc]) + octave;
   }
 
-  // Handle string context (Functional Jazz Rules)
-  let tonic = typeof context === 'string' ? context.replace(/[0-9-]/g, '') : 'C';
-
-  // 1. Check for functional overrides (Jazz Rules)
-  const functionalOverride = getFunctionalPitchClassOverride(pc, tonic);
-  if (functionalOverride) return `${functionalOverride}${octave}`;
-
-  // Determine flat vs sharp preference from key (tonic).
-  const FLAT_KEYS = ['F', 'Bb', 'Eb', 'Ab', 'Db', 'Gb', 'Cb', 'Dm', 'Gm', 'Cm', 'Fm', 'Bbm', 'Ebm', 'Abm'];
-  // Sharp keys: major and minor keys that use sharp key signatures (e.g. B/D# not B/Eb).
-  const SHARP_HEAVY_KEYS = ['B', 'F#', 'C#', 'G#', 'D#', 'A#', 'E', 'Bm', 'F#m', 'C#m', 'G#m', 'D#m', 'A#m', 'Em'];
-
-  const isSharpKey = SHARP_HEAVY_KEYS.includes(tonic);
-  let prefersFlats = !isSharpKey && (FLAT_KEYS.includes(tonic) || tonic.includes('b'));
-
-  if (isSharpKey) {
-    prefersFlats = false;
-  } else {
-    // Flat / neutral keys: specific pitch-class overrides.
-    if (pc === 10) prefersFlats = true;
-    if (pc === 3 && !['E', 'B'].includes(tonic)) prefersFlats = true;
-    if (pc === 8 && !['A', 'E', 'B'].includes(tonic)) prefersFlats = true;
-    if (pc === 1 && !['D', 'A', 'E', 'B', 'F#', 'C#'].includes(tonic)) prefersFlats = true;
-  }
-
-  const noteName = prefersFlats ? NOTE_NAMES_FLAT[pc] : NOTE_NAMES[pc];
+  // Handle string context (Chord Lab enharmonic system)
+  const tonic = typeof context === 'string' ? context.replace(/[0-9-]/g, '') : 'C';
+  const noteName = spellPitchClassInKeyFromEnharmonic(pc, tonic);
   return `${noteName}${octave}`;
 }
 
@@ -461,6 +441,49 @@ export function parseChord(chordName: string): { root: string; quality: string; 
   return { root, quality, bass };
 }
 
+/**
+ * Chord recognition from symbol (e.g. iReal-style): parse symbol, build pitch-class set
+ * including explicit extensions from the symbol, then use detectJazzChordByProfile to
+ * produce a canonical quality (correct shell + extensions) for voicings.
+ * Use this for JazzKiller and any consumer that needs correct shell and extensions from
+ * symbols like "C^7(9)", "G7alt", "D-7(11)".
+ */
+export function recognizeChordFromSymbol(symbol: string): { root: string; quality: string; bass?: string } {
+  if (!symbol || typeof symbol !== 'string') return { root: 'C', quality: 'maj' };
+
+  const trimmed = symbol.trim();
+  const parts = trimmed.split('/') as [string] | [string, string];
+  const base = parts[0] ?? '';
+  const bass = parts[1];
+
+  const match = base.match(/^([A-G][b#]?)(.*)$/);
+  if (!match) return { root: 'C', quality: 'maj', bass };
+
+  const root = match[1];
+  const raw = match[2] ?? '';
+  const normalizedForParse = root + raw.replace(/\(.*?\)/g, '').replace(/[\[\]]/g, '');
+  const parsed = parseChord(normalizedForParse);
+  const quality = parsed.quality;
+  const baseIntervals = CHORD_INTERVALS[quality] ?? CHORD_INTERVALS['maj'];
+  const basePcs = [...new Set(baseIntervals.map((i) => i % 12))].sort((a, b) => a - b);
+
+  const extensionSemitones: number[] = [];
+  if (/\(9\)/.test(raw)) extensionSemitones.push(2);
+  if (/\(11\)/.test(raw) && !/\(#11\)/.test(raw)) extensionSemitones.push(5);
+  if (/\(13\)/.test(raw) && !/\(b13\)/.test(raw)) extensionSemitones.push(9);
+  if (/\(#11\)|7#11/.test(raw)) extensionSemitones.push(6);
+  if (/\(b9\)|7b9/.test(raw)) extensionSemitones.push(1);
+  if (/\(#9\)|7#9/.test(raw)) extensionSemitones.push(3);
+  if (/\(b13\)|7b13/.test(raw)) extensionSemitones.push(8);
+  if (/alt|7alt/.test(raw)) extensionSemitones.push(1, 3, 6, 8);
+
+  const allPcs = [...new Set([...basePcs, ...extensionSemitones])].sort((a, b) => a - b);
+  const canonical = allPcs.length >= 3 ? detectJazzChordByProfile(allPcs) : null;
+  const finalQuality = canonical ?? quality;
+
+  return { root, quality: finalQuality, bass };
+}
+
 /** Chord pc-set templates: quality -> sorted unique pitch classes (0–11) from root */
 const CHORD_PC_TEMPLATES: { quality: string; pcs: number[] }[] = (() => {
   const out: { quality: string; pcs: number[] }[] = [];
@@ -550,11 +573,11 @@ export function detectJazzChordByProfile(intervalsFromRoot: number[]): string | 
 }
 
 /**
- * Spell a pitch class (0–11) using music-theory enharmonic rules for the given key.
- * Uses the same logic as midiToNoteName (flat keys vs sharp keys).
+ * Spell a pitch class (0–11) using the Chord Lab enharmonic rules for the given key.
+ * Single source of truth: enharmonicSpelling.ts.
  */
 export function spellPitchClassInKey(pc: number, keyContext: string): string {
-  return midiToNoteName(pc + 60, keyContext).replace(/[0-9-]/g, '');
+  return spellPitchClassInKeyFromEnharmonic(pc, keyContext);
 }
 
 /**
@@ -666,10 +689,19 @@ export function getScaleDegree(root: number, note: number): string {
   return degrees[(semitones + 12) % 12];
 }
 
-/** Chord-tone labels (R, M3, 11, b7, etc.) from chord root — use for inversions. */
+/** Chord-tone labels (R, M3, 11, b7, etc.) — default when no chord symbol. */
 export const CHORD_TONE_LABELS = ['R', 'b9', '9', 'm3', 'M3', '11', 'b5', '5', '#5', '13', 'b7', 'M7'] as const;
 
-export function getChordToneLabel(chordRootMidi: number, noteMidi: number): string {
+/**
+ * Chord-tone label for a note given chord root (and optional chord symbol).
+ * When chordSymbol is provided, uses ChordDna so C7#9 shows #9 not m3 for D#.
+ * Unifies player, piano visualiser, and voicings analyser with Chord Lab detection.
+ */
+export function getChordToneLabel(chordRootMidi: number, noteMidi: number, chordSymbol?: string): string {
   const semitones = (noteMidi - chordRootMidi + 12) % 12;
+  if (chordSymbol) {
+    const map = getChordToneLabelMap(chordSymbol);
+    if (map && map[semitones] !== undefined) return map[semitones];
+  }
   return CHORD_TONE_LABELS[semitones];
 }

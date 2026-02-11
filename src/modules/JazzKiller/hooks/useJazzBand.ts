@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import * as Tone from 'tone';
 import { JazzTheoryService, JazzVoicingType } from '../utils/JazzTheoryService';
-import { getChordDna, CompingEngine, RhythmEngine, type RhythmPattern } from '../../../core/theory';
+import { CompingEngine, RhythmEngine, type RhythmPattern, DrumEngine, type DrumHit } from '../../../core/theory';
 import {
     currentMeasureIndexSignal,
     currentBeatSignal,
@@ -59,7 +59,9 @@ export const useJazzBand = (song: any, isActive: boolean = true): JazzPlaybackSt
     const onNoteRef = useRef<(note: any) => void | undefined>(undefined);
     const compingEngineRef = useRef<CompingEngine>(new CompingEngine());
     const rhythmEngineRef = useRef<RhythmEngine>(new RhythmEngine());
+    const drumEngineRef = useRef<DrumEngine>(new DrumEngine());
     const currentPatternRef = useRef<RhythmPattern | null>(null);
+    const currentDrumHitsRef = useRef<DrumHit[]>([]);
 
     useEffect(() => {
         const checkLoaded = () => { if (pianoRef.current?.loaded && bassRef.current?.loaded && drumsRef.current?.ride.loaded) isLoadedSignal.value = true; };
@@ -140,8 +142,6 @@ export const useJazzBand = (song: any, isActive: boolean = true): JazzPlaybackSt
                 : song.music.measures.map((_: { chords?: string[] }, i: number) => i);
         if (plan.length === 0) return;
 
-        const quarterTime = Tone.Time("4n").toSeconds();
-
         const loop = new Tone.Loop((time) => {
             const pos = Tone.Transport.position.toString().split(':');
             const bar = parseInt(pos[0], 10) || 0;
@@ -196,9 +196,15 @@ export const useJazzBand = (song: any, isActive: boolean = true): JazzPlaybackSt
             // PIANO PRO: Phrase-Based Template Engine (Phase 11)
             const bpm = bpmSignal.value;
 
-            // 1. Select a 1-bar Phrase Template at the start of each bar
+            // 1. Select 1-bar phrase definitions at the start of each bar
             if (beat === 0) {
-                currentPatternRef.current = rhythmEngineRef.current.getRhythmPattern(bpm, activityLevelSignal.value);
+                const pianoPattern = rhythmEngineRef.current.getRhythmPattern(bpm, activityLevelSignal.value);
+                currentPatternRef.current = pianoPattern;
+
+                // Collaborative Dynamics: Drummer "listens" to piano density
+                // normalized density based on number of scheduled piano hits
+                const pianoDensity = pianoPattern.steps.length / 4;
+                currentDrumHitsRef.current = drumEngineRef.current.generateBar(activityLevelSignal.value, pianoDensity);
             }
 
             const pattern = currentPatternRef.current;
@@ -210,7 +216,6 @@ export const useJazzBand = (song: any, isActive: boolean = true): JazzPlaybackSt
                 const currentStep = pattern?.steps.find(s => {
                     const parts = s.time.split(':');
                     const patternBeat = parseInt(parts[1], 10);
-                    // For now, simple beat match. In 2026 update, move loop to 16n for syncopated steps.
                     return patternBeat === beat;
                 });
 
@@ -222,7 +227,6 @@ export const useJazzBand = (song: any, isActive: boolean = true): JazzPlaybackSt
                     const targetChord = (currentStep && currentStep.isAnticipation && nextChord) ? nextChord : currentChord;
 
                     // 4. Harmony Solution: Pro Grip Dictionary + Pivot Rule
-                    // BASS-ASSIST: Add root note if the bass instrument is muted
                     const voicing = compingEngineRef.current.getNextVoicing(targetChord, {
                         addRoot: bassMutedSignal.value
                     });
@@ -250,27 +254,32 @@ export const useJazzBand = (song: any, isActive: boolean = true): JazzPlaybackSt
                 }
             }
 
-            // DRUMS: energy match — if Extension layer has >2 alterations (e.g. alt), increase ride bell probability
-            if (drumsRef.current) {
-                const isStrongBeat = beat === 0 || beat === 2;
-                const dna = currentChord ? getChordDna(JazzTheoryService.normalizeChordSymbolForTheory(currentChord)) : null;
-                const altHeavy = (dna?.extension.alterationCount ?? 0) > 2;
-                const rideNote = (activity > 0.5 && Math.random() > 0.7) || (altHeavy && Math.random() > 0.5) ? "E1" : (activity > 0.3 && Math.random() > 0.5 ? "D1" : "C1");
-                const rideVel = (isStrongBeat ? 0.6 : 0.4) + (Math.random() * 0.1) + (activity * 0.1);
-                drumsRef.current.ride.triggerAttack(rideNote, time, Math.min(1, rideVel));
+            // DRUMS PRO: DeJohnette-Style Generative Engine (Phase 11)
+            // limbs move independently; hi-hat anchors 2 & 4.
+            if (drumsRef.current && !drumsMutedSignal.value) {
+                const hitsForBeat = currentDrumHitsRef.current.filter(h => {
+                    const parts = h.time.split(':');
+                    return parseInt(parts[1], 10) === beat;
+                });
 
-                if (activity > 0.4 && (beat === 1 || beat === 3 || Math.random() > 0.6)) {
-                    const skipTime = time + quarterTime * 0.66;
-                    drumsRef.current.ride.triggerAttack(rideNote, skipTime, 0.2 + Math.random() * 0.15 + activity * 0.1);
-                }
+                hitsForBeat.forEach(hit => {
+                    const microTiming = drumEngineRef.current.getMicroTiming(hit.instrument);
+                    const sixteenthOffset = hit.time.split(':')[2];
+                    const offsetTime = Tone.Time(`0:0:${sixteenthOffset}`).toSeconds();
+                    const scheduleTime = time + offsetTime + microTiming;
 
-                if (beat === 1 || beat === 3) drumsRef.current.hihat.triggerAttack("C1", time, 0.5 + activity * 0.15);
-                if (beat === 0) drumsRef.current.kick.triggerAttack("C1", time, 0.2 + activity * 0.15);
-                const snareChance = 0.3 + activity * 0.5;
-                if ((beat === 2 || (beat === 1 && activity > 0.6)) && Math.random() < snareChance) {
-                    const snareOffset = activity > 0.5 ? (Math.random() > 0.5 ? Tone.Time("8t").toSeconds() : Tone.Time("8t").toSeconds() * 2) : 0;
-                    drumsRef.current.snare.triggerAttack("C1", time + snareOffset, 0.1 + Math.random() * 0.2 + activity * 0.1);
-                }
+                    // Trigger appropriate sampler limb
+                    if (hit.instrument === "Ride") {
+                        drumsRef.current?.ride.triggerAttack("C1", scheduleTime, hit.velocity);
+                    } else if (hit.instrument === "Snare") {
+                        drumsRef.current?.snare.triggerAttack("C1", scheduleTime, hit.velocity);
+                    } else if (hit.instrument === "Kick") {
+                        drumsRef.current?.kick.triggerAttack("C1", scheduleTime, hit.velocity);
+                    } else if (hit.instrument === "HatPedal") {
+                        // Ground the pulse on 2 & 4
+                        drumsRef.current?.hihat.triggerAttack("C1", scheduleTime, hit.velocity);
+                    }
+                });
             }
         }, "4n");
 

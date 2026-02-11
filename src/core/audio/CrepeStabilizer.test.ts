@@ -3,7 +3,10 @@ import { CrepeStabilizer } from './CrepeStabilizer';
 
 describe('CrepeStabilizer', () => {
     it('should hold last stable pitch on low confidence', () => {
-        const stabilizer = new CrepeStabilizer({ minConfidence: 0.8 });
+        const stabilizer = new CrepeStabilizer({
+            minConfidence: 0.8,
+            stabilityThreshold: 1
+        });
 
         // Initial good frame
         expect(stabilizer.process(440, 0.9)).toBe(440);
@@ -13,7 +16,11 @@ describe('CrepeStabilizer', () => {
     });
 
     it('should use median to reject outliers', () => {
-        const stabilizer = new CrepeStabilizer({ windowSize: 5, minConfidence: 0 });
+        const stabilizer = new CrepeStabilizer({
+            windowSize: 5,
+            minConfidence: 0,
+            stabilityThreshold: 1
+        });
 
         stabilizer.process(100, 1);
         stabilizer.process(100, 1);
@@ -27,20 +34,30 @@ describe('CrepeStabilizer', () => {
     });
 
     it('should only update when crossing hysteresis threshold', () => {
-        const stabilizer = new CrepeStabilizer({ hysteresisCents: 20, minConfidence: 0 });
+        const stabilizer = new CrepeStabilizer({
+            hysteresisCents: 20,
+            minConfidence: 0,
+            stabilityThreshold: 3
+        });
 
-        stabilizer.process(440, 1);
-        stabilizer.process(440, 1);
-        stabilizer.process(440, 1);
+        // Seed initial pitch (fill history with 440)
+        for (let i = 0; i < 10; i++) stabilizer.process(440, 1);
+        expect(stabilizer.getLastStablePitch()).toBe(440);
 
         // Small change (10 cents)
         const smallChange = 440 * Math.pow(2, 10 / 1200);
-        expect(stabilizer.process(smallChange, 1)).toBe(440);
+        for (let i = 0; i < 10; i++) stabilizer.process(smallChange, 1);
+        expect(stabilizer.getLastStablePitch()).toBe(440);
 
-        // Large change (30 cents) - call enough times to shift the median
+        // Large change (30 cents)
         const largeChange = 440 * Math.pow(2, 30 / 1200);
-        stabilizer.process(largeChange, 1);
-        stabilizer.process(largeChange, 1);
-        expect(stabilizer.process(largeChange, 1)).toBeCloseTo(largeChange, 1);
+
+        // Process enough frames to shift the median (4 frames) 
+        // and satisfy stability threshold (3 frames)
+        for (let i = 0; i < 15; i++) {
+            stabilizer.process(largeChange, 1);
+        }
+
+        expect(stabilizer.getLastStablePitch()).toBeCloseTo(largeChange, 1);
     });
 });
