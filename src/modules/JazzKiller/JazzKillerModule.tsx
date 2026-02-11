@@ -35,6 +35,10 @@ import { MasterKeyTeacher } from './components/MasterKeyTeacher';
 import { GuideToneSpotlightEffect } from './components/GuideToneSpotlightEffect';
 import { LiveNoteIndicator } from '../../components/shared/LiveNoteIndicator';
 import { CallAndResponseDrill } from './components/CallAndResponseDrill';
+import { PerformanceScoringOverlay } from './components/PerformanceScoringOverlay';
+import { PracticeReportModal } from './components/PracticeReportModal';
+import { GuidedPracticePane } from './components/GuidedPracticePane';
+import { useGuidedPracticeStore } from '../../core/store/useGuidedPracticeStore';
 import * as MicrophoneService from '../../core/audio/MicrophoneService';
 
 export default function JazzKillerModule() {
@@ -53,6 +57,7 @@ export default function JazzKillerModule() {
     const [showRelated, setShowRelated] = useState(false);
     const [showLickLibrary, setShowLickLibrary] = useState(false);
     const [showMasterKeyTeacher, setShowMasterKeyTeacher] = useState(false);
+    const [showGuidedPractice, setShowGuidedPractice] = useState(false);
 
     // Hint animation for onboarding
     const [showToolHints, setShowToolHints] = useState(false);
@@ -67,6 +72,7 @@ export default function JazzKillerModule() {
 
     // Practice Store integration
     const { loadSong, detectedPatterns, showGuideTones, toggleGuideTones, showAnalysis, toggleAnalysis, guideToneSpotlightMode, setGuideToneSpotlightMode } = usePracticeStore();
+    const { isFinished: isRoutineFinished, resetRoutine } = useGuidedPracticeStore();
 
     // Analysis filters
     const [analysisFilters, setAnalysisFilters] = useState<AnalysisFilters>({
@@ -257,6 +263,12 @@ export default function JazzKillerModule() {
                     </div>
                 </div>
             )}
+
+            {/* ITM Scoring Overlay */}
+            <div className="fixed bottom-6 left-6 z-[200]">
+                <PerformanceScoringOverlay />
+            </div>
+
             <style>
                 {`
                     @keyframes hint-pulse {
@@ -455,6 +467,13 @@ export default function JazzKillerModule() {
                                 title="Master Key (Cycle of 5ths)"
                             >
                                 <Keyboard size={18} />
+                            </button>
+                            <button
+                                onClick={() => setShowGuidedPractice(!showGuidedPractice)}
+                                className={`p-1.5 md:p-2.5 rounded-lg md:rounded-xl transition-all ${showGuidedPractice ? 'bg-purple-600 text-white shadow-[0_0_20px_rgba(147,51,234,0.4)]' : 'text-neutral-500 hover:text-white'} ${showToolHints ? 'animate-hint-pulse text-purple-400' : ''}`}
+                                title="Teaching Machine (Guided Practice)"
+                            >
+                                <Zap size={18} />
                             </button>
                         </div>
                     </div>
@@ -869,6 +888,10 @@ export default function JazzKillerModule() {
                                     {showMasterKeyTeacher && (
                                         <MasterKeyTeacher />
                                     )}
+
+                                    {showGuidedPractice && (
+                                        <GuidedPracticePane />
+                                    )}
                                 </div>
                             </>
                         )}
@@ -878,6 +901,14 @@ export default function JazzKillerModule() {
 
             {showDrillMode && <DrillDashboard />}
             {showBarRangeDrill && <BarRangeDrill onClose={() => setShowBarRangeDrill(false)} />}
+
+            {isRoutineFinished && selectedStandard && (
+                <PracticeReportModal
+                    songTitle={selectedStandard.Title}
+                    songKey={selectedSong?.key || selectedStandard.Key || 'C'}
+                    onClose={resetRoutine}
+                />
+            )}
         </div>
     );
 }

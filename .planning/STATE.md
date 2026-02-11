@@ -1,22 +1,23 @@
 # ITM Project State
 
-## Current Phase: Phase 1: The "Feedback" Engine
-**Milestone**: Transitioning to active listening and scoring.
+## Current Status
 
-### Progress Summary
-- [x] Initial Vision & Roadmap defined for ITM 2026.
-- [ ] Implement Zustand Scoring Logic (Starting).
+- **Phase**: Phase 1: The "Feedback" Engine
+- **Status**: ✅ Completed
+- **Next Milestone**: Phase 2: The Mastery Tree
+- **Overall Progress**: 25%
 
-### Active Requirements
-| ID | Description | Status |
-| :--- | :--- | :--- |
-| REQ-FB-01 | Guided Practice Sessions | Not Started |
-| REQ-FB-02 | Active Scoring Logic | Starting |
-| REQ-FB-03 | Nano-Powered Critique | Not Started |
+## Active Requirements
 
-### Recent Achievements
+- [✅] REQ-FB-01: Guided Practice Sessions
+- [✅] REQ-FB-02: Active Scoring Logic
+- [✅] REQ-FB-03: Nano-Powered Critique
+- [✅] REQ-FB-04: Real-time Visual Heatmap
+
+## Recent Achievements
+
 - Defined the 4-phase roadmap for ITM 2026.
 - Established the core tech stack for scoring (Zustand + Tonal.js + Pitch Detection).
-
-### Blockers
-- None.
+- Built the "Teaching Machine" 15-minute routine engine.
+- Integrated real-time Performance Heatmaps into the Lead Sheet.
+- Automated AI-driven performance critique using Gemini Nano.

@@ -440,3 +440,75 @@ Explain the "mental shift" needed in one or two short sentences. Mention fingeri
     return '';
   }
 }
+/**
+ * Generate a performance critique after a practice session (REQ-FB-04).
+ * Uses Gemini Nano to provide pedagogical feedback based on scoring data.
+ */
+export async function generatePerformanceCritique(
+  sessionData: {
+    songTitle: string;
+    key: string;
+    score: number;
+    grade: string;
+    perfectNotesCount: number;
+    totalNotesCount: number;
+    heatmap: Record<number, number>;
+    measureTicks: Record<number, number>;
+  }
+): Promise<string> {
+  if (!isGeminiNanoAvailable()) return '';
+
+  try {
+    const session = await createGeminiSession(JAZZ_TEACHER_SYSTEM_PROMPT, { temperature: 0.2, topK: 3 });
+    if (!session) return '';
+
+    // Identify weak measures (accuracy < 50%)
+    const weakMeasures = Object.entries(sessionData.measureTicks)
+      .map(([idx, ticks]) => {
+        const measureIdx = parseInt(idx);
+        const points = sessionData.heatmap[measureIdx] || 0;
+        const accuracy = points / (ticks * 1.2); // Matching our heatmap UI logic
+        return { index: measureIdx + 1, accuracy };
+      })
+      .filter(m => m.accuracy < 0.6)
+      .sort((a, b) => a.accuracy - b.accuracy)
+      .slice(0, 3);
+
+    const weakMeasuresText = weakMeasures.length > 0
+      ? `Struggled most in bars: ${weakMeasures.map(m => m.index).join(', ')}.`
+      : 'No significant weak spots identified.';
+
+    const masteryRatio = sessionData.perfectNotesCount / Math.max(1, sessionData.totalNotesCount);
+    const masteryText = masteryRatio > 0.3
+      ? "Excellent targeting of 3rds and 7ths."
+      : "Could improve targeting of 3rds and 7ths on chord changes.";
+
+    const prompt = `
+### PERFORMANCE SUMMARY
+SONG: "${sessionData.songTitle}" in ${sessionData.key}
+OVERALL SCORE: ${sessionData.score}% (Grade: ${sessionData.grade})
+MASTERY: ${masteryText}
+HOTSPOTS: ${weakMeasuresText}
+
+### TASK
+Provide a "Sandwich Technique" critique:
+1. One strength (e.g. general accuracy or mastery).
+2. One specific area for improvement based on HOTSPOTS.
+3. A concrete next step for tomorrow's session.
+
+### CONSTRAINTS
+- Professional jazz educator tone.
+- Max 3 short sentences.
+- Be encouraging but honest.
+
+### RESPONSE
+`.trim();
+
+    const response = await session.prompt(prompt);
+    session.destroy();
+    return response;
+  } catch (err) {
+    console.error('AI Critique failed:', err);
+    return 'The sensei is impressed by your dedication. Keep shedding.';
+  }
+}
