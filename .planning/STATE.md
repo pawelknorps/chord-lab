@@ -45,6 +45,13 @@
 
 ## Stabilization (Phase 6 prep)
 
-- **JazzKiller audio playback**: Await Tone.start() in premium engine; ensure globalAudio init when starting playback (Director guide instrument); legacy engine fallback when playbackPlan missing (use measures indices).
-- **AI detection**: Shared `checkAiAvailability()` in `core/services/aiDetection.ts`; Banner and Sidebar use it; supports Chrome Prompt API (availability "available"|"downloadable"|"downloading") and legacy window.ai.
-- **Automated tests**: Vitest config in vite.config.ts; `npm run test` / `npm run test:run`; tests for aiDetection (8) and JazzKiller playback plan fallback (3). Pre-existing failures remain in ConceptAnalyzer.test.ts and theoryEngine.test.ts (sharp-key spelling).
+- **High-Performance Ear (2026)**:
+  - `PitchMemory.ts`: createPitchMemory() for 8-byte SAB (frequency + confidence); used by ITM pitch store.
+  - `public/worklets/pitch-processor.js`: Audio Worklet with MPM, writes to SAB via processorOptions.sab; CREPE-WASM-ready.
+  - useITMPitchStore loads `/worklets/pitch-processor.js` and passes sab + sampleRate in processorOptions for zero-latency pitch.
+  - usePitchTracker hook for standalone pitch ref (polls SAB in rAF).
+  - COOP/COEP in vite server and preview for SharedArrayBuffer.
+- **JazzKiller playback**: initGlobalAudio() called on first play (togglePlayback) when !isAudioReady() so Director guide instrument works.
+- **AI detection**: checkAiAvailability() and isAiApiPresent(); navigator.languageModel checked first (Chrome canary); jazzTeacherLogic and nanoHelpers aligned.
+- **Chord analysis**: Functional decomposition (detectJazzChordByProfile) + CHORD_PC_TEMPLATES; Emaj7#5 and jazz alterations covered.
+- **Automated tests**: PitchMemory.test.ts, aiDetection (incl. isAiApiPresent), chordDetection (48 tests passing).

@@ -7,7 +7,8 @@ type SessionLike = { prompt(prompt: string): Promise<string>; destroy(): void };
 
 function isNanoAvailable(): boolean {
   const w = window as Window & { LanguageModel?: unknown; ai?: { languageModel?: unknown } };
-  return !!w.LanguageModel || !!w.ai?.languageModel;
+  const nav = navigator as Navigator & { languageModel?: unknown };
+  return !!nav?.languageModel || !!w.LanguageModel || !!w.ai?.languageModel;
 }
 
 async function createOneShotSession(systemPrompt: string): Promise<SessionLike | null> {

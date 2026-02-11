@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { checkAiAvailability } from './aiDetection';
+import { checkAiAvailability, isAiApiPresent } from './aiDetection';
 
 describe('aiDetection', () => {
   const originalWindow = globalThis.window;
@@ -106,5 +106,38 @@ describe('aiDetection', () => {
       },
     };
     expect(await checkAiAvailability()).toBe('unsupported');
+  });
+
+  describe('isAiApiPresent', () => {
+    it('returns false when window is undefined', () => {
+      const orig = globalThis.window;
+      vi.stubGlobal('window', undefined);
+      expect(isAiApiPresent()).toBe(false);
+      vi.stubGlobal('window', orig);
+    });
+
+    it('returns true when navigator.languageModel exists', () => {
+      (globalThis as any).window = { LanguageModel: undefined, ai: undefined };
+      (globalThis as any).navigator = { languageModel: {} };
+      expect(isAiApiPresent()).toBe(true);
+    });
+
+    it('returns true when window.LanguageModel exists', () => {
+      (globalThis as any).window = { LanguageModel: {}, ai: undefined };
+      (globalThis as any).navigator = {};
+      expect(isAiApiPresent()).toBe(true);
+    });
+
+    it('returns true when window.ai.languageModel exists', () => {
+      (globalThis as any).window = { LanguageModel: undefined, ai: { languageModel: {} } };
+      (globalThis as any).navigator = {};
+      expect(isAiApiPresent()).toBe(true);
+    });
+
+    it('returns false when no API is present', () => {
+      (globalThis as any).window = { LanguageModel: undefined, ai: undefined };
+      (globalThis as any).navigator = {};
+      expect(isAiApiPresent()).toBe(false);
+    });
   });
 });

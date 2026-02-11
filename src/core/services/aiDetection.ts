@@ -18,16 +18,22 @@ const LEGACY_OPTS = { languages: ['en'] as const };
 
 declare global {
   interface Window {
-    LanguageModel?: {
-      availability?(opts?: object): Promise<string>;
-      create?(opts?: object): Promise<unknown>;
-    };
+    LanguageModel?: LanguageModelShape;
     ai?: {
       languageModel?: {
         capabilities(): Promise<{ available?: string }>;
+        create?(opts?: object): Promise<unknown>;
       };
     };
   }
+  interface Navigator {
+    languageModel?: LanguageModelShape;
+  }
+}
+
+interface LanguageModelShape {
+  availability?(opts?: object): Promise<string>;
+  create?(opts?: object): Promise<unknown>;
 }
 
 /** Returns true only when the API reports explicitly "unavailable". */
@@ -45,8 +51,9 @@ export async function checkAiAvailability(): Promise<AiAvailabilityStatus> {
   const w = typeof window !== 'undefined' ? window : undefined;
   if (!w) return 'unsupported';
 
-  // Chrome Prompt API: window.LanguageModel (or navigator in some builds)
-  const LM = w.LanguageModel ?? (typeof navigator !== 'undefined' && (navigator as { languageModel?: typeof w.LanguageModel }).languageModel);
+  // Chrome Prompt API: navigator.languageModel (2026) or window.LanguageModel
+  const nav = typeof navigator !== 'undefined' ? navigator : undefined;
+  const LM = nav?.languageModel ?? w.LanguageModel;
 
   if (LM) {
     try {
@@ -84,4 +91,14 @@ export async function checkAiAvailability(): Promise<AiAvailabilityStatus> {
   }
 
   return 'unsupported';
+}
+
+/**
+ * Sync check: true if an AI API (Gemini Nano / Prompt API) is present.
+ * Use for initial UI state; call checkAiAvailability() for definitive result.
+ */
+export function isAiApiPresent(): boolean {
+  if (typeof window === 'undefined') return false;
+  const nav = navigator as Navigator & { languageModel?: LanguageModelShape };
+  return !!(nav?.languageModel ?? (window as Window).LanguageModel ?? (window as Window).ai?.languageModel);
 }

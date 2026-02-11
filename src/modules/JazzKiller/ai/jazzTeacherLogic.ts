@@ -12,7 +12,8 @@ type SessionLike = { prompt(prompt: string): Promise<string>; destroy(): void };
 /** Use this to check if Gemini Nano (Chrome Prompt API or window.ai) is available before calling generate*. */
 export function isGeminiNanoAvailable(): boolean {
   const w = window as Window;
-  return !!(w as unknown as { LanguageModel?: unknown }).LanguageModel || !!w.ai?.languageModel;
+  const nav = navigator as Navigator & { languageModel?: unknown };
+  return !!nav?.languageModel || !!(w as unknown as { LanguageModel?: unknown }).LanguageModel || !!w.ai?.languageModel;
 }
 
 const EXPECTED_LANG = ['en'] as const;
@@ -28,7 +29,8 @@ function throwIfOutOfSpace(e: unknown): void {
 
 async function createGeminiSession(systemPrompt: string, opts: { temperature?: number; topK?: number }): Promise<SessionLike | null> {
   const w = window as Window;
-  const LM = (w as unknown as { LanguageModel?: { create(opts?: object): Promise<SessionLike> } }).LanguageModel;
+  const nav = navigator as Navigator & { languageModel?: { create(opts?: object): Promise<SessionLike> } };
+  const LM = nav?.languageModel ?? (w as unknown as { LanguageModel?: { create(opts?: object): Promise<SessionLike> } }).LanguageModel;
   const legacy = w.ai?.languageModel;
 
   if (LM?.create) {

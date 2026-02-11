@@ -23,7 +23,7 @@ import {
     drumsSoloSignal
 } from '../state/jazzSignals';
 import { Signal } from "@preact/signals-react";
-import { playGuideChord, isAudioReady } from '../../../core/audio/globalAudio';
+import { playGuideChord, isAudioReady, initAudio as initGlobalAudio } from '../../../core/audio/globalAudio';
 import { getDirectorInstrument } from '../../../core/audio/directorInstrumentSignal';
 
 interface JazzPlaybackState {
@@ -127,91 +127,87 @@ export const useJazzBand = (song: any, isActive: boolean = true): JazzPlaybackSt
         if (!isActive || !song || !song.music || !song.music.measures) return;
         Tone.Transport.cancel();
 
+        // Playback plan: order of measure indices (handles repeats & endings). Fallback = straight indices.
+        const plan: number[] =
+            song.music.playbackPlan?.length > 0
+                ? song.music.playbackPlan
+                : song.music.measures.map((_: { chords?: string[] }, i: number) => i);
+        if (plan.length === 0) return;
+
+        const quarterTime = Tone.Time("4n").toSeconds();
+
         const loop = new Tone.Loop((time) => {
-            const position = Tone.Transport.position.toString().split(':');
-            const bar = parseInt(position[0]);
-            const beat = parseInt(position[1]);
-            const sixteenths = parseFloat(position[2]);
+            const pos = Tone.Transport.position.toString().split(':');
+            const bar = parseInt(pos[0], 10) || 0;
+            const beat = Math.min(3, Math.max(0, parseInt(pos[1], 10) || 0));
 
-            const measureIndex = bar % song.music.measures.length;
-            const currentChord = song.music.measures[measureIndex].chord;
-            const nextChord = song.music.measures[(measureIndex + 1) % song.music.measures.length].chord;
+            const logicalBar = bar % plan.length;
+            const measureIndex = plan[logicalBar];
+            const currentLoop = Math.floor(bar / plan.length);
 
-            if (bar === 0 && beat === 0 && sixteenths === 0) loopCountSignal.value = 0;
-            if (bar > 0 && bar % song.music.measures.length === 0 && beat === 0 && sixteenths === 0) {
-                loopCountSignal.value++;
-                if (loopCountSignal.value >= totalLoopsSignal.value) {
-                    togglePlayback();
-                    return;
-                }
+            if (currentLoop >= totalLoopsSignal.value) {
+                Tone.Transport.stop();
+                isPlayingSignal.value = false;
+                currentMeasureIndexSignal.value = -1;
+                loopCountSignal.value = 0;
+                return;
             }
 
-            currentMeasureIndexSignal.value = measureIndex;
-            currentBeatSignal.value = beat;
+            Tone.Draw.schedule(() => {
+                currentMeasureIndexSignal.value = measureIndex;
+                currentBeatSignal.value = beat;
+                loopCountSignal.value = currentLoop;
+            }, time);
+
+            const measure = song.music.measures[measureIndex];
+            if (!measure) return;
+
+            const nextLogicalBar = (logicalBar * 4 + beat + 1) / 4;
+            const nextMeasureIndex = plan[Math.floor(nextLogicalBar) % plan.length];
+            const nextMeasure = song.music.measures[nextMeasureIndex];
+            const chords = measure.chords || [];
+            const nextChords = nextMeasure?.chords || [];
+            const currentChord = (chords.length === 1 ? chords[0] : chords.length === 2 ? (beat < 2 ? chords[0] : chords[1]) : chords[Math.min(beat, chords.length - 1)] ?? chords[0] ?? "")?.trim() ?? "";
+            const nextChord = (nextChords.length === 1 ? nextChords[0] : nextChords.length === 2 ? (beat < 2 ? nextChords[0] : nextChords[1]) : nextChords[Math.min(beat + 1, nextChords.length - 1)] ?? nextChords[0] ?? "")?.trim() ?? "";
 
             tensionCycleRef.current = (bar * 4 + beat) / 16;
             const currentTension = 0.5 + Math.sin(tensionCycleRef.current) * 0.3 + (activityLevelSignal.value * 0.2);
 
-            // BASS logic
-            if (sixteenths === 0) {
-                const bassNote = JazzTheoryService.getNextWalkingBassNote(beat, currentChord, nextChord, lastBassNoteRef.current, currentTension);
-                const hitTime = time + (Math.random() * 0.02 - 0.01);
-                const finalVel = 0.7 + (currentTension * 0.2);
-
-                bassRef.current?.triggerAttackRelease(Tone.Frequency(bassNote, "midi").toNote(), "4n", hitTime, finalVel);
-                lastBassNoteRef.current = bassNote;
-
-                onNoteRef.current?.({
-                    midi: bassNote,
-                    velocity: finalVel,
-                    instrument: 'bass',
-                    type: 'root',
-                    duration: 1
-                });
+            // BASS: one note per quarter (loop runs every 4n = walking bass)
+            if (currentChord && bassRef.current?.loaded) {
+                const bassNote = JazzTheoryService.getNextWalkingBassNote(beat, currentChord, nextChord || null, lastBassNoteRef.current, currentTension);
+                const safeBass = Number.isFinite(bassNote) ? bassNote : lastBassNoteRef.current;
+                lastBassNoteRef.current = safeBass;
+                const vel = 0.7 + currentTension * 0.2;
+                bassRef.current.triggerAttackRelease(Tone.Frequency(safeBass, "midi").toNote(), "4n", time, vel);
+                onNoteRef.current?.({ midi: safeBass, velocity: vel, instrument: 'bass', type: 'root', duration: 1 });
             }
 
-            // PIANO logic
-            const shouldPianoHit = (Math.random() < 0.4 + activityLevelSignal.value * 0.4);
-            if (shouldPianoHit && (sixteenths === 0 || sixteenths === 2)) {
-                const hitTime = time + (Math.random() * 0.03 - 0.015);
-                if (hitTime - pianoLastHitTimeRef.current > 0.4) {
-                    const duration = Math.random() > 0.5 ? "4n" : "8n";
-                    const voicing = JazzTheoryService.getPianoVoicing(currentChord, voicingTypeRef.current, 3, lastVoicingRef.current, currentTension, false, lastBassNoteRef.current);
-
-                    voicing.forEach((n, i) => {
-                        const stagger = i * (0.005 + Math.random() * 0.01);
-                        const baseVel = 0.5 + Math.random() * 0.2;
-                        pianoRef.current?.triggerAttackRelease(Tone.Frequency(n, "midi").toNote(), duration, hitTime + stagger, baseVel);
-
-                        onNoteRef.current?.({
-                            midi: n,
-                            velocity: baseVel,
-                            instrument: 'piano',
-                            type: JazzTheoryService.getNoteFunction(n, currentChord),
-                            duration: duration === "4n" ? 1 : 0.5
-                        });
-                    });
-
+            // PIANO: comp on downbeat and mid-bar when two chords, with probability
+            const isDownbeat = beat === 0;
+            const isMidBar = chords.length >= 2 && beat === 2;
+            const shouldComp = currentChord && (isDownbeat || isMidBar) && (Math.random() < 0.5 + activityLevelSignal.value * 0.3);
+            if (shouldComp && pianoRef.current?.loaded) {
+                const voicing = JazzTheoryService.getPianoVoicing(currentChord, voicingTypeRef.current, 3, lastVoicingRef.current, currentTension, false, lastBassNoteRef.current);
+                if (voicing.length > 0) {
                     lastVoicingRef.current = voicing;
-                    pianoLastHitTimeRef.current = hitTime;
+                    const duration = isDownbeat ? "2n" : "4n";
+                    const baseVel = 0.5 + Math.random() * 0.15;
+                    voicing.forEach((n, i) => {
+                        const t = time + i * 0.008;
+                        const vel = baseVel * (0.95 + Math.random() * 0.1);
+                        pianoRef.current?.triggerAttackRelease(Tone.Frequency(n, "midi").toNote(), duration, t, vel);
+                        onNoteRef.current?.({ midi: n, velocity: vel, instrument: 'piano', type: JazzTheoryService.getNoteFunction(n, currentChord), duration: duration === "2n" ? 2 : 1 });
+                    });
                 }
             }
 
-            // DRUMS logic
+            // DRUMS: simple and on-grid to avoid lag (one ride per beat, hihat 2&4, light snare/kick)
             if (drumsRef.current) {
-                const jitter = () => (Math.random() - 0.5) * 0.01;
-                // Ride
-                if (sixteenths === 0 || sixteenths === 2.6) {
-                    drumsRef.current.ride.triggerAttack("C1", time + jitter(), 0.7 + Math.random() * 0.2);
-                }
-                // Hihat on 2 and 4
-                if (beat === 1 || beat === 3) {
-                    drumsRef.current.hihat.triggerAttack("C1", time + jitter(), 0.6);
-                }
-                // Snare comping
-                if (Math.random() < 0.2 + activityLevelSignal.value * 0.2) {
-                    drumsRef.current.snare.triggerAttack("C1", time + jitter(), 0.3 + Math.random() * 0.2);
-                }
+                drumsRef.current.ride.triggerAttack("C1", time, 0.65);
+                if (beat === 1 || beat === 3) drumsRef.current.hihat.triggerAttack("C1", time, 0.5);
+                if (beat === 0) drumsRef.current.kick.triggerAttack("C1", time, 0.25);
+                if (beat === 2 && Math.random() < 0.4) drumsRef.current.snare.triggerAttack("C1", time, 0.2);
             }
         }, "4n");
 
@@ -225,9 +221,7 @@ export const useJazzBand = (song: any, isActive: boolean = true): JazzPlaybackSt
             isPlayingSignal.value = false;
         } else {
             await Tone.start();
-            // Ensure global audio (Director guide instrument) is ready for playGuideChord
-            const { initAudio } = await import('../../../core/audio/globalAudio');
-            await initAudio();
+            if (!isAudioReady()) await initGlobalAudio();
             Tone.Transport.start();
             isPlayingSignal.value = true;
         }

@@ -19,8 +19,9 @@
 ### REQ-FB-04: High-Performance Pitch Engine
 
 - **Requirement**: Implement a WASM-based pitch detector (Pitchy v3 or CREPE) in an Audio Worklet.
-- **Performance**: Use `SharedArrayBuffer` for zero-latency communication with the React UI.
+- **Performance**: Use `SharedArrayBuffer` for zero-latency communication with the React UI (PitchMemory + processorOptions.sab; public/worklets/pitch-processor.js).
 - **Input Quality**: Enable `voiceIsolation` constraints on microphone streams to filter out practice room noise.
+- **Status**: MPM in Worklet + SAB; architecture ready for CREPE-WASM swap. COOP/COEP in Vite server/preview.
 
 ## Phase 2: The "Mastery Tree"
 
@@ -55,6 +56,31 @@
 
 ### REQ-CC-03: Mobile PWA
 - **Requirement**: Ensure full PWA compatibility for offline practice room use.
+
+## Phase 5: The "Director" Engine
+
+### REQ-DR-01: FSRS-Based Scheduling
+- **Requirement**: Use FSRS (Free Spaced Repetition Scheduler) so each practice item is modeled with Retrievability (R), Stability (S), and Difficulty (D). Input (reviews, new material) is processed by the algorithm; Director uses R/S/D to decide what to show next.
+
+### REQ-DR-02: Director Service
+- **Requirement**: A central "Director" component/service that consumes FSRS state and session context to select the next item (song, lick, key, exercise) and optional difficulty/pace for the student.
+
+### REQ-DR-03: Context Injection (Timbre/Instrument)
+- **Requirement**: Director varies timbre and instrument (e.g. Piano → Cello → Synth) via the app's audio system (internal patches) so learning is not context-dependent on a single sound.
+
+## Phase 6: Polish, Analytics & Launch
+
+### REQ-PL-01: Performance & Bundle
+- **Requirement**: Meet Core Web Vitals (LCP, FID/INP, CLS) and keep critical path lean; audit and fix regressions.
+
+### REQ-PL-02: Analytics & Events
+- **Requirement**: Instrument key user actions (practice start/end, song unlock, lick publish, teacher dashboard views) for product and growth decisions.
+
+### REQ-PL-03: Onboarding & First-Run
+- **Requirement**: First-time users get a short guided flow (e.g. instrument choice, try one song or lick) to reach “first value” quickly.
+
+### REQ-PL-04: Launch Readiness
+- **Requirement**: Error boundaries, clear offline/error messaging, and minimal deploy/support runbook.
 
 ## Technical Priorities
 1. **High**: Pitch-to-Theory Sync (Turns app from book into teacher).
