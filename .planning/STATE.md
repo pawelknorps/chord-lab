@@ -41,6 +41,10 @@
 - [x] Built the reactive chat interface in JazzKiller `SmartLessonPane.tsx`.
 - [x] Defined Chord Lab AI chatbot and AI drill actions in PROJECT.md, REQUIREMENTS.md, ROADMAP.md.
 
+## Responsive Layout (Phase 4b)
+**Status**: Planned  
+**Goal**: Ensure Workbench, Standards (JazzKiller), and all exercises render well on every screen size including mobile. REQ-RESP-01–05; Phase 4b (Steps 10b–10d) in ROADMAP; PLAN and AUDIT updated in `04-responsiveness-ux-polish/`.
+
 ## Currently Working On
 - **Focus**: Make the Chord Lab AI assistant work—verify end-to-end flow (open Smart Lesson → Progression Assistant chat → ask about progression → get answer); improve discoverability if needed; fix any bugs (e.g. chord format, LocalAgentService init); ensure clear UX (loading, errors, Nano banner).
 - Phase 5 (AI Drill Actions) deferred; Phase 4, Phase 6, and Phase 7 complete. Step 19b (Theory Agent triplet) remains for Phase 6 refinement when prioritized.

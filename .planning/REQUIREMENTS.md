@@ -81,6 +81,13 @@
 - **REQ-MIC-14**: **Smart mic goals**: Support (or plan) Target Practice (pitch + Tonal.js → chord tones), Drone Tuning (mic + sine reference), Lick Validation (pitch buffering), Energy Tracker (RMS → dynamics feedback).
 - **REQ-MIC-15**: **Tone Quality (v2)**: Optional: use `AnalyserNode.getByteFrequencyData()` for brightness feedback (too thin vs too harsh) for jazz sound.
 
+### RESP: Responsive Layout (All Exercises & Main Sections)
+- **REQ-RESP-01**: **All exercises** (ChordLab, ChordBuildr, BiTonalSandbox, GripSequencer, Tonnetz, NegativeMirror, BarryHarris, RhythmArchitect, FunctionalEarTraining, CircleChords, MidiLibrary, ProgressionsPage) must render without horizontal scroll and remain usable at viewport widths from 320px up (including mobile).
+- **REQ-RESP-02**: **Workbench** (main Dashboard home with ChordLab as default) must render well and be visible on every screen size including mobile—no overflow, readable controls, accessible layout.
+- **REQ-RESP-03**: **Standards** (Jazz Standards / JazzKiller at `/jazz-standards`) must render well and be visible on every screen size including mobile—song list, lead sheet, practice studio, drill panels all accessible without horizontal scroll.
+- **REQ-RESP-04**: Audit and fix: `min-width` on wide content, flex/grid that forces horizontal scroll, `overflow-x` handling; apply `min-w-0`, `max-w-full`, `overflow-x-auto` (inside panels) where needed.
+- **REQ-RESP-05**: Main shell (App.tsx, Dashboard.tsx) must constrain child modules so no module can force body-level horizontal scroll.
+
 ### ADAPTIVE-EAR: Adaptive Ear Training with MIDI-Supported AI
 *Detailed requirements: `.planning/milestones/adaptive-ear-midi-ai/REQUIREMENTS.md` (REQ-MIDI-EAR-01–04, REQ-PERF-01–03, REQ-ADAPT-01–04, REQ-AI-FOCUS-01–03, REQ-INT-01–03).*
 - **REQ-ADAPT-EAR-01**: **MIDI input**: IntervalsLevel and ChordQualitiesLevel (and applicable levels) accept MIDI input as answer; grade played notes correctly.

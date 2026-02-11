@@ -226,6 +226,18 @@ Transform the Ear Trainer from a quiz with hints (Phase 7) into an **adaptive te
 
 ---
 
+## Responsive Layout (All Exercises & Main Sections)
+
+**Goal**: Ensure all exercises and main sections—**Workbench** (Dashboard/ChordLab home) and **Standards** (Jazz Standards/JazzKiller)—render well and remain visible for every screen size including mobile.
+
+- **Workbench**: Main hub with ChordLab as default; all module nav and ChordLab (slots, piano, fretboard, Progression Builder) must be usable on 320px+ viewports.
+- **Standards**: JazzKiller (song list, lead sheet, practice studio, drill panels, Smart Lesson) must be usable on mobile without horizontal scroll.
+- **All exercises**: ChordLab, ChordBuildr, BiTonalSandbox, GripSequencer, Tonnetz, NegativeMirror, BarryHarris, RhythmArchitect, FunctionalEarTraining, CircleChords, MidiLibrary, ProgressionsPage—each must pass a responsive audit at 375px and 320px.
+
+*Requirements: REQ-RESP-01–05. Phase: `.planning/phases/04-responsiveness-ux-polish/`.*
+
+---
+
 ## Out of Scope
 
 - Cloud-based LLM calls (OpenAI/Anthropic) for this milestone.

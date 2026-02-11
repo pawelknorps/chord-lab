@@ -15,8 +15,8 @@ autonomous: false
 
 # Plan: Phase 4 – Responsiveness & UX Polish
 
-**Roadmap**: Phase 4 (Steps 10–12)  
-**Goal**: Layout audit for all modules, fix mobile horizontal scrolling (especially Piano/Fretboard), smooth lazy-loading with skeleton loaders, resolve high-priority CONCERNS.md items.
+**Roadmap**: Phase 4 (Steps 10–12) + Phase 4b (Full Responsive Audit)  
+**Goal**: Layout audit for all modules, fix mobile horizontal scrolling (especially Piano/Fretboard), smooth lazy-loading with skeleton loaders, resolve high-priority CONCERNS.md items. **Ensure Workbench and Standards render well on every screen size including mobile; all exercises must be visible and usable.**
 
 ## Phase Scope (from ROADMAP.md)
 
@@ -50,6 +50,32 @@ Review `Dashboard.tsx` and `App.tsx` for viewport and overflow:
 **Verification (Wave 1)**  
 - No horizontal scroll on 375px viewport when Chord Lab is open with Piano and Fretboard visible.  
 - Audit checklist completed and at least Piano/Fretboard fixes applied.
+
+---
+
+## Wave 1b: Full Responsive Audit — Workbench, Standards, All Exercises (Phase 4b)
+
+<task id="step10b-workbench">
+Audit **Workbench** (Dashboard home with ChordLab as default):
+- At 375px and 320px viewport: layout, nav, ChordLab slots, Piano, Fretboard, Progression Builder, WorkbenchAiPanel.
+- Fix horizontal scroll, overflow, and layout collapse; ensure controls are accessible.
+</task>
+
+<task id="step10c-standards">
+Audit **Standards** (JazzKiller at `/jazz-standards`):
+- At 375px and 320px: song list, lead sheet, practice studio, drill panels, Smart Lesson, BarRangeDrill.
+- Fix horizontal scroll and ensure all sections are visible and usable on mobile.
+</task>
+
+<task id="step10d-exercises">
+Audit remaining exercises (ChordBuildr, BiTonalSandbox, GripSequencer, Tonnetz, NegativeMirror, BarryHarris, RhythmArchitect, FunctionalEarTraining, CircleChords, MidiLibrary, ProgressionsPage):
+- Resize to 375px and 320px; check each route for overflow, min-width issues, flex/grid forcing scroll.
+- Apply `min-w-0`, `max-w-full`, `overflow-x-auto` (inside panels) where needed.
+- Document completion in AUDIT.md.
+</task>
+
+**Verification (Wave 1b)**  
+- REQ-RESP-01–05 satisfied: no horizontal scroll at 375px and 320px; Workbench and Standards fully usable on mobile; all modules pass audit.
 
 ---
 
