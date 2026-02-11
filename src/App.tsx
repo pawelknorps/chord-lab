@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Suspense, lazy } from 'react';
 import { AudioProvider } from './context/AudioContext';
 import { MidiProvider } from './context/MidiContext';
+import { AuthProvider } from './context/AuthContext';
 import ChordLab from './modules/ChordLab/ChordLab'; // Keep Core module eager for LCP
 import Dashboard from './components/layout/Dashboard';
 import { GlobalMidiHandler } from './components/GlobalMidiHandler';
@@ -34,6 +35,7 @@ function App() {
     }, [theme]);
 
     return (
+        <AuthProvider>
         <AudioProvider>
             <MidiProvider>
                 <GlobalMidiHandler />
@@ -108,6 +110,7 @@ function App() {
                 <PerformanceMonitor />
             </MidiProvider>
         </AudioProvider>
+        </AuthProvider>
     );
 }
 

@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
 import { useSettingsStore, InstrumentType } from '../../core/store/useSettingsStore';
-import { Volume2, VolumeX, Music, Type, Sun, Moon, Settings, X } from 'lucide-react';
+import { Volume2, VolumeX, Music, Type, Sun, Moon, Settings, X, Cloud } from 'lucide-react';
 import { useMasteryStore } from '../../core/store/useMasteryStore';
+import { useAuth } from '../../context/AuthContext';
+import { AuthDialog } from '../auth/AuthDialog';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export function GlobalSettings() {
     const [isOpen, setIsOpen] = useState(false);
+    const [authDialogOpen, setAuthDialogOpen] = useState(false);
+    const { session, isConfigured } = useAuth();
     const {
         masterVolume, setMasterVolume,
         instrument, setInstrument,
@@ -125,10 +129,24 @@ export function GlobalSettings() {
                                     <span className="text-[9px] font-black uppercase tracking-tighter">{theme}</span>
                                 </button>
                             </div>
+
+                            {/* Sign in to sync (Phase 4: Cloud) */}
+                            {isConfigured && !session && (
+                                <div className="pt-2 border-t border-white/5">
+                                    <button
+                                        type="button"
+                                        onClick={() => setAuthDialogOpen(true)}
+                                        className="flex items-center justify-center gap-2 w-full py-2 rounded-xl border border-amber-500/50 text-amber-500 text-xs font-bold hover:bg-amber-500/10 transition-colors"
+                                    >
+                                        <Cloud size={14} /> Sign in to sync progress
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </motion.div>
                 )}
             </AnimatePresence>
+            <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
         </div>
     );
 }
