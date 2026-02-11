@@ -13,6 +13,7 @@ import type { ExerciseType } from '../core/StandardsExerciseEngine';
 import type { ExerciseInputSource } from '../core/ExerciseInputAdapter';
 import * as Tone from 'tone';
 import { Target, Mic, Keyboard, Check, X, RotateCcw, Zap } from 'lucide-react';
+import { SoloTranscriptionPanel } from './SoloTranscriptionPanel';
 
 const DEFAULT_LATENCY_MS = 80;
 const MIN_LATENCY_MS = 0;
@@ -231,6 +232,12 @@ export function StandardsExercisesPanel({ getChordAtTransportTime }: StandardsEx
                     </div>
                 </div>
             </div>
+
+            {/* Phase 15: Record solo → written transcription */}
+            <SoloTranscriptionPanel
+                inputSource={inputSource}
+                active={true}
+            />
 
             {!isReady && inputSource === 'mic' && (
                 <p className="text-[10px] text-neutral-500">Mic initializing… Allow microphone access when prompted.</p>
