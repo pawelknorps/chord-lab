@@ -72,7 +72,7 @@ export const LeadSheet = ({ song, filteredPatterns, onChordClick }: LeadSheetPro
     const selectedRange = selectedMeasureRangeSignal.value;
 
     return (
-        <div className="w-full max-w-5xl mx-auto p-1.5 md:p-8 bg-[#fdf6e3] text-black font-serif rounded-lg shadow-2xl overflow-hidden relative">
+        <div className="w-full max-w-5xl min-w-0 mx-auto p-1.5 md:p-8 bg-[#fdf6e3] text-black font-serif rounded-lg shadow-2xl overflow-auto relative">
             {/* Paper Texture Overlay */}
             <div className="absolute inset-0 pointer-events-none opacity-10 bg-[url('https://www.transparenttextures.com/patterns/aged-paper.png')]"></div>
 

@@ -35,7 +35,7 @@ import { MasterKeyTeacher } from './components/MasterKeyTeacher';
 import { GuideToneSpotlightEffect } from './components/GuideToneSpotlightEffect';
 import { LiveNoteIndicator } from '../../components/shared/LiveNoteIndicator';
 import { CallAndResponseDrill } from './components/CallAndResponseDrill';
-import { useMicrophone } from '../../hooks/useMicrophone';
+import * as MicrophoneService from '../../core/audio/MicrophoneService';
 
 export default function JazzKillerModule() {
     useAudioCleanup('jazz-killer');
@@ -67,7 +67,6 @@ export default function JazzKillerModule() {
 
     // Practice Store integration
     const { loadSong, detectedPatterns, showGuideTones, toggleGuideTones, showAnalysis, toggleAnalysis, guideToneSpotlightMode, setGuideToneSpotlightMode } = usePracticeStore();
-    const { start: startMic } = useMicrophone();
 
     // Analysis filters
     const [analysisFilters, setAnalysisFilters] = useState<AnalysisFilters>({
@@ -230,7 +229,7 @@ export default function JazzKillerModule() {
     const { clearAdvice } = useAiTeacher();
 
     return (
-        <div className="h-full w-full bg-[#0a0a0a] text-white p-1.5 md:p-3 flex flex-col gap-2 md:gap-3 overflow-hidden relative">
+        <div className="h-full w-full min-w-0 bg-[#0a0a0a] text-white p-1.5 md:p-3 flex flex-col gap-2 md:gap-3 overflow-hidden relative">
             {/* AI Proactive Notification */}
             {proactiveAdviceSignal.value && (
                 <div className="fixed bottom-24 right-6 z-[200] max-w-sm animate-in slide-in-from-right-8 duration-500">
@@ -398,7 +397,7 @@ export default function JazzKillerModule() {
                                 onClick={() => {
                                     const next = !guideToneSpotlightMode;
                                     setGuideToneSpotlightMode(next);
-                                    if (next) startMic();
+                                    if (next) void MicrophoneService.start();
                                 }}
                                 className={`p-1.5 md:p-2.5 rounded-lg md:rounded-xl transition-all ${guideToneSpotlightMode ? 'bg-red-500 text-black' : 'text-neutral-500 hover:text-white'} ${showToolHints ? 'animate-hint-pulse text-red-400' : ''}`}
                                 title="Guide Tone Spotlight (mic): play 3rd of chord, bar lights green"
@@ -741,7 +740,7 @@ export default function JazzKillerModule() {
                         )}
 
                         {/* MAIN CONTENT */}
-                        <div className="flex-1 overflow-y-auto px-1 md:px-2 custom-scrollbar transition-all duration-300">
+                        <div className="flex-1 min-w-0 overflow-y-auto overflow-x-auto px-1 md:px-2 custom-scrollbar transition-all duration-300">
                             <GuideToneSpotlightEffect />
                             <LeadSheet
                                 song={selectedSong}
