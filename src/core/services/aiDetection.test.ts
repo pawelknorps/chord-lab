@@ -87,4 +87,24 @@ describe('aiDetection', () => {
     };
     expect(await checkAiAvailability()).toBe('supported');
   });
+
+  it('returns supported when LanguageModel is on navigator only (Chrome canary path)', async () => {
+    (globalThis as any).window = { LanguageModel: undefined, ai: undefined };
+    (globalThis as any).navigator = {
+      languageModel: {
+        availability: vi.fn().mockResolvedValue('available'),
+      },
+    };
+    expect(await checkAiAvailability()).toBe('supported');
+  });
+
+  it('returns unsupported when navigator.languageModel.availability returns unavailable', async () => {
+    (globalThis as any).window = { LanguageModel: undefined, ai: undefined };
+    (globalThis as any).navigator = {
+      languageModel: {
+        availability: vi.fn().mockResolvedValue('unavailable'),
+      },
+    };
+    expect(await checkAiAvailability()).toBe('unsupported');
+  });
 });

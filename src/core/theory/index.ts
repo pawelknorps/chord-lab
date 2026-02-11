@@ -61,16 +61,23 @@ export const CHORD_INTERVALS: Record<string, number[]> = {
 
   // 7th Chords
   'maj7': [0, 4, 7, 11],
+  'maj7#5': [0, 4, 8, 11],
+  'maj7b5': [0, 4, 6, 11],
   'min7': [0, 3, 7, 10],
   'dom7': [0, 4, 7, 10],
   'dim7': [0, 3, 6, 9],
   'm7b5': [0, 3, 6, 10],
+  'min7#5': [0, 3, 8, 10],
   'aug7': [0, 4, 8, 10],
   'mM7': [0, 3, 7, 11],
   '6': [0, 4, 7, 9],
   'm6': [0, 3, 7, 9],
   '69': [0, 4, 7, 9, 14],
   'm69': [0, 3, 7, 9, 14],
+  'add9': [0, 2, 4, 7],
+  'minadd9': [0, 2, 3, 7],
+  'add11': [0, 4, 5, 7],
+  'maj7#11': [0, 4, 6, 7, 11],
 
   // Extended / Altered Dom
   '9': [0, 4, 7, 10, 14],
@@ -431,7 +438,6 @@ export function parseChord(chordName: string): { root: string; quality: string; 
   else if (quality === '9') quality = '9';
   else if (quality === '11') quality = '11';
   else if (quality === '13') quality = '13';
-  else if (quality === 'add9') quality = 'maj9';
 
   // 6. Handle Alterations
   else if (quality === '7b9') quality = '7b9';
@@ -465,6 +471,84 @@ const CHORD_PC_TEMPLATES: { quality: string; pcs: number[] }[] = (() => {
   return out;
 })();
 
+/** 12-bit bitmask: bit i = 1 if semitone i (from root) is present. Fast pitch-set comparison. */
+export function pcsToBitmask(pcs: number[]): number {
+  return pcs.reduce((mask, i) => mask | (1 << (i % 12)), 0);
+}
+
+/**
+ * Functional decomposition: build chord quality from triad + 7th + extensions.
+ * Uses interval profile (pitch classes from root). Never returns "custom"; produces
+ * a theoretically correct symbol (e.g. maj7#5, min7, 7#11).
+ */
+export function detectJazzChordByProfile(intervalsFromRoot: number[]): string | null {
+  if (intervalsFromRoot.length < 3) return null;
+  const set = new Set(intervalsFromRoot);
+  if (!set.has(0)) return null;
+
+  const has = (i: number) => set.has(i);
+  // Triad: 3rd and 5th
+  const hasM3 = has(4);
+  const hasm3 = has(3);
+  const hasP5 = has(7);
+  const hasAug5 = has(8);
+  const hasDim5 = has(6);
+  const hasSus4 = has(5) && !hasM3 && !hasm3;
+  const hasSus2 = has(2) && !hasM3 && !hasm3;
+
+  let quality: string;
+
+  if (hasSus4 && hasP5 && has(10)) quality = '7sus4';
+  else if (hasSus4 && hasP5) quality = 'sus4';
+  else if (hasSus2 && hasP5) quality = 'sus2';
+  else if (hasSus4) quality = 'sus4';
+  else if (hasM3 && hasAug5) quality = 'aug';
+  else if (hasM3 && hasP5) quality = 'maj';
+  else if (hasm3 && hasP5) quality = 'min';
+  else if (hasm3 && hasDim5) quality = 'dim';
+  else if (hasM3 && hasDim5) quality = 'maj7b5';
+  else if (hasm3 && hasAug5) quality = 'min7#5';
+  else if (hasM3) quality = 'aug';
+  else if (hasm3) quality = 'dim';
+  else return null;
+
+  // 7ths
+  const hasMaj7 = has(11);
+  const hasDom7 = has(10);
+  const hasDim7 = has(9); // diminished 7th = 9 semitones from root
+  if (hasMaj7) {
+    if (quality === 'aug') quality = 'maj7#5';
+    else if (quality === 'maj') quality = 'maj7';
+    else if (quality === 'min') quality = 'mM7';
+    else if (quality === 'dim') quality = 'dim7';
+    else quality = quality + 'maj7';
+  } else if (hasDim7 && quality === 'dim') {
+    quality = 'dim7';
+  } else if (hasDom7) {
+    if (quality === 'aug') quality = '7#5';
+    else if (quality === 'maj') quality = 'dom7';
+    else if (quality === 'min') quality = 'min7';
+    else if (quality === 'min7#5') quality = 'min7#5';
+    else if (quality === 'dim') quality = 'm7b5';
+    else quality = quality + '7';
+  } else if (quality === 'min7#5') quality = 'min';
+
+  // Extensions: map 7th chord + extension to standard symbol (no "maj79")
+  const has7 = quality.includes('7');
+  if (has7) {
+    if (has(9) && (quality === 'dom7' || quality === 'min7' || quality === 'maj7')) {
+      quality = quality === 'maj7' ? 'maj13' : quality === 'min7' ? 'min13' : '13';
+    } else if (has(6) && quality === 'maj7') quality = 'maj7#11'; // #11 = semitone 6 from root
+    else if (has(2) && (quality === 'dom7' || quality === 'min7' || quality === 'maj7')) {
+      quality = quality === 'maj7' ? 'maj9' : quality === 'min7' ? 'min9' : '9';
+    } else if (has(1) && quality === 'dom7') quality = '7b9';
+    else if (has(3) && hasM3 && quality === 'dom7') quality = '7#9';
+  } else if (quality === 'maj' && has(2)) quality = 'add9';
+  else if (quality === 'min' && has(2)) quality = 'minadd9';
+
+  return quality;
+}
+
 /**
  * Spell a pitch class (0–11) using music-theory enharmonic rules for the given key.
  * Uses the same logic as midiToNoteName (flat keys vs sharp keys).
@@ -475,14 +559,14 @@ export function spellPitchClassInKey(pc: number, keyContext: string): string {
 
 /**
  * Analyze a set of MIDI notes into chord root, quality, and optional bass (inversion).
+ * 1. Tries CHORD_PC_TEMPLATES (fast, exact match).
+ * 2. If null, uses functional decomposition (detectJazzChordByProfile) so any triad + 7th + extensions gets a proper name.
  * Does not assume the lowest note is the root; detects inversions and slash chords.
- * When keyContext is provided, root and bass use correct enharmonic spelling (e.g. Bb not A# in F).
  */
 export function analyzeChordFromNotes(notes: number[], keyContext?: string): { root: string; quality: string; bass?: string } | null {
   if (notes.length < 3) return null;
 
-  const sorted = [...notes].sort((a, b) => a - b);
-  const bassMidi = sorted[0];
+  const bassMidi = [...notes].sort((a, b) => a - b)[0];
   const bassPc = bassMidi % 12;
   const pitchClasses = [...new Set(notes.map((n) => n % 12))].sort((a, b) => a - b);
 
@@ -492,6 +576,7 @@ export function analyzeChordFromNotes(notes: number[], keyContext?: string): { r
 
   let best: { rootPc: number; quality: string } | null = null;
 
+  // 1. Template match (speed)
   for (const candidateRoot of pitchClasses) {
     const intervalsFromRoot = pitchClasses.map((pc) => (pc - candidateRoot + 12) % 12).sort((a, b) => a - b);
 
@@ -501,10 +586,23 @@ export function analyzeChordFromNotes(notes: number[], keyContext?: string): { r
 
       if (!best || candidateRoot === bassPc) {
         best = { rootPc: candidateRoot, quality };
-        if (candidateRoot === bassPc) break; // prefer root position when valid
+        if (candidateRoot === bassPc) break;
       }
     }
     if (best?.rootPc === bassPc) break;
+  }
+
+  // 2. Fallback: functional decomposition (no "custom")
+  if (!best) {
+    for (const candidateRoot of pitchClasses) {
+      const intervalsFromRoot = pitchClasses.map((pc) => (pc - candidateRoot + 12) % 12).sort((a, b) => a - b);
+      const quality = detectJazzChordByProfile(intervalsFromRoot);
+      if (!quality) continue;
+      if (!best || candidateRoot === bassPc) {
+        best = { rootPc: candidateRoot, quality };
+        if (candidateRoot === bassPc) break;
+      }
+    }
   }
 
   if (!best) return null;
