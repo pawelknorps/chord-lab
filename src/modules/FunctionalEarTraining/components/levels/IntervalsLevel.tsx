@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useFunctionalEarTrainingStore } from '../../state/useFunctionalEarTrainingStore';
 import { useMasteryStore } from '../../../../core/store/useMasteryStore';
+import { useMidi } from '../../../../context/MidiContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Play, Check, X, ArrowRight, Music, Activity, RotateCcw, SkipForward } from 'lucide-react';
+import { Play, X, ArrowRight, Music, Activity, RotateCcw, SkipForward, Keyboard } from 'lucide-react';
 import * as Tone from 'tone';
 import { diagnoseEarError } from '../../utils/earDiagnosis';
 import { getEarHint } from '../../../../core/services/earHintService';
@@ -22,9 +23,12 @@ const INTERVALS = [
     { name: 'P8', semitones: 12, label: 'Octave' },
 ];
 
+const MIDI_DEBOUNCE_MS = 300;
+
 export const IntervalsLevel: React.FC = () => {
     const { addScore, setPlaying, difficulty, streak } = useFunctionalEarTrainingStore();
     const { addExperience, updateStreak } = useMasteryStore();
+    const { lastNote } = useMidi();
 
     const [challenge, setChallenge] = useState<any>(null);
     const [selectedInterval, setSelectedInterval] = useState<string | null>(null);
@@ -32,11 +36,14 @@ export const IntervalsLevel: React.FC = () => {
     const [playMode, setPlayMode] = useState<'melodic' | 'harmonic'>('melodic');
     const [aiHint, setAiHint] = useState<string | null>(null);
     const [hintLoading, setHintLoading] = useState(false);
+    const [midiFeedback, setMidiFeedback] = useState<string | null>(null);
+    const lastMidiGradedRef = useRef<{ note: number; ts: number } | null>(null);
 
     const loadNewChallenge = useCallback(() => {
         setResult(null);
         setSelectedInterval(null);
         setAiHint(null);
+        setMidiFeedback(null);
 
         const interval = INTERVALS[Math.floor(Math.random() * INTERVALS.length)];
         const rootMidi = 60; // Middle C
@@ -51,6 +58,25 @@ export const IntervalsLevel: React.FC = () => {
     useEffect(() => {
         if (!challenge) loadNewChallenge();
     }, [challenge, loadNewChallenge]);
+
+    useEffect(() => {
+        if (!lastNote || lastNote.type !== 'noteon' || !challenge || result === 'correct') return;
+        const now = performance.now();
+        if (lastMidiGradedRef.current && lastMidiGradedRef.current.note === lastNote.note && now - lastMidiGradedRef.current.ts < MIDI_DEBOUNCE_MS) return;
+        lastMidiGradedRef.current = { note: lastNote.note, ts: now };
+
+        let playedSemitones = lastNote.note - challenge.rootMidi;
+        if (playedSemitones < 0) playedSemitones += 12;
+        if (playedSemitones > 12) playedSemitones = playedSemitones % 12 || 12;
+
+        const matched = INTERVALS.find(i => i.semitones === playedSemitones);
+        if (matched) {
+            setSelectedInterval(matched.name);
+            handleAnswer(matched.name);
+        } else {
+            setMidiFeedback(`PLAYED: semitone ${playedSemitones}`);
+        }
+    }, [lastNote, challenge, result, handleAnswer]);
 
     const playAudio = async () => {
         if (!challenge) return;
@@ -120,7 +146,7 @@ export const IntervalsLevel: React.FC = () => {
                 >
                     Pure Intervals
                 </motion.h2>
-                <div className="flex justify-center gap-4 mt-2">
+                <div className="flex flex-wrap justify-center items-center gap-4 mt-2">
                     {['melodic', 'harmonic'].map(m => (
                         <button
                             key={m}
@@ -130,7 +156,13 @@ export const IntervalsLevel: React.FC = () => {
                             {m}
                         </button>
                     ))}
+                    <span className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-white/5 text-white/40 text-[10px] uppercase font-bold tracking-wider">
+                        <Keyboard size={12} /> MIDI
+                    </span>
                 </div>
+                {midiFeedback && (
+                    <div className="text-amber-400/90 font-bold text-sm uppercase tracking-wider">{midiFeedback}</div>
+                )}
             </div>
 
             <div className="relative group">
