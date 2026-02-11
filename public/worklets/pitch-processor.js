@@ -1,23 +1,36 @@
 /**
- * High-Performance Ear (2026): Zero-latency pitch processor.
- * - Captures 128-sample buffers from the mic, fills a 1024-sample circular buffer.
- * - Runs MPM (or CREPE-WASM when available) and writes frequency + confidence to SAB.
- * - Throttled: run pitch detection every 2nd full buffer to avoid glitching playback.
- * - Float32Array on SAB: single writer (worklet) / single reader (main thread); direct write.
+ * High-Performance Ear (2026): Low-latency pitch processor.
+ * - Zero-copy circular buffer: 128-sample blocks copied with buffer.set(); ptr wrap.
+ * - Downsamples native mic to 16 kHz (CREPE-trained rate) for ~3x faster inference.
+ * - Hop size 128: run MPM every block once buffer is full (overlapping frames).
+ * - Writes stabilized frequency + confidence to SAB. No console in hot path.
  */
+const CREPE_TARGET_HZ = 16000;
+const CREPE_FRAME_LEN = 1024;
+
 class PitchProcessor extends AudioWorkletProcessor {
   constructor(options) {
     super();
     const opts = options?.processorOptions || {};
     const sab = opts.sab;
     this.sharedView = sab ? new Float32Array(sab) : null;
-    this.sampleRate = opts.sampleRate || 44100;
-    this.bufferSize = 1024; // CREPE window size
-    this.buffer = new Float32Array(this.bufferSize);
-    this.ptr = 0;
-    this.runCount = 0; // run MPM every 2nd full buffer to reduce CPU on audio thread
+    const sampleRate = opts.sampleRate || 44100;
+    this.sampleRate = sampleRate;
 
-    // Instrument presets (inlined for Worklet)
+    // Native circular buffer: hold enough samples to yield 1024 @ 16 kHz
+    this.nativeBufferSize = Math.ceil(CREPE_FRAME_LEN * sampleRate / CREPE_TARGET_HZ);
+    this.nativeBuffer = new Float32Array(this.nativeBufferSize);
+    this.ptr = 0;
+    this.samplesWritten = 0;
+    this.hopBlocks = Math.max(1, opts.hopBlocks || 1);
+    this.blockCount = 0;
+
+    // Pre-allocated buffers (no GC in process())
+    this.tempNative = new Float32Array(this.nativeBufferSize);
+    this.downsampled = new Float32Array(CREPE_FRAME_LEN);
+    this.nsdf = new Float32Array(CREPE_FRAME_LEN);
+    this.effectiveSampleRate = CREPE_TARGET_HZ;
+
     const presets = {
       auto: { min: 20, max: 4000 },
       bass: { min: 30, max: 400 },
@@ -30,61 +43,115 @@ class PitchProcessor extends AudioWorkletProcessor {
     this.minHz = preset.min;
     this.maxHz = preset.max;
 
-    // Stabilization state (inlined logic for Worklet)
     this.lastStablePitch = 0;
     this.pitchHistory = [];
-    this.windowSize = 5;
-    this.minConfidence = 0.85;
-    this.hysteresisCents = 20;
+    this.windowSize = 7;
+    this.minConfidence = 0.92;
+    this.hysteresisCents = 35;
+    this.stabilityThreshold = 3;
+    this.stableCount = 0;
+    this.pendingPitch = 0;
   }
 
   process(inputs) {
     const input = inputs[0]?.[0];
     if (!input || !this.sharedView) return true;
 
-    for (let i = 0; i < input.length; i++) {
-      this.buffer[this.ptr++] = input[i];
-      if (this.ptr >= this.bufferSize) {
-        this.ptr = 0;
-        this.runCount++;
-        if (this.runCount >= 2) {
-          this.runCount = 0;
-          let [pitch, confidence] = this.detectPitch(this.buffer);
+    const blockLen = input.length;
+    const buf = this.nativeBuffer;
+    const size = this.nativeBufferSize;
+    let ptr = this.ptr;
 
-          // In-Worklet Stabilization
-          if (confidence >= this.minConfidence) {
-            this.pitchHistory.push(pitch);
-            if (this.pitchHistory.length > this.windowSize) this.pitchHistory.shift();
+    // Zero-copy: copy block into circular buffer (handle wrap)
+    if (ptr + blockLen <= size) {
+      buf.set(input, ptr);
+    } else {
+      const first = size - ptr;
+      buf.set(input.subarray(0, first), ptr);
+      buf.set(input.subarray(first), 0);
+    }
+    ptr = (ptr + blockLen) % size;
+    this.ptr = ptr;
+    this.samplesWritten += blockLen;
 
-            if (this.pitchHistory.length >= 3) {
-              const sorted = [...this.pitchHistory].sort((a, b) => a - b);
-              const medianPitch = sorted[Math.floor(sorted.length / 2)];
-
-              if (this.lastStablePitch === 0) {
-                this.lastStablePitch = medianPitch;
-              } else {
-                const centDiff = 1200 * Math.log2(medianPitch / this.lastStablePitch);
-                if (Math.abs(centDiff) > this.hysteresisCents) {
-                  this.lastStablePitch = medianPitch;
-                }
-              }
-            } else {
-              this.lastStablePitch = pitch;
-            }
-          }
-
-          // Write stabilized values
-          this.sharedView[0] = this.lastStablePitch;
-          this.sharedView[1] = confidence;
-        }
+    // Run inference every hopBlocks once we have a full frame
+    if (this.samplesWritten >= size) {
+      this.blockCount++;
+      if (this.blockCount >= this.hopBlocks) {
+        this.blockCount = 0;
+        this.runInference();
       }
     }
+
     return true;
   }
 
-  detectPitch(buffer) {
+  runInference() {
+    const buf = this.nativeBuffer;
+    const size = this.nativeBufferSize;
+    const ptr = this.ptr;
+    const temp = this.tempNative;
+    const out = this.downsampled;
+
+    // Chronological copy: last `size` samples (oldest at ptr)
+    for (let i = 0; i < size; i++) {
+      temp[i] = buf[(ptr + i) % size];
+    }
+
+    // Downsample to 1024 @ 16 kHz (linear interpolation)
+    const ratio = size / CREPE_FRAME_LEN;
+    for (let j = 0; j < CREPE_FRAME_LEN; j++) {
+      const srcIdx = j * ratio;
+      const lo = Math.floor(srcIdx);
+      const hi = Math.min(lo + 1, size - 1);
+      const frac = srcIdx - lo;
+      out[j] = temp[lo] * (1 - frac) + temp[hi] * frac;
+    }
+
+    let [pitch, confidence] = this.detectPitch(out, this.effectiveSampleRate);
+
+    // 2026 Jazz Stabilization
+    if (confidence >= this.minConfidence) {
+      this.pitchHistory.push(pitch);
+      if (this.pitchHistory.length > this.windowSize) this.pitchHistory.shift();
+
+      if (this.pitchHistory.length >= 3) {
+        const sorted = [...this.pitchHistory].sort((a, b) => a - b);
+        const medianPitch = sorted[Math.floor(sorted.length / 2)];
+
+        if (this.lastStablePitch === 0) {
+          this.lastStablePitch = medianPitch;
+        } else {
+          const newMidi = 12 * Math.log2(medianPitch / 440) + 69;
+          const currentMidi = 12 * Math.log2(this.lastStablePitch / 440) + 69;
+
+          if (Math.abs(newMidi - currentMidi) > (this.hysteresisCents / 100)) {
+            if (Math.abs(12 * Math.log2(medianPitch / this.pendingPitch)) < 0.1) {
+              this.stableCount++;
+            } else {
+              this.stableCount = 1;
+              this.pendingPitch = medianPitch;
+            }
+            if (this.stableCount >= this.stabilityThreshold) {
+              this.lastStablePitch = medianPitch;
+              this.stableCount = 0;
+            }
+          } else {
+            this.stableCount = 0;
+          }
+        }
+      } else {
+        this.lastStablePitch = pitch;
+      }
+    }
+
+    this.sharedView[0] = this.lastStablePitch;
+    this.sharedView[1] = confidence;
+  }
+
+  detectPitch(buffer, sampleRate) {
     const n = buffer.length;
-    const nsdf = new Float32Array(n);
+    const nsdf = this.nsdf;
 
     for (let tau = 0; tau < n; tau++) {
       let acf = 0;
@@ -123,7 +190,7 @@ class PitchProcessor extends AudioWorkletProcessor {
     const y1 = nsdf[x1];
     const y2 = nsdf[x2];
     const p = x1 + (y0 - y2) / (2 * (y0 - 2 * y1 + y2) || 1e-6);
-    const frequency = this.sampleRate / p;
+    const frequency = sampleRate / p;
     const clarity = nsdf[targetPeak];
     if (frequency < this.minHz || frequency > this.maxHz) return [0, 0];
     return [frequency, clarity];

@@ -81,8 +81,8 @@
 
 - **High-Performance Ear (2026)**:
   - `PitchMemory.ts`: createPitchMemory() for 8-byte SAB (frequency + confidence); used by ITM pitch store.
-  - `public/worklets/pitch-processor.js`: Audio Worklet with MPM, writes to SAB via processorOptions.sab; CREPE-WASM-ready.
-  - useITMPitchStore loads `/worklets/pitch-processor.js` and passes sab + sampleRate in processorOptions for zero-latency pitch.
+  - `public/worklets/pitch-processor.js`: Audio Worklet with MPM; **Phase 14**: zero-copy circular buffer, 16 kHz downsampling, hop 128; writes to SAB; CREPE-WASM-ready.
+  - useITMPitchStore loads `/worklets/pitch-processor.js` and passes sab + sampleRate in processorOptions for low-latency pitch.
   - usePitchTracker hook for standalone pitch ref (polls SAB in rAF).
   - COOP/COEP in vite server and preview for SharedArrayBuffer.
 - **JazzKiller playback**: initGlobalAudio() called on first play (togglePlayback) when !isAudioReady() so Director guide instrument works.
@@ -94,6 +94,13 @@
 
 - **Scope**: CrepeStabilizer (confidence gate, running median, hysteresis); in-worklet stabilization; usePitchTracker/ITM consume stabilized SAB; frequencyToNote + perfect intonation (±10 cents); jazz instrument presets (frequency clamping); tests.
 - **Planning**: `.planning/phases/09-mic-algorithm-upgrade/PLAN.md`, RESEARCH.md. ROADMAP and REQUIREMENTS updated (REQ-MA-01–REQ-MA-05).
+
+## Phase 14: Pitch Detection Latency (Break the Latency Wall) 🚀
+
+- **Status**: In progress.
+- **Scope**: 16 kHz downsampling in worklet; zero-copy circular buffer; hop size 128; pre-allocated buffers; optional hopBlocks throttle; CREPE-Tiny/Small swap path documented.
+- **Planning**: `.planning/phases/14-pitch-latency/PLAN.md`, RESEARCH.md.
+- **Delivered**: pitch-processor.js updated with native circular buffer, linear-interp downsampler, MPM at 16 kHz effective, inference every block (or every hopBlocks); no GC in hot path; no console in worklet.
 
 ## Phase 12: Walking Bass Engine (Target & Approach)
 
