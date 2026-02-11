@@ -46,13 +46,13 @@
 - [ ] **Step 19b (Theory Agent)**: When user asks "why does this work?" for a chord, send Nano a **triplet** (Prev → Current → Next) with Tonal.js ground truth; prompt for voice-leading explanation (e.g. 7th of G7 → 3rd of Cmaj7). Nano provides flavor; Tonal.js provides the truth.
 - **Success Criteria**: User can ask about the current progression and get coherent answers and suggestions; no raw `[[...]]` in Chord Lab chat (or define a minimal command set later).
 
-## Phase 7: Ear Trainer Feedback Loop & Rhythm Scat (Nano as Metadata Generator)
+## Phase 7: Ear Trainer Feedback Loop & Rhythm Scat (Nano as Metadata Generator) ✅
 *Goal: Ear Trainer explains why mistakes happened (diagnostic hints); Rhythm Trainer gets scat phrases for subdivisions. Nano narrates Tonal.js ground truth.*
-- [ ] **Step 20**: **Ear diagnostic**: Implement `diagnoseEarError(correctInterval, userGuess)` using Tonal.js Interval.semitones—return correct, guess, errorType (overshot/undershot), distance, isCommonConfusion (e.g. 4P vs tritone).
-- [ ] **Step 21**: **Ear hint**: Implement `getEarHint(diagnosis)`—pass diagnosis to Nano; system prompt "Never give the answer. 1-sentence hint on vibe/character of the correct interval." Return hint for display.
-- [ ] **Step 22**: **Listen Again UI**: In Ear Trainer (Functional Ear Training): on wrong answer → show "Not quite" + AI hint (toast/bubble) → replay → retry → on success update performance heatmap.
-- [ ] **Step 23**: **Rhythm Scat**: For selected rhythm (e.g. Swing), ask Nano for a 3-word vocalization/scat phrase (e.g. "Doo-dah, doo-dah"); display above metronome. For complex syncopated rhythms, generate scat phrase to internalize time.
-- [ ] **Step 24**: **askNano guardrail**: Ensure all Nano calls use Zero-Shot Context wrapper—re-inject ground truth (JSON from Tonal.js/state); system prompt "Concise Jazz Coach. Limit 15 words" where applicable.
+- [x] **Step 20**: **Ear diagnostic**: Implement `diagnoseEarError(correctInterval, userGuess)` using semitones (earDiagnosis.ts)—return correct, guess, errorType (overshot/undershot), distance, isCommonConfusion (e.g. 4P vs tritone).
+- [x] **Step 21**: **Ear hint**: Implement `getEarHint(diagnosis)`—pass diagnosis to Nano via askNano; system prompt "Never give the answer. 1-sentence hint on vibe/character of the correct interval." Return hint for display.
+- [x] **Step 22**: **Listen Again UI**: In Ear Trainer (IntervalsLevel): on wrong answer → show "Not quite" + AI hint (bubble) → "Listen again" (replay) → retry → on success update heatmap; "Skip" loads next challenge.
+- [x] **Step 23**: **Rhythm Scat**: getScatForSubdivision + display above metronome in SubdivisionPyramid; fallback to Konnakol when Nano off.
+- [x] **Step 24**: **askNano guardrail**: nanoHelpers.askNano used by getEarHint and getScatForSubdivision; context re-injected; one-shot session.
 - **Success Criteria**: Ear Trainer wrong answers show AI hint (no answer); student can retry after hint. Rhythm Trainer shows scat phrase above metronome for selected subdivision. No Nano call assumes prior context.
 
 ## Phase 8: Universal Microphone Handler (App-Wide)
