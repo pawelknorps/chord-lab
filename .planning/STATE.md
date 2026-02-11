@@ -35,11 +35,6 @@
 
 ## Recent Achievements
 
-- **Reactive Comping Engine (Humanized Piano)**:
-  - Implemented `ReactiveCompingEngine` with "Virtual Room" logic: piano reacts to bass mode (Walking → sparse, TwoFeel → denser) and drum intensity (>0.8 → sparse).
-  - Pocket micro-timing (small offsets): LayBack +12ms, Tight +6ms, Push −8ms for pads, stabs, and anticipations.
-  - Template vocabulary: Red Garland (sparse), Bill Evans (sustain), Herbie (dense); stabs use shell voicing (3rd+7th), sustains use full voicing.
-  - Integrated into `useJazzBand`: full bar of piano scheduled at beat 0 via `scheduleBar()`; unit tests in ReactiveCompingEngine.test.ts.
 - **Completed Phase 11: Pro Drum Engine (DeJohnette-Style)**:
   - Implemented `DrumEngine` with "Elastic" Ride, "Chatter" Snare/Kick, and "Hi-Hat" Anchor.
   - Added collaborative dynamics: drummer listens and simplifies when piano density is high.
@@ -107,9 +102,9 @@
 - **Band integration**: useJazzBand generates full line at beat 0, plays `line[beat]` for 0–3; fallback to JazzTheoryService.getNextWalkingBassNote if line invalid.
 - **Tests**: WalkingBassEngine.test.ts (4 notes, range, Beat 1 root, Beat 4 approach, state carry).
 
-## Phase 13: Standards-Based Exercises (Scales, Guide Tones, Arpeggios) 🆕
+## Phase 13: Standards-Based Exercises (Scales, Guide Tones, Arpeggios) ✅
 
-- **Status**: Planned.
+- **Status**: Completed.
 - **Goal**: **New module inside JazzKiller**: timed exercises over the standards (scales, guide tones, arpeggios) in sync with playback and chart; support both mic and MIDI input. Same standard picker, same lead sheet, same band.
-- **Requirements**: REQ-SBE-01 (Scale exercise), REQ-SBE-02 (Guide-tone exercise), REQ-SBE-03 (Arpeggio exercise), REQ-SBE-04 (Unified mic + MIDI), REQ-SBE-05 (Exercise UI and feedback).
-- **Planning**: `.planning/phases/13-standards-exercises/PLAN.md`.
+- **Delivered**: ExerciseInputAdapter (mic/MIDI → getCurrentNote), StandardsExerciseEngine (getTargetSet + scoreNote), useStandardsExercise hook, StandardsExercisesPanel, JazzKiller integration (Exercises button, sidebar, panel). Unit tests: StandardsExerciseEngine.test.ts (8 passing).
+- **Planning**: `.planning/phases/13-standards-exercises/PLAN.md`, SUMMARY.md, VERIFICATION.md.
