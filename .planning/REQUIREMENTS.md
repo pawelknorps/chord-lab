@@ -81,9 +81,17 @@
 - **REQ-MIC-14**: **Smart mic goals**: Support (or plan) Target Practice (pitch + Tonal.js → chord tones), Drone Tuning (mic + sine reference), Lick Validation (pitch buffering), Energy Tracker (RMS → dynamics feedback).
 - **REQ-MIC-15**: **Tone Quality (v2)**: Optional: use `AnalyserNode.getByteFrequencyData()` for brightness feedback (too thin vs too harsh) for jazz sound.
 
+### ADAPTIVE-EAR: Adaptive Ear Training with MIDI-Supported AI
+*Detailed requirements: `.planning/milestones/adaptive-ear-midi-ai/REQUIREMENTS.md` (REQ-MIDI-EAR-01–04, REQ-PERF-01–03, REQ-ADAPT-01–04, REQ-AI-FOCUS-01–03, REQ-INT-01–03).*
+- **REQ-ADAPT-EAR-01**: **MIDI input**: IntervalsLevel and ChordQualitiesLevel (and applicable levels) accept MIDI input as answer; grade played notes correctly.
+- **REQ-ADAPT-EAR-02**: **Performance store**: Log per-level, per-interval/quality success/failure and error diagnoses; aggregate for profiling.
+- **REQ-ADAPT-EAR-03**: **Repeat on struggle**: When N+ mistakes on same type, repeat similar items before introducing new ones.
+- **REQ-ADAPT-EAR-04**: **Harder when ready**: When streak ≥ M and success rate > threshold, offer harder variants (wider interval set, rarer qualities).
+- **REQ-ADAPT-EAR-05**: **AI focus-area suggestion**: Pass aggregate profile to Nano; Nano returns 1–2 sentence focus suggestion; display in panel/toast without blocking.
+
 ## v2: Future Considerations (Deferred)
 - **REQ-AI-05**: Persistent User Weakness Map (Track which scales the user fails at).
-- **REQ-AI-06**: Audio-to-AI (Analyze user's incoming MIDI in real-time for mistakes).
+- **REQ-AI-06**: Audio-to-AI (Analyze user's incoming MIDI in real-time for mistakes)—*partially addressed by ADAPTIVE-EAR milestone*.
 
 ## Out of Scope
 - Real-time video/audio analysis (beyond mic for playing/clapping).

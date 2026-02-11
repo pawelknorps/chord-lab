@@ -202,6 +202,30 @@ To avoid the messiness of web-based timing, the microphone is used as a **Harmon
 
 ---
 
+## Adaptive Ear Training with MIDI-Supported AI (New Initiative)
+
+**Goal**: Improve all ear training exercises with MIDI-supported AI that learns what the student is doing wrong, proposes areas to focus on, gives more challenging questions when the student is ready, and repeats similar challenges when the student makes many mistakes.
+
+### Vision
+
+Transform the Ear Trainer from a quiz with hints (Phase 7) into an **adaptive teaching machine**:
+
+- **MIDI everywhere**: All applicable ear training levels accept MIDI keyboard input so students can *play* their answer (Intervals, ChordQualities, MelodySteps, Bass, etc.).
+- **AI learns mistakes**: Aggregate error profiles (overshoot/undershoot, common confusions like P4 vs tritone) and pass to Nano for diagnostic summaries and focus-area suggestions.
+- **Adaptive difficulty**: When success streak and rate exceed thresholds → offer harder questions. When mistake count is high → repeat similar items before introducing new ones.
+- **Propose focus areas**: AI suggests, e.g. "Focus on P4 vs Tritone—that's your weak spot" and the app can bias the curriculum accordingly.
+
+### Technical Approach
+
+- **Reuse**: MidiContext/useMidi, earDiagnosis, getEarHint, nanoHelpers.askNano (Phase 7).
+- **New**: useEarPerformanceStore (or extend useFunctionalEarTrainingStore) for per-interval/quality success/failure and error diagnosis aggregation.
+- **Adaptive logic**: Rule-based (streak, success rate, mistake count thresholds); no ML for v1.
+- **Focus-area AI**: Pass aggregate profile to Nano; Nano returns 1–2 sentence suggestion; display in panel/toast.
+
+*Detailed plan: `.planning/milestones/adaptive-ear-midi-ai/`.*
+
+---
+
 ## Out of Scope
 
 - Cloud-based LLM calls (OpenAI/Anthropic) for this milestone.

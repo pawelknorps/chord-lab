@@ -8,6 +8,10 @@
 **Status**: Complete (Phase 8) ✅
 **Goal**: App-wide mic handler; **Harmonic Mirror** first (pitch/note accuracy, "teacher that listens")—Guide Tone Spotlight, Call and Response, useAuralMirror, noise gate, Live Note indicator; rhythm grading deferred. See PROJECT.md § Universal Microphone Handler & Harmonic Mirror, REQUIREMENTS REQ-MIC-01–15, ROADMAP Phase 8.
 
+## New Initiative: Adaptive Ear Training with MIDI-Supported AI
+**Status**: Not Started (Phase 9)
+**Goal**: Improve all ear training exercises with MIDI-supported AI—learn what the student is doing wrong, propose focus areas, give harder questions when ready, repeat similar when struggling. See PROJECT.md § Adaptive Ear Training with MIDI-Supported AI, REQUIREMENTS REQ-ADAPT-EAR-01–05, milestone `.planning/milestones/adaptive-ear-midi-ai/`.
+
 ## Phase Progress
 - **Phase 1: Semantic Engine**: 100% (AiContextService, Markdown translation, Theory Bundles)
 - **Phase 2: Proactive Triggers**: 90% (Pivot detection, Struggle timer, Proactive Hook)
@@ -17,8 +21,10 @@
 - **Phase 6: Chord Lab Progression Chatbot**: 100% (progression bundle, chatbot UI, Q&A and continuations); Step 19b (Theory Agent triplet) and Phase 7 planned
 - **Phase 7: Ear Trainer Feedback Loop & Rhythm Scat**: 100% (earDiagnosis, earHintService, nanoHelpers, IntervalsLevel Listen Again UI, rhythmScatService, SubdivisionPyramid scat display) ✅
 - **Phase 8: Universal Microphone Handler & Harmonic Mirror**: 100% (MicrophoneService, useMicrophone, pitchDetection, useAuralMirror, LiveNoteIndicator, Guide Tone Spotlight, CallAndResponseDrill, BiTonal migration; clapping Step 31 deferred) ✅
+- **Phase 9: Adaptive Ear Training with MIDI-Supported AI**: 0% (MIDI in Intervals/ChordQualities, performance store, adaptive curriculum, AI focus-area suggestions) — *planned*
 
 ## Recently Completed / Updated
+- [x] **Plan – Adaptive Ear Training with MIDI-Supported AI**: New milestone `.planning/milestones/adaptive-ear-midi-ai/` (PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md). PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md updated with initiative: MIDI input in Intervals/ChordQualities; performance store and error profiling; adaptive curriculum (repeat on struggle, harder when ready); AI focus-area suggestions via Nano. Phase 9 (Steps 33–38) added to ROADMAP. REQ-ADAPT-EAR-01–05 added.
 - [x] **Phase 8 – Universal Microphone Handler & Harmonic Mirror**: MicrophoneService, useMicrophone, pitchDetection (ml5 + RMS noise gate), useAuralMirror, LiveNoteIndicator; Guide Tone Spotlight (store, GuideToneSpotlightEffect, green bar in LeadSheet, Mic toggle in JazzKiller); CallAndResponseDrill (Practice Panel, Nano tip on miss); BiTonal Sandbox migration (SingingArchitect accepts stream prop); modes/subscription doc; Step 31 clapping deferred.
 - [x] **Plan – Harmonic Mirror (Mic as "Teacher That Listens")**: PROJECT.md, REQUIREMENTS.md, ROADMAP.md updated: mic framed as Harmonic Mirror (frequency accuracy, not rhythm judge); Ignore Rhythm rule; Pitch-to-Theory Pipe (Worklet → YIN/MPM → Tonal.js); useAuralMirror hook; Guide Tone Spotlight (3rd of chord, bar lights green); Call and Response (lick playback + Nano tip on miss); Smart Implementation Table (Target Practice, Drone, Lick Validation, Energy Tracker); technical sanity (noise gate -40 dB, Live Note indicator, clarity > 90%, debounce); REQ-MIC-07–15; Phase 8 Steps 26–32 expanded.
 - [x] **Phase 7 – Ear Trainer Feedback Loop & Rhythm Scat**: earDiagnosis.ts (diagnoseEarError); nanoHelpers.ts (askNano); earHintService.ts (getEarHint); IntervalsLevel Listen Again UI (wrong → "Not quite" + AI hint, Listen again, Skip); rhythmScatService.ts (getScatForSubdivision); SubdivisionPyramid scat phrase above metronome. All Nano calls use askNano with context re-injection.
@@ -38,6 +44,7 @@
 ## Currently Working On
 - **Focus**: Make the Chord Lab AI assistant work—verify end-to-end flow (open Smart Lesson → Progression Assistant chat → ask about progression → get answer); improve discoverability if needed; fix any bugs (e.g. chord format, LocalAgentService init); ensure clear UX (loading, errors, Nano banner).
 - Phase 5 (AI Drill Actions) deferred; Phase 4, Phase 6, and Phase 7 complete. Step 19b (Theory Agent triplet) remains for Phase 6 refinement when prioritized.
+- **Phase 9 (Adaptive Ear Training)**: Planning complete; run `/gsd-plan-phase 9` when ready to execute.
 
 ## Blockers
 - None.

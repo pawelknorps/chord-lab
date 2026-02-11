@@ -66,3 +66,13 @@
 - [ ] **Step 31**: **Clapping analysis** (secondary): Beat/onset and tempo from mic for modules that need it (e.g. Rhythm Architect).
 - [x] **Step 32**: **Migration and integration**: Migrate BiTonal Sandbox to shared mic service; at least one other module uses handler (Guide Tone or Call & Response).
 - **Success Criteria**: One mic permission and one stream; Harmonic Mirror in use (Guide Tone or Call & Response); Live Note indicator and noise gate; "Ignore Rhythm" UX; playing yields pitch/notes validated by Tonal.js; optional clapping yields beat/tempo.
+
+## Phase 9: Adaptive Ear Training with MIDI-Supported AI
+*Goal: All applicable ear training exercises accept MIDI; AI learns mistakes and drives adaptive difficulty (harder when ready, repeat when struggling). See `.planning/milestones/adaptive-ear-midi-ai/`.*
+- [ ] **Step 33**: **MIDI input**: Add useMidi to IntervalsLevel and ChordQualitiesLevel; grade played notes as answer (reuse MelodyStepsLevel pattern).
+- [ ] **Step 34**: **Performance store**: Create useEarPerformanceStore; record per-level, per-interval/quality success/failure and diagnosis (errorType, distance, isCommonConfusion).
+- [ ] **Step 35**: **Repeat on struggle**: When N+ mistakes on same type, repeat similar items before new ones.
+- [ ] **Step 36**: **Harder when ready**: When streak ≥ M and success rate > threshold, offer harder variants.
+- [ ] **Step 37**: **AI focus-area suggestion**: getFocusAreaSuggestion(profile) via askNano; display in panel/toast.
+- [ ] **Step 38**: **Extend levels** (optional): BassLevel, HarmonicContextLevel MIDI where applicable.
+- **Success Criteria**: Intervals and ChordQualities accept MIDI; curriculum adapts (repeat when struggling, harder when ready); AI suggests focus areas from error profile.
