@@ -22,6 +22,7 @@ import { AiAssistantSidebar } from '../AiAssistantSidebar';
 import { GlobalSettings } from '../shared/GlobalSettings';
 import { useTranslation } from 'react-i18next';
 import { setLanguage } from '../../utils/i18n';
+import { useProfile } from '../../hooks/useProfile';
 
 const Dashboard: React.FC = () => {
     const [collapsed, setCollapsed] = useState(false);
@@ -29,6 +30,7 @@ const Dashboard: React.FC = () => {
     const location = useLocation();
     const { isReady } = useAudio();
     const { i18n } = useTranslation();
+    const profile = useProfile();
 
     // Auto-collapse on small screens
     useEffect(() => {
@@ -87,7 +89,10 @@ const Dashboard: React.FC = () => {
             items: [
                 { to: "/midi-library", icon: Library, label: "MIDI Library" },
             ]
-        }
+        },
+        ...(profile?.role === 'teacher'
+            ? [{ title: "Teacher", items: [{ to: "/teacher-dashboard", icon: Layout, label: "Dashboard" }] }]
+            : [])
     ];
 
     return (
