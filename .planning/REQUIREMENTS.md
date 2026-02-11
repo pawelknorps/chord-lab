@@ -82,6 +82,83 @@
 ### REQ-PL-04: Launch Readiness
 - **Requirement**: Error boundaries, clear offline/error messaging, and minimal deploy/support runbook.
 
+## Phase 7: Advanced Piano Engine
+
+### REQ-APE-01: Voice-Leading Engine
+
+- **Requirement**: Implement a stateful engine that selects the best voicing (Type A or B) based on the previous chord to minimize movement.
+- **Metric**: Use "Taxi Cab" distance (Manhattan distance) to score candidates.
+
+### REQ-APE-02: Chord DNA Model
+
+- **Requirement**: Expand chord parsing to identify "Guide Tones" (3rd, 7th) and extensions/alterations (9, 13, b9, #9, b13) suitable for rootless jazz voicings.
+
+### REQ-APE-03: Register Management (Soprano Anchor)
+
+- **Requirement**: Implement a penalty system for voicings exceeding a defined top range (e.g., G5) to prevent octaves from drifting upwards during transitions.
+
+### REQ-APE-04: Tritone Substitution
+
+- **Requirement**: Allow the engine to optionally substitute a dominant chord with its tritone substitute if it results in significantly smoother voice leading or desired tension.
+
+## Phase 8: Advanced Rhythm Engine
+
+### REQ-ARE-01: BPM-Aware Pattern Selection
+
+- **Requirement**: Implement a selection logic that favors specific rhythmic patterns based on BPM zones (Slow < 110, Medium 110-190, Fast > 190).
+- **Patterns**: Include Charleston, RedGarland, Pedal (Sustain), Anticipation (Push), and SparseStab.
+
+### REQ-ARE-02: Dynamic Articulation Control
+
+- **Requirement**: Automatically adjust note duration based on BPM (e.g., 16n staccato at > 180 BPM, 4n legato at < 120 BPM).
+- **Goal**: Maintain clarity and prevent muddiness at high tempos.
+
+### REQ-ARE-03: Energy-Driven Rhythmic Bias
+
+- **Requirement**: Use the "Energy" or "Tension" parameter to bias rhythmic density (e.g., high energy boosts Anticipation and RedGarland).
+
+### REQ-ARE-04: Implementation Architecture
+
+- **Requirement**: Create a standalone `RhythmEngine` class to encapsulate pattern definitions, probability weights, and articulation logic.
+
+## Phase 9: Mic Algorithm Upgrade (Stabilization & CREPE-Ready)
+
+### REQ-MA-01: Pitch Stabilization (Confidence + Median + Hysteresis)
+
+- **Requirement**: Apply state-space post-processing to raw pitch: (1) confidence gate—if confidence < 0.85, hold last stable pitch; (2) running median over 5 frames to reject outliers and octave spikes; (3) hysteresis—update reported pitch only if change exceeds 20 cents to prevent vibrato/flicker.
+- **Location**: CrepeStabilizer (TS for tests) and inline equivalent in Audio Worklet (pitch-processor.js) so SAB receives stabilized values.
+
+### REQ-MA-02: Worklet Writes Stabilized Pitch
+
+- **Requirement**: The Audio Worklet writes stabilized frequency and confidence to SharedArrayBuffer; all consumers (usePitchTracker, useITMPitchStore) read smooth values with zero main-thread pitch math.
+
+### REQ-MA-03: Frequency-to-Note and Perfect Intonation
+
+- **Requirement**: Map stabilized frequency to note name (Tonal.js) and cents deviation from equal temperament. If |centsDeviation| ≤ 10, expose "perfect intonation" for UI (e.g. green indicator).
+
+### REQ-MA-04: Jazz Instrument Presets
+
+- **Requirement**: Optional frequency clamping per instrument (Double Bass 30–400 Hz, Trumpet 160–1100, Sax 100–900, Guitar 80–1000, Voice 80–1200) to reject impossible values and room noise.
+
+### REQ-MA-05: Optional Center-of-Gravity and Viterbi
+
+- **Requirement**: (Enhancement) In detector, use weighted argmax (sum(prob_i * freq_i) / sum(prob_i)) to reduce octave jumps. Document Viterbi decoding over CREPE activation matrix as future enhancement when CREPE-WASM is integrated.
+
+## Phase 10: State-Machine Rhythmic Phrasing
+
+### REQ-SMR-01: Repetition Penalty System
+
+- **Requirement**: Implement a stateful tracking of the previous pattern to penalize immediate repetition (0.2x weight multiplier).
+- **Goal**: Force the engine to "phrase" by exploring different rhythmic options consecutively.
+
+### REQ-SMR-02: Pattern-Specific Resilience
+
+- **Requirement**: Allow "Pedal" (sustained) patterns to repeat with a lighter penalty (0.8x) to simulate common jazz "pads" or breathing moments.
+
+### REQ-SMR-03: Stateful Weighted Selection
+
+- **Requirement**: The selection logic must combine BPM zones, energy bias, and the repetition penalty into a single probability matrix per measure.
+
 ## Technical Priorities
 1. **High**: Pitch-to-Theory Sync (Turns app from book into teacher).
 2. **Medium**: Gemini Nano Hint Loop (Ear training "AHA!" moments).

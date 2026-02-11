@@ -2,13 +2,26 @@
 
 ## Current Status
 
-- **Phase**: Phase 6: Polish, Analytics & Launch
-- **Status**: ✅ Phase 5 complete
-- **Next Milestone**: Phase 6: Polish, Analytics & Launch
-- **Overall Progress**: ~80%
+- **Phase**: Phase 7: Advanced Piano Engine
+- **Status**: 🟢 Initializing Phase 7
+- **Next Milestone**: Advanced Piano Engine (Voice Leading + Taxi Cab)
+- **Overall Progress**: ~75%
 
 ## Active Requirements
 
+- [ ] REQ-MA-01: Pitch Stabilization (Confidence + Median + Hysteresis)
+- [ ] REQ-MA-02: Worklet Writes Stabilized Pitch
+- [ ] REQ-MA-03: Frequency-to-Note and Perfect Intonation
+- [ ] REQ-MA-04: Jazz Instrument Presets
+- [ ] REQ-MA-05: Optional Center-of-Gravity / Viterbi (doc)
+- [ ] REQ-SMR-01: Repetition Penalty System
+- [ ] REQ-SMR-02: Pattern-Specific Resilience
+- [ ] REQ-SMR-03: Stateful Weighted Selection
+- [ ] REQ-ARE-01: BPM-Aware Pattern Selection
+- [ ] REQ-APE-01: Voice-Leading Engine
+- [ ] REQ-APE-02: Chord DNA Model
+- [ ] REQ-APE-03: Register Management (Soprano Anchor)
+- [ ] REQ-APE-04: Tritone Substitution
 - [✅] REQ-FB-01: Guided Practice Sessions
 - [✅] REQ-FB-02: Active Scoring Logic
 - [✅] REQ-FB-03: Nano-Powered Critique
@@ -55,3 +68,8 @@
 - **AI detection**: checkAiAvailability() and isAiApiPresent(); navigator.languageModel checked first (Chrome canary); jazzTeacherLogic and nanoHelpers aligned.
 - **Chord analysis**: Functional decomposition (detectJazzChordByProfile) + CHORD_PC_TEMPLATES; Emaj7#5 and jazz alterations covered.
 - **Automated tests**: PitchMemory.test.ts, aiDetection (incl. isAiApiPresent), chordDetection (48 tests passing).
+
+## Phase 9: Mic Algorithm Upgrade (planned)
+
+- **Scope**: CrepeStabilizer (confidence gate, running median, hysteresis); in-worklet stabilization; usePitchTracker/ITM consume stabilized SAB; frequencyToNote + perfect intonation (±10 cents); jazz instrument presets (frequency clamping); tests.
+- **Planning**: `.planning/phases/09-mic-algorithm-upgrade/PLAN.md`, RESEARCH.md. ROADMAP and REQUIREMENTS updated (REQ-MA-01–REQ-MA-05).
