@@ -23,7 +23,9 @@ import { useMusicalClipboard } from '../../core/state/musicalClipboard';
 import { audioManager } from '../../core/services';
 import { useAudioCleanup } from '../../hooks/useAudioManager';
 import { SmartLessonPane } from './components/SmartLessonPane';
+import { WorkbenchAiPanel } from '../../components/WorkbenchAiPanel';
 import { useSettingsStore } from '../../core/store/useSettingsStore';
+import { Sparkles } from 'lucide-react';
 import * as Tone from 'tone';
 
 const MAX_PROGRESSION_LENGTH = 16;
@@ -44,6 +46,7 @@ function ChordLab() {
   const [bpm, setBpm] = useState(80);
   const [selectedLessonTitle, setSelectedLessonTitle] = useState<string | null>(null);
   const [buildingNotes, setBuildingNotes] = useState<number[]>([]);
+  const [showWorkbenchAi, setShowWorkbenchAi] = useState(false);
 
   // Chord detection for builder (uses true root + inversion/slash when applicable, key-aware enharmonics)
   const detectChord = useCallback((notes: number[]): { root: string; quality: string; bass?: string } | null => {
@@ -132,6 +135,17 @@ function ChordLab() {
     setProgression((prev) => {
       const newProg = [...prev];
       newProg[index] = null;
+      return newProg;
+    });
+  }, []);
+
+  const handleMoveChord = useCallback((fromIndex: number, toIndex: number) => {
+    if (fromIndex === toIndex) return;
+    setProgression((prev) => {
+      const newProg = [...prev];
+      const temp = newProg[fromIndex];
+      newProg[fromIndex] = newProg[toIndex];
+      newProg[toIndex] = temp;
       return newProg;
     });
   }, []);
@@ -676,7 +690,7 @@ function ChordLab() {
   const currentChord = playingIndex !== null ? progression[playingIndex] : null;
 
   return (
-    <div className="min-h-screen p-4 md:p-8 relative">
+    <div className="min-h-screen min-w-0 w-full max-w-full p-4 md:p-8 relative">
       <div className="max-w-screen-2xl mx-auto space-y-6 pb-20 px-4 md:px-6">
         {/* Header */}
         <header className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
@@ -693,6 +707,14 @@ function ChordLab() {
           {/* <LanguageSelector value={i18n.language} onChange={setLanguage} /> */}
         </header>
 
+        {/* Workbench AI Assistant panel */}
+        <WorkbenchAiPanel
+          open={showWorkbenchAi}
+          onClose={() => setShowWorkbenchAi(false)}
+          progressionChords={progression.filter((c): c is ChordInfo => c !== null).map(c => `${c.root}${c.quality === 'maj' ? '' : c.quality === 'min' ? 'm' : c.quality}${c.bass ? '/' + c.bass : ''}`)}
+          key={selectedKey}
+          scale={selectedScale}
+        />
         {selectedLessonTitle && (
           <SmartLessonPane
             songTitle={selectedLessonTitle}
@@ -727,6 +749,19 @@ function ChordLab() {
               useSettingsStore.getState().setFretboard(false);
             }}
           />
+        )}
+
+        {/* Workbench AI Assistant FAB - hidden when panel is open */}
+        {!showWorkbenchAi && (
+          <button
+            onClick={() => setShowWorkbenchAi(true)}
+            className="fixed bottom-6 right-6 z-30 p-4 rounded-2xl bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white shadow-lg shadow-black/20 hover:shadow-xl hover:scale-105 transition-all flex items-center gap-2 font-bold text-sm"
+            aria-label="Open AI Assistant"
+            title="Ask AI about your progression"
+          >
+            <Sparkles size={20} />
+            <span className="hidden sm:inline">Ask AI</span>
+          </button>
         )}
 
         {/* MIDI Detection UI floating or integrated */}
@@ -783,6 +818,7 @@ function ChordLab() {
           onExportMidi={handleExportMidi}
           onSlotClick={handleSlotClick}
           onRemoveChord={handleRemoveChord}
+          onMoveChord={handleMoveChord}
           onClearProgression={handleClearProgression}
           onAddStructureChord={(chord) => {
             setProgression((prev) => {

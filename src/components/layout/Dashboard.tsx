@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { useAudio } from '../../context/AudioContext';
 import { MidiSettings } from '../MidiSettings';
+import { AiAssistantSidebar } from '../AiAssistantSidebar';
 import { GlobalSettings } from '../shared/GlobalSettings';
 import { useTranslation } from 'react-i18next';
 import { setLanguage } from '../../utils/i18n';
@@ -174,9 +175,13 @@ const Dashboard: React.FC = () => {
                     ))}
                 </nav>
 
-                {/* Footer Controls */}
                 <div className="p-3 border-t border-[var(--border-subtle)] bg-[var(--bg-panel)]">
-                    {!collapsed && <MidiSettings />}
+                    {!collapsed && (
+                        <>
+                            <AiAssistantSidebar />
+                            <MidiSettings />
+                        </>
+                    )}
 
                     {/* Language Switcher */}
                     <div className={`mt-2 flex items-center ${collapsed ? 'justify-center' : 'justify-start gap-2'}`}>
@@ -217,7 +222,7 @@ const Dashboard: React.FC = () => {
             </aside>
 
             {/* Main Content */}
-            <main className="flex-1 flex flex-col bg-[var(--bg-app)] relative overflow-hidden">
+            <main className="flex-1 min-w-0 flex flex-col bg-[var(--bg-app)] relative overflow-hidden">
                 {/* Mobile Menu Button */}
                 <button
                     onClick={() => setMobileOpen(true)}
@@ -228,7 +233,7 @@ const Dashboard: React.FC = () => {
                 </button>
 
                 <GlobalSettings />
-                <div className="flex-1 overflow-auto p-0">
+                <div className="flex-1 min-w-0 overflow-auto p-0">
                     <Outlet />
                 </div>
             </main>
