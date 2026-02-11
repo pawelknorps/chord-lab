@@ -37,6 +37,12 @@ Transition from a music theory prototype to a full-scale "Incredible Teaching Ma
 - **Goal**: Teacher-student synchronization and community lick sharing.
 - **Tech**: Supabase for progress tracking, PWA for offline/mobile use.
 
+### 5. Walking Bass Engine (Target & Approach)
+
+- **Concept**: Teleological walking bass—every bar asks "Where is the next chord, and how do I get there smoothly?"
+- **Goal**: Beat 4 as chromatic or dominant approach into the next bar’s root; Beat 1 anchor, Beats 2–3 bridge.
+- **Tech**: WalkingBassEngine (tonal.js), 4-note line per bar, E1–G3 range.
+
 ## Key Decisions
 
 | Decision | Rationale | Status |
@@ -47,6 +53,7 @@ Transition from a music theory prototype to a full-scale "Incredible Teaching Ma
 | **Pitchy v3 / CREPE** | Use McLeod or Neural Pitch detection for jazz-proof overtone handling. | [Decided] |
 | **Audio Worklets** | Decouple pitch math from the UI thread using SharedArrayBuffer for 120Hz smoothness. | [Decided] |
 | **Supabase for Backend** | Reliable, real-time database for teacher dashboards and lick sharing. | [Proposed] |
+| **Template-Based Comping** | Switch from mathematical voicing generation to Grip-Libraries and Phrase-Templates for musicality. | [Decided] |
 
 ## Out of Scope
 

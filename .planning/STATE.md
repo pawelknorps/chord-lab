@@ -94,3 +94,10 @@
 
 - **Scope**: CrepeStabilizer (confidence gate, running median, hysteresis); in-worklet stabilization; usePitchTracker/ITM consume stabilized SAB; frequencyToNote + perfect intonation (±10 cents); jazz instrument presets (frequency clamping); tests.
 - **Planning**: `.planning/phases/09-mic-algorithm-upgrade/PLAN.md`, RESEARCH.md. ROADMAP and REQUIREMENTS updated (REQ-MA-01–REQ-MA-05).
+
+## Phase 12: Walking Bass Engine (Target & Approach)
+
+- **Status**: Implemented.
+- **WalkingBassEngine**: 4-beat strategy (Anchor → Bridge → Bridge → Approach); Beat 4 chromatic or 5th-of-destination; E1–G3 range; tonal.js Chord/Note.
+- **Band integration**: useJazzBand generates full line at beat 0, plays `line[beat]` for 0–3; fallback to JazzTheoryService.getNextWalkingBassNote if line invalid.
+- **Tests**: WalkingBassEngine.test.ts (4 notes, range, Beat 1 root, Beat 4 approach, state carry).

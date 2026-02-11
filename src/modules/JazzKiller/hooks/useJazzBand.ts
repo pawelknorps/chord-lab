@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import * as Tone from 'tone';
 import { JazzTheoryService, JazzVoicingType } from '../utils/JazzTheoryService';
-import { CompingEngine, RhythmEngine, type RhythmPattern, DrumEngine, type DrumHit } from '../../../core/theory';
+import { CompingEngine, RhythmEngine, type RhythmPattern, DrumEngine, type DrumHit, GrooveManager, WalkingBassEngine } from '../../../core/theory';
 import {
     currentMeasureIndexSignal,
     currentBeatSignal,
@@ -26,6 +26,11 @@ import {
 import { Signal } from "@preact/signals-react";
 import { playGuideChord, isAudioReady, initAudio as initGlobalAudio } from '../../../core/audio/globalAudio';
 import { getDirectorInstrument } from '../../../core/audio/directorInstrumentSignal';
+
+/** Probability (0–1) that piano comping plays voicings one octave lower for a warmer, lower register. */
+const PIANO_LOWER_VOICING_PROBABILITY = 0.25;
+/** Minimum MIDI note when shifting voicings down (C2); keeps comping above bass range. */
+const PIANO_LOWER_VOICING_MIN_MIDI = 36;
 
 interface JazzPlaybackState {
     isPlayingSignal: Signal<boolean>;
@@ -60,8 +65,11 @@ export const useJazzBand = (song: any, isActive: boolean = true): JazzPlaybackSt
     const compingEngineRef = useRef<CompingEngine>(new CompingEngine());
     const rhythmEngineRef = useRef<RhythmEngine>(new RhythmEngine());
     const drumEngineRef = useRef<DrumEngine>(new DrumEngine());
+    const grooveRef = useRef<GrooveManager>(new GrooveManager());
     const currentPatternRef = useRef<RhythmPattern | null>(null);
     const currentDrumHitsRef = useRef<DrumHit[]>([]);
+    const walkingBassEngineRef = useRef<WalkingBassEngine>(new WalkingBassEngine());
+    const walkingLineRef = useRef<number[]>([]);
 
     useEffect(() => {
         const checkLoaded = () => { if (pianoRef.current?.loaded && bassRef.current?.loaded && drumsRef.current?.ride.loaded) isLoadedSignal.value = true; };
@@ -179,22 +187,33 @@ export const useJazzBand = (song: any, isActive: boolean = true): JazzPlaybackSt
             tensionCycleRef.current = (bar * 4 + beat) / 16;
             const currentTension = 0.5 + Math.sin(tensionCycleRef.current) * 0.3 + (activityLevelSignal.value * 0.2);
             const activity = activityLevelSignal.value;
+            const bpm = bpmSignal.value;
 
             // Voicing type follows tension + activity (increasing intensity/reactivity of the band)
             voicingTypeRef.current = JazzTheoryService.getNextLogicalVoicingType(voicingTypeRef.current, activity, currentTension, currentTension > 0.6);
 
-            // BASS: one note per quarter (loop runs every 4n = walking bass)
+            // BASS: Target & Approach (Phase 12) — 4-note line per bar, Beat 4 approaches next chord
             if (currentChord && bassRef.current?.loaded) {
-                const bassNote = JazzTheoryService.getNextWalkingBassNote(beat, currentChord, nextChord || null, lastBassNoteRef.current, currentTension);
+                if (beat === 0) {
+                    walkingBassEngineRef.current.setLastNoteMidi(lastBassNoteRef.current);
+                    walkingLineRef.current = walkingBassEngineRef.current.generateWalkingLine(
+                        currentChord,
+                        nextChord?.trim() || currentChord
+                    );
+                }
+                const line = walkingLineRef.current;
+                const bassNote = Array.isArray(line) && line.length === 4 ? line[beat] : JazzTheoryService.getNextWalkingBassNote(beat, currentChord, nextChord || null, lastBassNoteRef.current, currentTension);
                 const safeBass = Number.isFinite(bassNote) ? bassNote : lastBassNoteRef.current;
                 lastBassNoteRef.current = safeBass;
                 const vel = 0.7 + currentTension * 0.2;
-                bassRef.current.triggerAttackRelease(Tone.Frequency(safeBass, "midi").toNote(), "4n", time, vel);
+                const bassTiming = grooveRef.current.getMicroTiming(bpm, "Bass");
+                const sampleLatencyCompensation = -0.010;
+                const bassTime = time + bassTiming + sampleLatencyCompensation;
+                bassRef.current.triggerAttackRelease(Tone.Frequency(safeBass, "midi").toNote(), "4n", bassTime, vel);
                 onNoteRef.current?.({ midi: safeBass, velocity: vel, instrument: 'bass', type: 'root', duration: 1 });
             }
 
             // PIANO PRO: Phrase-Based Template Engine (Phase 11)
-            const bpm = bpmSignal.value;
 
             // 1. Select 1-bar phrase definitions at the start of each bar
             if (beat === 0) {
@@ -227,9 +246,16 @@ export const useJazzBand = (song: any, isActive: boolean = true): JazzPlaybackSt
                     const targetChord = (currentStep && currentStep.isAnticipation && nextChord) ? nextChord : currentChord;
 
                     // 4. Harmony Solution: Pro Grip Dictionary + Pivot Rule
-                    const voicing = compingEngineRef.current.getNextVoicing(targetChord, {
+                    let voicing = compingEngineRef.current.getNextVoicing(targetChord, {
                         addRoot: bassMutedSignal.value
                     });
+
+                    // With a fixed probability, play this voicing one octave lower for variety
+                    if (voicing.length > 0 && Math.random() < PIANO_LOWER_VOICING_PROBABILITY) {
+                        const shifted = voicing.map(m => m - 12);
+                        const lowest = Math.min(...shifted);
+                        if (lowest >= PIANO_LOWER_VOICING_MIN_MIDI) voicing = shifted;
+                    }
 
                     if (voicing.length > 0) {
                         lastVoicingRef.current = voicing;
@@ -263,7 +289,7 @@ export const useJazzBand = (song: any, isActive: boolean = true): JazzPlaybackSt
                 });
 
                 hitsForBeat.forEach(hit => {
-                    const microTiming = drumEngineRef.current.getMicroTiming(hit.instrument);
+                    const microTiming = drumEngineRef.current.getMicroTiming(bpm, hit.instrument);
                     const sixteenthOffset = hit.time.split(':')[2];
                     const offsetTime = Tone.Time(`0:0:${sixteenthOffset}`).toSeconds();
                     const scheduleTime = time + offsetTime + microTiming;
@@ -285,7 +311,7 @@ export const useJazzBand = (song: any, isActive: boolean = true): JazzPlaybackSt
 
         loop.start(0);
         return () => { loop.dispose(); };
-    }, [isActive, song, activityLevelSignal.value]);
+    }, [isActive, song]);
 
     const togglePlayback = async () => {
         if (isPlayingSignal.value) {

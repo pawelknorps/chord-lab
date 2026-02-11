@@ -4,7 +4,9 @@ import { getChordDna, getChordDnaIntervals, getChordToneLabelMap, type ChordDnaR
 import { CompingEngine, type Voicing } from './CompingEngine';
 import { RhythmEngine, type RhythmPattern, type RhythmTemplateName } from './RhythmEngine';
 import { DrumEngine, type DrumHit, type DrumInstrument } from './DrumEngine';
-export { getChordDna, getChordDnaIntervals, getChordToneLabelMap, type ChordDnaResult, CompingEngine, type Voicing, RhythmEngine, type RhythmPattern, type RhythmTemplateName, DrumEngine, type DrumHit, type DrumInstrument };
+import { GrooveManager, type GrooveInstrument } from './GrooveManager';
+import { WalkingBassEngine } from './WalkingBassEngine';
+export { getChordDna, getChordDnaIntervals, getChordToneLabelMap, type ChordDnaResult, CompingEngine, type Voicing, RhythmEngine, type RhythmPattern, type RhythmTemplateName, DrumEngine, type DrumHit, type DrumInstrument, GrooveManager, type GrooveInstrument, WalkingBassEngine };
 
 export const NOTE_NAMES = ENHARMONIC_NOTE_NAMES;
 export const NOTE_NAMES_FLAT = ENHARMONIC_NOTE_NAMES_FLAT;

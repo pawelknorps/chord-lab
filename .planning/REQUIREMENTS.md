@@ -159,6 +159,47 @@
 
 - **Requirement**: The selection logic must combine BPM zones, energy bias, and the repetition penalty into a single probability matrix per measure.
 
+## Phase 11: Pro Comping Engine (Templates & Grips)
+
+### REQ-PRO-01: Grip Dictionary Harmony
+
+- **Requirement**: Replace mathematical voicing generation with a pre-curated "Grip Dictionary" (offsets relative to Root).
+- **Categories**: Major7, Minor7, Dominant7, Altered Dominant, Half-Diminished.
+- **Forms**: Support "A Form" and "B Form" for each chord type.
+
+### REQ-PRO-02: Phrase Template Rhythm
+
+- **Requirement**: Replace 1-bar random hits with 2-bar "Phrase Templates" (Standard, Sustain, Driving).
+- **Goal**: Create consistent grooves that repeat and resolve like a real musician.
+
+### REQ-PRO-03: Rhythmic Anticipation (The "Push")
+
+- **Requirement**: Implement "And of 4" anticipation. The engine must peek at the next chord and play its voicing early if the template calls for an anticipation hit.
+
+### REQ-PRO-04: Bass-Assist Integration
+
+- **Requirement**: If the "Bass" track is muted, the piano engine must automatically prepend the Root note (transposed down) to its voicings to maintain harmonic clarity.
+
+### REQ-PRO-05: Pivot Rule Normalization
+
+- **Requirement**: Switch between A/B voicing forms based on proximity to a "Range Center" (Middle C) or the previous voicing to prevent erratic jumping.
+
+## Phase 12: Walking Bass Engine (Target & Approach)
+
+### REQ-WB-01: 4-Beat Strategy (Anchor, Direction, Pivot, Approach)
+
+- **Requirement**: Generate a 4-note walking line per bar: Beat 1 = anchor (root/nearest chord tone); Beat 4 = approach note to next chord’s root (chromatic or dominant); Beats 2–3 = bridge notes (chord tones or scale steps between Beat 1 and Beat 4).
+- **Goal**: "Pro" feel via Beat 4 leading into the next bar (chromatic upper/lower or 5th-of-destination).
+
+### REQ-WB-02: WalkingBassEngine Class
+
+- **Requirement**: Standalone engine using tonal.js (Chord, Note) with `generateWalkingLine(currentChordSymbol, nextChordSymbol)` returning `number[]` (4 MIDI notes), stateful `lastNoteMidi` for continuity.
+- **Constraints**: E1 (28)–G3 (55) range; constrain notes that fall outside.
+
+### REQ-WB-03: Band Integration
+
+- **Requirement**: JazzKiller band (useJazzBand) uses the engine per bar: at beat 0 generate full line, cache, and play `line[beat]` for beats 0–3; last note of line updates state for next bar.
+
 ## Technical Priorities
 1. **High**: Pitch-to-Theory Sync (Turns app from book into teacher).
 2. **Medium**: Gemini Nano Hint Loop (Ear training "AHA!" moments).
