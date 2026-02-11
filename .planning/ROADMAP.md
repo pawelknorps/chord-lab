@@ -74,12 +74,12 @@
 - [ ] **Step 10d**: Audit remaining exercises: ChordBuildr, BiTonalSandbox, GripSequencer, Tonnetz, NegativeMirror, BarryHarris, RhythmArchitect, FunctionalEarTraining, CircleChords, MidiLibrary, ProgressionsPage; fix horizontal scroll and overflow.
 - **Success Criteria**: No horizontal scroll at 375px and 320px; Workbench and Standards are fully usable on mobile; all modules pass REQ-RESP-01–05.
 
-## Phase 9: Adaptive Ear Training with MIDI-Supported AI
+## Phase 9: Adaptive Ear Training with MIDI-Supported AI ✅
 *Goal: All applicable ear training exercises accept MIDI; AI learns mistakes and drives adaptive difficulty (harder when ready, repeat when struggling). See `.planning/milestones/adaptive-ear-midi-ai/`.*
-- [ ] **Step 33**: **MIDI input**: Add useMidi to IntervalsLevel and ChordQualitiesLevel; grade played notes as answer (reuse MelodyStepsLevel pattern).
-- [ ] **Step 34**: **Performance store**: Create useEarPerformanceStore; record per-level, per-interval/quality success/failure and diagnosis (errorType, distance, isCommonConfusion).
-- [ ] **Step 35**: **Repeat on struggle**: When N+ mistakes on same type, repeat similar items before new ones.
-- [ ] **Step 36**: **Harder when ready**: When streak ≥ M and success rate > threshold, offer harder variants.
-- [ ] **Step 37**: **AI focus-area suggestion**: getFocusAreaSuggestion(profile) via askNano; display in panel/toast.
+- [x] **Step 33**: **MIDI input**: Add useMidi to IntervalsLevel and ChordQualitiesLevel; grade played notes as answer (reuse MelodyStepsLevel pattern).
+- [x] **Step 34**: **Performance store**: Create useEarPerformanceStore; record per-level, per-interval/quality success/failure and diagnosis (errorType, distance, isCommonConfusion).
+- [x] **Step 35**: **Repeat on struggle**: When N+ mistakes on same type, repeat similar items before new ones.
+- [x] **Step 36**: **Harder when ready**: When streak ≥ M and success rate > threshold, offer harder variants.
+- [x] **Step 37**: **AI focus-area suggestion**: getFocusAreaSuggestion(profile) via askNano; display in panel/toast.
 - [ ] **Step 38**: **Extend levels** (optional): BassLevel, HarmonicContextLevel MIDI where applicable.
 - **Success Criteria**: Intervals and ChordQualities accept MIDI; curriculum adapts (repeat when struggling, harder when ready); AI suggests focus areas from error profile.
