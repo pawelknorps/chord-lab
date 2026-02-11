@@ -2,11 +2,12 @@ import { spellPitchClassInKey as spellPitchClassInKeyFromEnharmonic, NOTE_NAMES 
 export * from './analysis';
 import { getChordDna, getChordDnaIntervals, getChordToneLabelMap, type ChordDnaResult } from './ChordDna';
 import { CompingEngine, type Voicing } from './CompingEngine';
-import { RhythmEngine, type RhythmPattern, type RhythmTemplateName } from './RhythmEngine';
+import { RhythmEngine, type RhythmPattern, type RhythmPatternOptions, type RhythmTemplateName } from './RhythmEngine';
 import { DrumEngine, type DrumHit, type DrumInstrument } from './DrumEngine';
 import { GrooveManager, type GrooveInstrument } from './GrooveManager';
 import { WalkingBassEngine } from './WalkingBassEngine';
-export { getChordDna, getChordDnaIntervals, getChordToneLabelMap, type ChordDnaResult, CompingEngine, type Voicing, RhythmEngine, type RhythmPattern, type RhythmTemplateName, DrumEngine, type DrumHit, type DrumInstrument, GrooveManager, type GrooveInstrument, WalkingBassEngine };
+import { ReactiveCompingEngine, type CompingHit, type BassMode } from './ReactiveCompingEngine';
+export { getChordDna, getChordDnaIntervals, getChordToneLabelMap, type ChordDnaResult, CompingEngine, type Voicing, RhythmEngine, type RhythmPattern, type RhythmPatternOptions, type RhythmTemplateName, DrumEngine, type DrumHit, type DrumInstrument, GrooveManager, type GrooveInstrument, WalkingBassEngine, ReactiveCompingEngine, type CompingHit, type BassMode };
 
 export const NOTE_NAMES = ENHARMONIC_NOTE_NAMES;
 export const NOTE_NAMES_FLAT = ENHARMONIC_NOTE_NAMES_FLAT;

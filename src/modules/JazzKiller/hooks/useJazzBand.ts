@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import * as Tone from 'tone';
 import { JazzTheoryService, JazzVoicingType } from '../utils/JazzTheoryService';
-import { CompingEngine, RhythmEngine, type RhythmPattern, DrumEngine, type DrumHit, GrooveManager, WalkingBassEngine } from '../../../core/theory';
+import { CompingEngine, RhythmEngine, type RhythmPattern, DrumEngine, type DrumHit, GrooveManager, WalkingBassEngine, ReactiveCompingEngine } from '../../../core/theory';
 import {
     currentMeasureIndexSignal,
     currentBeatSignal,
@@ -26,11 +26,6 @@ import {
 import { Signal } from "@preact/signals-react";
 import { playGuideChord, isAudioReady, initAudio as initGlobalAudio } from '../../../core/audio/globalAudio';
 import { getDirectorInstrument } from '../../../core/audio/directorInstrumentSignal';
-
-/** Probability (0–1) that piano comping plays voicings one octave lower for a warmer, lower register. */
-const PIANO_LOWER_VOICING_PROBABILITY = 0.25;
-/** Minimum MIDI note when shifting voicings down (C2); keeps comping above bass range. */
-const PIANO_LOWER_VOICING_MIN_MIDI = 36;
 
 interface JazzPlaybackState {
     isPlayingSignal: Signal<boolean>;
@@ -70,6 +65,7 @@ export const useJazzBand = (song: any, isActive: boolean = true): JazzPlaybackSt
     const currentDrumHitsRef = useRef<DrumHit[]>([]);
     const walkingBassEngineRef = useRef<WalkingBassEngine>(new WalkingBassEngine());
     const walkingLineRef = useRef<number[]>([]);
+    const reactiveCompingRef = useRef<ReactiveCompingEngine>(new ReactiveCompingEngine());
 
     useEffect(() => {
         const checkLoaded = () => { if (pianoRef.current?.loaded && bassRef.current?.loaded && drumsRef.current?.ride.loaded) isLoadedSignal.value = true; };
@@ -214,71 +210,36 @@ export const useJazzBand = (song: any, isActive: boolean = true): JazzPlaybackSt
             }
 
             // PIANO PRO: Phrase-Based Template Engine (Phase 11)
+            // Space rules: use longer note values when there's more time (few chords or slow tune).
 
-            // 1. Select 1-bar phrase definitions at the start of each bar
+            // 1. At bar start: schedule full bar of piano via Reactive Comping (pocket + conversation)
             if (beat === 0) {
-                const pianoPattern = rhythmEngineRef.current.getRhythmPattern(bpm, activityLevelSignal.value);
+                const chordsPerBar = (measure.chords || []).length;
+                const pianoPattern = rhythmEngineRef.current.getRhythmPattern(bpm, activityLevelSignal.value, { chordsPerBar });
                 currentPatternRef.current = pianoPattern;
-
-                // Collaborative Dynamics: Drummer "listens" to piano density
-                // normalized density based on number of scheduled piano hits
                 const pianoDensity = pianoPattern.steps.length / 4;
                 currentDrumHitsRef.current = drumEngineRef.current.generateBar(activityLevelSignal.value, pianoDensity);
-            }
 
-            const pattern = currentPatternRef.current;
-            const isNewChord = currentChord && currentChord !== lastChordRef.current;
-            if (isNewChord) lastChordRef.current = currentChord;
-
-            if (currentChord && pianoRef.current?.loaded && !pianoMutedSignal.value) {
-                // 2. Check if the current beat matches a step in the phrase template
-                const currentStep = pattern?.steps.find(s => {
-                    const parts = s.time.split(':');
-                    const patternBeat = parseInt(parts[1], 10);
-                    return patternBeat === beat;
-                });
-
-                // RULE: Always play at least once on a chord change to act as a reliable backing track
-                const shouldPlay = currentStep || isNewChord;
-
-                if (shouldPlay) {
-                    // 3. Anticipation Logic (Push): If step is anticipation, "steal" the next chord
-                    const targetChord = (currentStep && currentStep.isAnticipation && nextChord) ? nextChord : currentChord;
-
-                    // 4. Harmony Solution: Pro Grip Dictionary + Pivot Rule
-                    let voicing = compingEngineRef.current.getNextVoicing(targetChord, {
-                        addRoot: bassMutedSignal.value
-                    });
-
-                    // With a fixed probability, play this voicing one octave lower for variety
-                    if (voicing.length > 0 && Math.random() < PIANO_LOWER_VOICING_PROBABILITY) {
-                        const shifted = voicing.map(m => m - 12);
-                        const lowest = Math.min(...shifted);
-                        if (lowest >= PIANO_LOWER_VOICING_MIN_MIDI) voicing = shifted;
-                    }
-
-                    if (voicing.length > 0) {
-                        lastVoicingRef.current = voicing;
-
-                        // 5. Articulation & Dynamics
-                        const baseVel = 0.55 + (activityLevelSignal.value * 0.2) + (Math.random() * 0.1);
-                        const duration = currentStep?.duration || "4n";
-
-                        voicing.forEach((n, i) => {
-                            const t = time + i * 0.008;
-                            const vel = baseVel * (0.95 + Math.random() * 0.1);
-                            pianoRef.current?.triggerAttackRelease(Tone.Frequency(n, "midi").toNote(), duration, t, vel);
-                            onNoteRef.current?.({
-                                midi: n,
-                                velocity: vel,
-                                instrument: 'piano',
-                                type: JazzTheoryService.getNoteFunction(n, targetChord),
-                                duration: 1
-                            });
-                        });
-                    }
+                if (currentChord && pianoRef.current?.loaded && !pianoMutedSignal.value) {
+                    reactiveCompingRef.current.scheduleBar(
+                        time,
+                        bar,
+                        currentChord,
+                        nextChord?.trim() || currentChord,
+                        activityLevelSignal.value,
+                        'Walking',
+                        compingEngineRef.current,
+                        pianoRef.current,
+                        {
+                            addRoot: bassMutedSignal.value,
+                            onNote: (note) => onNoteRef.current?.({ ...note, type: JazzTheoryService.getNoteFunction(note.midi, currentChord) }),
+                        }
+                    );
                 }
             }
+
+            const isNewChord = currentChord && currentChord !== lastChordRef.current;
+            if (isNewChord) lastChordRef.current = currentChord;
 
             // DRUMS PRO: DeJohnette-Style Generative Engine (Phase 11)
             // limbs move independently; hi-hat anchors 2 & 4.
