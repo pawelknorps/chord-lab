@@ -13,9 +13,11 @@ export interface SoloTranscriptionPanelProps {
     active: boolean;
     standardTitle?: string;
     keySignature?: string;
+    /** Called when user stops recording with the note list string (for AI analysis). */
+    onTranscriptionReady?: (noteList: string) => void;
 }
 
-export function SoloTranscriptionPanel({ inputSource, active, standardTitle, keySignature }: SoloTranscriptionPanelProps) {
+export function SoloTranscriptionPanel({ inputSource, active, standardTitle, keySignature, onTranscriptionReady }: SoloTranscriptionPanelProps) {
     const {
         isRecording,
         startRecording,
@@ -30,7 +32,9 @@ export function SoloTranscriptionPanel({ inputSource, active, standardTitle, key
 
     const handleStop = () => {
         stopRecording();
-        setNoteList(getNoteListString());
+        const text = getNoteListString();
+        setNoteList(text);
+        onTranscriptionReady?.(text);
     };
 
     const handleCopy = async () => {

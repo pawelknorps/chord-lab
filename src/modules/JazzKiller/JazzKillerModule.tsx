@@ -961,7 +961,11 @@ export default function JazzKillerModule() {
                                         <GuidedPracticePane />
                                     )}
                                     {showStandardsExercises && (
-                                        <StandardsExercisesPanel getChordAtTransportTime={getChordAtTransportTime} />
+                                        <StandardsExercisesPanel
+                                            getChordAtTransportTime={getChordAtTransportTime}
+                                            standardTitle={selectedSong?.title}
+                                            keySignature={selectedSong?.key ?? 'C'}
+                                        />
                                     )}
                                 </div>
                             </>

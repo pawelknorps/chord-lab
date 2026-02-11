@@ -12,8 +12,9 @@ import { useStandardsExerciseHeatmapStore } from '../state/useStandardsExerciseH
 import type { ExerciseType } from '../core/StandardsExerciseEngine';
 import type { ExerciseInputSource } from '../core/ExerciseInputAdapter';
 import * as Tone from 'tone';
-import { Target, Mic, Keyboard, Check, X, RotateCcw, Zap } from 'lucide-react';
+import { Target, Mic, Keyboard, Check, X, RotateCcw, Zap, Sparkles } from 'lucide-react';
 import { SoloTranscriptionPanel } from './SoloTranscriptionPanel';
+import { generateStandardsExerciseAnalysis, isGeminiNanoAvailable } from '../ai/jazzTeacherLogic';
 
 const DEFAULT_LATENCY_MS = 80;
 const MIN_LATENCY_MS = 0;
@@ -22,6 +23,10 @@ const MAX_LATENCY_MS = 300;
 export interface StandardsExercisesPanelProps {
     /** Chord at transport time t (for latency-adjusted scoring). When provided, scoring uses chord at (now - latencyMs). */
     getChordAtTransportTime?: (t: number) => string;
+    /** Standard title for AI analysis (Phase 15). */
+    standardTitle?: string;
+    /** Key for AI analysis (e.g. "C", "Bb"). */
+    keySignature?: string;
 }
 
 const EXERCISE_TYPES: { id: ExerciseType; label: string }[] = [
@@ -30,7 +35,7 @@ const EXERCISE_TYPES: { id: ExerciseType; label: string }[] = [
     { id: 'arpeggio', label: 'Arpeggios' }
 ];
 
-export function StandardsExercisesPanel({ getChordAtTransportTime }: StandardsExercisesPanelProps = {}) {
+export function StandardsExercisesPanel({ getChordAtTransportTime, standardTitle, keySignature }: StandardsExercisesPanelProps = {}) {
     useSignals();
     const [exerciseType, setExerciseType] = useState<ExerciseType>('scale');
     const [inputSource, setInputSource] = useState<ExerciseInputSource>('mic');
@@ -75,6 +80,34 @@ export function StandardsExercisesPanel({ getChordAtTransportTime }: StandardsEx
     useEffect(() => {
         setHeatmap(statsByMeasure, currentExerciseType);
     }, [statsByMeasure, currentExerciseType, setHeatmap]);
+
+    const [lastTranscription, setLastTranscription] = useState('');
+    const [analysisLoading, setAnalysisLoading] = useState(false);
+    const [analysisResult, setAnalysisResult] = useState<string | null>(null);
+
+    const handleAnalyzePerformance = async () => {
+        if (!isGeminiNanoAvailable()) {
+            setAnalysisResult('AI analysis requires Gemini Nano (Chrome or Edge with AI enabled).');
+            return;
+        }
+        setAnalysisLoading(true);
+        setAnalysisResult(null);
+        try {
+            const result = await generateStandardsExerciseAnalysis({
+                standardTitle: standardTitle ?? 'Standard',
+                key: keySignature ?? 'C',
+                exerciseType: currentExerciseType,
+                accuracy,
+                heatmap: statsByMeasure,
+                transcription: lastTranscription || undefined
+            });
+            setAnalysisResult(result || 'No feedback generated.');
+        } catch (e) {
+            setAnalysisResult('Analysis failed. Try again.');
+        } finally {
+            setAnalysisLoading(false);
+        }
+    };
 
     const [calibrating, setCalibrating] = useState(false);
     const handleCalibrate = async () => {
@@ -237,7 +270,27 @@ export function StandardsExercisesPanel({ getChordAtTransportTime }: StandardsEx
             <SoloTranscriptionPanel
                 inputSource={inputSource}
                 active={true}
+                onTranscriptionReady={setLastTranscription}
             />
+
+            {/* Phase 15: AI analysis of performance */}
+            <div className="flex flex-col gap-2">
+                <p className="text-[10px] font-black uppercase tracking-widest text-neutral-500">AI analysis</p>
+                <button
+                    type="button"
+                    onClick={handleAnalyzePerformance}
+                    disabled={analysisLoading || (hits === 0 && misses === 0)}
+                    className="flex items-center gap-2 px-3 py-2 rounded-xl border border-amber-500/50 bg-amber-500/20 text-amber-400 text-xs font-bold hover:bg-amber-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                >
+                    <Sparkles size={14} />
+                    {analysisLoading ? 'Analyzing…' : 'Analyze performance'}
+                </button>
+                {analysisResult && (
+                    <div className="p-3 bg-black/40 rounded-xl border border-white/10 text-sm text-neutral-200 whitespace-pre-wrap">
+                        {analysisResult}
+                    </div>
+                )}
+            </div>
 
             {!isReady && inputSource === 'mic' && (
                 <p className="text-[10px] text-neutral-500">Mic initializing… Allow microphone access when prompted.</p>

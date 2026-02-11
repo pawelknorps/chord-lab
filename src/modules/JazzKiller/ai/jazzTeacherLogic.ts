@@ -514,3 +514,75 @@ Provide a "Sandwich Technique" critique:
     return 'The sensei is impressed by your dedication. Keep shedding.';
   }
 }
+
+/**
+ * Generate AI analysis of a Standards Exercise session (Phase 15, REQ-SBE-08).
+ * Input: heatmap (hits/misses per measure), accuracy, exercise type, optional transcription.
+ * Output: strengths/weaknesses, specific advice, development suggestions.
+ */
+export async function generateStandardsExerciseAnalysis(sessionData: {
+  standardTitle: string;
+  key: string;
+  exerciseType: 'scale' | 'guideTones' | 'arpeggio';
+  accuracy: number;
+  heatmap: Record<number, { hits: number; misses: number }>;
+  transcription?: string;
+}): Promise<string> {
+  if (!isGeminiNanoAvailable()) return '';
+
+  try {
+    const session = await createGeminiSession(JAZZ_TEACHER_SYSTEM_PROMPT, { temperature: 0.2, topK: 3 });
+    if (!session) return '';
+
+    const exerciseLabel =
+      sessionData.exerciseType === 'scale'
+        ? 'Scales'
+        : sessionData.exerciseType === 'guideTones'
+          ? 'Guide Tones'
+          : 'Arpeggios';
+
+    const measureAccuracies = Object.entries(sessionData.heatmap).map(([idx, stats]) => {
+      const measureIdx = parseInt(idx, 10);
+      const total = stats.hits + stats.misses;
+      const accuracy = total > 0 ? (stats.hits / total) * 100 : 0;
+      return { index: measureIdx + 1, accuracy };
+    });
+    const weakMeasures = measureAccuracies
+      .filter((m) => m.accuracy < 60)
+      .sort((a, b) => a.accuracy - b.accuracy)
+      .slice(0, 5);
+    const weakMeasuresText =
+      weakMeasures.length > 0
+        ? `Struggled most in bars: ${weakMeasures.map((m) => m.index).join(', ')}.`
+        : 'No significant weak spots identified.';
+
+    const prompt = `
+### STANDARDS EXERCISE SUMMARY (Phase 15)
+TUNE: "${sessionData.standardTitle}" in ${sessionData.key}
+EXERCISE TYPE: ${exerciseLabel}
+OVERALL ACCURACY: ${sessionData.accuracy}%
+HOTSPOTS: ${weakMeasuresText}
+${sessionData.transcription ? `TRANSCRIPTION (note list): ${sessionData.transcription.slice(0, 200)}${sessionData.transcription.length > 200 ? '…' : ''}` : ''}
+
+### TASK
+Provide a short pedagogical analysis:
+1. One strength (e.g. overall accuracy or a section they nailed).
+2. One specific area for improvement based on HOTSPOTS (e.g. "Work on guide tones in the bridge", "Focus on arpeggios in bars 17–24").
+3. A concrete development suggestion (e.g. "Practice this tune in 3 keys", "Next: try the same exercise at a slower BPM").
+
+### CONSTRAINTS
+- Professional jazz educator tone.
+- Max 3–4 short sentences.
+- Be encouraging but honest.
+
+### RESPONSE
+`.trim();
+
+    const response = await session.prompt(prompt);
+    session.destroy();
+    return response;
+  } catch (err) {
+    console.error('Standards Exercise AI analysis failed:', err);
+    return 'The sensei is impressed by your dedication. Keep shedding.';
+  }
+}
