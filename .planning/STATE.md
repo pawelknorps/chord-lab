@@ -101,3 +101,10 @@
 - **WalkingBassEngine**: 4-beat strategy (Anchor → Bridge → Bridge → Approach); Beat 4 chromatic or 5th-of-destination; E1–G3 range; tonal.js Chord/Note.
 - **Band integration**: useJazzBand generates full line at beat 0, plays `line[beat]` for 0–3; fallback to JazzTheoryService.getNextWalkingBassNote if line invalid.
 - **Tests**: WalkingBassEngine.test.ts (4 notes, range, Beat 1 root, Beat 4 approach, state carry).
+
+## Phase 13: Standards-Based Exercises (Scales, Guide Tones, Arpeggios) 🆕
+
+- **Status**: Planned.
+- **Goal**: Use existing mic detection and jazz standards to run timed exercises (scales, guide tones, arpeggios) in sync with playback and chart; support both mic and MIDI input.
+- **Requirements**: REQ-SBE-01 (Scale exercise), REQ-SBE-02 (Guide-tone exercise), REQ-SBE-03 (Arpeggio exercise), REQ-SBE-04 (Unified mic + MIDI), REQ-SBE-05 (Exercise UI and feedback).
+- **Planning**: `.planning/phases/13-standards-exercises/PLAN.md`.

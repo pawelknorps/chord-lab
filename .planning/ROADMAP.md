@@ -126,3 +126,15 @@
   - [ ] **WalkingBassEngine**: Class with `generateWalkingLine(currentChord, nextChord)` (Anchor → Bridge → Bridge → Approach); E1–G3 range.
   - [ ] **Approach strategies**: Chromatic from below/above, 5th-of-destination; bridge notes as chord tones between Beat 1 and Beat 4.
   - [ ] **Band integration**: useJazzBand generates line at beat 0, plays `line[beat]` for 0–3; state carried to next bar.
+
+## Phase 13: Standards-Based Exercises (Scales, Guide Tones, Arpeggios) 🆕
+
+*Focus: Use existing mic detection and jazz standards to run timed exercises in sync with playback and the chart; support both mic and MIDI.*
+
+- **Success Criteria**: Student can choose a standard, pick an exercise type (Scales / Guide Tones / Arpeggios), play along with playback, and receive real-time evaluation against the correct scale, guide tones, or arpeggio for each chord; input can be mic or MIDI.
+- **Tasks**:
+  - [ ] **Scale exercise**: Per-chord target scale from ChordScaleEngine; evaluate student input (mic/MIDI) against scale notes in time with chart and playback.
+  - [ ] **Guide-tone exercise**: Per-chord target 3rd/7th from GuideToneCalculator; score hitting guide tones on downbeats (reuse/extend REQ-FB-02).
+  - [ ] **Arpeggio exercise**: Per-chord chord tones as target; real-time evaluation in sync with playback.
+  - [ ] **Unified input**: Single exercise engine consuming either mic pitch (useITMPitchStore / existing pipeline) or MIDI; same scoring logic for both.
+  - [ ] **Exercise UI**: Select exercise type + standard, start playback, show real-time feedback (correct/incorrect, accuracy, target notes); optional Director/FSRS integration.

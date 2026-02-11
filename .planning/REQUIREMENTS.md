@@ -200,6 +200,37 @@
 
 - **Requirement**: JazzKiller band (useJazzBand) uses the engine per bar: at beat 0 generate full line, cache, and play `line[beat]` for beats 0–3; last note of line updates state for next bar.
 
+## Phase 13: Standards-Based Exercises (Scales, Guide Tones, Arpeggios)
+
+*Uses existing microphone detection and jazz standards to deliver timed exercises in sync with playback and the chart. Works for both mic and MIDI input.*
+
+### REQ-SBE-01: Scale Exercise Mode
+
+- **Requirement**: Exercise mode where the student plays the **appropriate scale** for the current chord in time with JazzKiller playback and the lead-sheet chart.
+- **Behavior**: Per measure (or per chord), the app knows the current chord from the standard; `ChordScaleEngine` (or equivalent) provides the correct scale; student input (mic or MIDI) is evaluated against that scale in real time.
+- **Sync**: Use existing `currentMeasureIndexSignal` / `currentBeatSignal` and chart so the “target scale” updates with the progression.
+
+### REQ-SBE-02: Guide-Tone Exercise Mode
+
+- **Requirement**: Exercise mode where the student plays the **correct guide tones** (3rd and 7th) for each chord in time with the standard.
+- **Behavior**: Per chord, use existing `GuideToneCalculator` (or AiContextService guide tones) as the target set; real-time scoring for hitting 3rd/7th on downbeats (or designated beats).
+- **Integration**: Reuse REQ-FB-02 “Target Note mastery” logic where applicable; extend to full chart so guide tones are chart-driven.
+
+### REQ-SBE-03: Arpeggio Exercise Mode
+
+- **Requirement**: Exercise mode where the student plays the **correct arpeggio** (chord tones) for each chord in time with the standard.
+- **Behavior**: Chord tones per chord from existing theory (e.g. Tonal.js `Chord.notes` or AiContextService `chordTones`); evaluate student input against these notes in real time, in sync with playback and chart.
+
+### REQ-SBE-04: Unified Input (Mic + MIDI)
+
+- **Requirement**: All three exercise modes (scales, guide tones, arpeggios) must work with **both microphone input** and **MIDI input**.
+- **Behavior**: Single “exercise engine” that consumes either (1) pitch/MIDI from the existing mic pipeline (useITMPitchStore / pitch detection) or (2) MIDI from a connected device; same scoring and target logic for both.
+
+### REQ-SBE-05: Exercise UI and Feedback
+
+- **Requirement**: UI to select exercise type (Scales / Guide Tones / Arpeggios), select a standard (from existing jazz library), start playback, and show real-time feedback (e.g. correct/incorrect, accuracy, target notes).
+- **Optional**: Persist scores or integrate with Director/FSRS for “what to practice next.”
+
 ## Technical Priorities
 1. **High**: Pitch-to-Theory Sync (Turns app from book into teacher).
 2. **Medium**: Gemini Nano Hint Loop (Ear training "AHA!" moments).
