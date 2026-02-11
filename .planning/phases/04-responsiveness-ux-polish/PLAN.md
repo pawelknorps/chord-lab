@@ -123,6 +123,10 @@ Implement fixes for the chosen high-priority items:
 - **Step 11**: All lazy-loaded modules use a skeleton (or equivalent) fallback.
 - **Step 12**: At least one high-priority CONCERNS.md item resolved; rest documented for follow-up.
 
+## Phase 4b Reference
+
+Phase 4b (Full Responsive Audit — Workbench, Standards, All Exercises) has a dedicated plan: `.planning/phases/04b-full-responsive-audit/PLAN.md`. Run `/gsd-execute-phase 4b` to execute Wave 1b (Steps 10b–10d).
+
 ## Next steps
 
-After execution, update `.planning/STATE.md`: set Phase 4 progress, add "Recently Completed" for Steps 10–12, and move "Currently Working On" to Phase 5 or next milestone.
+After execution, update `.planning/STATE.md`: set Phase 4 progress, add "Recently Completed" for Steps 10–12, and move "Currently Working On" to Phase 5 or next milestone. For Phase 4b, update STATE.md with Steps 10b–10d completion.
