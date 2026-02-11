@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { RefreshCw, Volume2, Mic } from 'lucide-react';
 import { useSplitBrainAudio } from './hooks/useSplitBrainAudio';
+import { useMicrophone } from '../../hooks/useMicrophone';
 import { generateExercise } from './exerciseGenerator';
 import type { BiTonalExercise } from './exerciseGenerator';
 import { noteNameToMidi, midiToNoteName } from '../../core/theory';
@@ -10,6 +11,7 @@ import { InteractivePiano } from '../../components/InteractivePiano';
 
 const BiTonalSandbox: React.FC = () => {
     const { playShell, playUpperStructure, setDissonance, stopAll } = useSplitBrainAudio();
+    const { start: startMic, stream: micStream, isActive: isMicActive } = useMicrophone();
 
     const [exercise, setExercise] = useState<BiTonalExercise | null>(null);
     const [status, setStatus] = useState<'idle' | 'listening' | 'success'>('idle');
@@ -155,10 +157,22 @@ const BiTonalSandbox: React.FC = () => {
 
             {mode === 'mic' && (
                 <div className="mb-8">
+                    {!isMicActive && (
+                        <div className="flex justify-center mb-4">
+                            <button
+                                type="button"
+                                onClick={startMic}
+                                className="flex items-center gap-2 px-6 py-3 bg-red-600 hover:bg-red-500 rounded-full text-white font-bold"
+                            >
+                                <Mic size={24} /> Enable app microphone
+                            </button>
+                        </div>
+                    )}
                     <SingingArchitect
                         isActive={true}
                         targetNotes={exercise.upperStructureNotes}
                         onPitchDetected={handleSingingPitch}
+                        stream={micStream}
                     />
                     <div className="text-center mt-2 text-sm text-[var(--text-muted)]">
                         Sing the notes of the Upper Structure: {exercise.upperStructureRoot} {exercise.upperStructureQuality}

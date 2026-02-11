@@ -2,6 +2,10 @@
  * Central app-wide microphone service (REQ-MIC-01, REQ-MIC-02).
  * Owns a single getUserMedia stream; all modules consume this service.
  * Does not open mic automatically; requires explicit start() (e.g. user action).
+ *
+ * Modes (REQ-MIC-05): "pitch" (Harmonic Mirror) is the default; consumers use
+ * useAuralMirror() or createPitchPipeline(stream) to subscribe to pitch.
+ * "rhythm" (clapping/beat) is secondary; onset/beat subscription can be added when needed.
  */
 
 let stream: MediaStream | null = null;

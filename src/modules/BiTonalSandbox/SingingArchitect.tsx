@@ -9,15 +9,18 @@ interface SingingArchitectProps {
     targetNotes: string[]; // Notes to sing
     onPitchDetected: (midi: number) => void;
     isActive: boolean;
+    /** When provided, use app-wide mic stream (MicrophoneService) instead of opening own getUserMedia. */
+    stream?: MediaStream | null;
 }
 
-const SingingArchitect: React.FC<SingingArchitectProps> = ({ onPitchDetected, isActive }) => {
+const SingingArchitect: React.FC<SingingArchitectProps> = ({ onPitchDetected, isActive, stream: externalStream }) => {
     const [pitch, setPitch] = useState<number | null>(null);
     const [isMicOn, setIsMicOn] = useState(false);
     const audioContextRef = useRef<AudioContext | null>(null);
     const streamRef = useRef<MediaStream | null>(null);
     const pitchDetectorRef = useRef<any>(null);
     const [confidence, setConfidence] = useState(0);
+    const ownsStreamRef = useRef(false);
 
     const startMic = async () => {
         try {
@@ -25,28 +28,20 @@ const SingingArchitect: React.FC<SingingArchitectProps> = ({ onPitchDetected, is
                 audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
             }
 
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+            const stream = externalStream && externalStream.active
+                ? externalStream
+                : await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+            if (!ownsStreamRef.current) ownsStreamRef.current = !externalStream;
             streamRef.current = stream;
             setIsMicOn(true);
 
-            // Initialize ml5 pitch detection
-            // Ensure ml5 is loaded (we added it to index.html or npm?)
-            // I installed 'ml5' via npm.
-            // import ml5 from 'ml5'; // This usually works if types are present, otherwise declare var.
-
             const audioContext = audioContextRef.current;
-
-            // ml5.pitchDetection(model, audioContext, stream, callback)
             pitchDetectorRef.current = ml5.pitchDetection(
-                './model/', // Model path - usually defaults to online or need local model? 
-                // Actually for CREPE it fetches online by default or we need to bundle it.
-                // Let's assume default works or use a CDN link in index.html if npm fails.
-                // Standard ml5 pitch detection usage:
+                './model/',
                 audioContext,
                 stream,
                 modelLoaded
             );
-
         } catch (err) {
             console.error("Error accessing microphone:", err);
         }
@@ -79,9 +74,10 @@ const SingingArchitect: React.FC<SingingArchitectProps> = ({ onPitchDetected, is
     };
 
     const stopMic = () => {
-        if (streamRef.current) {
+        if (streamRef.current && ownsStreamRef.current) {
             streamRef.current.getTracks().forEach(track => track.stop());
         }
+        streamRef.current = null;
         setIsMicOn(false);
         pitchDetectorRef.current = null;
     };
@@ -93,17 +89,16 @@ const SingingArchitect: React.FC<SingingArchitectProps> = ({ onPitchDetected, is
     }, []);
 
     useEffect(() => {
-        if (isActive && !isMicOn) {
-            // Ideally wait for user interaction to start mic to avoid autoplay policy issues?
-            // We can show a button.
+        if (isActive && externalStream?.active && !isMicOn) {
+            startMic();
         } else if (!isActive && isMicOn) {
             stopMic();
         }
-    }, [isActive]);
+    }, [isActive, externalStream?.active]);
 
     return (
         <div className="flex flex-col items-center">
-            {!isMicOn && isActive && (
+            {!isMicOn && isActive && !externalStream && (
                 <button
                     onClick={startMic}
                     className="flex items-center gap-2 px-6 py-3 bg-red-600 hover:bg-red-500 rounded-full text-white font-bold transition-all animate-pulse"

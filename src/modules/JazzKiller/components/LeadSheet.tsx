@@ -2,7 +2,9 @@ import { useRef, useEffect } from 'react';
 import { useSignals } from "@preact/signals-react/runtime";
 import {
     currentMeasureIndexSignal,
-    currentBeatSignal
+    currentBeatSignal,
+    selectedMeasureRangeSignal,
+    isPlayingSignal
 } from '../state/jazzSignals';
 import { usePracticeStore } from '../../../core/store/usePracticeStore';
 import { AnalysisOverlay } from './AnalysisOverlay';
@@ -17,16 +19,37 @@ export const LeadSheet = ({ song, filteredPatterns, onChordClick }: LeadSheetPro
     useSignals();
     const activeRef = useRef<HTMLDivElement>(null);
     const gridRef = useRef<HTMLDivElement>(null);
-    const { detectedPatterns, activeFocusIndex, focusOnPattern, showAnalysis, guideTones, showGuideTones } = usePracticeStore();
+    const { detectedPatterns, activeFocusIndex, focusOnPattern, showAnalysis, guideTones, showGuideTones, guideToneSpotlightMode, guideToneBarsHit } = usePracticeStore();
+
+    // Access signals at top level for reactivity
+    const curMeasure = currentMeasureIndexSignal.value;
+    const curBeat = currentBeatSignal.value;
+    const isPlaying = isPlayingSignal.value;
 
     const patternsToDisplay = filteredPatterns || detectedPatterns;
 
     useEffect(() => {
-        // Automatic scroll to active measure (React-based scroll is fine for measure changes)
-        if (activeRef.current) {
+        // Automatic scroll to active measure
+        if (activeRef.current && curMeasure >= 0) {
             activeRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
-    }, [currentMeasureIndexSignal.value]);
+    }, [curMeasure]);
+
+    const handleMeasureClick = (index: number, isAlt: boolean) => {
+        const current = selectedMeasureRangeSignal.value;
+        if (isAlt && current) {
+            const start = Math.min(current[0], index);
+            const end = Math.max(current[0], index);
+            selectedMeasureRangeSignal.value = [start, end];
+        } else {
+            // Toggle selection if clicking the same single measure
+            if (current && current[0] === index && current[1] === index) {
+                selectedMeasureRangeSignal.value = null;
+            } else {
+                selectedMeasureRangeSignal.value = [index, index];
+            }
+        }
+    };
 
 
     if (!song || !song.music) return null;
@@ -34,10 +57,10 @@ export const LeadSheet = ({ song, filteredPatterns, onChordClick }: LeadSheetPro
     // Handle raw string case (if parser returns raw)
     if (typeof song.music === 'string') {
         return (
-            <div className="p-8 text-center">
+            <div className="p-8 text-center text-black bg-[#fdf6e3]">
                 <h1 className="text-2xl font-bold mb-4">{song.title}</h1>
                 <p className="mb-4">Music format not fully parsed (Raw String):</p>
-                <code className="block bg-neutral-100 p-4 rounded text-xs break-all text-left">
+                <code className="block bg-black/5 p-4 rounded text-xs break-all text-left">
                     {song.music}
                 </code>
             </div>
@@ -45,6 +68,8 @@ export const LeadSheet = ({ song, filteredPatterns, onChordClick }: LeadSheetPro
     }
 
     if (!song.music.measures) return null;
+
+    const selectedRange = selectedMeasureRangeSignal.value;
 
     return (
         <div className="w-full max-w-5xl mx-auto p-1.5 md:p-8 bg-[#fdf6e3] text-black font-serif rounded-lg shadow-2xl overflow-hidden relative">
@@ -60,7 +85,7 @@ export const LeadSheet = ({ song, filteredPatterns, onChordClick }: LeadSheetPro
 
                 {/* Analysis Overlay - Visual Brackets */}
                 <div className="relative">
-                    <div ref={gridRef} data-leadsheet-grid className="grid grid-cols-4 gap-y-0 border-t-2 border-b-2 border-black relative">
+                    <div ref={gridRef} data-leadsheet-grid className="grid grid-cols-4 gap-y-0 border-2 border-black relative">
                         {/* Analysis Overlay Needs Access to Grid */}
                         {showAnalysis && (
                             <AnalysisOverlay
@@ -72,9 +97,11 @@ export const LeadSheet = ({ song, filteredPatterns, onChordClick }: LeadSheetPro
                         )}
 
                         {song.music.measures.map((measure: any, index: number) => {
-                            const isActive = index === currentMeasureIndexSignal.value;
+                            const isActive = index === curMeasure;
+                            const isLastMeasure = index === song.music.measures.length - 1;
                             const isSystemStart = index % 4 === 0;
                             const isSystemEnd = index % 4 === 3;
+                            const isInSelectedRange = selectedRange && index >= selectedRange[0] && index <= selectedRange[1];
 
                             // Guide Tones for this measure
                             const gt = guideTones.get(index);
@@ -83,26 +110,74 @@ export const LeadSheet = ({ song, filteredPatterns, onChordClick }: LeadSheetPro
                                 <div
                                     key={index}
                                     ref={isActive ? activeRef : null}
+                                    onClick={(e) => handleMeasureClick(index, e.altKey || e.shiftKey)}
                                     className={`
                                     relative h-20 md:h-32 p-1 md:p-2 flex flex-col items-center justify-center
-                                    border-black
-                                    ${!isSystemEnd ? 'border-r md:border-r-2' : 'border-r-0'} 
+                                    border-black cursor-cell group/measure
+                                    ${!isSystemEnd ? 'border-r md:border-r-2' : ''} 
                                     ${index >= 4 ? 'border-t' : ''}
-                                    ${isActive ? 'bg-yellow-200/50 transition-colors duration-200' : ''}
+                                    ${isActive ? 'bg-yellow-100/80 ring-2 ring-amber-400 z-50 transition-all duration-200 shadow-inner' : ''}
+                                    ${guideToneSpotlightMode && guideToneBarsHit[index] ? 'bg-emerald-500/30 ring-2 ring-emerald-400' : ''}
+                                    ${isInSelectedRange ? 'bg-cyan-500/10 ring-2 ring-inset ring-cyan-500/30' : ''}
+                                    hover:bg-black/5 transition-all
                                 `}
                                 >
+                                    {/* Selection Glow */}
+                                    {isInSelectedRange && (
+                                        <div className="absolute inset-0 bg-cyan-500/5 animate-pulse pointer-events-none" />
+                                    )}
+
+                                    {/* Section Label */}
+                                    {measure.sectionLabel && measure.isFirstOfSection && (
+                                        <div className="absolute -top-3 -left-3 bg-black text-white w-7 h-7 flex items-center justify-center font-bold rounded shadow-lg z-30 transform -rotate-3 text-lg border-2 border-white">
+                                            {measure.sectionLabel}
+                                        </div>
+                                    )}
+
+                                    {/* Ending Marker */}
+                                    {measure.endingNumber && measure.isFirstOfEnding && (
+                                        <div className="absolute top-0 left-0 w-8 h-8 border-l-2 border-t-2 border-black z-10 flex items-start justify-start p-0.5">
+                                            <span className="text-[10px] font-bold font-mono leading-none">{measure.endingNumber}.</span>
+                                        </div>
+                                    )}
+
                                     {/* Measure Number */}
-                                    {isSystemStart && (
-                                        <span className="absolute top-0.5 left-0.5 text-[8px] md:text-[10px] text-neutral-500 font-sans">
+                                    {(isSystemStart || measure.isFirstOfSection) && (
+                                        <span className="absolute top-0.5 left-2 text-[8px] md:text-[10px] text-neutral-500 font-sans z-40">
                                             {index + 1}
                                         </span>
                                     )}
 
-                                    {isActive && currentBeatSignal.value >= 0 && (
-                                        <div
-                                            className="absolute top-0 bottom-0 w-0.5 md:w-1 bg-amber-500/40 shadow-[0_0_8px_rgba(245,158,11,0.5)] z-20 transition-all duration-100"
-                                            style={{ left: `${(currentBeatSignal.value / 4) * 100}%` }}
-                                        />
+                                    {/* Visual Repeat Signs */}
+                                    {/* Visual Repeat Signs - Professional Aesthetic */}
+                                    {measure.isStartRepeat && (
+                                        <div className="absolute inset-y-0 left-0 flex items-center pointer-events-none z-[60]">
+                                            <div className="w-1 md:w-1.5 h-full bg-black shadow-sm"></div>
+                                            <div className="w-[1px] h-full bg-black ml-[1px] md:ml-[2px]"></div>
+                                            <div className="flex flex-col gap-2 ml-1 md:ml-2">
+                                                <div className="w-1 md:w-1.2 h-1 md:h-1.2 bg-black rounded-full shadow-sm"></div>
+                                                <div className="w-1 md:w-1.2 h-1 md:h-1.2 bg-black rounded-full shadow-sm"></div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {measure.isEndRepeat && (
+                                        <div className="absolute inset-y-0 right-0 flex items-center pointer-events-none z-[60]">
+                                            <div className="flex flex-col gap-2 mr-1 md:mr-2">
+                                                <div className="w-1 md:w-1.2 h-1 md:h-1.2 bg-black rounded-full shadow-sm"></div>
+                                                <div className="w-1 md:w-1.2 h-1 md:h-1.2 bg-black rounded-full shadow-sm"></div>
+                                            </div>
+                                            <div className="w-[1px] h-full bg-black mr-[1px] md:mr-[2px]"></div>
+                                            <div className="w-1 md:w-1.5 h-full bg-black shadow-sm"></div>
+                                        </div>
+                                    )}
+
+                                    {/* Final Double Bar for the very last measure of the song form */}
+                                    {isLastMeasure && !measure.isEndRepeat && (
+                                        <div className="absolute inset-y-0 right-0 flex items-center pointer-events-none z-[60]">
+                                            <div className="w-[1px] h-full bg-black mr-[2px]"></div>
+                                            <div className="w-1.5 md:w-2 h-full bg-black shadow-sm"></div>
+                                        </div>
                                     )}
 
                                     {/* Guide Tones (Inline) */}
@@ -125,6 +200,26 @@ export const LeadSheet = ({ song, filteredPatterns, onChordClick }: LeadSheetPro
                                     <div className="text-sm sm:text-base md:text-3xl font-bold font-jazz w-full text-center z-10 relative leading-tight">
                                         {renderMeasureChords(measure, index, onChordClick)}
                                     </div>
+
+                                    {/* Focus Target Overlay */}
+                                    {!selectedRange && (
+                                        <div className="absolute inset-0 opacity-0 group-hover/measure:opacity-100 bg-cyan-500/5 flex items-center justify-center transition-opacity pointer-events-none">
+                                            <div className="bg-cyan-500/80 text-white text-[8px] font-black uppercase tracking-tighter px-1 rounded">Focus</div>
+                                        </div>
+                                    )}
+
+                                    {/* Playhead */}
+                                    {isActive && isPlaying && (
+                                        <div
+                                            className="absolute inset-y-0 w-1.5 md:w-2 bg-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.8)] z-[200] pointer-events-none transition-all duration-75"
+                                            style={{
+                                                left: `${(Math.max(0, curBeat) / 4) * 100}%`,
+                                            }}
+                                        >
+                                            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3 h-3 bg-amber-500 rotate-45 -translate-y-1/2 shadow-lg" />
+                                            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3 h-3 bg-amber-500 rotate-45 translate-y-1/2 shadow-lg" />
+                                        </div>
+                                    )}
                                 </div>
                             );
                         })}

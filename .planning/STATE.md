@@ -5,7 +5,7 @@
 **Progress**: ~75%
 
 ## New Initiative: Universal Microphone Handler & Harmonic Mirror
-**Status**: Planned (Phase 8)
+**Status**: Complete (Phase 8) ✅
 **Goal**: App-wide mic handler; **Harmonic Mirror** first (pitch/note accuracy, "teacher that listens")—Guide Tone Spotlight, Call and Response, useAuralMirror, noise gate, Live Note indicator; rhythm grading deferred. See PROJECT.md § Universal Microphone Handler & Harmonic Mirror, REQUIREMENTS REQ-MIC-01–15, ROADMAP Phase 8.
 
 ## Phase Progress
@@ -16,9 +16,10 @@
 - **Phase 5: AI Drill Actions (Practice Studio)**: 0% (parse/execute/strip `[[DRILL:SPOTLIGHT]]` etc. in "Get AI lesson") — *skipped for now*
 - **Phase 6: Chord Lab Progression Chatbot**: 100% (progression bundle, chatbot UI, Q&A and continuations); Step 19b (Theory Agent triplet) and Phase 7 planned
 - **Phase 7: Ear Trainer Feedback Loop & Rhythm Scat**: 100% (earDiagnosis, earHintService, nanoHelpers, IntervalsLevel Listen Again UI, rhythmScatService, SubdivisionPyramid scat display) ✅
-- **Phase 8: Universal Microphone Handler & Harmonic Mirror**: 0% (central mic service, Pitch-to-Theory Pipe, useAuralMirror, Guide Tone Spotlight, Call and Response, sanity rules; clapping secondary) — *planned*
+- **Phase 8: Universal Microphone Handler & Harmonic Mirror**: 100% (MicrophoneService, useMicrophone, pitchDetection, useAuralMirror, LiveNoteIndicator, Guide Tone Spotlight, CallAndResponseDrill, BiTonal migration; clapping Step 31 deferred) ✅
 
 ## Recently Completed / Updated
+- [x] **Phase 8 – Universal Microphone Handler & Harmonic Mirror**: MicrophoneService, useMicrophone, pitchDetection (ml5 + RMS noise gate), useAuralMirror, LiveNoteIndicator; Guide Tone Spotlight (store, GuideToneSpotlightEffect, green bar in LeadSheet, Mic toggle in JazzKiller); CallAndResponseDrill (Practice Panel, Nano tip on miss); BiTonal Sandbox migration (SingingArchitect accepts stream prop); modes/subscription doc; Step 31 clapping deferred.
 - [x] **Plan – Harmonic Mirror (Mic as "Teacher That Listens")**: PROJECT.md, REQUIREMENTS.md, ROADMAP.md updated: mic framed as Harmonic Mirror (frequency accuracy, not rhythm judge); Ignore Rhythm rule; Pitch-to-Theory Pipe (Worklet → YIN/MPM → Tonal.js); useAuralMirror hook; Guide Tone Spotlight (3rd of chord, bar lights green); Call and Response (lick playback + Nano tip on miss); Smart Implementation Table (Target Practice, Drone, Lick Validation, Energy Tracker); technical sanity (noise gate -40 dB, Live Note indicator, clarity > 90%, debounce); REQ-MIC-07–15; Phase 8 Steps 26–32 expanded.
 - [x] **Phase 7 – Ear Trainer Feedback Loop & Rhythm Scat**: earDiagnosis.ts (diagnoseEarError); nanoHelpers.ts (askNano); earHintService.ts (getEarHint); IntervalsLevel Listen Again UI (wrong → "Not quite" + AI hint, Listen again, Skip); rhythmScatService.ts (getScatForSubdivision); SubdivisionPyramid scat phrase above metronome. All Nano calls use askNano with context re-injection.
 - [x] **New initiative – Universal Microphone Handler**: PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md updated with app-wide mic handler: single stream, playing (pitch/notes) and clapping (beat/tempo) analysis; REQ-MIC-01–06; Phase 8 (Steps 25–29); BiTonal Sandbox migration and at least one other module integration.

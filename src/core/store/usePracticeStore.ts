@@ -36,6 +36,10 @@ interface PracticeState {
     // --- Guide Tones ---
     guideTones: Map<number, GuideTone[]>;
     showGuideTones: boolean;
+    /** Guide Tone Spotlight: mic listens; when student hits 3rd of chord, bar lights green */
+    guideToneSpotlightMode: boolean;
+    /** Measure indices where student hit the 3rd (for green bar) */
+    guideToneBarsHit: Record<number, boolean>;
     showAnalysis: boolean;
     showRomanNumerals: boolean;
     hotspots: number[];
@@ -50,6 +54,9 @@ interface PracticeState {
     updateHeatmap: (measureIndex: number, successScore: number) => void;
     incrementBpm: (step?: number) => void;
     toggleGuideTones: () => void;
+    setGuideToneSpotlightMode: (on: boolean) => void;
+    addGuideToneBarHit: (measureIndex: number) => void;
+    resetGuideToneBarsHit: () => void;
     toggleAnalysis: () => void;
 }
 
@@ -67,6 +74,8 @@ export const usePracticeStore = create<PracticeState>((set, get) => ({
     performanceHeatmap: {},
     guideTones: new Map(),
     showGuideTones: false,
+    guideToneSpotlightMode: false,
+    guideToneBarsHit: {},
     showAnalysis: false,
     showRomanNumerals: false,
     hotspots: [],
@@ -108,7 +117,8 @@ export const usePracticeStore = create<PracticeState>((set, get) => ({
             endIndex: chordIndexToMeasureIndex[c.endIndex] ?? c.endIndex
         }));
 
-        const exercises = ConceptAnalyzer.generateExercises({ ...analysisResult, concepts: mappedConcepts }, flattenedChords);
+        // Use original concepts (chord indices) for exercise chord slice; overlay/loop use mappedConcepts (measure indices)
+        const exercises = ConceptAnalyzer.generateExercises({ ...analysisResult, concepts: analysisResult.concepts }, flattenedChords);
 
         // Calculate guide tones per measure
         const guideTones = new Map<number, GuideTone[]>();
@@ -236,6 +246,15 @@ export const usePracticeStore = create<PracticeState>((set, get) => ({
         set((state) => ({ showGuideTones: !state.showGuideTones }));
         console.log(`🎯 Guide tones ${get().showGuideTones ? 'ON' : 'OFF'}`);
     },
+
+    setGuideToneSpotlightMode: (on: boolean) => {
+        set({ guideToneSpotlightMode: on });
+        if (!on) set({ guideToneBarsHit: {} });
+    },
+    addGuideToneBarHit: (measureIndex: number) => {
+        set((state) => ({ guideToneBarsHit: { ...state.guideToneBarsHit, [measureIndex]: true } }));
+    },
+    resetGuideToneBarsHit: () => set({ guideToneBarsHit: {} }),
 
     toggleAnalysis: () => {
         set((state) => ({ showAnalysis: !state.showAnalysis }));

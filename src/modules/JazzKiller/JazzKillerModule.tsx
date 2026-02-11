@@ -3,17 +3,22 @@ import { useSignals } from "@preact/signals-react/runtime";
 import { useJazzLibrary, JazzStandard } from './hooks/useJazzLibrary';
 import { LeadSheet } from './components/LeadSheet';
 import { PracticeTips } from './components/PracticeTips';
-import { useJazzPlayback } from './hooks/useJazzPlayback';
+import { useJazzEngine } from './hooks/useJazzEngine';
 import {
     transposeSignal,
     pianoVolumeSignal,
     bassVolumeSignal,
     drumsVolumeSignal,
     pianoReverbSignal,
-    reverbVolumeSignal
+    reverbVolumeSignal,
+    isPremiumEngineSignal,
+    activityLevelSignal,
+    proactiveAdviceSignal,
+    isAiThinkingSignal
 } from './state/jazzSignals';
+import { useAiTeacher } from './hooks/useAiTeacher';
 import {
-    Play, Volume2, Search, X, Target, Music, StopCircle, Sliders, ChevronDown, ChevronUp, Layers, Zap, Info, Activity, BookOpen
+    Play, Volume2, Search, X, Target, Music, StopCircle, Sliders, ChevronDown, ChevronUp, Layers, Zap, Info, Activity, BookOpen, BookMarked, Keyboard, Sparkles, Mic
 } from 'lucide-react';
 import { SendToMenu } from '../../components/shared/SendToMenu';
 import { useAudioCleanup } from '../../hooks/useAudioManager';
@@ -25,6 +30,12 @@ import { BarRangeDrill } from './components/BarRangeDrill';
 import { WalkthroughPanel } from './components/TheoryWalkthrough/WalkthroughPanel';
 import { ChordScalePanel } from './components/ChordScaleExplorer/ChordScalePanel';
 import { SmartLessonPane } from './components/SmartLessonPane';
+import { LickLibrary } from './components/LickLibrary';
+import { MasterKeyTeacher } from './components/MasterKeyTeacher';
+import { GuideToneSpotlightEffect } from './components/GuideToneSpotlightEffect';
+import { LiveNoteIndicator } from '../../components/shared/LiveNoteIndicator';
+import { CallAndResponseDrill } from './components/CallAndResponseDrill';
+import { useMicrophone } from '../../hooks/useMicrophone';
 
 export default function JazzKillerModule() {
     useAudioCleanup('jazz-killer');
@@ -40,6 +51,8 @@ export default function JazzKillerModule() {
     const [showChordScaleExplorer, setShowChordScaleExplorer] = useState(false);
     const [selectedChordForScale, setSelectedChordForScale] = useState<string | null>(null);
     const [showRelated, setShowRelated] = useState(false);
+    const [showLickLibrary, setShowLickLibrary] = useState(false);
+    const [showMasterKeyTeacher, setShowMasterKeyTeacher] = useState(false);
 
     // Hint animation for onboarding
     const [showToolHints, setShowToolHints] = useState(false);
@@ -53,7 +66,8 @@ export default function JazzKillerModule() {
     const { standards, getSongAsIRealFormat } = useJazzLibrary();
 
     // Practice Store integration
-    const { loadSong, detectedPatterns, showGuideTones, toggleGuideTones, showAnalysis, toggleAnalysis } = usePracticeStore();
+    const { loadSong, detectedPatterns, showGuideTones, toggleGuideTones, showAnalysis, toggleAnalysis, guideToneSpotlightMode, setGuideToneSpotlightMode } = usePracticeStore();
+    const { start: startMic } = useMicrophone();
 
     // Analysis filters
     const [analysisFilters, setAnalysisFilters] = useState<AnalysisFilters>({
@@ -89,7 +103,8 @@ export default function JazzKillerModule() {
         togglePlayback,
         playChord,
         setBpm,
-    } = useJazzPlayback(selectedSong);
+        toggleEngine
+    } = useJazzEngine(selectedSong);
 
     // Scan standards for ii-V-I patterns on mount
     useEffect(() => {
@@ -145,13 +160,32 @@ export default function JazzKillerModule() {
     const handleSelectSong = (song: JazzStandard) => {
         setSearchQuery('');
         setSelectedStandard(song);
+        localStorage.setItem('jazz-killer-last-song', song.Title);
+        if (song.Tempo != null) setBpm(song.Tempo);
+        if (song.DefaultLoops != null) totalLoopsSignal.value = Math.max(1, song.DefaultLoops);
     };
 
     const handleCloseSong = () => {
         if (isPlayingSignal.value) togglePlayback();
         setSelectedStandard(null);
+        localStorage.removeItem('jazz-killer-last-song');
         transposeSignal.value = 0;
     };
+
+    // Restore last song on mount
+    useEffect(() => {
+        const saved = localStorage.getItem('jazz-killer-last-song');
+        if (saved && !selectedStandard && standards.length > 0) {
+            const song = standards.find(s => s.Title === saved);
+            if (song) {
+                // We use a small timeout to ensure the engine is ready
+                const timer = setTimeout(() => {
+                    handleSelectSong(song);
+                }, 100);
+                return () => clearTimeout(timer);
+            }
+        }
+    }, [standards]);
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -188,8 +222,42 @@ export default function JazzKillerModule() {
         };
     }, [selectedSong]);
 
+    const currentSongChords = useMemo(() => {
+        if (!selectedSong?.music?.measures) return [];
+        return selectedSong.music.measures.flatMap((m: { chords: string[] }) => m.chords).filter((c: string) => c && c.trim() !== "");
+    }, [selectedSong]);
+
+    const { clearAdvice } = useAiTeacher();
+
     return (
         <div className="h-full w-full bg-[#0a0a0a] text-white p-1.5 md:p-3 flex flex-col gap-2 md:gap-3 overflow-hidden relative">
+            {/* AI Proactive Notification */}
+            {proactiveAdviceSignal.value && (
+                <div className="fixed bottom-24 right-6 z-[200] max-w-sm animate-in slide-in-from-right-8 duration-500">
+                    <div className="bg-indigo-900/90 backdrop-blur-2xl border border-indigo-400/30 p-4 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative group">
+                        <div className="absolute -left-1 -top-1">
+                            <div className="bg-indigo-500 rounded-full p-1 animate-bounce">
+                                <Sparkles size={16} className="text-white" />
+                            </div>
+                        </div>
+                        <button
+                            onClick={clearAdvice}
+                            className="absolute top-2 right-2 p-1 hover:bg-white/10 rounded-full text-white/40 hover:text-white transition-colors"
+                        >
+                            <X size={14} />
+                        </button>
+                        <div className="flex flex-col gap-1 pr-4">
+                            <span className="text-[10px] font-black uppercase tracking-widest text-indigo-300">Sensei Tip</span>
+                            <p className="text-xs font-medium leading-relaxed text-indigo-50/90">
+                                {proactiveAdviceSignal.value}
+                            </p>
+                        </div>
+                        {isAiThinkingSignal.value && (
+                            <div className="absolute bottom-0 left-0 h-1 bg-indigo-400/50 animate-pulse w-full rounded-b-2xl"></div>
+                        )}
+                    </div>
+                </div>
+            )}
             <style>
                 {`
                     @keyframes hint-pulse {
@@ -326,6 +394,17 @@ export default function JazzKillerModule() {
                             >
                                 <Target size={18} />
                             </button>
+                            <button
+                                onClick={() => {
+                                    const next = !guideToneSpotlightMode;
+                                    setGuideToneSpotlightMode(next);
+                                    if (next) startMic();
+                                }}
+                                className={`p-1.5 md:p-2.5 rounded-lg md:rounded-xl transition-all ${guideToneSpotlightMode ? 'bg-red-500 text-black' : 'text-neutral-500 hover:text-white'} ${showToolHints ? 'animate-hint-pulse text-red-400' : ''}`}
+                                title="Guide Tone Spotlight (mic): play 3rd of chord, bar lights green"
+                            >
+                                <Mic size={18} />
+                            </button>
                             <div className="w-px h-4 md:h-6 bg-white/10 mx-0.5" />
                             <button
                                 onClick={() => setShowPracticeTips(!showPracticeTips)}
@@ -363,6 +442,21 @@ export default function JazzKillerModule() {
                             >
                                 <Activity size={18} />
                             </button>
+                            <div className="w-px h-4 md:h-6 bg-white/10 mx-0.5" />
+                            <button
+                                onClick={() => setShowLickLibrary(!showLickLibrary)}
+                                className={`p-1.5 md:p-2.5 rounded-lg md:rounded-xl transition-all ${showLickLibrary ? 'bg-amber-600 text-white' : 'text-neutral-500 hover:text-white'} ${showToolHints ? 'animate-hint-pulse text-amber-400' : ''}`}
+                                title="Lick Library"
+                            >
+                                <BookMarked size={18} />
+                            </button>
+                            <button
+                                onClick={() => setShowMasterKeyTeacher(!showMasterKeyTeacher)}
+                                className={`p-1.5 md:p-2.5 rounded-lg md:rounded-xl transition-all ${showMasterKeyTeacher ? 'bg-teal-500 text-black' : 'text-neutral-500 hover:text-white'} ${showToolHints ? 'animate-hint-pulse text-teal-400' : ''}`}
+                                title="Master Key (Cycle of 5ths)"
+                            >
+                                <Keyboard size={18} />
+                            </button>
                         </div>
                     </div>
                 )}
@@ -399,10 +493,13 @@ export default function JazzKillerModule() {
                                             </div>
                                             <div className="text-left">
                                                 <h4 className="font-bold text-lg leading-tight">{std.Title}</h4>
-                                                <p className="text-sm text-neutral-500">{std.Composer}</p>
+                                                <p className="text-sm text-neutral-500">{std.Composer}{std.Tempo != null ? ` • ${std.Tempo} BPM` : ''}</p>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-3">
+                                            {std.Tempo != null && (
+                                                <span className="text-[10px] font-bold text-amber-500/90 tabular-nums">{std.Tempo} BPM</span>
+                                            )}
                                             <div className="px-3 py-1 bg-white/5 rounded-full text-[10px] font-bold uppercase tracking-wider text-neutral-500 group-hover:text-neutral-300 transition-colors border border-transparent group-hover:border-white/10">
                                                 Analyze
                                             </div>
@@ -435,7 +532,7 @@ export default function JazzKillerModule() {
                                                         <Music size={18} />
                                                     </div>
                                                     <h3 className="font-bold text-neutral-200 group-hover:text-amber-100 text-lg leading-tight mb-1 transition-colors">{song.Title}</h3>
-                                                    <p className="text-xs text-neutral-500 group-hover:text-neutral-400 transition-colors uppercase tracking-wider font-medium">{song.Composer}</p>
+                                                    <p className="text-xs text-neutral-500 group-hover:text-neutral-400 transition-colors uppercase tracking-wider font-medium">{song.Composer}{song.Tempo != null ? ` • ${song.Tempo} BPM` : ''}</p>
                                                 </div>
                                             </div>
                                         </button>
@@ -513,7 +610,7 @@ export default function JazzKillerModule() {
                                                     className="w-full text-left p-3 hover:bg-white/5 rounded-xl transition-all border border-transparent hover:border-white/5 group"
                                                 >
                                                     <h4 className="font-bold text-xs text-neutral-200 group-hover:text-amber-400 truncate">{std.Title}</h4>
-                                                    <p className="text-[10px] text-neutral-500 truncate">{std.Composer}</p>
+                                                    <p className="text-[10px] text-neutral-500 truncate">{std.Composer}{std.Tempo != null ? ` • ${std.Tempo} BPM` : ''}</p>
                                                 </button>
                                             ))
                                         ) : (
@@ -551,7 +648,7 @@ export default function JazzKillerModule() {
                                                 className="w-full text-left p-3 hover:bg-white/5 rounded-xl transition-all border border-transparent hover:border-white/5 group"
                                             >
                                                 <h4 className="font-bold text-xs text-neutral-200 group-hover:text-amber-400 truncate">{std.Title}</h4>
-                                                <p className="text-[10px] text-neutral-500 truncate">{std.Composer}</p>
+                                                <p className="text-[10px] text-neutral-500 truncate">{std.Composer}{std.Tempo != null ? ` • ${std.Tempo} BPM` : ''}</p>
                                             </button>
                                         ))}
                                     </div>
@@ -627,7 +724,17 @@ export default function JazzKillerModule() {
                                     )}
 
                                     {selectedStandard && (
-                                        <SmartLessonPane songId={selectedStandard.Title.toLowerCase().replace(/\s+/g, '-')} />
+                                        <SmartLessonPane
+                                            songId={selectedStandard.Title.toLowerCase().replace(/\s+/g, '-')}
+                                            songTitle={selectedStandard.Title}
+                                            songKey={selectedSong?.key}
+                                            progressionChords={currentSongChords}
+                                            measures={selectedSong?.music?.measures}
+                                            onSetBpm={setBpm}
+                                            onSetTranspose={(val) => transposeSignal.value = val}
+                                            onToggleAnalysis={toggleAnalysis}
+                                            onToggleGuideTones={toggleGuideTones}
+                                        />
                                     )}
                                 </div>
                             </>
@@ -635,22 +742,26 @@ export default function JazzKillerModule() {
 
                         {/* MAIN CONTENT */}
                         <div className="flex-1 overflow-y-auto px-1 md:px-2 custom-scrollbar transition-all duration-300">
+                            <GuideToneSpotlightEffect />
                             <LeadSheet
                                 song={selectedSong}
                                 filteredPatterns={filteredPatterns}
                                 onChordClick={handleChordClick}
                             />
+                            {guideToneSpotlightMode && <LiveNoteIndicator />}
                             <div className="h-32 xl:hidden" />
                         </div>
 
                         {/* RIGHT SIDEBAR AREA */}
-                        {(showPracticePanel || showMixer) && (
+                        {(showPracticePanel || showMixer || showLickLibrary || showMasterKeyTeacher) && (
                             <>
                                 <div
                                     className="xl:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
                                     onClick={() => {
                                         setShowMixer(false);
                                         setShowPracticePanel(false);
+                                        setShowLickLibrary(false);
+                                        setShowMasterKeyTeacher(false);
                                     }}
                                 />
                                 <div className="flex flex-col gap-4 max-h-full overflow-y-auto shrink-0 
@@ -661,7 +772,7 @@ export default function JazzKillerModule() {
 
                                     <button
                                         className="xl:hidden absolute top-4 right-4 p-2 bg-white/5 rounded-full hover:bg-white/10"
-                                        onClick={() => { setShowMixer(false); setShowPracticePanel(false); }}
+                                        onClick={() => { setShowMixer(false); setShowPracticePanel(false); setShowLickLibrary(false); setShowMasterKeyTeacher(false); }}
                                     >
                                         <X size={20} />
                                     </button>
@@ -676,6 +787,44 @@ export default function JazzKillerModule() {
                                                     <X size={16} />
                                                 </button>
                                             </div>
+
+                                            {/* Engine Toggle Toggle */}
+                                            <div className="p-4 bg-white/5 rounded-2xl border border-white/5 flex flex-col gap-3">
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center gap-2">
+                                                        <Sparkles size={16} className={isPremiumEngineSignal.value ? "text-amber-400" : "text-neutral-600"} />
+                                                        <span className="text-[10px] font-black uppercase tracking-widest text-neutral-300">Premium AI Engine</span>
+                                                    </div>
+                                                    <button
+                                                        onClick={toggleEngine}
+                                                        className={`w-10 h-5 rounded-full transition-all relative ${isPremiumEngineSignal.value ? 'bg-amber-500' : 'bg-neutral-800'}`}
+                                                    >
+                                                        <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${isPremiumEngineSignal.value ? 'left-6' : 'left-1'}`} />
+                                                    </button>
+                                                </div>
+                                                <p className="text-[9px] text-neutral-500 leading-relaxed font-medium">
+                                                    {isPremiumEngineSignal.value
+                                                        ? "Active: Ron Carter Bass, Red Garland Phrasing, Nate Smith Drums. Multi-sampled HQ audio."
+                                                        : "Active: Standard MIDI synthesis. Low latency, legacy compatibility."}
+                                                </p>
+
+                                                {isPremiumEngineSignal.value && (
+                                                    <div className="mt-2 pt-3 border-t border-white/5 space-y-2">
+                                                        <div className="flex justify-between items-end">
+                                                            <span className="text-[9px] font-bold text-neutral-500 uppercase tracking-tighter">Activity Level</span>
+                                                            <span className="text-[9px] font-mono text-amber-500">{Math.round(activityLevelSignal.value * 100)}%</span>
+                                                        </div>
+                                                        <input
+                                                            type="range"
+                                                            min="0" max="1" step="0.01"
+                                                            value={activityLevelSignal.value}
+                                                            onChange={(e) => activityLevelSignal.value = Number(e.target.value)}
+                                                            className="w-full h-1 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-amber-500"
+                                                        />
+                                                    </div>
+                                                )}
+                                            </div>
+
                                             <div className="space-y-6 md:space-y-8">
                                                 {[
                                                     { label: 'Piano', signal: pianoVolumeSignal, min: -60, max: 0, step: 1, unit: 'dB' },
@@ -705,9 +854,21 @@ export default function JazzKillerModule() {
                                     )}
 
                                     {showPracticePanel && (
-                                        <div className="flex-none">
+                                        <div className="flex-none space-y-4">
                                             <PracticeExercisePanel />
+                                            <CallAndResponseDrill />
                                         </div>
+                                    )}
+
+                                    {showLickLibrary && (
+                                        <LickLibrary
+                                            currentSongChords={currentSongChords}
+                                            onClose={() => setShowLickLibrary(false)}
+                                        />
+                                    )}
+
+                                    {showMasterKeyTeacher && (
+                                        <MasterKeyTeacher />
                                     )}
                                 </div>
                             </>
