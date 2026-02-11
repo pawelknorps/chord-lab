@@ -119,3 +119,10 @@
 - **Goal**: **New module inside JazzKiller**: timed exercises over the standards (scales, guide tones, arpeggios) in sync with playback and chart; support both mic and MIDI input. Same standard picker, same lead sheet, same band.
 - **Delivered**: ExerciseInputAdapter (mic/MIDI → getCurrentNote), StandardsExerciseEngine (getTargetSet + scoreNote), useStandardsExercise hook, StandardsExercisesPanel, JazzKiller integration (Exercises button, sidebar, panel). Unit tests: StandardsExerciseEngine.test.ts (8 passing).
 - **Planning**: `.planning/phases/13-standards-exercises/PLAN.md`, SUMMARY.md, VERIFICATION.md.
+
+## Phase 15: Standards Exercises — Error Heatmaps, Transcription & AI Analysis 🚀
+
+- **Status**: Planned.
+- **Goal**: Extend Phase 13 with error heatmaps (per measure, per exercise type: Scales • Guide Tones • Arpeggios), option to record written transcription of solo (mic or MIDI), and AI analysis of performance with advice and development suggestions.
+- **Requirements**: REQ-SBE-06 (error heatmaps), REQ-SBE-07 (record + written transcription), REQ-SBE-08 (AI analysis with advice and development suggestions).
+- **Planning**: `.planning/phases/15-standards-exercises-heatmaps-transcription-ai/PLAN.md`.

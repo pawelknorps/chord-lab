@@ -202,7 +202,7 @@
 
 ## Phase 13: Standards-Based Exercises (Scales, Guide Tones, Arpeggios)
 
-*Uses existing microphone detection and jazz standards to deliver timed exercises in sync with playback and the chart. Works for both mic and MIDI input.*
+*New **module inside JazzKiller** that delivers timed exercises over the standards: play scales, guide tones, or arpeggios in sync with playback and the chart. Uses existing mic detection and works for both mic and MIDI input.*
 
 ### REQ-SBE-01: Scale Exercise Mode
 
@@ -226,10 +226,35 @@
 - **Requirement**: All three exercise modes (scales, guide tones, arpeggios) must work with **both microphone input** and **MIDI input**.
 - **Behavior**: Single “exercise engine” that consumes either (1) pitch/MIDI from the existing mic pipeline (useITMPitchStore / pitch detection) or (2) MIDI from a connected device; same scoring and target logic for both.
 
-### REQ-SBE-05: Exercise UI and Feedback
+### REQ-SBE-05: Exercise UI and Feedback (JazzKiller module)
 
-- **Requirement**: UI to select exercise type (Scales / Guide Tones / Arpeggios), select a standard (from existing jazz library), start playback, and show real-time feedback (e.g. correct/incorrect, accuracy, target notes).
+- **Requirement**: **Inside JazzKiller**, a dedicated Exercises view/panel/tab where the user selects exercise type (Scales / Guide Tones / Arpeggios), picks a standard from the same JazzKiller library, starts playback (same band/chart), and sees real-time feedback (correct/incorrect, accuracy, target notes).
+- **Scope**: This is part of JazzKiller, not a separate app or top-level route—same standard picker, same lead sheet, same playback; exercises run over the selected standard.
 - **Optional**: Persist scores or integrate with Director/FSRS for “what to practice next.”
+
+## Phase 15: Standards Exercises — Error Heatmaps, Transcription & AI Analysis
+
+*Extends Phase 13. When the user plays over a standard (mic or MIDI) in Scales / Guide Tones / Arpeggios mode, provide error heatmaps, optional written transcription of the solo, and AI analysis with advice and development suggestions.*
+
+### REQ-SBE-06: Error Heatmaps for Standards Exercises (Scales • Guide Tones • Arpeggios)
+
+- **Requirement**: Per-measure (and optionally per-chord) visualization of hit/miss for Standards Exercises.
+- **Behavior**: For each exercise type (Scales, Guide Tones, Arpeggios), record hits and misses by measure (and optionally by chord) during a session; expose this data for visualization.
+- **UI**: Option to show an **error heatmap** on the lead sheet (e.g. overlay per measure: green/amber/red by accuracy) or in a dedicated panel (e.g. bar chart or grid over measures). User can view heatmap by exercise type (Scales vs Guide Tones vs Arpeggios).
+- **Data**: Reuse or extend `statsByMeasure` (hits/misses per measure) from `useStandardsExercise`; optionally persist per standard + exercise type for historical comparison.
+
+### REQ-SBE-07: Record Written Transcription of Solo
+
+- **Requirement**: When the user is playing over a standard (mic or MIDI), offer an option to **record** the performance and produce a **written transcription** of the solo.
+- **Behavior**: In Standards Exercises (or a dedicated "Solo over standard" mode), user can start "Record solo"; the app captures timestamped notes (pitch + onset/offset or rhythm) from the same input pipeline (mic via pitch detection or MIDI). At end of recording (or on demand), produce a written transcription: note list (e.g. "C4, E4, G4...") and/or notation (e.g. ABC, MusicXML, or internal note+rhythm format for display).
+- **Scope**: Works for both mic and MIDI input; transcription is tied to the current standard and transport (measure/beat) so it can be aligned with the chart for display or export.
+
+### REQ-SBE-08: AI Analysis of Performance with Advice and Development Suggestions
+
+- **Requirement**: After a Standards Exercise session (or on demand), provide **AI analysis** of the performance with **advice** and **further development suggestions**.
+- **Input**: Performance data: error heatmap (per measure, per exercise type), optional written transcription, accuracy (overall and per section), exercise type (Scales / Guide Tones / Arpeggios), standard name, key.
+- **Output**: AI-generated text (Gemini Nano or API): summary of strengths/weaknesses, specific advice (e.g. "Work on guide tones in the bridge"), and development suggestions (e.g. "Next: practice this tune in 3 keys" or "Focus on arpeggios in bars 17–24").
+- **Integration**: Reuse `generatePerformanceCritique`-style flow (jazzTeacherLogic); extend or add a dedicated `generateStandardsExerciseAnalysis(sessionData)` that accepts exercise heatmap, transcription snippet, and exercise type and returns pedagogical feedback.
 
 ## Technical Priorities
 1. **High**: Pitch-to-Theory Sync (Turns app from book into teacher).

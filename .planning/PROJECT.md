@@ -43,11 +43,12 @@ Transition from a music theory prototype to a full-scale "Incredible Teaching Ma
 - **Goal**: Beat 4 as chromatic or dominant approach into the next bar’s root; Beat 1 anchor, Beats 2–3 bridge.
 - **Tech**: WalkingBassEngine (tonal.js), 4-note line per bar, E1–G3 range.
 
-### 6. Standards-Based Exercises (Scales, Guide Tones, Arpeggios)
+### 6. Standards-Based Exercises (JazzKiller module)
 
-- **Concept**: Use existing mic detection and jazz standards to run timed exercises in sync with playback and the chart.
-- **Goal**: Student plays appropriate scales, guide tones, or arpeggios for each chord; real-time evaluation; works for both mic and MIDI input.
-- **Tech**: ChordScaleEngine, GuideToneCalculator, unified input adapter, StandardsExerciseEngine; JazzKiller chart + playback sync.
+- **Concept**: New **module inside JazzKiller** that runs timed exercises over the standards—scales, guide tones, arpeggios—in sync with playback and the chart.
+- **Goal**: Student picks a standard (same JazzKiller library), chooses exercise type, plays in time; real-time evaluation; works for both mic and MIDI input.
+- **Tech**: ChordScaleEngine, GuideToneCalculator, unified input adapter, StandardsExerciseEngine; JazzKiller chart + playback + standard picker (exercises as a view/panel/tab within JazzKiller).
+- **Phase 15 extension**: **Error heatmaps** (per measure, per exercise type: Scales • Guide Tones • Arpeggios) on the lead sheet or dedicated panel; option to **record** a solo and get a **written transcription**; **AI analysis** of performance with advice and development suggestions (Gemini Nano / API).
 
 ## Key Decisions
 
