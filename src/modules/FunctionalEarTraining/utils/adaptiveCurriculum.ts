@@ -60,14 +60,11 @@ function getSimilarQualities(itemKey: string): string[] {
   return [itemKey];
 }
 
-/** Harder intervals: m2, M7 (outer edges). */
-const BASE_INTERVALS = ['M2', 'm3', 'M3', 'P4', '#4/b5', 'P5', 'm6', 'M6', 'm7'];
-const EXTENDED_INTERVALS = ['m2', 'M2', 'm3', 'M3', 'P4', '#4/b5', 'P5', 'm6', 'M6', 'm7', 'M7', 'P8'];
-
 export interface PoolItem {
   name: string;
   semitones?: number;
   intervals?: number[];
+  interval?: number;
   label?: string;
   flavor?: string;
 }
@@ -82,7 +79,6 @@ export function getNextChallenge<T extends PoolItem>(
   extendedPool: T[] | null,
   lastItemKey: string | null
 ): T {
-  const state = useEarPerformanceStore.getState();
   const doRepeat = shouldRepeatSimilar();
   const doHarder = extendedPool && extendedPool.length > 0 && shouldIncreaseDifficulty();
 

@@ -20,6 +20,7 @@ import { PositionsLevel } from './components/levels/PositionsLevel';
 import { JazzStandardsLevel } from './components/levels/JazzStandardsLevel';
 import { ProgressionsLevel } from './components/levels/ProgressionsLevel';
 import { HUD } from './components/HUD';
+import { FocusAreaPanel } from './components/FocusAreaPanel';
 import { useMasteryStore } from '../../core/store/useMasteryStore';
 import { useAudioCleanup } from '../../hooks/useAudioManager';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -130,7 +131,10 @@ export function FunctionalEarTraining() {
                         <Brain size={16} className="text-[var(--accent)]" />
                         <span className="font-semibold tracking-tight">{levels.find(l => l.id === level)?.label}</span>
                     </div>
-                    <HUD />
+                    <div className="flex items-center gap-6">
+                        <HUD />
+                        <FocusAreaPanel />
+                    </div>
                 </header>
 
                 {/* Content Container */}

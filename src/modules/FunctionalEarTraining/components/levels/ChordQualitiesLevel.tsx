@@ -112,7 +112,7 @@ export function ChordQualitiesLevel() {
         }
         const data = currentMode === 'Triads' ? TRIADS : currentMode === 'Sevenths' ? SEVENTHS : EXTENSIONS;
         const extended = difficulty === 'Pro' && currentMode === 'Sevenths' ? EXTENSIONS : null;
-        const randomItem = getNextChallenge('ChordQualities', data, extended, targetAnswer);
+        const randomItem = getNextChallenge('ChordQualities', data as { name: string }[], extended as { name: string }[] | null, targetAnswer);
         setTargetAnswer(randomItem.name);
         playDrillItem(randomItem);
     }, [currentMode, externalData]);

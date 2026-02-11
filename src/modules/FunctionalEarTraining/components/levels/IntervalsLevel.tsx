@@ -4,7 +4,7 @@ import { useEarPerformanceStore } from '../../state/useEarPerformanceStore';
 import { useMasteryStore } from '../../../../core/store/useMasteryStore';
 import { useMidi } from '../../../../context/MidiContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Play, X, ArrowRight, Music, Activity, RotateCcw, SkipForward, Keyboard } from 'lucide-react';
+import { Play, X, ArrowRight, Activity, RotateCcw, SkipForward, Keyboard } from 'lucide-react';
 import * as Tone from 'tone';
 import { diagnoseEarError } from '../../utils/earDiagnosis';
 import { getEarHint } from '../../../../core/services/earHintService';
@@ -64,29 +64,6 @@ export const IntervalsLevel: React.FC = () => {
         });
     }, []);
 
-    useEffect(() => {
-        if (!challenge) loadNewChallenge(null);
-    }, [challenge, loadNewChallenge]);
-
-    useEffect(() => {
-        if (!lastNote || lastNote.type !== 'noteon' || !challenge || result === 'correct') return;
-        const now = performance.now();
-        if (lastMidiGradedRef.current && lastMidiGradedRef.current.note === lastNote.note && now - lastMidiGradedRef.current.ts < MIDI_DEBOUNCE_MS) return;
-        lastMidiGradedRef.current = { note: lastNote.note, ts: now };
-
-        let playedSemitones = lastNote.note - challenge.rootMidi;
-        if (playedSemitones < 0) playedSemitones += 12;
-        if (playedSemitones > 12) playedSemitones = playedSemitones % 12 || 12;
-
-        const matched = ALL_INTERVALS.find(i => i.semitones === playedSemitones);
-        if (matched) {
-            setSelectedInterval(matched.name);
-            handleAnswer(matched.name);
-        } else {
-            setMidiFeedback(`PLAYED: semitone ${playedSemitones}`);
-        }
-    }, [lastNote, challenge, result, handleAnswer]);
-
     const playAudio = async () => {
         if (!challenge) return;
         setPlaying(true);
@@ -144,6 +121,25 @@ export const IntervalsLevel: React.FC = () => {
             }
         }
     }, [challenge, result, difficulty, streak, addScore, addExperience, updateStreak, loadNewChallenge, recordAttempt]);
+
+    useEffect(() => {
+        if (!lastNote || lastNote.type !== 'noteon' || !challenge || result === 'correct') return;
+        const now = performance.now();
+        if (lastMidiGradedRef.current && lastMidiGradedRef.current.note === lastNote.note && now - lastMidiGradedRef.current.ts < MIDI_DEBOUNCE_MS) return;
+        lastMidiGradedRef.current = { note: lastNote.note, ts: now };
+
+        let playedSemitones = lastNote.note - challenge.rootMidi;
+        if (playedSemitones < 0) playedSemitones += 12;
+        if (playedSemitones > 12) playedSemitones = playedSemitones % 12 || 12;
+
+        const matched = ALL_INTERVALS.find(i => i.semitones === playedSemitones);
+        if (matched) {
+            setSelectedInterval(matched.name);
+            handleAnswer(matched.name);
+        } else {
+            setMidiFeedback(`PLAYED: semitone ${playedSemitones}`);
+        }
+    }, [lastNote, challenge, result, handleAnswer]);
 
     if (!challenge) return null;
 
@@ -262,7 +258,7 @@ export const IntervalsLevel: React.FC = () => {
                                 </button>
                                 <button
                                     type="button"
-                                    onClick={loadNewChallenge}
+                                    onClick={() => loadNewChallenge(challenge)}
                                     className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/15 border border-white/10 text-white/60 text-xs font-bold uppercase tracking-wider transition-all"
                                 >
                                     <SkipForward size={14} /> Skip
@@ -275,7 +271,7 @@ export const IntervalsLevel: React.FC = () => {
 
             <button
                 className="group flex items-center gap-4 text-white/20 hover:text-white transition-all font-black uppercase text-[10px] tracking-[0.3em]"
-                onClick={loadNewChallenge}
+                onClick={() => loadNewChallenge(challenge)}
             >
                 RECALIBRATE
                 <div className="p-3 bg-white/5 rounded-full group-hover:bg-white/10 transition-all group-hover:translate-x-1 group-hover:text-indigo-400 border border-white/5">
