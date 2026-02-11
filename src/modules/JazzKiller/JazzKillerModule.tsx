@@ -6,11 +6,6 @@ import { PracticeTips } from './components/PracticeTips';
 import { useJazzEngine } from './hooks/useJazzEngine';
 import {
     transposeSignal,
-    pianoVolumeSignal,
-    bassVolumeSignal,
-    drumsVolumeSignal,
-    pianoReverbSignal,
-    reverbVolumeSignal,
     isPremiumEngineSignal,
     activityLevelSignal,
     proactiveAdviceSignal,
@@ -42,6 +37,8 @@ import { useGuidedPracticeStore } from '../../core/store/useGuidedPracticeStore'
 import { useMasteryTreeStore } from '../../core/store/useMasteryTreeStore';
 import * as MicrophoneService from '../../core/audio/MicrophoneService';
 import { MasteryTreeView } from '../../components/MasteryTree/MasteryTreeView';
+import { PremiumMixer } from './components/PremiumMixer';
+import { NoteWaterfall } from './components/NoteWaterfall';
 
 export default function JazzKillerModule() {
     useAudioCleanup('jazz-killer');
@@ -127,8 +124,22 @@ export default function JazzKillerModule() {
         togglePlayback,
         playChord,
         setBpm,
-        toggleEngine
+        toggleEngine,
+        onNote
     } = useJazzEngine(selectedSong);
+
+    const pushNoteToWaterfallRef = useRef<((note: { midi: number; velocity: number; type: 'root' | 'third' | 'fifth' | 'seventh' | 'extension'; duration?: number }) => void) | null>(null);
+    useEffect(() => {
+        if (!onNote) return;
+        onNote((note) => {
+            pushNoteToWaterfallRef.current?.({
+                midi: note.midi,
+                velocity: note.velocity,
+                type: note.type,
+                duration: note.duration
+            });
+        });
+    }, [onNote]);
 
     // Scan standards for ii-V-I patterns on mount
     useEffect(() => {
@@ -822,6 +833,13 @@ export default function JazzKillerModule() {
                         {/* MAIN CONTENT */}
                         <div className="flex-1 min-w-0 overflow-y-auto overflow-x-auto px-1 md:px-2 custom-scrollbar transition-all duration-300">
                             <GuideToneSpotlightEffect />
+                            {selectedStandard && (
+                                <div className="h-20 w-full rounded-xl overflow-hidden bg-black/30 border border-white/5 mb-2">
+                                    <NoteWaterfall
+                                        onNoteEvent={(push) => { pushNoteToWaterfallRef.current = push; }}
+                                    />
+                                </div>
+                            )}
                             <LeadSheet
                                 song={selectedSong}
                                 filteredPatterns={filteredPatterns}
@@ -857,16 +875,7 @@ export default function JazzKillerModule() {
                                     </button>
 
                                     {showMixer && (
-                                        <div className="bg-neutral-900/40 backdrop-blur-md rounded-3xl border border-white/5 p-4 md:p-6 flex flex-col gap-6 md:gap-8">
-                                            <div className="flex items-center justify-between">
-                                                <h3 className="text-sm font-black uppercase tracking-widest text-neutral-400 flex items-center gap-2">
-                                                    <Volume2 size={16} /> MIXER
-                                                </h3>
-                                                <button onClick={() => setShowMixer(false)} className="hidden xl:block text-neutral-600 hover:text-white transition-colors">
-                                                    <X size={16} />
-                                                </button>
-                                            </div>
-
+                                        <div className="space-y-6">
                                             {/* Engine Toggle Toggle */}
                                             <div className="p-4 bg-white/5 rounded-2xl border border-white/5 flex flex-col gap-3">
                                                 <div className="flex items-center justify-between">
@@ -904,30 +913,11 @@ export default function JazzKillerModule() {
                                                 )}
                                             </div>
 
-                                            <div className="space-y-6 md:space-y-8">
-                                                {[
-                                                    { label: 'Piano', signal: pianoVolumeSignal, min: -60, max: 0, step: 1, unit: 'dB' },
-                                                    { label: 'Piano Reverb', signal: pianoReverbSignal, min: 0, max: 1, step: 0.01, unit: '%' },
-                                                    { label: 'Double Bass', signal: bassVolumeSignal, min: -60, max: 0, step: 1, unit: 'dB' },
-                                                    { label: 'Drums', signal: drumsVolumeSignal, min: -60, max: 0, step: 1, unit: 'dB' },
-                                                    { label: 'Master Reverb', signal: reverbVolumeSignal, min: 0, max: 1, step: 0.01, unit: '%' }
-                                                ].map((ctrl, i) => (
-                                                    <div key={i} className="space-y-3">
-                                                        <div className="flex justify-between items-end">
-                                                            <span className="text-xs font-bold text-neutral-500 uppercase tracking-tighter">{ctrl.label}</span>
-                                                            <span className="text-xs font-mono text-amber-500">
-                                                                {ctrl.unit === '%' ? Math.round(ctrl.signal.value * 100) : ctrl.signal.value}{ctrl.unit}
-                                                            </span>
-                                                        </div>
-                                                        <input
-                                                            type="range"
-                                                            min={ctrl.min} max={ctrl.max} step={ctrl.step}
-                                                            value={ctrl.signal.value}
-                                                            onChange={(e) => ctrl.signal.value = Number(e.target.value)}
-                                                            className="w-full h-1.5 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-amber-500"
-                                                        />
-                                                    </div>
-                                                ))}
+                                            <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl">
+                                                <p className="text-[10px] text-amber-500 font-bold leading-relaxed mb-3 uppercase tracking-widest">Master Control Panel Open</p>
+                                                <p className="text-[9px] text-neutral-400 leading-relaxed flex items-center gap-2">
+                                                    <Volume2 size={12} /> Use the Studio Mixer for per-track volume, mute, and solo.
+                                                </p>
                                             </div>
                                         </div>
                                     )}
@@ -973,16 +963,18 @@ export default function JazzKillerModule() {
             {/* Mastery Tree View */}
             {showMasteryTree && (
                 <div className="fixed inset-0 z-[250] p-6 lg:p-12 pb-24 md:pb-12 bg-black flex flex-col animate-in fade-in duration-300 overflow-hidden">
-                    <div className="flex justify-between items-center mb-6">
-                        <div className="flex flex-col">
-                            <h2 className="text-3xl font-black text-white tracking-tighter uppercase italic">Curriculum</h2>
-                            <p className="text-xs font-bold text-neutral-500 tracking-[0.2em] uppercase">Master the Standards</p>
+                    <div className="flex items-center justify-between mb-8">
+                        <div>
+                            <h1 className="text-4xl font-black text-white tracking-tighter italic uppercase flex items-center gap-4">
+                                <Trophy size={32} className="text-amber-500" /> Mastery Tree
+                            </h1>
+                            <p className="text-neutral-500 font-bold tracking-[0.3em] uppercase text-xs mt-1">Curriculum & Song Unlock System</p>
                         </div>
                         <button
                             onClick={() => setShowMasteryTree(false)}
-                            className="bg-white/5 hover:bg-white/10 text-white p-3 rounded-2xl border border-white/10 transition-all"
+                            className="p-4 bg-white/5 rounded-full hover:bg-white/10 text-white transition-all group"
                         >
-                            <X size={24} />
+                            <X size={24} className="group-hover:rotate-90 transition-transform" />
                         </button>
                     </div>
                     <div className="flex-1 min-h-0 bg-neutral-900/50 rounded-[40px] border border-white/5 overflow-hidden">
@@ -990,6 +982,8 @@ export default function JazzKillerModule() {
                     </div>
                 </div>
             )}
+
+            {showMixer && <PremiumMixer onClose={() => setShowMixer(false)} />}
         </div>
     );
 }
