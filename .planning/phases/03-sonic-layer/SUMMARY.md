@@ -31,4 +31,7 @@ Phase 3 was **started but not formally completed**. The following were already i
 - **Wave 2**: Completed.
   - **W2-T2** — NoteWaterfall now uses `Tone.Transport.seconds` for scroll time so visuals stay in sync with audio and freeze when transport stops.
   - **W2 wiring** — `JazzKillerModule` imports `NoteWaterfall`, keeps a ref to the push callback, registers with `onNote` from `useJazzEngine`, and renders the waterfall in a strip above the LeadSheet when a song is selected. Canvas is sized via ResizeObserver on its container.
-- **Wave 3**: To be executed next (ToneSpectrumAnalyzer, Acoustic Feedback, performance audit).
+- **Wave 3**: Completed.
+  - **W3-T1** — `ToneSpectrumAnalyzer`: Canvas component driven by `useMicSpectrum` hook; real-time FFT (2048, getByteFrequencyData) from app-wide mic stream; bar chart of harmonic overtones; shows “Enable mic” when inactive.
+  - **W3-T2** — `AcousticFeedbackWidget`: Warmth (low bins) and Brightness (high bins) from same FFT; progress bars and percentages; shown in sidebar with spectrum when mixer is open.
+  - **W3-T3** — Performance: Note Waterfall uses Transport.seconds and a single rAF loop; spectrum updates ref every frame and throttles React state to every 3 frames; canvas resize via ResizeObserver. No heavy work on main thread beyond existing Tone/analyser usage.

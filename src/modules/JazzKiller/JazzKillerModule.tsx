@@ -39,6 +39,10 @@ import * as MicrophoneService from '../../core/audio/MicrophoneService';
 import { MasteryTreeView } from '../../components/MasteryTree/MasteryTreeView';
 import { PremiumMixer } from './components/PremiumMixer';
 import { NoteWaterfall } from './components/NoteWaterfall';
+import { ToneSpectrumAnalyzer } from './components/ToneSpectrumAnalyzer';
+import { AcousticFeedbackWidget } from './components/AcousticFeedbackWidget';
+import { ToneSpectrumAnalyzer } from './components/ToneSpectrumAnalyzer';
+import { AcousticFeedbackWidget } from './components/AcousticFeedbackWidget';
 
 export default function JazzKillerModule() {
     useAudioCleanup('jazz-killer');
@@ -918,6 +922,11 @@ export default function JazzKillerModule() {
                                                 <p className="text-[9px] text-neutral-400 leading-relaxed flex items-center gap-2">
                                                     <Volume2 size={12} /> Use the Studio Mixer for per-track volume, mute, and solo.
                                                 </p>
+                                            </div>
+                                            <div className="space-y-3">
+                                                <p className="text-[10px] font-black text-neutral-500 uppercase tracking-widest">Tone Analysis</p>
+                                                <ToneSpectrumAnalyzer />
+                                                <AcousticFeedbackWidget />
                                             </div>
                                         </div>
                                     )}
