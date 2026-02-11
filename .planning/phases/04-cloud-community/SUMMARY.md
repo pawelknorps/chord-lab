@@ -8,6 +8,20 @@
 - **W1-T4**: `useSupabaseProgressSync` hook: push local `useProfileStore` progress to Supabase (upsert), hydrate from Supabase on sign-in; `mergeProgressFromCloud` on profile store.
 - **W1-T5**: `SyncBridge` in App mounts the sync hook; hydrate on sign-in then push once; debounced sync on profile changes.
 
-## Wave 2: Teacher Dashboard UI (in progress)
+## Wave 2: Teacher Dashboard UI ✅
 
-- Pending: schema extension (classrooms, classroom_students), TeacherDashboard page/route, StudentProgressView, teacher role guard.
+- Schema: `classrooms`, `classroom_students`, RLS for teachers and students.
+- TeacherDashboard page at `/teacher-dashboard`, ClassroomList (create classroom, invite code), StudentProgressView (per-student BPM, mastered).
+- Teacher nav link in Dashboard when `profile.role === 'teacher'`.
+
+## Wave 3: Lick Social Feed ✅
+
+- `licks` table and RLS; useLickFeed hook (fetch public licks, publishLick).
+- "Publish to feed" in LickLibrary (when signed in); LickFeed component with "Copy to my library" (addLickToLocalLibrary).
+- Route `/lick-feed`, "Browse feed" link in Lick Library.
+
+## Wave 4: PWA Optimization ✅
+
+- Updated `public/manifest.json`: name "Chord Lab", description, categories, icons (logo128, logo512), display standalone.
+- Added `vite-plugin-pwa` with autoUpdate and includeAssets; manifest: false (use existing manifest).
+- **Limitations**: Auth and progress sync require network; app shell and static assets load from cache when offline.

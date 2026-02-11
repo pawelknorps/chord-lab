@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useLickFeed, type FeedLick } from '../../hooks/useLickFeed';
 import { addLickToLocalLibrary } from '../../modules/JazzKiller/components/LickLibrary';
 import { clsx } from 'clsx';
