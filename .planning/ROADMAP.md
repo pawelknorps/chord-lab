@@ -67,11 +67,11 @@
 - [x] **Step 32**: **Migration and integration**: Migrate BiTonal Sandbox to shared mic service; at least one other module uses handler (Guide Tone or Call & Response).
 - **Success Criteria**: One mic permission and one stream; Harmonic Mirror in use (Guide Tone or Call & Response); Live Note indicator and noise gate; "Ignore Rhythm" UX; playing yields pitch/notes validated by Tonal.js; optional clapping yields beat/tempo.
 
-## Phase 4b: Full Responsive Audit (Workbench, Standards, All Exercises)
+## Phase 4b: Full Responsive Audit (Workbench, Standards, All Exercises) ✅
 *Goal: Ensure Workbench, Jazz Standards, and every exercise module render well on all screen sizes including mobile. Extends Phase 4 layout work.*
-- [ ] **Step 10b**: Audit **Workbench** (Dashboard + ChordLab): verify layout, controls, Piano/Fretboard, Progression Builder at 375px and 320px.
-- [ ] **Step 10c**: Audit **Standards** (JazzKiller): song list, lead sheet, practice studio, drill panels, Smart Lesson at 375px and 320px.
-- [ ] **Step 10d**: Audit remaining exercises: ChordBuildr, BiTonalSandbox, GripSequencer, Tonnetz, NegativeMirror, BarryHarris, RhythmArchitect, FunctionalEarTraining, CircleChords, MidiLibrary, ProgressionsPage; fix horizontal scroll and overflow.
+- [x] **Step 10b**: Audit **Workbench** (Dashboard + ChordLab): verify layout, controls, Piano/Fretboard, Progression Builder at 375px and 320px.
+- [x] **Step 10c**: Audit **Standards** (JazzKiller): song list, lead sheet, practice studio, drill panels, Smart Lesson at 375px and 320px.
+- [x] **Step 10d**: Audit remaining exercises: ChordBuildr, BiTonalSandbox, GripSequencer, Tonnetz, NegativeMirror, BarryHarris, RhythmArchitect, FunctionalEarTraining, CircleChords, MidiLibrary, ProgressionsPage; fix horizontal scroll and overflow.
 - **Success Criteria**: No horizontal scroll at 375px and 320px; Workbench and Standards are fully usable on mobile; all modules pass REQ-RESP-01–05.
 
 ## Phase 9: Adaptive Ear Training with MIDI-Supported AI ✅

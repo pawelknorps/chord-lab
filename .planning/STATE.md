@@ -24,6 +24,7 @@
 - **Phase 9: Adaptive Ear Training with MIDI-Supported AI**: 100% (IntervalsLevel + ChordQualitiesLevel MIDI, useEarPerformanceStore, adaptiveCurriculum, earFocusService, FocusAreaPanel; Step 38 deferred) ✅
 
 ## Recently Completed / Updated
+- [x] **Phase 4b – Full Responsive Audit**: Shell constraints (Dashboard main min-w-0, ChordLab root containment); Workbench ChordLabDashboard min-w-0 max-w-full; Standards JazzKiller min-w-0, LeadSheet overflow-auto; all exercises (ChordBuildr, BiTonalSandbox, Tonnetz, NegativeMirror, BarryHarris, GripSequencer, RhythmArchitect, FunctionalEarTraining, CircleChords, MidiLibrary, ProgressionsPage) given min-w-0 and containment. PositionsLevel fretboard overflow-x-auto; MidiLibrary min-w-[200px]. AUDIT.md completed. Commits: cf7d0f5, ed205a1, 9b6f99e, d9ab1fe.
 - [x] **Phase 9 – Adaptive Ear Training with MIDI-Supported AI**: IntervalsLevel MIDI input (useMidi, debounce, PLAYED feedback); ChordQualitiesLevel MIDI for Novice Triads + Advanced Sevenths; useEarPerformanceStore (recordAttempt, getProfile); adaptiveCurriculum (shouldRepeatSimilar, shouldIncreaseDifficulty, getNextChallenge); earFocusService (getFocusAreaSuggestion); FocusAreaPanel in FET header. Step 38 (BassLevel/HarmonicContextLevel MIDI) deferred.
 - [x] **Plan – Adaptive Ear Training with MIDI-Supported AI**: New milestone `.planning/milestones/adaptive-ear-midi-ai/` (PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md). PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md updated with initiative: MIDI input in Intervals/ChordQualities; performance store and error profiling; adaptive curriculum (repeat on struggle, harder when ready); AI focus-area suggestions via Nano. Phase 9 (Steps 33–38) added to ROADMAP. REQ-ADAPT-EAR-01–05 added.
 - [x] **Phase 8 – Universal Microphone Handler & Harmonic Mirror**: MicrophoneService, useMicrophone, pitchDetection (ml5 + RMS noise gate), useAuralMirror, LiveNoteIndicator; Guide Tone Spotlight (store, GuideToneSpotlightEffect, green bar in LeadSheet, Mic toggle in JazzKiller); CallAndResponseDrill (Practice Panel, Nano tip on miss); BiTonal Sandbox migration (SingingArchitect accepts stream prop); modes/subscription doc; Step 31 clapping deferred.
@@ -43,8 +44,8 @@
 - [x] Defined Chord Lab AI chatbot and AI drill actions in PROJECT.md, REQUIREMENTS.md, ROADMAP.md.
 
 ## Responsive Layout (Phase 4b)
-**Status**: Planned  
-**Goal**: Ensure Workbench, Standards (JazzKiller), and all exercises render well on every screen size including mobile. REQ-RESP-01–05; Phase 4b (Steps 10b–10d) in ROADMAP; PLAN and AUDIT updated in `04-responsiveness-ux-polish/`.
+**Status**: Complete ✅  
+**Goal**: Ensure Workbench, Standards (JazzKiller), and all exercises render well on every screen size including mobile. REQ-RESP-01–05. Phase 4b (Steps 10b–10d) executed; SUMMARY.md, VERIFICATION.md, AUDIT.md updated.
 
 ## Currently Working On
 - **Focus**: Make the Chord Lab AI assistant work—verify end-to-end flow (open Smart Lesson → Progression Assistant chat → ask about progression → get answer); improve discoverability if needed; fix any bugs (e.g. chord format, LocalAgentService init); ensure clear UX (loading, errors, Nano banner).
