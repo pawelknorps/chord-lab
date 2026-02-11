@@ -6,7 +6,7 @@ Target viewport: 375px and 320px (mobile). Check: overflow-x, min-width on wide 
 
 | Section | Scope | Horizontal scroll? | Note |
 |---------|-------|--------------------|------|
-| **Workbench** | Dashboard + ChordLab (default home) | To verify | Nav, slots, Piano, Fretboard, Progression Builder, WorkbenchAiPanel at 375px/320px. |
+| **Workbench** | Dashboard + ChordLab (default home) | Fixed | min-w-0 on Dashboard main; ChordLab root containment; ChordLabDashboard min-w-0 max-w-full; Piano/Fretboard overflow-x-auto. Phase 4b Wave 1. |
 | **Standards** | JazzKiller (`/jazz-standards`) | To verify | Song list, lead sheet, practice studio, drill panels, Smart Lesson. |
 
 ## All Exercises (REQ-RESP-01)

@@ -7,7 +7,7 @@ import { ProgressionBuilder } from '../modules/ChordLab/components/ProgressionBu
 import { ConstantStructureTool } from '../modules/ChordLab/components/ConstantStructureTool';
 import { SmartLibrary } from '../modules/ChordLab/components/SoundLibrary/SmartLibrary';
 import type { ChordInfo, Progression } from '../core/theory';
-import { midiToNoteName } from '../core/theory';
+import { midiToNoteName, noteNameToMidi } from '../core/theory';
 import type { Style } from '../core/audio/globalAudio';
 import { Mixer } from '../modules/ChordLab/components/Mixer';
 import { PracticeTips } from '../modules/ChordLab/components/PracticeTips';
@@ -46,6 +46,7 @@ interface ChordLabDashboardProps {
     onExportMidi: () => void;
     onSlotClick: (index: number) => void;
     onRemoveChord: (index: number) => void;
+    onMoveChord: (fromIndex: number, toIndex: number) => void;
     onClearProgression: () => void;
     onAddStructureChord: (chord: ChordInfo) => void;
     onSelectPreset: (preset: Progression) => void;
@@ -54,7 +55,7 @@ interface ChordLabDashboardProps {
 
     // Chord Builder
     buildingNotes: number[];
-    builtChord: { root: string; quality: string } | null;
+    builtChord: { root: string; quality: string; bass?: string } | null;
     onNoteToggle: (note: number) => void;
     onAddBuiltChord: () => void;
     onClearBuilder: () => void;
@@ -70,7 +71,7 @@ export function ChordLabDashboard({
     progression, playingIndex, midiNotes, visualizedNotes, highlightedNotes,
     isLooping, onLoopToggle, transposeSettings, onTransposeSettingsChange,
     onKeyChange, onScaleChange, onVoicingChange, onStyleChange, onBpmChange, onPlay, onStop, onExportMidi,
-    onSlotClick, onRemoveChord, onClearProgression, onAddStructureChord, onSelectPreset, onImportMidi, onAddChord,
+    onSlotClick, onRemoveChord, onMoveChord, onClearProgression, onAddStructureChord, onSelectPreset, onImportMidi, onAddChord,
     buildingNotes, builtChord, onNoteToggle, onAddBuiltChord, onClearBuilder,
     availableChords, userPresets, onSaveUserPreset
 }: ChordLabDashboardProps) {
@@ -117,7 +118,7 @@ export function ChordLabDashboard({
     }, [progression, selectedKey]);
 
     return (
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-6 min-w-0 max-w-full">
             {/* --- ROW 1: Controls --- */}
             <div className="w-full flex items-start gap-3">
                 <div className="flex-1">
@@ -169,8 +170,8 @@ export function ChordLabDashboard({
 
             {/* --- ROW 2: Visualization (Piano / Fretboard) --- */}
             {(showPiano || showFretboard) && (
-                <div className="w-full">
-                    <div className="bg-[var(--bg-panel)] border border-[var(--border-subtle)] rounded-lg p-6 relative overflow-x-auto flex flex-col justify-center min-h-[160px] shadow-sm">
+                <div className="w-full min-w-0 max-w-full">
+                    <div className="bg-[var(--bg-panel)] border border-[var(--border-subtle)] rounded-lg p-6 relative overflow-x-auto flex flex-col justify-center min-h-[160px] shadow-sm max-w-full">
                         {/* Chord Builder Panel */}
                         {buildingNotes.length > 0 && (
                             <div className="absolute top-4 right-6 z-20 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-lg p-4 shadow-lg min-w-[200px]">
@@ -196,7 +197,7 @@ export function ChordLabDashboard({
                                 {builtChord && buildingNotes.length >= 3 && (
                                     <>
                                         <div className="text-2xl font-bold text-white mb-3">
-                                            {builtChord.root}{builtChord.quality === 'maj' ? '' : builtChord.quality}
+                                            {builtChord.root}{builtChord.quality === 'maj' ? '' : builtChord.quality === 'min' ? 'm' : builtChord.quality}{builtChord.bass ? `/${builtChord.bass}` : ''}
                                         </div>
                                         <button
                                             onClick={onAddBuiltChord}
@@ -225,7 +226,7 @@ export function ChordLabDashboard({
                                         activeNotes={displayedNotes}
                                         highlightedNotes={[...highlightedNotes, ...buildingNotes]}
                                         showLabels="chord-tone"
-                                        rootNote={buildingNotes.length > 0 ? Math.min(...buildingNotes) : (displayedNotes.length > 0 ? Math.min(...displayedNotes) : undefined)}
+                                        rootNote={builtChord ? noteNameToMidi(builtChord.root + '4') : (buildingNotes.length > 0 ? Math.min(...buildingNotes) : (displayedNotes.length > 0 ? Math.min(...displayedNotes) : undefined))}
                                         onNoteClick={onNoteToggle}
                                     />
                                 </div>
@@ -236,12 +237,14 @@ export function ChordLabDashboard({
                                     <UnifiedFretboard
                                         mode="chord-tones"
                                         activeNotes={displayedNotes}
-                                        highlightedNotes={[...highlightedNotes, ...buildingNotes]}
+                                        highlightedNotes={buildingNotes}
+                                        highlightByPitchClass={true}
                                         fretRange={[0, 15]}
                                         showFretNumbers={true}
                                         showStringNames={true}
                                         interactive={true}
-                                        rootNote={buildingNotes.length > 0 ? Math.min(...buildingNotes) : (displayedNotes.length > 0 ? Math.min(...displayedNotes) : undefined)}
+                                        playSound={false}
+                                        rootNote={builtChord ? noteNameToMidi(builtChord.root + '4') : (buildingNotes.length > 0 ? Math.min(...buildingNotes) : (displayedNotes.length > 0 ? Math.min(...displayedNotes) : undefined))}
                                         onNoteClick={onNoteToggle}
                                     />
                                 </div>
@@ -271,7 +274,7 @@ export function ChordLabDashboard({
                                 <div className="text-xl font-bold flex items-baseline gap-0.5">
                                     {chord.root}
                                     <span className="text-xs font-normal text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">
-                                        {chord.quality === 'maj' ? '' : chord.quality}
+                                        {chord.quality === 'maj' ? '' : chord.quality === 'min' ? 'm' : chord.quality}{chord.bass ? `/${chord.bass}` : ''}
                                     </span>
                                 </div>
                             </button>
@@ -284,6 +287,7 @@ export function ChordLabDashboard({
                     progression={progression}
                     playingIndex={playingIndex}
                     onRemoveChord={onRemoveChord}
+                    onMoveChord={onMoveChord}
                     onChordClick={onSlotClick}
                     onClear={onClearProgression}
                     onSave={onSaveUserPreset}
