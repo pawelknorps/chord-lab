@@ -1,14 +1,27 @@
 /**
  * Standards-Based Exercises panel (Phase 13). Inside JazzKiller: play scales,
  * guide tones, or arpeggios in time with the chart; real-time feedback; Mic or MIDI.
+ * Latency offset (ms) aligns detected pitch with the chord the user was actually playing.
+ * Phase 15: syncs statsByMeasure to heatmap store for Lead Sheet error heatmap.
  */
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSignals } from '@preact/signals-react/runtime';
 import { isPlayingSignal } from '../state/jazzSignals';
 import { useStandardsExercise } from '../hooks/useStandardsExercise';
+import { useStandardsExerciseHeatmapStore } from '../state/useStandardsExerciseHeatmapStore';
 import type { ExerciseType } from '../core/StandardsExerciseEngine';
 import type { ExerciseInputSource } from '../core/ExerciseInputAdapter';
-import { Target, Mic, Keyboard, Check, X, RotateCcw } from 'lucide-react';
+import * as Tone from 'tone';
+import { Target, Mic, Keyboard, Check, X, RotateCcw, Zap } from 'lucide-react';
+
+const DEFAULT_LATENCY_MS = 80;
+const MIN_LATENCY_MS = 0;
+const MAX_LATENCY_MS = 300;
+
+export interface StandardsExercisesPanelProps {
+    /** Chord at transport time t (for latency-adjusted scoring). When provided, scoring uses chord at (now - latencyMs). */
+    getChordAtTransportTime?: (t: number) => string;
+}
 
 const EXERCISE_TYPES: { id: ExerciseType; label: string }[] = [
     { id: 'scale', label: 'Scales' },
@@ -16,12 +29,23 @@ const EXERCISE_TYPES: { id: ExerciseType; label: string }[] = [
     { id: 'arpeggio', label: 'Arpeggios' }
 ];
 
-export function StandardsExercisesPanel() {
+export function StandardsExercisesPanel({ getChordAtTransportTime }: StandardsExercisesPanelProps = {}) {
     useSignals();
     const [exerciseType, setExerciseType] = useState<ExerciseType>('scale');
     const [inputSource, setInputSource] = useState<ExerciseInputSource>('mic');
+    const [latencyMs, setLatencyMs] = useState(DEFAULT_LATENCY_MS);
     const isPlaying = isPlayingSignal.value;
 
+    const playCalibrationTone = () => {
+        try {
+            const syn = new Tone.Synth().toDestination();
+            syn.triggerAttackRelease('C4', '8n');
+        } catch {
+            // ignore
+        }
+    };
+
+    const setHeatmap = useStandardsExerciseHeatmapStore((s) => s.setHeatmap);
     const {
         currentChord,
         targetSet,
@@ -29,13 +53,38 @@ export function StandardsExercisesPanel() {
         accuracy,
         hits,
         misses,
+        accuracyLast4,
+        hitsLast4,
+        missesLast4,
+        statsByMeasure,
+        exerciseType: currentExerciseType,
         isReady,
-        resetSession
+        resetSession,
+        runCalibration
     } = useStandardsExercise({
         exerciseType,
         inputSource,
-        active: true
+        active: true,
+        getChordAtTransportTime,
+        latencyMs,
+        onRequestCalibrationTone: playCalibrationTone
     });
+
+    // Phase 15: sync exercise heatmap to store so Lead Sheet can show error heatmap
+    useEffect(() => {
+        setHeatmap(statsByMeasure, currentExerciseType);
+    }, [statsByMeasure, currentExerciseType, setHeatmap]);
+
+    const [calibrating, setCalibrating] = useState(false);
+    const handleCalibrate = async () => {
+        setCalibrating(true);
+        try {
+            const measured = await runCalibration();
+            setLatencyMs(Math.min(MAX_LATENCY_MS, Math.max(MIN_LATENCY_MS, measured)));
+        } finally {
+            setCalibrating(false);
+        }
+    };
 
     return (
         <div className="bg-neutral-900/60 backdrop-blur-xl border border-white/10 rounded-3xl p-6 flex flex-col gap-6 shadow-2xl relative overflow-hidden">
@@ -84,10 +133,45 @@ export function StandardsExercisesPanel() {
                 </div>
             </div>
 
-            {/* Playback hint */}
+            {/* Latency offset: aligns detected pitch with chord user was playing */}
+            {getChordAtTransportTime && (
+                <div>
+                    <div className="flex items-center justify-between mb-1">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-neutral-500">Latency (ms)</p>
+                        <span className="text-xs font-mono text-neutral-400 tabular-nums">{latencyMs} ms</span>
+                    </div>
+                    <input
+                        type="range"
+                        min={MIN_LATENCY_MS}
+                        max={MAX_LATENCY_MS}
+                        value={latencyMs}
+                        onChange={(e) => setLatencyMs(Number(e.target.value))}
+                        className="w-full h-2 rounded-full bg-white/10 accent-amber-500"
+                    />
+                    <p className="text-[10px] text-neutral-500 mt-0.5">
+                        Increase if correct notes score as miss (feedback lags behind).
+                    </p>
+                    <button
+                        type="button"
+                        onClick={handleCalibrate}
+                        disabled={calibrating || !isPlaying}
+                        className="mt-2 flex items-center gap-1.5 text-[10px] font-bold text-amber-400 hover:text-amber-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        <Zap size={12} />
+                        {calibrating ? 'Measuring…' : 'Calibrate (playback on)'}
+                    </button>
+                </div>
+            )}
+
+            {/* Playback hint + count-in note */}
             {!isPlaying && (
                 <p className="text-xs text-amber-500/90 font-medium">
                     Start playback from the main transport to run exercises in time with the chart.
+                </p>
+            )}
+            {isPlaying && (
+                <p className="text-[10px] text-neutral-500">
+                    First 4 beats are count-in (not scored). Use them to prepare.
                 </p>
             )}
 
@@ -128,6 +212,23 @@ export function StandardsExercisesPanel() {
                     <span className="text-xs text-neutral-500 font-medium">
                         {hits} hit{hits !== 1 ? 's' : ''} / {misses} miss{misses !== 1 ? 'es' : ''}
                     </span>
+                </div>
+                {/* Overall vs last 4 bars */}
+                <div className="grid grid-cols-2 gap-3 pt-1 border-t border-white/5">
+                    <div className="p-2 bg-black/20 rounded-lg">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-neutral-500 mb-0.5">Overall</p>
+                        <p className="text-lg font-black text-white tabular-nums">{accuracy}%</p>
+                        <p className="text-[10px] text-neutral-500">{hits} hits / {misses} misses</p>
+                    </div>
+                    <div className="p-2 bg-black/20 rounded-lg">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-neutral-500 mb-0.5">Last 4 bars</p>
+                        <p className="text-lg font-black text-white tabular-nums">
+                            {accuracyLast4 !== null ? `${accuracyLast4}%` : '—'}
+                        </p>
+                        <p className="text-[10px] text-neutral-500">
+                            {hitsLast4 + missesLast4 > 0 ? `${hitsLast4} hits / ${missesLast4} misses` : 'No notes yet'}
+                        </p>
+                    </div>
                 </div>
             </div>
 

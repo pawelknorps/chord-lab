@@ -7,7 +7,6 @@ import { useJazzEngine } from './hooks/useJazzEngine';
 import {
     transposeSignal,
     isPremiumEngineSignal,
-    activityLevelSignal,
     proactiveAdviceSignal,
     isAiThinkingSignal
 } from './state/jazzSignals';
@@ -34,6 +33,7 @@ import { CallAndResponseDrill } from './components/CallAndResponseDrill';
 import { PracticeReportModal } from './components/PracticeReportModal';
 import { GuidedPracticePane } from './components/GuidedPracticePane';
 import { StandardsExercisesPanel } from './components/StandardsExercisesPanel';
+import { useStandardsExerciseHeatmapStore } from './state/useStandardsExerciseHeatmapStore';
 import { useGuidedPracticeStore } from '../../core/store/useGuidedPracticeStore';
 import { useMasteryTreeStore } from '../../core/store/useMasteryTreeStore';
 import * as MicrophoneService from '../../core/audio/MicrophoneService';
@@ -68,6 +68,11 @@ export default function JazzKillerModule() {
     const [showMasterKeyTeacher, setShowMasterKeyTeacher] = useState(false);
     const [showGuidedPractice, setShowGuidedPractice] = useState(false);
     const [showStandardsExercises, setShowStandardsExercises] = useState(false);
+
+    // Phase 15: clear exercise heatmap when Exercises panel is closed
+    useEffect(() => {
+        if (!showStandardsExercises) useStandardsExerciseHeatmapStore.getState().clear();
+    }, [showStandardsExercises]);
 
     // Hint animation for onboarding
     const [showToolHints, setShowToolHints] = useState(false);
@@ -160,7 +165,8 @@ export default function JazzKillerModule() {
         playChord,
         setBpm,
         toggleEngine,
-        onNote
+        onNote,
+        getChordAtTransportTime
     } = useJazzEngine(selectedSong);
 
     const pushNoteToWaterfallRef = useRef<((note: { midi: number; velocity: number; type: 'root' | 'third' | 'fifth' | 'seventh' | 'extension'; duration?: number; startTime: number }) => void) | null>(null);
@@ -413,7 +419,7 @@ export default function JazzKillerModule() {
                             <div className="flex items-center gap-1 md:gap-2">
                                 <input
                                     type="number"
-                                    value={bpmSignal.value}
+                                    value={Math.round(bpmSignal.value)}
                                     onChange={(e) => setBpm(Number(e.target.value))}
                                     className="w-10 md:w-16 bg-transparent text-lg md:text-2xl font-black font-mono leading-none focus:outline-none text-amber-500 [appearance:textfield]"
                                 />
@@ -438,10 +444,7 @@ export default function JazzKillerModule() {
 
                         {/* Main Play Action */}
                         <button
-                            onClick={async () => {
-                                if (Tone.context.state !== 'running') await Tone.start();
-                                await togglePlayback();
-                            }}
+                            onClick={() => togglePlayback()}
                             disabled={!isLoadedSignal.value}
                             className={`flex items-center gap-2 md:gap-3 px-3 md:px-6 py-1.5 md:py-3 rounded-xl md:rounded-2xl font-black tracking-widest transition-all active:scale-95 text-[10px] md:text-sm ${!isLoadedSignal.value
                                 ? 'bg-neutral-800 text-neutral-600 cursor-not-allowed'
@@ -903,6 +906,7 @@ export default function JazzKillerModule() {
                                 song={selectedSong}
                                 filteredPatterns={filteredPatterns}
                                 onChordClick={handleChordClick}
+                                showExerciseHeatmap={showStandardsExercises}
                             />
                             {guideToneSpotlightMode && <MicPianoVisualizer />}
                             <div className="h-32 xl:hidden" />
@@ -957,7 +961,7 @@ export default function JazzKillerModule() {
                                         <GuidedPracticePane />
                                     )}
                                     {showStandardsExercises && (
-                                        <StandardsExercisesPanel />
+                                        <StandardsExercisesPanel getChordAtTransportTime={getChordAtTransportTime} />
                                     )}
                                 </div>
                             </>

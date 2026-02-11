@@ -7,20 +7,26 @@ import {
     isPlayingSignal
 } from '../state/jazzSignals';
 import { usePracticeStore } from '../../../core/store/usePracticeStore';
+import { JazzTheoryService } from '../utils/JazzTheoryService';
 import { AnalysisOverlay } from './AnalysisOverlay';
 import { PerformanceHeatmapOverlay } from './PerformanceHeatmapOverlay';
+import { StandardsExerciseHeatmapOverlay } from './StandardsExerciseHeatmapOverlay';
+import { useStandardsExerciseHeatmapStore } from '../state/useStandardsExerciseHeatmapStore';
 
 interface LeadSheetProps {
     song: any;
     filteredPatterns?: any[];
     onChordClick?: (chord: string, measureIndex: number) => void;
+    /** When true, show Standards Exercise error heatmap instead of scoring heatmap (Phase 15). */
+    showExerciseHeatmap?: boolean;
 }
 
-export const LeadSheet = ({ song, filteredPatterns, onChordClick }: LeadSheetProps) => {
+export const LeadSheet = ({ song, filteredPatterns, onChordClick, showExerciseHeatmap }: LeadSheetProps) => {
     useSignals();
     const activeRef = useRef<HTMLDivElement>(null);
     const gridRef = useRef<HTMLDivElement>(null);
     const { detectedPatterns, activeFocusIndex, focusOnPattern, showAnalysis, guideTones, showGuideTones, guideToneSpotlightMode, guideToneBarsHit } = usePracticeStore();
+    const exerciseStatsByMeasure = useStandardsExerciseHeatmapStore((s) => s.statsByMeasure);
 
     // Access signals at top level for reactivity
     const curMeasure = currentMeasureIndexSignal.value;
@@ -123,7 +129,11 @@ export const LeadSheet = ({ song, filteredPatterns, onChordClick }: LeadSheetPro
                                     hover:bg-black/5 transition-all
                                 `}
                                 >
-                                    <PerformanceHeatmapOverlay measureIndex={index} />
+                                    {showExerciseHeatmap ? (
+                                        <StandardsExerciseHeatmapOverlay measureIndex={index} statsByMeasure={exerciseStatsByMeasure} />
+                                    ) : (
+                                        <PerformanceHeatmapOverlay measureIndex={index} />
+                                    )}
                                     {/* Selection Glow */}
                                     {isInSelectedRange && (
                                         <div className="absolute inset-0 bg-cyan-500/5 animate-pulse pointer-events-none" />
@@ -247,18 +257,36 @@ const renderMeasureChords = (measure: any, measureIndex: number, onChordClick?: 
 
     return (
         <div className="flex w-full justify-around items-baseline">
-            {chords.map((chord: string, i: number) => (
-                <span
-                    key={i}
-                    className={`cursor-pointer hover:text-purple-600 transition-colors active:scale-95 inline-block px-1 ${chord === '' ? 'pointer-events-none' : ''}`}
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        if (chord && onChordClick) onChordClick(chord, measureIndex);
-                    }}
-                >
-                    {formatChord(chord)}
-                </span>
-            ))}
+            {chords.map((chord: string, i: number) => {
+                const { main, optionals } = JazzTheoryService.parseChordWithOptional(chord);
+                const hasOptional = optionals.length > 0;
+                const hasMain = main.length > 0;
+                return (
+                    <span
+                        key={i}
+                        className={`cursor-pointer hover:text-purple-600 transition-colors active:scale-95 px-1 flex flex-col items-center justify-end ${chord === '' ? 'pointer-events-none' : ''}`}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            const forClick = main || optionals[0] || chord;
+                            if (forClick && onChordClick) onChordClick(forClick, measureIndex);
+                        }}
+                    >
+                        {hasOptional && (
+                            <span className="text-[0.5em] md:text-[0.55em] leading-tight text-neutral-500 font-normal opacity-90">
+                                {optionals.map((opt) => formatChord(opt)).join(' ')}
+                            </span>
+                        )}
+                        {hasMain && (
+                            <span className={hasOptional ? 'text-[0.85em] md:text-[0.9em]' : ''}>
+                                {formatChord(main)}
+                            </span>
+                        )}
+                        {!hasMain && !hasOptional && chord && (
+                            <span>{formatChord(chord)}</span>
+                        )}
+                    </span>
+                );
+            })}
         </div>
     );
 };
