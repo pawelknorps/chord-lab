@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { noteNameToMidi } from '../../../../core/theory';
 import { playChordPart, triggerAttack, triggerRelease } from '../../../../core/audio/globalAudio';
 import { useMasteryStore } from '../../../../core/store/useMasteryStore';
+import { useEarPerformanceStore } from '../../state/useEarPerformanceStore';
 import { useMidi } from '../../../../context/MidiContext';
 import { Brain, Target, RotateCw, Play } from 'lucide-react';
 import { useFunctionalEarTrainingStore } from '../../state/useFunctionalEarTrainingStore';
@@ -16,6 +17,7 @@ export function ChordQualitiesLevel() {
     const { t } = useTranslation();
     const { addExperience, updateStreak } = useMasteryStore();
     const { lastNote } = useMidi();
+    const recordAttempt = useEarPerformanceStore((s) => s.recordAttempt);
     const { externalData, setExternalData } = useFunctionalEarTrainingStore();
 
     const [difficulty, setDifficulty] = useState<Difficulty>('Novice');
@@ -60,7 +62,11 @@ export function ChordQualitiesLevel() {
     }, [difficulty, currentMode]);
 
     useEffect(() => {
-        if (!quizMode || difficulty !== 'Pro' || !lastNote) return;
+        if (!quizMode || !lastNote) return;
+        const midiAllowed = difficulty === 'Pro' ||
+            (difficulty === 'Advanced' && currentMode === 'Sevenths') ||
+            (difficulty === 'Novice' && currentMode === 'Triads');
+        if (!midiAllowed) return;
 
         if (lastNote.type === 'noteon') {
             const notePos = lastNote.note % 12;
@@ -76,7 +82,7 @@ export function ChordQualitiesLevel() {
         } else {
             triggerRelease(lastNote.note);
         }
-    }, [lastNote, quizMode, difficulty]);
+    }, [lastNote, quizMode, difficulty, currentMode]);
 
     const checkProAnswer = (input: number[]) => {
         if (input.length < targetIntervals.length) return;
@@ -112,6 +118,7 @@ export function ChordQualitiesLevel() {
     const handleAnswer = useCallback((answer: string) => {
         if (!quizMode || !targetAnswer) return;
         if (answer === targetAnswer || (externalData && answer.toLowerCase() === targetAnswer.toLowerCase())) {
+            recordAttempt('ChordQualities', targetAnswer, true);
             setFeedback('Correct! 🎉');
             const multiplier = difficulty === 'Novice' ? 1 : difficulty === 'Advanced' ? 2 : 5;
             setScore(s => ({ ...s, correct: s.correct + multiplier, total: s.total + 1 }));
@@ -120,10 +127,11 @@ export function ChordQualitiesLevel() {
             if (externalData) setExternalData(null);
             setTimeout(nextQuestion, 1500);
         } else {
+            recordAttempt('ChordQualities', targetAnswer, false);
             setFeedback(`Try again! (It was ${targetAnswer})`);
             setScore(s => ({ ...s, total: s.total + 1 }));
         }
-    }, [quizMode, targetAnswer, difficulty, score.correct, addExperience, updateStreak, externalData, setExternalData, nextQuestion]);
+    }, [quizMode, targetAnswer, difficulty, score.correct, addExperience, updateStreak, externalData, setExternalData, nextQuestion, recordAttempt]);
 
     const playDrillItem = useCallback((item: any) => {
         const rootMidi = noteNameToMidi(currentRoot + '4');
@@ -184,7 +192,7 @@ export function ChordQualitiesLevel() {
                 <div className="space-y-6">
                     <div className="p-6 bg-white/5 rounded-2xl border border-white/5 space-y-4">
                         <h3 className="text-white text-sm font-bold flex items-center justify-between"><span className="flex items-center gap-2"><Target size={16} className="text-purple-400" />{quizMode ? 'Identify Target' : 'Explore Relationships'}</span></h3>
-                        {difficulty === 'Pro' && quizMode ? (
+                        {(difficulty === 'Pro' || (difficulty === 'Advanced' && currentMode === 'Sevenths') || (difficulty === 'Novice' && currentMode === 'Triads')) && quizMode ? (
                             <div className="flex flex-col items-center gap-6 py-4">
                                 <UnifiedPiano mode="highlight" highlightedNotes={inputBuffer.map(i => noteNameToMidi(currentRoot + '4') + i)} octaveRange={[4, 5]} showLabels="none" />
                                 <div className="text-[10px] text-white/20 font-mono uppercase tracking-widest">Playing: {inputBuffer.map(i => i === 0 ? 'R' : i).join(' - ')}</div>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useFunctionalEarTrainingStore } from '../../state/useFunctionalEarTrainingStore';
+import { useEarPerformanceStore } from '../../state/useEarPerformanceStore';
 import { useMasteryStore } from '../../../../core/store/useMasteryStore';
 import { useMidi } from '../../../../context/MidiContext';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -29,6 +30,7 @@ export const IntervalsLevel: React.FC = () => {
     const { addScore, setPlaying, difficulty, streak } = useFunctionalEarTrainingStore();
     const { addExperience, updateStreak } = useMasteryStore();
     const { lastNote } = useMidi();
+    const recordAttempt = useEarPerformanceStore((s) => s.recordAttempt);
 
     const [challenge, setChallenge] = useState<any>(null);
     const [selectedInterval, setSelectedInterval] = useState<string | null>(null);
@@ -111,6 +113,7 @@ export const IntervalsLevel: React.FC = () => {
 
         if (intervalName === challenge.interval.name) {
             setResult('correct');
+            recordAttempt('Intervals', challenge.interval.name, true);
             const multiplier = difficulty === 'Novice' ? 1 : difficulty === 'Advanced' ? 1.5 : 3;
             const points = Math.floor(100 * multiplier) + streak * 5;
             addScore(points);
@@ -119,10 +122,11 @@ export const IntervalsLevel: React.FC = () => {
             setTimeout(loadNewChallenge, 1500);
         } else {
             setResult('incorrect');
+            const diagnosis = diagnoseEarError(challenge.interval.name, intervalName);
+            recordAttempt('Intervals', challenge.interval.name, false, diagnosis);
             updateStreak('FET', 0);
             setAiHint(null);
             setHintLoading(true);
-            const diagnosis = diagnoseEarError(challenge.interval.name, intervalName);
             try {
                 const hint = await getEarHint(diagnosis);
                 setAiHint(hint);
@@ -132,7 +136,7 @@ export const IntervalsLevel: React.FC = () => {
                 setHintLoading(false);
             }
         }
-    }, [challenge, result, difficulty, streak, addScore, addExperience, updateStreak, loadNewChallenge]);
+    }, [challenge, result, difficulty, streak, addScore, addExperience, updateStreak, loadNewChallenge, recordAttempt]);
 
     if (!challenge) return null;
 
