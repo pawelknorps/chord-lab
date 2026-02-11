@@ -105,3 +105,14 @@
   - [✅] **Repetition Penalty Logic**: Apply exponential weight multipliers to recently played patterns.
   - [✅] **The "Push" Awareness**: Correctly anticipate chord changes on the "and of 4".
   - [✅] **Markov Transition Matrix**: Favor desirable rhythmic sequences (e.g. Sustain -> Standard).
+
+## Phase 11: Pro Drum Engine (Jack DeJohnette Style) ✅
+
+*Focus: Limb independence and collaborative dynamics.*
+
+- **Success Criteria**: Generative drums that reactive to piano density; micro-timing (Push/Drag) for organic feel.
+- **Tasks**:
+  - [✅] **Broken-Time Ride**: Randomized skip notes for elastic pulse.
+  - [✅] **Collaborative Listening**: Simplify drum patterns when piano is "busy" (>0.8 density).
+  - [✅] **Micro-Timing**: Ride pushes (-15ms), Snare drags (+20ms).
+  - [✅] **Anchor Logic**: Strict Hi-Hat pedal on 2 & 4.
