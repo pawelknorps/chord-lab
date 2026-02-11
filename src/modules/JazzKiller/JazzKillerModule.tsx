@@ -15,6 +15,7 @@ import { useAiTeacher } from './hooks/useAiTeacher';
 import {
     Play, Volume2, Search, X, Target, Music, StopCircle, Sliders, ChevronDown, ChevronUp, Layers, Zap, Info, Activity, BookOpen, BookMarked, Keyboard, Sparkles, Mic, Trophy
 } from 'lucide-react';
+import { AnimatePresence } from 'framer-motion';
 import { SendToMenu } from '../../components/shared/SendToMenu';
 import { useAudioCleanup } from '../../hooks/useAudioManager';
 import { usePracticeStore } from '../../core/store/usePracticeStore';
@@ -28,21 +29,26 @@ import { SmartLessonPane } from './components/SmartLessonPane';
 import { LickLibrary } from './components/LickLibrary';
 import { MasterKeyTeacher } from './components/MasterKeyTeacher';
 import { GuideToneSpotlightEffect } from './components/GuideToneSpotlightEffect';
-import { LiveNoteIndicator } from '../../components/shared/LiveNoteIndicator';
+import { MicPianoVisualizer } from './components/MicPianoVisualizer';
 import { CallAndResponseDrill } from './components/CallAndResponseDrill';
-import { PerformanceScoringOverlay } from './components/PerformanceScoringOverlay';
 import { PracticeReportModal } from './components/PracticeReportModal';
 import { GuidedPracticePane } from './components/GuidedPracticePane';
+import { StandardsExercisesPanel } from './components/StandardsExercisesPanel';
 import { useGuidedPracticeStore } from '../../core/store/useGuidedPracticeStore';
 import { useMasteryTreeStore } from '../../core/store/useMasteryTreeStore';
 import * as MicrophoneService from '../../core/audio/MicrophoneService';
 import { MasteryTreeView } from '../../components/MasteryTree/MasteryTreeView';
-import { PremiumMixer } from './components/PremiumMixer';
+import { Mixer } from './components/Mixer';
 import { NoteWaterfall } from './components/NoteWaterfall';
-import { ToneSpectrumAnalyzer } from './components/ToneSpectrumAnalyzer';
-import { AcousticFeedbackWidget } from './components/AcousticFeedbackWidget';
-import { ToneSpectrumAnalyzer } from './components/ToneSpectrumAnalyzer';
-import { AcousticFeedbackWidget } from './components/AcousticFeedbackWidget';
+import { DEFAULT_WATERFALL_OCTAVE_RANGE } from './utils/pianoKeyLayout';
+import { formatSongItemId, parseItemId } from '../../core/director/directorTypes';
+import { useDirector } from '../../hooks/useDirector';
+import * as Tone from 'tone';
+import { HighPerformanceScoringBridge } from '../ITM/components/HighPerformanceScoringBridge';
+import { JazzPitchMonitor } from '../ITM/components/JazzPitchMonitor';
+
+/** Set to true to show the falling-notes piano strip (currently not usable). */
+const SHOW_FALLING_NOTES = false;
 
 export default function JazzKillerModule() {
     useAudioCleanup('jazz-killer');
@@ -61,6 +67,7 @@ export default function JazzKillerModule() {
     const [showLickLibrary, setShowLickLibrary] = useState(false);
     const [showMasterKeyTeacher, setShowMasterKeyTeacher] = useState(false);
     const [showGuidedPractice, setShowGuidedPractice] = useState(false);
+    const [showStandardsExercises, setShowStandardsExercises] = useState(false);
 
     // Hint animation for onboarding
     const [showToolHints, setShowToolHints] = useState(false);
@@ -72,6 +79,30 @@ export default function JazzKillerModule() {
         }
     }, [selectedStandard]);
     const { standards, getSongAsIRealFormat } = useJazzLibrary();
+
+    // Director (Phase 5): suggested next item from FSRS
+    const directorKeys = ['C', 'F', 'Bb', 'Eb'];
+    const directorCandidateIds = useMemo(
+        () => standards.flatMap((s) => directorKeys.map((k) => formatSongItemId(s.Title, k))),
+        [standards]
+    );
+    const { nextItem: directorNextItem, advance: directorAdvance } = useDirector(directorCandidateIds);
+    // Suppress unused warning for directorNextItem as it's intended for future use or background state
+    void directorNextItem;
+    const keyToSemitones: Record<string, number> = { C: 0, F: -5, Bb: -2, Eb: 3 };
+    const handleSuggestedNext = () => {
+        const next = directorAdvance();
+        if (!next) return;
+        const parsed = parseItemId(next.nextItemId);
+        if (parsed.type === 'song' && parsed.title) {
+            const song = standards.find((s) => s.Title === parsed.title);
+            if (song) {
+                handleSelectSong(song);
+                const semis = keyToSemitones[parsed.key ?? 'C'] ?? 0;
+                transposeSignal.value = semis;
+            }
+        }
+    };
 
     // Practice Store integration
     const { loadSong, detectedPatterns, showGuideTones, toggleGuideTones, showAnalysis, toggleAnalysis, guideToneSpotlightMode, setGuideToneSpotlightMode } = usePracticeStore();
@@ -132,7 +163,7 @@ export default function JazzKillerModule() {
         onNote
     } = useJazzEngine(selectedSong);
 
-    const pushNoteToWaterfallRef = useRef<((note: { midi: number; velocity: number; type: 'root' | 'third' | 'fifth' | 'seventh' | 'extension'; duration?: number }) => void) | null>(null);
+    const pushNoteToWaterfallRef = useRef<((note: { midi: number; velocity: number; type: 'root' | 'third' | 'fifth' | 'seventh' | 'extension'; duration?: number; startTime: number }) => void) | null>(null);
     useEffect(() => {
         if (!onNote) return;
         onNote((note) => {
@@ -140,7 +171,8 @@ export default function JazzKillerModule() {
                 midi: note.midi,
                 velocity: note.velocity,
                 type: note.type,
-                duration: note.duration
+                duration: note.duration,
+                startTime: Tone.Transport.seconds
             });
         });
     }, [onNote]);
@@ -270,6 +302,10 @@ export default function JazzKillerModule() {
 
     return (
         <div className="h-full w-full min-w-0 bg-[#0a0a0a] text-white p-1.5 md:p-3 flex flex-col gap-2 md:gap-3 overflow-hidden relative">
+            {/* 2026 Detection Engine Bridges */}
+            <HighPerformanceScoringBridge />
+            <JazzPitchMonitor />
+
             {/* AI Proactive Notification */}
             {proactiveAdviceSignal.value && (
                 <div className="fixed bottom-24 right-6 z-[200] max-w-sm animate-in slide-in-from-right-8 duration-500">
@@ -297,11 +333,6 @@ export default function JazzKillerModule() {
                     </div>
                 </div>
             )}
-
-            {/* ITM Scoring Overlay */}
-            <div className="fixed bottom-6 left-6 z-[200]">
-                <PerformanceScoringOverlay />
-            </div>
 
             <style>
                 {`
@@ -339,6 +370,14 @@ export default function JazzKillerModule() {
                             >
                                 <X size={14} />
                                 EXIT
+                            </button>
+                            <button
+                                onClick={handleSuggestedNext}
+                                className="flex items-center gap-2 px-3 py-1 bg-amber-500/20 hover:bg-amber-500/30 rounded-lg text-[10px] font-bold text-amber-400 hover:text-amber-300 transition-all border border-amber-500/30"
+                                title="Director suggests next (FSRS + key rotation)"
+                            >
+                                <Target size={14} />
+                                Suggested next
                             </button>
                         </div>
                     )}
@@ -399,7 +438,10 @@ export default function JazzKillerModule() {
 
                         {/* Main Play Action */}
                         <button
-                            onClick={togglePlayback}
+                            onClick={async () => {
+                                if (Tone.context.state !== 'running') await Tone.start();
+                                await togglePlayback();
+                            }}
                             disabled={!isLoadedSignal.value}
                             className={`flex items-center gap-2 md:gap-3 px-3 md:px-6 py-1.5 md:py-3 rounded-xl md:rounded-2xl font-black tracking-widest transition-all active:scale-95 text-[10px] md:text-sm ${!isLoadedSignal.value
                                 ? 'bg-neutral-800 text-neutral-600 cursor-not-allowed'
@@ -443,7 +485,12 @@ export default function JazzKillerModule() {
                                 onClick={() => {
                                     const next = !guideToneSpotlightMode;
                                     setGuideToneSpotlightMode(next);
-                                    if (next) void MicrophoneService.start();
+                                    if (next) {
+                                        void (async () => {
+                                            if (Tone.context.state !== 'running') await Tone.start();
+                                            await MicrophoneService.start();
+                                        })();
+                                    }
                                 }}
                                 className={`p-1.5 md:p-2.5 rounded-lg md:rounded-xl transition-all ${guideToneSpotlightMode ? 'bg-red-500 text-black' : 'text-neutral-500 hover:text-white'} ${showToolHints ? 'animate-hint-pulse text-red-400' : ''}`}
                                 title="Guide Tone Spotlight (mic): play 3rd of chord, bar lights green"
@@ -508,6 +555,13 @@ export default function JazzKillerModule() {
                                 title="Teaching Machine (Guided Practice)"
                             >
                                 <Zap size={18} />
+                            </button>
+                            <button
+                                onClick={() => setShowStandardsExercises(!showStandardsExercises)}
+                                className={`p-1.5 md:p-2.5 rounded-lg md:rounded-xl transition-all ${showStandardsExercises ? 'bg-amber-500 text-black shadow-[0_0_20px_rgba(245,158,11,0.4)]' : 'text-neutral-500 hover:text-white hover:bg-white/5'} ${showToolHints ? 'animate-hint-pulse text-amber-400' : ''}`}
+                                title="Standards Exercises (Scales, Guide Tones, Arpeggios)"
+                            >
+                                <Target size={18} />
                             </button>
                             <div className="w-px h-4 md:h-6 bg-white/10 mx-0.5" />
                             <button
@@ -837,10 +891,11 @@ export default function JazzKillerModule() {
                         {/* MAIN CONTENT */}
                         <div className="flex-1 min-w-0 overflow-y-auto overflow-x-auto px-1 md:px-2 custom-scrollbar transition-all duration-300">
                             <GuideToneSpotlightEffect />
-                            {selectedStandard && (
-                                <div className="h-20 w-full rounded-xl overflow-hidden bg-black/30 border border-white/5 mb-2">
+                            {SHOW_FALLING_NOTES && selectedStandard && (
+                                <div className="w-full rounded-xl overflow-hidden border border-white/5 mb-2 bg-neutral-900/80">
                                     <NoteWaterfall
                                         onNoteEvent={(push) => { pushNoteToWaterfallRef.current = push; }}
+                                        octaveRange={DEFAULT_WATERFALL_OCTAVE_RANGE}
                                     />
                                 </div>
                             )}
@@ -849,12 +904,12 @@ export default function JazzKillerModule() {
                                 filteredPatterns={filteredPatterns}
                                 onChordClick={handleChordClick}
                             />
-                            {guideToneSpotlightMode && <LiveNoteIndicator />}
+                            {guideToneSpotlightMode && <MicPianoVisualizer />}
                             <div className="h-32 xl:hidden" />
                         </div>
 
                         {/* RIGHT SIDEBAR AREA */}
-                        {(showPracticePanel || showMixer || showLickLibrary || showMasterKeyTeacher) && (
+                        {(showPracticePanel || showMixer || showLickLibrary || showMasterKeyTeacher || showGuidedPractice || showStandardsExercises) && (
                             <>
                                 <div
                                     className="xl:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
@@ -863,6 +918,8 @@ export default function JazzKillerModule() {
                                         setShowPracticePanel(false);
                                         setShowLickLibrary(false);
                                         setShowMasterKeyTeacher(false);
+                                        setShowGuidedPractice(false);
+                                        setShowStandardsExercises(false);
                                     }}
                                 />
                                 <div className="flex flex-col gap-4 max-h-full overflow-y-auto shrink-0 
@@ -873,63 +930,10 @@ export default function JazzKillerModule() {
 
                                     <button
                                         className="xl:hidden absolute top-4 right-4 p-2 bg-white/5 rounded-full hover:bg-white/10"
-                                        onClick={() => { setShowMixer(false); setShowPracticePanel(false); setShowLickLibrary(false); setShowMasterKeyTeacher(false); }}
+                                        onClick={() => { setShowMixer(false); setShowPracticePanel(false); setShowLickLibrary(false); setShowMasterKeyTeacher(false); setShowGuidedPractice(false); setShowStandardsExercises(false); }}
                                     >
                                         <X size={20} />
                                     </button>
-
-                                    {showMixer && (
-                                        <div className="space-y-6">
-                                            {/* Engine Toggle Toggle */}
-                                            <div className="p-4 bg-white/5 rounded-2xl border border-white/5 flex flex-col gap-3">
-                                                <div className="flex items-center justify-between">
-                                                    <div className="flex items-center gap-2">
-                                                        <Sparkles size={16} className={isPremiumEngineSignal.value ? "text-amber-400" : "text-neutral-600"} />
-                                                        <span className="text-[10px] font-black uppercase tracking-widest text-neutral-300">Premium AI Engine</span>
-                                                    </div>
-                                                    <button
-                                                        onClick={toggleEngine}
-                                                        className={`w-10 h-5 rounded-full transition-all relative ${isPremiumEngineSignal.value ? 'bg-amber-500' : 'bg-neutral-800'}`}
-                                                    >
-                                                        <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${isPremiumEngineSignal.value ? 'left-6' : 'left-1'}`} />
-                                                    </button>
-                                                </div>
-                                                <p className="text-[9px] text-neutral-500 leading-relaxed font-medium">
-                                                    {isPremiumEngineSignal.value
-                                                        ? "Active: Ron Carter Bass, Red Garland Phrasing, Nate Smith Drums. Multi-sampled HQ audio."
-                                                        : "Active: Standard MIDI synthesis. Low latency, legacy compatibility."}
-                                                </p>
-
-                                                {isPremiumEngineSignal.value && (
-                                                    <div className="mt-2 pt-3 border-t border-white/5 space-y-2">
-                                                        <div className="flex justify-between items-end">
-                                                            <span className="text-[9px] font-bold text-neutral-500 uppercase tracking-tighter">Activity Level</span>
-                                                            <span className="text-[9px] font-mono text-amber-500">{Math.round(activityLevelSignal.value * 100)}%</span>
-                                                        </div>
-                                                        <input
-                                                            type="range"
-                                                            min="0" max="1" step="0.01"
-                                                            value={activityLevelSignal.value}
-                                                            onChange={(e) => activityLevelSignal.value = Number(e.target.value)}
-                                                            className="w-full h-1 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-amber-500"
-                                                        />
-                                                    </div>
-                                                )}
-                                            </div>
-
-                                            <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl">
-                                                <p className="text-[10px] text-amber-500 font-bold leading-relaxed mb-3 uppercase tracking-widest">Master Control Panel Open</p>
-                                                <p className="text-[9px] text-neutral-400 leading-relaxed flex items-center gap-2">
-                                                    <Volume2 size={12} /> Use the Studio Mixer for per-track volume, mute, and solo.
-                                                </p>
-                                            </div>
-                                            <div className="space-y-3">
-                                                <p className="text-[10px] font-black text-neutral-500 uppercase tracking-widest">Tone Analysis</p>
-                                                <ToneSpectrumAnalyzer />
-                                                <AcousticFeedbackWidget />
-                                            </div>
-                                        </div>
-                                    )}
 
                                     {showPracticePanel && (
                                         <div className="flex-none space-y-4">
@@ -951,6 +955,9 @@ export default function JazzKillerModule() {
 
                                     {showGuidedPractice && (
                                         <GuidedPracticePane />
+                                    )}
+                                    {showStandardsExercises && (
+                                        <StandardsExercisesPanel />
                                     )}
                                 </div>
                             </>
@@ -992,7 +999,9 @@ export default function JazzKillerModule() {
                 </div>
             )}
 
-            {showMixer && <PremiumMixer onClose={() => setShowMixer(false)} />}
+            <AnimatePresence>
+                {showMixer && <Mixer onClose={() => setShowMixer(false)} />}
+            </AnimatePresence>
         </div>
     );
 }
