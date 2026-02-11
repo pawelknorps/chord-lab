@@ -8,8 +8,9 @@ import { Play, X, ArrowRight, Music, Activity, RotateCcw, SkipForward, Keyboard 
 import * as Tone from 'tone';
 import { diagnoseEarError } from '../../utils/earDiagnosis';
 import { getEarHint } from '../../../../core/services/earHintService';
+import { getNextChallenge } from '../../utils/adaptiveCurriculum';
 
-const INTERVALS = [
+const ALL_INTERVALS = [
     { name: 'm2', semitones: 1, label: 'Minor 2nd' },
     { name: 'M2', semitones: 2, label: 'Major 2nd' },
     { name: 'm3', semitones: 3, label: 'Minor 3rd' },
@@ -23,6 +24,7 @@ const INTERVALS = [
     { name: 'M7', semitones: 11, label: 'Major 7th' },
     { name: 'P8', semitones: 12, label: 'Octave' },
 ];
+const BASE_INTERVALS = ALL_INTERVALS.filter((i) => !['m2', 'M7', 'P8'].includes(i.name));
 
 const MIDI_DEBOUNCE_MS = 300;
 
@@ -41,13 +43,18 @@ export const IntervalsLevel: React.FC = () => {
     const [midiFeedback, setMidiFeedback] = useState<string | null>(null);
     const lastMidiGradedRef = useRef<{ note: number; ts: number } | null>(null);
 
-    const loadNewChallenge = useCallback(() => {
+    const loadNewChallenge = useCallback((prevChallenge?: { interval: { name: string } } | null) => {
         setResult(null);
         setSelectedInterval(null);
         setAiHint(null);
         setMidiFeedback(null);
 
-        const interval = INTERVALS[Math.floor(Math.random() * INTERVALS.length)];
+        const interval = getNextChallenge(
+            'Intervals',
+            BASE_INTERVALS,
+            ALL_INTERVALS,
+            prevChallenge?.interval?.name ?? null
+        );
         const rootMidi = 60; // Middle C
 
         setChallenge({
@@ -58,7 +65,7 @@ export const IntervalsLevel: React.FC = () => {
     }, []);
 
     useEffect(() => {
-        if (!challenge) loadNewChallenge();
+        if (!challenge) loadNewChallenge(null);
     }, [challenge, loadNewChallenge]);
 
     useEffect(() => {
@@ -71,7 +78,7 @@ export const IntervalsLevel: React.FC = () => {
         if (playedSemitones < 0) playedSemitones += 12;
         if (playedSemitones > 12) playedSemitones = playedSemitones % 12 || 12;
 
-        const matched = INTERVALS.find(i => i.semitones === playedSemitones);
+        const matched = ALL_INTERVALS.find(i => i.semitones === playedSemitones);
         if (matched) {
             setSelectedInterval(matched.name);
             handleAnswer(matched.name);
@@ -119,7 +126,7 @@ export const IntervalsLevel: React.FC = () => {
             addScore(points);
             addExperience('FET', Math.floor(points / 2));
             updateStreak('FET', streak + 1);
-            setTimeout(loadNewChallenge, 1500);
+            setTimeout(() => loadNewChallenge(challenge), 1500);
         } else {
             setResult('incorrect');
             const diagnosis = diagnoseEarError(challenge.interval.name, intervalName);
@@ -193,7 +200,7 @@ export const IntervalsLevel: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-3 md:grid-cols-4 gap-4 w-full">
-                {INTERVALS.map((interval) => (
+                {ALL_INTERVALS.map((interval) => (
                     <motion.button
                         key={interval.name}
                         whileHover={{ scale: 1.02, y: -2 }}

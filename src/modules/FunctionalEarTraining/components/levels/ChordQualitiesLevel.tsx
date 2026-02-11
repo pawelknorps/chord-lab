@@ -7,6 +7,7 @@ import { useEarPerformanceStore } from '../../state/useEarPerformanceStore';
 import { useMidi } from '../../../../context/MidiContext';
 import { Brain, Target, RotateCw, Play } from 'lucide-react';
 import { useFunctionalEarTrainingStore } from '../../state/useFunctionalEarTrainingStore';
+import { getNextChallenge } from '../../utils/adaptiveCurriculum';
 import { UnifiedPiano } from '../../../../components/shared/UnifiedPiano';
 import { QuickExerciseJump } from '../../../../components/widgets/QuickExerciseJump';
 
@@ -110,7 +111,8 @@ export function ChordQualitiesLevel() {
             return;
         }
         const data = currentMode === 'Triads' ? TRIADS : currentMode === 'Sevenths' ? SEVENTHS : EXTENSIONS;
-        const randomItem = data[Math.floor(Math.random() * data.length)];
+        const extended = difficulty === 'Pro' && currentMode === 'Sevenths' ? EXTENSIONS : null;
+        const randomItem = getNextChallenge('ChordQualities', data, extended, targetAnswer);
         setTargetAnswer(randomItem.name);
         playDrillItem(randomItem);
     }, [currentMode, externalData]);
