@@ -6,8 +6,14 @@ import { RhythmEngine, type RhythmPattern, type RhythmPatternOptions, type Rhyth
 import { DrumEngine, type DrumHit, type DrumInstrument } from './DrumEngine';
 import { GrooveManager, type GrooveInstrument } from './GrooveManager';
 import { WalkingBassEngine } from './WalkingBassEngine';
-import { ReactiveCompingEngine, type CompingHit, type BassMode } from './ReactiveCompingEngine';
-export { getChordDna, getChordDnaIntervals, getChordToneLabelMap, type ChordDnaResult, CompingEngine, type Voicing, RhythmEngine, type RhythmPattern, type RhythmPatternOptions, type RhythmTemplateName, DrumEngine, type DrumHit, type DrumInstrument, GrooveManager, type GrooveInstrument, WalkingBassEngine, ReactiveCompingEngine, type CompingHit, type BassMode };
+import { BassRhythmVariator, type BassEvent } from './BassRhythmVariator';
+import { ReactiveCompingEngine, type CompingHit, type BassMode, type StepLike } from './ReactiveCompingEngine';
+import { CHORD_INTERVALS } from './chordIntervals';
+import { parseChord } from './parseChord';
+import { toTonalChordSymbol } from './chordSymbolForTonal';
+
+export { getChordDna, getChordDnaIntervals, getChordToneLabelMap, type ChordDnaResult, CompingEngine, type Voicing, RhythmEngine, type RhythmPattern, type RhythmPatternOptions, type RhythmTemplateName, DrumEngine, type DrumHit, type DrumInstrument, GrooveManager, type GrooveInstrument, WalkingBassEngine, BassRhythmVariator, type BassEvent, ReactiveCompingEngine, type CompingHit, type BassMode, type StepLike };
+export { CHORD_INTERVALS, parseChord, toTonalChordSymbol };
 
 export const NOTE_NAMES = ENHARMONIC_NOTE_NAMES;
 export const NOTE_NAMES_FLAT = ENHARMONIC_NOTE_NAMES_FLAT;
@@ -54,63 +60,6 @@ export const SCALES: Record<string, { intervals: number[]; chordQualities: strin
 // Roman numeral notation
 export const ROMAN_NUMERALS = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'];
 export const ROMAN_NUMERALS_MINOR = ['i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii'];
-
-// Chord intervals from root
-export const CHORD_INTERVALS: Record<string, number[]> = {
-  // Triads
-  'maj': [0, 4, 7],
-  'min': [0, 3, 7],
-  'dim': [0, 3, 6],
-  'aug': [0, 4, 8],
-  'sus2': [0, 2, 7],
-  'sus4': [0, 5, 7],
-
-  // 7th Chords
-  'maj7': [0, 4, 7, 11],
-  'maj7#5': [0, 4, 8, 11],
-  'maj7b5': [0, 4, 6, 11],
-  'min7': [0, 3, 7, 10],
-  'dom7': [0, 4, 7, 10],
-  'dim7': [0, 3, 6, 9],
-  'm7b5': [0, 3, 6, 10],
-  'min7#5': [0, 3, 8, 10],
-  'aug7': [0, 4, 8, 10],
-  'mM7': [0, 3, 7, 11],
-  '6': [0, 4, 7, 9],
-  'm6': [0, 3, 7, 9],
-  '69': [0, 4, 7, 9, 14],
-  'm69': [0, 3, 7, 9, 14],
-  'add9': [0, 2, 4, 7],
-  'minadd9': [0, 2, 3, 7],
-  'add11': [0, 4, 5, 7],
-  'maj7#11': [0, 4, 6, 7, 11],
-
-  // Extended / Altered Dom
-  '9': [0, 4, 7, 10, 14],
-  'maj9': [0, 4, 7, 11, 14],
-  'min9': [0, 3, 7, 10, 14],
-  '11': [0, 4, 7, 10, 14, 17],
-  'min11': [0, 3, 7, 10, 14, 17],
-  '13': [0, 4, 7, 10, 14, 21],
-  '13#11': [0, 4, 7, 10, 14, 18, 21],
-  'maj13': [0, 4, 7, 11, 14, 21],
-  'min13': [0, 3, 7, 10, 14, 21],
-
-  // Alterations
-  '7b9': [0, 4, 7, 10, 13],
-  '7#9': [0, 4, 7, 10, 15],
-  '7b5': [0, 4, 6, 10],
-  '7#5': [0, 4, 8, 10],
-  '7b13': [0, 4, 10, 14, 20],
-  '7#11': [0, 4, 7, 10, 14, 18],
-  '7alt': [0, 4, 10, 13, 20],
-
-  // Sus variations
-  '7sus4': [0, 5, 7, 10],
-  '9sus4': [0, 5, 7, 10, 14],
-  '13sus4': [0, 5, 7, 10, 14, 21],
-  'b9sus4': [0, 5, 7, 10, 13],
-};
 
 // Helper for enharmonic spelling
 const LETTERS = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
@@ -171,11 +120,9 @@ export function noteNameToMidi(noteName: string): number {
   const notePart = match[1];
   const octave = parseInt(match[2]);
 
-  const letter = notePart[0];
-  const accidentals = notePart.slice(1);
-
-  let midi = BASE_MIDI[letter];
-  for (const char of accidentals) {
+  let midi = BASE_MIDI[notePart[0]];
+  for (let i = 1; i < notePart.length; i++) {
+    const char = notePart[i];
     if (char === '#') midi += 1;
     if (char === 'b') midi -= 1;
   }
@@ -211,7 +158,7 @@ export function getScaleChords(root: string, scaleName: string, octave = 4): Cho
 
     const midiNotes = chordIntervals.map(i => baseMidi + i);
 
-    // For chord member names, use the scale context for spelling if possible, 
+    // For chord member names, use the scale context for spelling if possible,
     // but for now simple context-aware midiToNoteName is good.
     const notes = midiNotes.map(m => midiToNoteName(m, root));
 
@@ -354,94 +301,6 @@ export function getChordNotes(
 
   const midiNotes = intervals.map(i => baseMidi + i);
   return applyVoicing(midiNotes, voicing);
-}
-
-// Parse a complex chord string into components
-export function parseChord(chordName: string): { root: string; quality: string; bass?: string } {
-  if (!chordName) return { root: 'C', quality: 'maj' };
-
-  // Handle slash chords (e.g., C/G)
-  const parts = chordName.split('/') as [string] | [string, string];
-  const base = parts[0];
-  const bass = parts[1];
-
-  // Robust Regex for Root + Quality
-  // Matches: Root (A-G, optional #/b), Quality (everything else)
-  const match = base.match(/^([A-G][b#]?)(.*)$/);
-  if (!match) return { root: 'C', quality: 'maj', bass };
-
-  const root = match[1];
-  let quality = match[2];
-
-  // Strip parentheses/brackets
-  quality = quality.replace(/[()\[\]]/g, '');
-
-  // Normalize Logic
-  if (!quality) quality = 'maj';
-
-  // 1. Handle Shorthand Aliases & Symbols
-  if (quality.includes('h') || quality.includes('ø')) quality = quality.replace('h', 'ø').replace('ø7', 'ø');
-  if (quality.includes('o') || quality.includes('°')) quality = quality.replace('o', '°').replace('°7', '°');
-  if (quality.includes('^') || quality.includes('Δ')) quality = quality.replace('^', 'Δ').replace('Δ7', 'Δ');
-
-  if (quality === '°' || quality === 'dim') quality = 'dim';
-  else if (quality === '°7' || quality === 'dim7') quality = 'dim7';
-  else if (quality === 'ø' || quality === 'm7b5' || quality === '-7b5') quality = 'm7b5';
-
-  // 2. Handle Augmented
-  else if (quality === '+' || quality === 'aug') quality = 'aug';
-  else if (quality === '+7' || quality === 'aug7' || quality === '7#5') quality = 'aug7';
-
-  // 3. Handle Minor
-  else if ((quality.startsWith('m') && !quality.startsWith('maj')) || quality.startsWith('-')) {
-    // Remove the 'm' or '-' indicator
-    const rest = quality.startsWith('min') ? quality.substring(3) : quality.substring(1);
-
-    if (!rest) quality = 'min';
-    else if (rest === '7') quality = 'min7';
-    else if (rest === '9') quality = 'min9';
-    else if (rest === '11') quality = 'min11';
-    else if (rest === '6') quality = 'm6';
-    else if (rest === 'maj7' || rest === 'M7' || rest === 'Δ' || rest === 'Δ7') quality = 'mM7';
-    else quality = 'min' + rest;
-  }
-
-  // 4. Handle Major
-  else if (quality.startsWith('M') || quality.startsWith('maj') || quality.startsWith('Δ')) {
-    const rest = quality.replace(/^(M|maj|Δ)/, '');
-    if (!rest) quality = 'maj';
-    else if (rest === '7' || rest === '') quality = 'maj7'; // Δ or Δ7
-    else if (rest === '9') quality = 'maj9';
-    else if (rest === '13') quality = 'maj13';
-    else quality = 'maj' + rest;
-  }
-
-  // 5. Handle Dominant / Numbers (Universal 7 is Dominant)
-  if (quality === '7' || quality === 'dom7' || quality === 'dom') quality = 'dom7';
-  else if (quality === '9') quality = '9';
-  else if (quality === '11') quality = '11';
-  else if (quality === '13') quality = '13';
-
-  // 6. Handle Alterations
-  else if (quality === '7b9') quality = '7b9';
-  else if (quality === '7#9') quality = '7#9';
-  else if (quality === '7b5') quality = '7b5';
-  else if (quality === '7#5') quality = 'aug7';
-  else if (quality === 'alt' || quality === '7alt') quality = '7alt';
-  else if (quality === 'sus4' || quality === 'sus') quality = 'sus4';
-  else if (quality === 'sus2') quality = 'sus2';
-  else if (quality === '7sus4' || quality === '7sus') quality = '7sus4';
-  else if (quality.includes('sus4') && quality.includes('b9')) quality = 'b9sus4';
-
-  // Fallback map check to ensure we return a supported quality
-  if (!CHORD_INTERVALS[quality]) {
-    // Try to map to nearest known
-    if (quality.includes('7')) quality = 'dom7';
-    else if (quality.includes('min') || quality.includes('m')) quality = 'min';
-    else quality = 'maj';
-  }
-
-  return { root, quality, bass };
 }
 
 /**

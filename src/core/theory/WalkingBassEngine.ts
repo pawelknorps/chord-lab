@@ -1,5 +1,7 @@
 import * as Note from "@tonaljs/note";
 import * as Chord from "@tonaljs/chord";
+import { toTonalChordSymbol } from './chordSymbolForTonal';
+import { BassRhythmVariator, BassEvent } from './BassRhythmVariator';
 
 /**
  * WalkingBassEngine (Phase 12: Target & Approach)
@@ -7,16 +9,24 @@ import * as Chord from "@tonaljs/chord";
  * Teleological walking bass: every bar asks "Where is the next chord,
  * and how do I get there smoothly?" Beat 4 is the key—chromatic or
  * dominant approach into the next bar's root.
- *
- * 4-Beat Strategy:
- * - Beat 1 (Anchor): Establish harmonic function (root, or nearest chord tone).
- * - Beat 4 (Approach): Chromatic or 5th-of-destination leading to next bar's root.
- * - Beats 2–3 (Bridge): Chord tones or scale steps between Beat 1 and Beat 4.
  */
 export class WalkingBassEngine {
   private lastNoteMidi: number = 41; // Start around F1
   private readonly RANGE_MIN = 28; // E1 (standard tuning low E)
   private readonly RANGE_MAX = 55; // G3 (thumb position start)
+  private variator: BassRhythmVariator = new BassRhythmVariator();
+
+  /**
+   * Generates a walking bass line with rhythmic variations.
+   */
+  public generateVariedWalkingLine(
+    currentChordSymbol: string,
+    nextChordSymbol: string,
+    barIndex: number
+  ): BassEvent[] {
+    const line = this.generateWalkingLine(currentChordSymbol, nextChordSymbol);
+    return this.variator.applyVariations(line, barIndex);
+  }
 
   /**
    * Generates a 4-note walking line for a single bar.
@@ -27,8 +37,8 @@ export class WalkingBassEngine {
     currentChordSymbol: string,
     nextChordSymbol: string
   ): number[] {
-    const currentChord = Chord.get(currentChordSymbol);
-    const nextChord = Chord.get(nextChordSymbol);
+    const currentChord = Chord.get(toTonalChordSymbol(currentChordSymbol));
+    const nextChord = Chord.get(toTonalChordSymbol(nextChordSymbol));
     const nextRootName = nextChord?.tonic ?? currentChord?.tonic ?? "C";
     const nextRootMidi = Note.midi(nextRootName + "2");
     const nextRoot =
@@ -37,7 +47,7 @@ export class WalkingBassEngine {
     const line: number[] = [];
 
     // --- BEAT 1: The Anchor ---
-    const beat1 = this.getNearestChordTone(currentChord, "1P");
+    const beat1 = this.getNearestChordTone(currentChord as any, "1P");
     line.push(beat1);
 
     // --- BEAT 4: The Approach (calculated before 2 & 3) ---
