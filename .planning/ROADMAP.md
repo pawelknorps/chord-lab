@@ -258,7 +258,7 @@
   - [x] **Wave 1–2**: Tonality segmentation (Fit cost, Transition cost, Viterbi, segment list API) (REQ-HAT-01–05).
   - [x] **Wave 3**: Functional labeling (jazz cliché dictionary, Chord DNA + context → Roman numeral, constant-structure) (REQ-HAT-06–08).
   - [x] **Wave 4**: Pipeline API and JazzKiller overlay refactor (REQ-HAT-09–11).
-  - [ ] **Wave 5** (optional): Live Harmonic Grounding (Conflict Resolver, Pedal Point Detection, Live Grounding API) (REQ-HAT-12–14) — deferred.
+  - [x] **Wave 5** (optional): Live Harmonic Grounding (Conflict Resolver, Pedal Point Detection, getLiveOverrides API) (REQ-HAT-12–14).
 
 ## Phase 22: Trio Hi-Fi Mixer (WASM Compressor & Parallel Processing)
 

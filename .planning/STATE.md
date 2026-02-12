@@ -31,7 +31,8 @@
   - TonalitySegmentationEngine: 24 key centers, getFitCost, getTransitionCost, Viterbi, getSegments (REQ-HAT-01–05).
   - FunctionalLabelingEngine: Chord DNA + context → Roman numeral; jazz cliché rules (ii–V–I, subV7, iiø7); chromatic/constant-structure → "Key shift" (REQ-HAT-06–08).
   - harmonicAnalysisPipeline: preprocessToSlots, analyzeHarmony(); usePracticeStore.loadSong uses pipeline for detectedPatterns with ConceptAnalyzer fallback (REQ-HAT-09–11).
-  - AnalysisTypes extended: KeySegmentRef, Concept.keySegment, romanNumeral, segmentLabel. Wave 5 (Live Grounding) deferred.
+  - liveHarmonicGrounding: getLiveOverrides(chartChord, pitchBuffer); Conflict Resolver (subV7); Pedal Point Detection; exported from theory index (REQ-HAT-12–14).
+  - AnalysisTypes extended: KeySegmentRef, Concept.keySegment, romanNumeral, segmentLabel.
 - **Phase 20: Jazz Band Comping Evolution (Smart Pattern Engine)**:
   - PatternType + RHYTHM_TEMPLATE_TO_PATTERN_TYPE in RhythmEngine; patternTypeBias filters candidates; FILL → minimal comp.
   - JazzMarkovEngine (transition matrix, getNextPatternType, updateIntensity); useJazzBand calls every 4 bars; FILL → DrumEngine.generateFill.

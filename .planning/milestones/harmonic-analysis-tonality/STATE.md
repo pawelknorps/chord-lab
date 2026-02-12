@@ -16,12 +16,12 @@
 
 - None.
 
-## Deferred
+## Wave 5 Complete
 
-- **Wave 5**: Live Harmonic Grounding (Conflict Resolver, Pedal Point Detection, getLiveOverrides) — optional; can be implemented later.
+- **Live Harmonic Grounding**: liveHarmonicGrounding.ts (getLiveOverrides, Conflict Resolver, Pedal Detection); unit tests; exported from theory index.
 
 ## Next Actions
 
 1. Manual verification: Blue Bossa, All the Things You Are, constant-structure tune (overlay labels and no regression).
-2. Optionally implement Wave 5 (Live Grounding).
+2. Optional: Wire getLiveOverrides into JazzKiller “live” mode (overlay/feedback when mic on).
 3. Run `/gsd-complete-milestone` for harmonic-analysis-tonality when ready to archive.

@@ -30,14 +30,16 @@ Phase 21 refactored the harmonic analysis used for jazz standards in JazzKiller 
 - **usePracticeStore.loadSong**: Calls `analyzeHarmony({ measures, key })`; uses result for `detectedPatterns` when non-empty; fallback to ConceptAnalyzer for overlay and for `generateExercises`.
 - AnalysisOverlay continues to receive `Concept[]`; existing CONCEPT_COLORS and brackets unchanged.
 
-### Wave 5 (Optional): Deferred
+### Wave 5: Live Harmonic Grounding (REQ-HAT-12–14)
 
-- Live Harmonic Grounding (Conflict Resolver, Pedal Point Detection, getLiveOverrides) not implemented; can be added later.
+- **liveHarmonicGrounding.ts**: `getLiveOverrides(chartChord, pitchBuffer)` — Conflict Resolver (chart dom7 vs buffer → subV7), Pedal Point Detection (bass-range dominant PC → pedal note name). Exported from theory index.
+- **liveHarmonicGrounding.test.ts**: 6 tests (empty/small buffer, subV7 conflict, chart tones, pedal detection, no pedal above bass).
+- Optional JazzKiller “live” mode (overlay/feedback using overrides) can be wired in a follow-up; API is ready.
 
 ## Files Created / Modified
 
-- **Created**: `TonalitySegmentationEngine.ts`, `TonalitySegmentationEngine.test.ts`, `FunctionalLabelingEngine.ts`, `FunctionalLabelingEngine.test.ts`, `harmonicAnalysisPipeline.ts`.
-- **Modified**: `AnalysisTypes.ts` (KeySegmentRef, Concept extensions), `usePracticeStore.ts` (loadSong uses analyzeHarmony).
+- **Created**: `TonalitySegmentationEngine.ts`, `TonalitySegmentationEngine.test.ts`, `FunctionalLabelingEngine.ts`, `FunctionalLabelingEngine.test.ts`, `harmonicAnalysisPipeline.ts`, `liveHarmonicGrounding.ts`, `liveHarmonicGrounding.test.ts`.
+- **Modified**: `AnalysisTypes.ts` (KeySegmentRef, Concept extensions), `usePracticeStore.ts` (loadSong uses analyzeHarmony), `src/core/theory/index.ts` (export getLiveOverrides, LiveOverrides, PitchBufferEntry).
 
 ## Verification
 

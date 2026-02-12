@@ -37,15 +37,15 @@
 - [ ] **All the Things You Are**: Key segments and ii–V–I (and modulations) labeled correctly.
 - [ ] **Constant-structure tune**: Segment labels show key shifts or chromatic; no bogus ii–V–I.
 
-## Wave 5 (Optional): Live Grounding — Deferred
+## Wave 5 (Optional): Live Grounding ✅
 
-- [ ] Conflict Resolver: Chart C7 + student F#/Bb (SwiftF0) → overlay or feedback shows subV7.
-- [ ] Pedal Point Detection: Sustained low pitch → "Pedal (X)".
-- [ ] Live Grounding API: getLiveOverrides(chartChord, pitchBuffer).
-- [ ] No regression when live grounding is off.
+- [x] Conflict Resolver: Chart C7 + pitch buffer with tritone sub PCs → getLiveOverrides returns romanNumeral: "subV7".
+- [x] Pedal Point Detection: Bass-range buffer with dominant PC → getLiveOverrides returns pedal: note name.
+- [x] Live Grounding API: getLiveOverrides(chartChord, pitchBuffer) in liveHarmonicGrounding.ts; exported from theory index.
+- [x] Unit tests: liveHarmonicGrounding.test.ts (6 tests). No overlay wiring yet (optional follow-up).
 
 ## Sign-Off
 
-- [x] Waves 1–4 complete; Wave 5 deferred.
+- [x] Waves 1–5 complete.
 - [ ] STATE.md and milestone STATE.md updated (done below).
 - [x] No breaking changes to AnalysisOverlay or LeadSheet public behavior.
