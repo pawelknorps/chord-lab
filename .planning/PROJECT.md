@@ -50,6 +50,12 @@ Transition from a music theory prototype to a full-scale "Incredible Teaching Ma
 - **Tech**: ChordScaleEngine, GuideToneCalculator, unified input adapter, StandardsExerciseEngine; JazzKiller chart + playback + standard picker (exercises as a view/panel/tab within JazzKiller).
 - **Phase 15 extension**: **Error heatmaps** (per measure, per exercise type: Scales • Guide Tones • Arpeggios) on the lead sheet or dedicated panel; option to **record** a solo and get a **written transcription**; **AI analysis** of performance with advice and development suggestions (Gemini Nano / API).
 
+### 7. Voice & Percussion Interactive (Sing & Clap)
+
+- **Concept**: Hands-free interactive loops for Ear Training and Rhythm.
+- **Goal**: Enable students to sing scale degrees/intervals and clap complex rhythms for real-time validation.
+- **Tech**: SwiftF0 onset detection, frequency-to-degree mapping, low-latency mic stream integration in Functional Ear Training and Rhythm Architect.
+
 ## Key Decisions
 
 | Decision | Rationale | Status |

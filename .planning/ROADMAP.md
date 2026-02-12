@@ -160,3 +160,14 @@
   - [x] **Error heatmaps**: Expose per-measure hit/miss from useStandardsExercise; show heatmap on lead sheet (overlay per measure: green/amber/red) via StandardsExerciseHeatmapOverlay and useStandardsExerciseHeatmapStore; filter by exercise type (Scales, Guide Tones, Arpeggios).
   - [x] **Record solo & transcription**: In Standards Exercises, add "Record solo" (SoloTranscriptionPanel); capture timestamped notes (pitch + measure/beat) from mic or MIDI via useSoloTranscription; at end of recording produce written note list (Tonal.js). Tie to current standard and transport.
   - [x] **AI analysis**: generateStandardsExerciseAnalysis(sessionData) in jazzTeacherLogic: input heatmap (hits/misses), optional transcription, accuracy, exercise type, standard, key; output AI text (Gemini Nano) with strengths/weaknesses, advice, development suggestions. "Analyze performance" button in StandardsExercisesPanel.
+## Phase 14.1: SwiftF0 SOTA 2026 Integration ✅
+
+*Focus: Pro-grade neural pitch detection with instrument-aware post-processing.*
+
+- **Success Criteria**: Web Worker offloading of SwiftF0 (WASM/WebGPU); <5ms inference; instrument-specific hysteresis (Vocals/Trumpet/Guitar); sub-cent resolution via Regression Head.
+- **Tasks**:
+  - [x] **Neural Inference Worker**: `SwiftF0Worker.ts` with non-blocking polling of PCM RingBuffer.
+  - [x] **Instrument Hysteresis Library**: Distinct stability profiles for various jazz instruments.
+  - [x] **Atonal Gating (RMS)**: Transient bridging for "chiff" and pluck noise.
+  - [x] **Regression Head Logic**: Sub-cent refinement from bins 3-134.
+  - [x] **Unified Store Integration**: `useITMPitchStore` favors SwiftF0 with MPM fallback.

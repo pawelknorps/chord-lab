@@ -2,10 +2,10 @@
 
 ## Current Status
 
-- **Phase**: Phase 7: Advanced Piano Engine
-- **Status**: 🟢 Initializing Phase 7
-- **Next Milestone**: Advanced Piano Engine (Voice Leading + Taxi Cab)
-- **Overall Progress**: ~88%
+- **Phase**: Phase 16: Voice & Percussion Interactive Training
+- **Status**: 🟢 Initializing Phase 16
+- **Next Milestone**: Sing-to-Answer in FET + Clap-to-Perform in Rhythm Architect
+- **Overall Progress**: ~92%
 
 ## Active Requirements
 
@@ -126,4 +126,10 @@
 - **Goal**: Extend Phase 13 with error heatmaps (per measure, per exercise type: Scales • Guide Tones • Arpeggios), option to record written transcription of solo (mic or MIDI), and AI analysis of performance with advice and development suggestions.
 - **Requirements**: REQ-SBE-06 (error heatmaps), REQ-SBE-07 (record + written transcription), REQ-SBE-08 (AI analysis with advice and development suggestions).
 - **Delivered**: useStandardsExercise exposes statsByMeasure and exerciseType; StandardsExerciseHeatmapOverlay + useStandardsExerciseHeatmapStore; Lead Sheet shows exercise heatmap when Exercises panel open; useSoloTranscription + SoloTranscriptionPanel (Record solo → note list + Copy); generateStandardsExerciseAnalysis in jazzTeacherLogic; "Analyze performance" button in StandardsExercisesPanel; unit tests for generateStandardsExerciseAnalysis.
-- **Planning**: `.planning/phases/15-standards-exercises-heatmaps-transcription-ai/PLAN.md`, SUMMARY.md, VERIFICATION.md.
+- **Completed Phase 14.1: SwiftF0 SOTA 2026 Integration**:
+  - Web Worker infrastructure for neural offloading (non-blocking inference).
+  - Instrument-aware hysteresis profiles (Vocals, Trumpet, Guitar).
+  - Atonal Gating (RMS + Confidence) to bridge noise gaps ("chiff" and "pluck").
+  - Regression Head support for sub-cent pitch resolution.
+  - Zero-Copy PCM pipeline sharing raw 16kHz audio with the worker.
+  - SwiftF0 enabled by default in `useHighPerformancePitch` with MPM fallback.
