@@ -106,6 +106,13 @@ Transition from a music theory prototype to a full-scale "Incredible Teaching Ma
 - **Tech**: TonalitySegmentationEngine (Fit, Transition, Viterbi); FunctionalLabelingEngine (ChordDna + key + context → Roman numeral); analyzeHarmony() pipeline; JazzKiller overlay refactor; optional Live Grounding (chart vs. pitch, pedal detection).
 - **Milestone**: `.planning/milestones/harmonic-analysis-tonality/` (PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md).
 
+### 15. Trio Hi-Fi Mixer (WASM Compressor & Parallel Processing)
+
+- **Concept**: Make JazzKiller trio playback **consistent and hi-fi** by replacing the blunt native DynamicsCompressorNode with a **parallel (NY) mix**, a **custom WASM/Worklet compressor** (soft knee, jazz-tuned params), **RMS-matching makeup gain**, and an **"Air" band** (+3 dB @ 12 kHz) for drums.
+- **Goal**: Bass sits transparently; piano doesn’t sound plinky; drums keep attack and gain ride "ping"; "Mastering" toggle improves tone without volume jump.
+- **Tech**: Parallel bus (dry + wet sum) in globalAudio; Audio Worklet compressor (soft-knee, ratio 4, attack ~5 ms, release ~150 ms); RMS input/output metering and automatic makeup gain; high-shelf EQ on drums bus; optional "Pro Mix" / "Mastering" toggle in Mixer.
+- **Milestone**: `.planning/milestones/trio-hifi-mixer/` (PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md).
+
 ## Key Decisions
 
 | Decision | Rationale | Status |

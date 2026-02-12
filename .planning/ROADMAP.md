@@ -259,3 +259,15 @@
   - [ ] **Wave 3**: Functional labeling (jazz cliché dictionary, Chord DNA + context → Roman numeral, constant-structure) (REQ-HAT-06–08).
   - [ ] **Wave 4**: Pipeline API and JazzKiller overlay refactor (REQ-HAT-09–11).
   - [ ] **Wave 5** (optional): Live Harmonic Grounding (Conflict Resolver, Pedal Point Detection, Live Grounding API) (REQ-HAT-12–14).
+
+## Phase 22: Trio Hi-Fi Mixer (WASM Compressor & Parallel Processing)
+
+*Focus: Make trio playback **consistent and hi-fi** via parallel (NY) mix, soft-knee WASM-style compressor, RMS-matching makeup gain, and "Air" band for drums.*
+
+- **Success Criteria**: Parallel dry+wet bus; soft-knee compressor (Worklet) on wet path; "Mastering" / "Pro Mix" toggle does not change perceived volume; drums have +3 dB @ 12 kHz (ride "ping"); no regression in mute/solo/volume.
+- **Milestone**: `.planning/milestones/trio-hifi-mixer/` (PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md).
+- **Tasks**:
+  - [ ] **Wave 1**: Bus architecture and parallel dry/wet sum (REQ-HIFI-01, REQ-HIFI-02).
+  - [ ] **Wave 2**: WASM/Worklet soft-knee compressor; jazz trio params; trio connected to parallel mixer (REQ-HIFI-03–05).
+  - [ ] **Wave 3**: RMS pre/post measurement; automatic makeup gain; "Mastering" / "Pro Mix" toggle (REQ-HIFI-06–08).
+  - [ ] **Wave 4**: Drums Air band (+3 dB @ 12 kHz) (REQ-HIFI-09).

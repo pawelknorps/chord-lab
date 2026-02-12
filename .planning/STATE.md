@@ -2,9 +2,9 @@
 
 ## Current Status
 
-- **Phase**: Phase 17: Innovative Interactive Exercises ✅; Phase 18: Creative Jazz Trio Playback ✅; Phase 19: Soloist-Responsive Playback ✅; Phase 20: Jazz Band Comping Evolution ✅
+- **Phase**: Phase 17–20 ✅; Phase 21 (Harmonic Analysis) and Phase 22 (Trio Hi-Fi Mixer) planned
 - **Status**: Phase 20 completed (Markov Smart Pattern Engine + humanization + procedural lead-in + MarkovBridge)
-- **Next Milestone**: Phase 6 Polish or next phase
+- **Next Milestone**: Phase 6 Polish, Phase 21 (Harmonic Analysis), or Phase 22 (Trio Hi-Fi Mixer)
 - **Overall Progress**: ~98%
 
 ## Active Requirements
