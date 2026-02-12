@@ -31,6 +31,10 @@ export const tuneIntensitySignal = signal(0.5);
 /** Progress through the tune: 0 = start, 1 = end. Updated each beat during playback. */
 export const tuneProgressSignal = signal(0);
 
+// Phase 22: Trio Hi-Fi Mixer – parallel dry/wet bus and "Pro Mix" (REQ-HIFI-08)
+/** When true, trio uses parallel bus (dry + compressed wet); when false, trio goes through compressor only (legacy). */
+export const proMixEnabledSignal = signal(false);
+
 // Soloist-Responsive Playback (Phase 19): band listens to mic and steers density—more space when user plays, more backing when user rests.
 /** When true, band density is steered by soloist activity from SwiftF0; default false. */
 export const soloistResponsiveEnabledSignal = signal(false);

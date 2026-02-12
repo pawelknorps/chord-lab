@@ -10,7 +10,18 @@ import {
   currentMeasureIndexSignal,
   currentBeatSignal
 } from './audioSignals';
+import {
+  pianoMutedSignal,
+  bassMutedSignal,
+  drumsMutedSignal,
+  pianoSoloSignal,
+  bassSoloSignal,
+  drumsSoloSignal,
+  proMixEnabledSignal
+} from '../../modules/JazzKiller/state/jazzSignals';
 import { effect } from '@preact/signals-react';
+import { getDirectorInstrument } from './directorInstrumentSignal';
+import { GrooveManager } from '../theory/GrooveManager';
 
 // Instrument Types
 export type Style = 'Swing' | 'Jazz' | 'Bossa' | 'Ballad' | 'Guitar' | 'None';
@@ -42,13 +53,22 @@ function emitVisualization(notes: number[]) {
 // Volume nodes & FX
 let reverb: Tone.Reverb;
 let pianoReverb: Tone.Reverb;
-let chorus: Tone.Chorus;
 let compressor: Tone.Compressor;
 let masterVol: Tone.Volume;
 
 let pianoVol: Tone.Volume;
 let bassVol: Tone.Volume;
 let drumsVol: Tone.Volume;
+
+let masterLimiter: Tone.Limiter;
+let masterEQ: Tone.EQ3;
+let masterBus: Tone.Gain;
+
+// Phase 22: Parallel (NY) bus – trio sum → dry path + wet (compressor) → sumGain → masterBus
+const PARALLEL_DRY_GAIN = 0.4;
+let trioSum: Tone.Gain;
+let parallelDryGain: Tone.Gain;
+let parallelSumGain: Tone.Gain;
 
 // Split-Brain Modules
 let shellSynth: Tone.PolySynth | null = null;
@@ -57,8 +77,28 @@ let shellPanner: Tone.Panner | null = null;
 let extensionPanner: Tone.Panner | null = null;
 let dissonanceTremolo: Tone.Tremolo | null = null;
 
+// Director guide instrument (Phase 5: context injection – cello-like timbre)
+let celloSynth: Tone.PolySynth | null = null;
+
+/** Ensure Tone uses a single native AudioContext with playback-optimized latency (avoids glitches when pitch + playback run together). */
+function ensureNativeAudioContext(): void {
+  const NativeAC = typeof window !== 'undefined' ? (window as Window & { AudioContext?: typeof AudioContext }).AudioContext : undefined;
+  if (!NativeAC) return;
+  try {
+    const toneCtx = Tone.getContext();
+    const raw = (toneCtx as { rawContext?: unknown }).rawContext;
+    if (!raw || !(raw instanceof NativeAC)) {
+      const nativeCtx = new NativeAC({ latencyHint: 'playback', sampleRate: 44100 });
+      Tone.setContext(nativeCtx);
+    }
+  } catch {
+    // Tone not ready or no window
+  }
+}
+
 export async function initAudio(): Promise<void> {
   if (isInitialized) return;
+  ensureNativeAudioContext();
   await Tone.start();
 
   // --- FX CHAIN ---
@@ -76,42 +116,90 @@ export async function initAudio(): Promise<void> {
   }).toDestination();
   await pianoReverb.generate();
 
-  chorus = new Tone.Chorus({
-    frequency: 1.5,
-    delayTime: 3.5,
-    depth: 0.7,
-    wet: 0.1
-  }).connect(reverb);
+  masterLimiter = new Tone.Limiter(-0.5).toDestination();
+  masterEQ = new Tone.EQ3({
+    low: 0,
+    mid: -1,
+    high: 0,
+    lowFrequency: 250,
+    highFrequency: 2500
+  }).connect(masterLimiter);
 
+  masterBus = new Tone.Gain(1).connect(masterEQ);
+
+  // Phase 22: Parallel bus – dry (Gain) + wet (compressor) summed into masterBus
+  parallelSumGain = new Tone.Gain(1).connect(masterBus);
   compressor = new Tone.Compressor({
-    threshold: -20,
-    ratio: 3,
-    attack: 0.05,
-    release: 0.2
-  }).connect(chorus);
+    threshold: -18,
+    ratio: 4,
+    attack: 0.03,
+    release: 0.1
+  }).connect(parallelSumGain);
 
-  masterVol = new Tone.Volume(0).connect(compressor);
+  trioSum = new Tone.Gain(1);
+  trioSum.connect(compressor);
+  parallelDryGain = new Tone.Gain(0);
+  trioSum.connect(parallelDryGain);
+  parallelDryGain.connect(parallelSumGain);
 
-  // --- BUSSES ---
-  pianoVol = new Tone.Volume(pianoVolumeSignal.value).connect(pianoReverb);
-  bassVol = new Tone.Volume(bassVolumeSignal.value).connect(compressor);
-  drumsVol = new Tone.Volume(drumsVolumeSignal.value).connect(compressor);
+  masterVol = new Tone.Volume(0).connect(parallelSumGain);
+
+  // --- BUSSES: piano to reverb + trio sum; bass/drums to trio sum (trio sum feeds dry + wet) ---
+  pianoVol = new Tone.Volume(pianoVolumeSignal.value);
+  pianoVol.connect(pianoReverb);
+  pianoVol.connect(trioSum);
+  bassVol = new Tone.Volume(bassVolumeSignal.value).connect(trioSum);
+  drumsVol = new Tone.Volume(drumsVolumeSignal.value).connect(trioSum);
+
+  // Unify reverb routing to master limiter too
+  reverb.connect(masterLimiter);
+  pianoReverb.connect(masterLimiter);
+
+  // Helper to determine if a track should be audible
+  const getOutputVolume = (id: 'piano' | 'bass' | 'drums', baseVol: number) => {
+    const isMuted =
+      (id === 'piano' && pianoMutedSignal.value) ||
+      (id === 'bass' && bassMutedSignal.value) ||
+      (id === 'drums' && drumsMutedSignal.value);
+
+    const anySolo = pianoSoloSignal.value || bassSoloSignal.value || drumsSoloSignal.value;
+    const isSolo =
+      (id === 'piano' && pianoSoloSignal.value) ||
+      (id === 'bass' && bassSoloSignal.value) ||
+      (id === 'drums' && drumsSoloSignal.value);
+
+    if (isMuted) return -Infinity;
+    if (anySolo && !isSolo) return -Infinity;
+    return baseVol;
+  };
 
   // Bind signals to Tone nodes
   effect(() => {
-    if (pianoVol) pianoVol.volume.rampTo(pianoVolumeSignal.value, 0.1);
+    if (pianoVol) {
+      const vol = getOutputVolume('piano', pianoVolumeSignal.value);
+      pianoVol.volume.rampTo(vol, 0.05);
+    }
   });
   effect(() => {
-    if (bassVol) bassVol.volume.rampTo(bassVolumeSignal.value, 0.1);
+    if (bassVol) {
+      const vol = getOutputVolume('bass', bassVolumeSignal.value);
+      bassVol.volume.rampTo(vol, 0.05);
+    }
   });
   effect(() => {
-    if (drumsVol) drumsVol.volume.rampTo(drumsVolumeSignal.value, 0.1);
+    if (drumsVol) {
+      const vol = getOutputVolume('drums', drumsVolumeSignal.value);
+      drumsVol.volume.rampTo(vol, 0.05);
+    }
   });
   effect(() => {
     if (reverb) reverb.wet.rampTo(reverbVolumeSignal.value, 0.1);
   });
   effect(() => {
     if (pianoReverb) pianoReverb.wet.rampTo(pianoReverbSignal.value, 0.1);
+  });
+  effect(() => {
+    if (parallelDryGain) parallelDryGain.gain.rampTo(proMixEnabledSignal.value ? PARALLEL_DRY_GAIN : 0, 0.05);
   });
 
   // --- SPLIT BRAIN BUSSES ---
@@ -179,6 +267,12 @@ export async function initAudio(): Promise<void> {
     volume: -5
   }).connect(dissonanceTremolo);
 
+  // 3b. Cello-style synth (Director context injection – warm, rounded)
+  celloSynth = new Tone.PolySynth(Tone.Synth, {
+    oscillator: { type: 'triangle' },
+    envelope: { attack: 0.08, decay: 0.3, sustain: 0.6, release: 1.2 },
+    volume: -4
+  }).connect(pianoReverb);
 
   // 4. Guitar (Nylon)
   guitar = new Tone.Sampler({
@@ -285,6 +379,32 @@ export function stop() {
   bass?.releaseAll();
 }
 
+// Director guide instrument (Phase 5: piano | cello | synth for context injection)
+export function getGuideInstrument(): Tone.Sampler | Tone.PolySynth | null {
+  if (!isInitialized) return null;
+  const id = getDirectorInstrument();
+  if (id === 'cello' && celloSynth) return celloSynth;
+  if (id === 'synth' && extensionSynth) return extensionSynth;
+  return piano;
+}
+
+/** Play chord on Director-chosen guide instrument (for JazzKiller/guided session). */
+export function playGuideChord(
+  midiNotes: number[],
+  duration: string | number = '2n',
+  time: number | string = Tone.now(),
+  velocity?: number
+): void {
+  const inst = getGuideInstrument();
+  if (!inst || !isInitialized) return;
+  const validNotes = midiNotes.filter(n => !isNaN(n) && isFinite(n));
+  const noteNames = validNotes.map(m => midiToNoteName(m));
+  if (noteNames.length > 0) {
+    emitVisualization(validNotes);
+    inst.triggerAttackRelease(noteNames, duration, time, velocity ?? 0.45);
+  }
+}
+
 // Play a single chord immediately or at a scheduled time
 export function playChord(midiNotes: number[], duration = '8n', style: Style = 'None', time: number | string = Tone.now()): void {
   if (!piano || !isInitialized) return;
@@ -300,12 +420,25 @@ export function playChord(midiNotes: number[], duration = '8n', style: Style = '
   }
 }
 
-// Real-time MIDI triggers
+// Real-time MIDI triggers (guarded: piano sampler buffers load async; avoid "buffer is either not set or not loaded")
+function safePianoTrigger(fn: () => void) {
+  try {
+    fn();
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    if (msg.includes('buffer') || msg.includes('not loaded') || msg.includes('not set')) {
+      // Sampler still loading; no-op to avoid crashing e.g. Ghost Note Match
+      return;
+    }
+    throw e;
+  }
+}
+
 export function triggerAttack(midiNote: number, velocity: number = 0.7) {
   if (!piano || !isInitialized) return;
   const noteName = midiToNoteName(midiNote);
   if (noteName) {
-    piano.triggerAttack(noteName, Tone.now(), velocity);
+    safePianoTrigger(() => piano.triggerAttack(noteName, Tone.now(), velocity));
   }
 }
 
@@ -313,7 +446,7 @@ export function triggerRelease(midiNote: number) {
   if (!piano || !isInitialized) return;
   const noteName = midiToNoteName(midiNote);
   if (noteName) {
-    piano.triggerRelease(noteName, Tone.now());
+    safePianoTrigger(() => piano.triggerRelease(noteName, Tone.now()));
   }
 }
 
@@ -321,7 +454,7 @@ export function triggerAttackRelease(midiNote: number, duration: string | number
   if (!piano || !isInitialized) return;
   const noteName = midiToNoteName(midiNote);
   if (noteName) {
-    piano.triggerAttackRelease(noteName, duration, time, velocity);
+    safePianoTrigger(() => piano.triggerAttackRelease(noteName, duration, time, velocity));
   }
 }
 
@@ -555,29 +688,39 @@ export function playProgression(
 
     // --- DRUMS ---
     if ((style === 'Swing' || style === 'Jazz') && drums) {
-      // ... (existing drum logic)
+      const groove = new GrooveManager();
+      const beatSec = Tone.Time('4n').toSeconds();
+      const rideSwingOffset = groove.getOffBeatOffsetInBeat(bpm);
+      const jitter = () => (Math.random() - 0.5) * 0.008;
+
       for (let b = 0; b < duration; b++) {
-        const beatTime = startSec + b * Tone.Time('4n').toSeconds();
-        const jitter = () => (Math.random() - 0.5) * 0.015;
+        const beatTime = startSec + b * beatSec;
 
-        // 1. Ride cymbal (Classic spang-a-lang)
-        // const ridePattern = [1, 0, 0.5, 0]; // downbeat, skip, upbeat, skip
-        // basic swing ride
+        // Ride: spang-a-lang — downbeat + swung upbeat per beat
+        // Accents: 1 strong, 3 strong, 2 & 4 medium, upbeats light; optional bell on 2 & 4
+        const isOneOrThree = b === 0 || b === 2;
+        const downbeatVel = (isOneOrThree ? 0.72 : 0.52) + Math.random() * 0.06;
+        const upbeatVel = 0.32 + Math.random() * 0.06;
+        const useBell = (b === 1 || b === 3) && Math.random() > 0.6;
+        const rideNote = useBell ? "D1" : "C1";
+
         Tone.Transport.schedule(t => {
-          const vel = (b % 2 === 0 ? 0.7 : 0.5) + Math.random() * 0.1;
-          drums?.ride.triggerAttack("C1", t + jitter(), vel);
+          drums?.ride.triggerAttack(rideNote, t + jitter(), downbeatVel);
         }, beatTime);
+        Tone.Transport.schedule(t => {
+          drums?.ride.triggerAttack("C1", t + jitter(), upbeatVel);
+        }, beatTime + rideSwingOffset);
 
-        // 2 and 4 Hihat
         if (b % 2 === 1) {
           Tone.Transport.schedule(t => {
             drums?.hihat.triggerAttack("C1", t + jitter(), 0.6);
           }, beatTime);
         }
 
-        // Kick feathering (very soft on all beats)
+        // Kick: 1 and 3 strong, 2 and 4 lighter — more active, less feathering
+        const kickVel = (b === 0 || b === 2) ? 0.42 + Math.random() * 0.08 : 0.24 + Math.random() * 0.06;
         Tone.Transport.schedule(t => {
-          drums?.kick.triggerAttack("C1", t + jitter(), 0.1);
+          drums?.kick.triggerAttack("C1", t + jitter(), kickVel);
         }, beatTime);
       }
     }

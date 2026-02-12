@@ -1,4 +1,4 @@
-import { X, Activity, Zap, Headphones, SlidersHorizontal, EyeOff, Radio, Mic } from 'lucide-react';
+import { X, Activity, Zap, Headphones, SlidersHorizontal, EyeOff, Radio, Mic, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useSignals } from "@preact/signals-react/runtime";
 import {
@@ -11,6 +11,7 @@ import {
     activityLevelSignal,
     soloistResponsiveEnabledSignal,
     soloistActivitySignal,
+    proMixEnabledSignal,
     pianoMutedSignal,
     bassMutedSignal,
     drumsMutedSignal,
@@ -149,6 +150,31 @@ export function Mixer({ onClose }: MixerProps) {
                         <div className="text-left flex-1 min-w-0">
                             <h4 className="font-bold text-sm text-white">Call-and-Response</h4>
                             <p className="text-[10px] text-neutral-500">Band leaves more space when you play, fills when you rest. Uses mic pitch.</p>
+                        </div>
+                    </button>
+                </section>
+
+                {/* Phase 22: Pro Mix – parallel dry/wet bus (REQ-HIFI-01, REQ-HIFI-02, REQ-HIFI-08) */}
+                <section className="space-y-4">
+                    <div className="flex items-center justify-between">
+                        <h3 className="text-[10px] font-black text-neutral-500 uppercase tracking-[0.2em]">Mastering</h3>
+                        <span className={`text-[9px] font-black px-2 py-0.5 rounded ${proMixEnabledSignal.value ? 'bg-violet-500 text-white' : 'bg-neutral-800 text-neutral-500'}`}>
+                            {proMixEnabledSignal.value ? 'PRO MIX' : 'FLAT'}
+                        </span>
+                    </div>
+                    <button
+                        onClick={() => proMixEnabledSignal.value = !proMixEnabledSignal.value}
+                        className={`w-full p-4 rounded-2xl border transition-all flex items-center gap-4 group relative overflow-hidden ${proMixEnabledSignal.value
+                            ? 'bg-violet-500/10 border-violet-500/30'
+                            : 'bg-white/5 border-white/5'
+                            }`}
+                    >
+                        <div className={`p-3 rounded-xl ${proMixEnabledSignal.value ? 'bg-violet-500 text-white' : 'bg-neutral-800 text-neutral-400'}`}>
+                            <Sparkles size={20} />
+                        </div>
+                        <div className="text-left flex-1 min-w-0">
+                            <h4 className="font-bold text-sm text-white">Pro Mix</h4>
+                            <p className="text-[10px] text-neutral-500">Parallel dry + compressed wet. Keeps attack, adds body. Same level on/off.</p>
                         </div>
                     </button>
                 </section>
