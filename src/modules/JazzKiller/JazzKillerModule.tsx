@@ -6,6 +6,7 @@ import { PracticeTips } from './components/PracticeTips';
 import { useJazzEngine } from './hooks/useJazzEngine';
 import {
     transposeSignal,
+    meterSignal,
     isPremiumEngineSignal,
     proactiveAdviceSignal,
     isAiThinkingSignal
@@ -45,7 +46,7 @@ import { formatSongItemId, parseItemId } from '../../core/director/directorTypes
 import { useDirector } from '../../hooks/useDirector';
 import * as Tone from 'tone';
 import { HighPerformanceScoringBridge } from '../ITM/components/HighPerformanceScoringBridge';
-import { JazzPitchMonitor } from '../ITM/components/JazzPitchMonitor';
+import { useSoloistActivity } from './hooks/useSoloistActivity';
 
 /** Set to true to show the falling-notes piano strip (currently not usable). */
 const SHOW_FALLING_NOTES = false;
@@ -53,6 +54,8 @@ const SHOW_FALLING_NOTES = false;
 export default function JazzKillerModule() {
     useAudioCleanup('jazz-killer');
     useSignals();
+    // Phase 19: Soloist-Responsive Playback — poll pitch store and update soloistActivitySignal when user turns toggle on
+    useSoloistActivity();
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedStandard, setSelectedStandard] = useState<JazzStandard | null>(null);
     const [showMixer, setShowMixer] = useState(false);
@@ -84,6 +87,9 @@ export default function JazzKillerModule() {
         }
     }, [selectedStandard]);
     const { standards, getSongAsIRealFormat } = useJazzLibrary();
+
+    // Read transpose in component body so signal changes trigger re-render and selectedSong updates for playback
+    const transpose = transposeSignal.value;
 
     // Director (Phase 5): suggested next item from FSRS
     const directorKeys = ['C', 'F', 'Bb', 'Eb'];
@@ -152,8 +158,8 @@ export default function JazzKillerModule() {
 
     const selectedSong = useMemo(() => {
         if (!selectedStandard) return null;
-        return getSongAsIRealFormat(selectedStandard, transposeSignal.value);
-    }, [selectedStandard, transposeSignal.value, getSongAsIRealFormat]);
+        return getSongAsIRealFormat(selectedStandard, transpose);
+    }, [selectedStandard, transpose, getSongAsIRealFormat]);
 
     const {
         isLoadedSignal,
@@ -201,7 +207,7 @@ export default function JazzKillerModule() {
     // Analyze song when loaded
     useEffect(() => {
         if (selectedSong && selectedSong.music) {
-            const songKey = `${selectedSong.title}-${transposeSignal.value}`;
+            const songKey = `${selectedSong.title}-${transpose}`;
 
             if (lastAnalyzedSongRef.current !== songKey) {
                 const measures = selectedSong.music.measures.map((m: any) =>
@@ -218,7 +224,7 @@ export default function JazzKillerModule() {
                 lastAnalyzedSongRef.current = songKey;
             }
         }
-    }, [selectedSong, transposeSignal.value, loadSong]);
+    }, [selectedSong, transpose, loadSong]);
 
     const filteredStandards = useMemo(() => {
         if (!searchQuery) return [];
@@ -239,6 +245,8 @@ export default function JazzKillerModule() {
         setSelectedStandard(song);
         localStorage.setItem('jazz-killer-last-song', song.Title);
         if (song.Tempo != null) setBpm(song.Tempo);
+        if (song.TimeSignature != null) meterSignal.value = song.TimeSignature;
+        else meterSignal.value = '4/4';
         if (song.DefaultLoops != null) totalLoopsSignal.value = Math.max(1, song.DefaultLoops);
     };
 
@@ -304,13 +312,12 @@ export default function JazzKillerModule() {
         return selectedSong.music.measures.flatMap((m: { chords: string[] }) => m.chords).filter((c: string) => c && c.trim() !== "");
     }, [selectedSong]);
 
-    const { clearAdvice } = useAiTeacher();
+    const { clearAdvice, requestAdviceForCurrentMeasure } = useAiTeacher();
 
     return (
         <div className="h-full w-full min-w-0 bg-[#0a0a0a] text-white p-1.5 md:p-3 flex flex-col gap-2 md:gap-3 overflow-hidden relative">
             {/* 2026 Detection Engine Bridges */}
             <HighPerformanceScoringBridge />
-            <JazzPitchMonitor />
 
             {/* AI Proactive Notification */}
             {proactiveAdviceSignal.value && (
@@ -385,6 +392,15 @@ export default function JazzKillerModule() {
                                 <Target size={14} />
                                 Suggested next
                             </button>
+                            <button
+                                onClick={requestAdviceForCurrentMeasure}
+                                disabled={isAiThinkingSignal.value}
+                                className="flex items-center gap-2 px-3 py-1 bg-indigo-500/20 hover:bg-indigo-500/30 rounded-lg text-[10px] font-bold text-indigo-400 hover:text-indigo-300 transition-all border border-indigo-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="Get AI tip for current bar (on-demand, no background inference)"
+                            >
+                                <Sparkles size={14} />
+                                {isAiThinkingSignal.value ? 'Thinking…' : 'Sensei tip'}
+                            </button>
                         </div>
                     )}
                 </div>
@@ -425,6 +441,26 @@ export default function JazzKillerModule() {
                                 />
                                 <span className="text-[8px] md:text-[10px] text-neutral-600 font-black uppercase tracking-tighter">BPM</span>
                             </div>
+                        </div>
+
+                        {/* Meter (time signature) */}
+                        <div className="flex flex-col px-2 md:px-4 border-r border-white/10">
+                            <span className="text-[8px] md:text-[10px] text-neutral-500 font-black uppercase tracking-[0.2em] mb-0.5 md:mb-1">Meter</span>
+                            <select
+                                value={meterSignal.value}
+                                onChange={(e) => { meterSignal.value = e.target.value; }}
+                                className="bg-transparent text-lg md:text-2xl font-black font-mono leading-none focus:outline-none text-amber-500 cursor-pointer border-0 py-0 pr-5 appearance-none bg-no-repeat bg-[length:10px] bg-[right_2px_center]"
+                                style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23737b80'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E\")" }}
+                            >
+                                {(() => {
+                                    const defaults = ['2/4', '3/4', '4/4', '5/4', '6/4', '7/8', '9/8', '12/8'];
+                                    const current = meterSignal.value;
+                                    const options = defaults.includes(current) ? defaults : [current, ...defaults];
+                                    return options.map((m) => (
+                                        <option key={m} value={m} className="bg-neutral-900 text-amber-500">{m}</option>
+                                    ));
+                                })()}
+                            </select>
                         </div>
 
                         {/* Loop Control */}
