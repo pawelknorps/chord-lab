@@ -247,3 +247,15 @@
   - [x] **Phase 3**: Procedural lead-ins at bar end (REQ-JBCE-07, REQ-JBCE-08).
   - [x] **Phase 4** (optional): MarkovBridge / updateIntensity (REQ-JBCE-09, REQ-JBCE-10).
   - [ ] **Phase 5** (future): Meter independence via rhythmic atoms (REQ-JBCE-11 deferred).
+
+## Phase 21: Professional-Grade Harmonic Analysis (Tonality Segmentation)
+
+*Focus: Refactor JazzKiller harmonic overlays from chord-by-chord labeling to tonality segmentation and Functional DNA mapping; optional SwiftF0 live grounding.*
+
+- **Success Criteria**: Key center segments and Roman numerals reflect context (e.g. Blue Bossa Cm7 = i); tritone subs and constant-structure tunes labeled correctly; JazzKiller AnalysisOverlay consumes new pipeline; optional Conflict Resolver and Pedal Point Detection from SwiftF0.
+- **Milestone**: `.planning/milestones/harmonic-analysis-tonality/` (PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md).
+- **Tasks**:
+  - [ ] **Wave 1–2**: Tonality segmentation (Fit cost, Transition cost, Viterbi, segment list API) (REQ-HAT-01–05).
+  - [ ] **Wave 3**: Functional labeling (jazz cliché dictionary, Chord DNA + context → Roman numeral, constant-structure) (REQ-HAT-06–08).
+  - [ ] **Wave 4**: Pipeline API and JazzKiller overlay refactor (REQ-HAT-09–11).
+  - [ ] **Wave 5** (optional): Live Harmonic Grounding (Conflict Resolver, Pedal Point Detection, Live Grounding API) (REQ-HAT-12–14).

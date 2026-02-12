@@ -99,6 +99,13 @@ Transition from a music theory prototype to a full-scale "Incredible Teaching Ma
 - **Tech**: JazzMarkovEngine (transition matrix, getNextPatternType / getPatternForBar); pattern tagging; humanization layer at schedule time; procedural lead-in using WalkingBassEngine / approach logic; RhythmicDensityTracker (SwiftF0 + onset, 4s window) + MarkovBridge when soloist-responsive on; meter independence (rhythmic atoms) deferred.
 - **Milestone**: `.planning/milestones/jazz-band-comping-evolution/` (PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md).
 
+### 14. Professional-Grade Harmonic Analysis (Tonality Segmentation)
+
+- **Concept**: Refactor the harmonic analysis used for jazz standards in JazzKiller from **chord-by-chord labeling** to a **global optimization** system that identifies **Key Center Segments (Tonality Segmentation)** and assigns Roman numerals via **Functional DNA Mapping**. Optional **SwiftF0 Live Harmonic Grounding** reconciles theoretical analysis with the student’s performance (e.g. tritone sub, pedal points).
+- **Goal**: Tonality segmentation (DP/Viterbi) over Fit(chord, key) + Transition(key, key); Chord DNA + context → Roman numerals via jazz cliché dictionary; refactor AnalysisOverlay data source; optional Conflict Resolver and Pedal Point Detection from SwiftF0.
+- **Tech**: TonalitySegmentationEngine (Fit, Transition, Viterbi); FunctionalLabelingEngine (ChordDna + key + context → Roman numeral); analyzeHarmony() pipeline; JazzKiller overlay refactor; optional Live Grounding (chart vs. pitch, pedal detection).
+- **Milestone**: `.planning/milestones/harmonic-analysis-tonality/` (PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md).
+
 ## Key Decisions
 
 | Decision | Rationale | Status |
