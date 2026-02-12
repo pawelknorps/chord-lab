@@ -1,38 +1,53 @@
 # Phase 21 Summary: Professional-Grade Harmonic Analysis (Tonality Segmentation)
 
-## What Was Planned
+## What Was Implemented
 
-Phase 21 refactors the harmonic analysis used for jazz standards in JazzKiller from **chord-by-chord labeling** to a **global optimization** system:
+Phase 21 refactored the harmonic analysis used for jazz standards in JazzKiller from **chord-by-chord labeling** to a **global optimization** pipeline (Waves 1–4; Wave 5 optional Live Grounding deferred).
 
-1. **Tonality Segmentation (DP/Viterbi)**: Minimize J = Σ Fit(Chord_i, Key_k) + Σ Transition(Key_i, Key_{i+1}) to get key center segments (e.g. "Bars 1–4: Bb Major", "Bars 5–8: G Minor"). Fit = how well chord belongs to key; Transition = modulation penalty (e.g. C→Db higher than C→F).
+### Wave 1–2: Tonality Segmentation
 
-2. **Functional DNA Mapping**: Once segments are known, map Chord DNA (m7, dom7, maj7, m7b5, etc.) + context (prev/next chord) to Roman numerals via a jazz cliché dictionary (ii–V–I, subV7, iiø7, etc.). Contextual awareness: e.g. Cm7 in Blue Bossa = i, not ii.
+- **TonalitySegmentationEngine** (`src/core/theory/TonalitySegmentationEngine.ts`):
+  - **REQ-HAT-01**: 24 key centers (12 major + 12 minor), `ChordSlot[]` (barIndex, chordSymbol).
+  - **REQ-HAT-02**: `getFitCost(chordSymbol, key)` — diatonic low, secondary/borrowed medium, chromatic high; uses ChordDna + Key scale.
+  - **REQ-HAT-03**: `getTransitionCost(keyFrom, keyTo)` — circle-of-fifths distance; relative major/minor bonus.
+  - **REQ-HAT-04**: Viterbi algorithm: optimal key path; merge consecutive same-key slots into segments.
+  - **REQ-HAT-05**: `getSegments(): KeySegment[]` (startBar, endBar, key).
+- Unit tests: `TonalitySegmentationEngine.test.ts` (10 tests).
 
-3. **Pipeline and JazzKiller Integration**: Preprocessing (iReal → chord array, reuse ChordDna); single entry point `analyzeHarmony()`; refactor LeadSheet/analyze flow so AnalysisOverlay consumes new pipeline. Overlay UI unchanged; optional key segment and Roman numeral in tooltip or secondary line.
+### Wave 3: Functional Labeling
 
-4. **Optional Live Harmonic Grounding (SwiftF0)**: Conflict Resolver (chart C7 vs. student F#/Bb → subV7); Pedal Point Detection (sustained low pitch while chords change → mark pedal). Lightweight; no full re-segmentation in real time.
+- **FunctionalLabelingEngine** (`src/core/theory/FunctionalLabelingEngine.ts`):
+  - **REQ-HAT-06, REQ-HAT-07**: Chord DNA + context → Roman numeral; jazz cliché rules (ii–V–I, tritone sub, iiø7, etc.).
+  - **REQ-HAT-08**: Chromatic/constant-structure segments → "Key shift" / chord roots only.
+- **AnalysisTypes** extended: `KeySegmentRef`, `Concept.keySegment`, `romanNumeral`, `segmentLabel`.
+- Unit tests: `FunctionalLabelingEngine.test.ts` (3 tests).
 
-## Deliverables (Planned)
+### Wave 4: Pipeline and JazzKiller Integration
 
-- **TonalitySegmentationEngine**: Fit cost, Transition cost, Viterbi, segment list API.
-- **FunctionalLabelingEngine**: Jazz cliché dictionary, Chord DNA + context → Roman numeral; constant-structure handling.
-- **harmonicAnalysisPipeline.ts**: analyzeHarmony(); orchestrates segmentation + labeling.
-- **JazzKiller**: Refactor analyze data source to new pipeline; AnalysisOverlay shows segment-aware Roman numerals.
-- **Optional**: Live Grounding API (Conflict Resolver, Pedal Point Detection).
+- **harmonicAnalysisPipeline** (`src/core/theory/harmonicAnalysisPipeline.ts`):
+  - **REQ-HAT-09**: `preprocessToSlots(measures)` — measures → ChordSlot[]; no duplicate parsing.
+  - **REQ-HAT-10**: `analyzeHarmony(input, options)` — Preprocessing → Segmentation → Labeling → Concept[] (backward compatible).
+- **usePracticeStore.loadSong**: Calls `analyzeHarmony({ measures, key })`; uses result for `detectedPatterns` when non-empty; fallback to ConceptAnalyzer for overlay and for `generateExercises`.
+- AnalysisOverlay continues to receive `Concept[]`; existing CONCEPT_COLORS and brackets unchanged.
 
-## Dependencies
+### Wave 5 (Optional): Deferred
 
-- ChordDna, functionalRules, ConceptAnalyzer, AnalysisTypes.
-- JazzKiller: LeadSheet, AnalysisOverlay, song load/analyze flow.
-- SwiftF0 / useITMPitchStore (for Wave 5 only).
+- Live Harmonic Grounding (Conflict Resolver, Pedal Point Detection, getLiveOverrides) not implemented; can be added later.
 
-## Success Criteria
+## Files Created / Modified
 
-- Key segments and Roman numerals reflect context (Blue Bossa Cm7 = i; tritone sub when segment supports it).
-- Constant-structure tunes get segment labels (chromatic/key shift) without wrong functional labels.
-- JazzKiller overlay displays new analysis without regression.
-- Optional: Live grounding shows subV7 when student plays tritone sub; pedal section annotated when student holds pedal.
+- **Created**: `TonalitySegmentationEngine.ts`, `TonalitySegmentationEngine.test.ts`, `FunctionalLabelingEngine.ts`, `FunctionalLabelingEngine.test.ts`, `harmonicAnalysisPipeline.ts`.
+- **Modified**: `AnalysisTypes.ts` (KeySegmentRef, Concept extensions), `usePracticeStore.ts` (loadSong uses analyzeHarmony).
 
-## Next Step
+## Verification
 
-Run **`/gsd-plan-phase 21`** for more task breakdown, or **`/gsd-execute-phase 21`** to start implementation (Wave 1: Fit and Transition costs).
+- Key set (24 keys), Fit, Transition, Viterbi, getSegments covered by unit tests.
+- FunctionalLabelingEngine: ii–V–I, subV7, chromatic segment tests pass.
+- Pipeline returns Concept[]; loadSong uses it for overlay; fallback to ConceptAnalyzer when pipeline returns none.
+- Manual verification on Blue Bossa / ATTYA / constant-structure recommended; overlay visibility and click behavior unchanged.
+
+## Next Steps
+
+- Optional: Implement Wave 5 (Live Grounding) for Conflict Resolver and Pedal Point Detection.
+- Run **`/gsd-complete-milestone`** for harmonic-analysis-tonality when ready to archive.
+- Or proceed to next phase from ROADMAP.

@@ -2,9 +2,9 @@
 
 ## Current Status
 
-- **Phase**: Phase 17–20 ✅; Phase 21 (Harmonic Analysis) and Phase 22 (Trio Hi-Fi Mixer) planned
-- **Status**: Phase 20 completed (Markov Smart Pattern Engine + humanization + procedural lead-in + MarkovBridge)
-- **Next Milestone**: Phase 6 Polish, Phase 21 (Harmonic Analysis), or Phase 22 (Trio Hi-Fi Mixer)
+- **Phase**: Phase 17–21 ✅; Phase 22 (Trio Hi-Fi Mixer) or Phase 6 Polish next
+- **Status**: Phase 21 completed (Tonality Segmentation, Functional Labeling, analyzeHarmony pipeline, loadSong integration)
+- **Next Milestone**: Phase 6 Polish, Phase 22 (Trio Hi-Fi Mixer), or `/gsd-complete-milestone` for harmonic-analysis-tonality
 - **Overall Progress**: ~98%
 
 ## Active Requirements
@@ -27,6 +27,11 @@
 
 ## Recent Achievements
 
+- **Phase 21: Professional-Grade Harmonic Analysis (Tonality Segmentation)**:
+  - TonalitySegmentationEngine: 24 key centers, getFitCost, getTransitionCost, Viterbi, getSegments (REQ-HAT-01–05).
+  - FunctionalLabelingEngine: Chord DNA + context → Roman numeral; jazz cliché rules (ii–V–I, subV7, iiø7); chromatic/constant-structure → "Key shift" (REQ-HAT-06–08).
+  - harmonicAnalysisPipeline: preprocessToSlots, analyzeHarmony(); usePracticeStore.loadSong uses pipeline for detectedPatterns with ConceptAnalyzer fallback (REQ-HAT-09–11).
+  - AnalysisTypes extended: KeySegmentRef, Concept.keySegment, romanNumeral, segmentLabel. Wave 5 (Live Grounding) deferred.
 - **Phase 20: Jazz Band Comping Evolution (Smart Pattern Engine)**:
   - PatternType + RHYTHM_TEMPLATE_TO_PATTERN_TYPE in RhythmEngine; patternTypeBias filters candidates; FILL → minimal comp.
   - JazzMarkovEngine (transition matrix, getNextPatternType, updateIntensity); useJazzBand calls every 4 bars; FILL → DrumEngine.generateFill.

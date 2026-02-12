@@ -1,32 +1,27 @@
 # Professional-Grade Harmonic Analysis – State
 
-## Status: Not Started
+## Status: Phase 21 Complete (Waves 1–4)
 
 - **Milestone**: `.planning/milestones/harmonic-analysis-tonality/`
 - **Phase**: 21 (see `.planning/phases/21-harmonic-analysis-tonality/`)
 
 ## Completed
 
-- PROJECT.md, REQUIREMENTS.md, ROADMAP.md created.
-- STATE.md initialized.
+- **Wave 1–2**: TonalitySegmentationEngine (key set, Fit, Transition, Viterbi, getSegments); unit tests.
+- **Wave 3**: FunctionalLabelingEngine (jazz cliché dictionary, Chord DNA + context → Roman numeral, constant-structure); AnalysisTypes extended; unit tests.
+- **Wave 4**: harmonicAnalysisPipeline (preprocessToSlots, analyzeHarmony); usePracticeStore.loadSong uses pipeline for overlay; fallback to ConceptAnalyzer.
+- SUMMARY.md, VERIFICATION.md updated; ROADMAP.md and main STATE.md updated.
 
 ## In Progress
 
 - None.
 
-## Blocked
+## Deferred
 
-- None.
+- **Wave 5**: Live Harmonic Grounding (Conflict Resolver, Pedal Point Detection, getLiveOverrides) — optional; can be implemented later.
 
 ## Next Actions
 
-1. Run `/gsd-plan-phase 21` for detailed wave/task breakdown (or use phase PLAN.md).
-2. Implement Wave 1–2: Tonality segmentation (Fit, Transition, Viterbi, segment API).
-3. Implement Wave 3: Functional labeling (cliché dictionary, Chord DNA + context → Roman numeral).
-4. Implement Wave 4: Pipeline API and JazzKiller overlay refactor.
-5. Optional: Wave 5 (Live Grounding).
-
-## Verification
-
-- After Phase 3: Load Blue Bossa, All the Things You Are, one constant-structure tune; confirm segment and Roman numeral labels; confirm overlay displays and no regression.
-- After Phase 4 (if done): With mic on, play tritone sub over dominant; confirm overlay or feedback shows subV7; hold pedal and confirm pedal section annotation.
+1. Manual verification: Blue Bossa, All the Things You Are, constant-structure tune (overlay labels and no regression).
+2. Optionally implement Wave 5 (Live Grounding).
+3. Run `/gsd-complete-milestone` for harmonic-analysis-tonality when ready to archive.
