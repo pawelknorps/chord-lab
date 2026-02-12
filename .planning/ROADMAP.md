@@ -224,13 +224,13 @@
   - [x] **Phase 3**: Soloist-space policy (REQ-TRIO-06), cross-instrument interaction (REQ-TRIO-07), band loop integration (REQ-TRIO-08).
 - **Implementation**: Hybrid—additive only; old balladMode/activity preserved. `trioContext.ts` (getPlaceInCycle, getSongStyleTag, isSoloistSpace); optional trio params on ReactiveCompingEngine, RhythmEngine, DrumEngine, BassRhythmVariator; useJazzBand computes place/style at beat 0 and passes to all engines. See `.planning/phases/18-creative-jazz-trio-playback/SUMMARY.md`, VERIFICATION.md.
 
-## Phase 19: Soloist-Responsive Playback (Call-and-Response)
+## Phase 19: Soloist-Responsive Playback (Call-and-Response) ✅
 
-*Focus: **Experimental feature** (toggle): playback listens to the soloist via SwiftF0 and adjusts—more space when user plays more/faster, more backing when user plays less.*
+*Focus: **Experimental feature** (toggle): playback listens to the soloist via SwiftF0 and steers the band—more space when user plays more/faster, more backing when user plays less.*
 
 - **Success Criteria**: Toggle (default off); soloist activity derived from SwiftF0 drives band density/space when on; no regression when off; toggle UI in Mixer or band panel.
 - **Milestone**: `.planning/milestones/soloist-responsive-playback/` (PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md).
 - **Tasks**:
-  - [ ] **Phase 1**: Toggle signal; soloist activity from useITMPitchStore / useHighPerformancePitch (onset + pitch presence → 0–1); graceful fallback when no mic.
-  - [ ] **Phase 2**: useJazzBand reads toggle + soloist activity; effective activity drives comping/drums/bass; no regression when toggle off.
-  - [ ] **Phase 3**: Toggle UI; STATE.md and VERIFICATION.md updated.
+  - [x] **Phase 1**: Toggle signal; soloist activity from useITMPitchStore (pitch duty cycle → 0–1); graceful fallback when no mic.
+  - [x] **Phase 2**: useJazzBand reads toggle + soloist activity; effective activity steered (activity *= 1 - 0.65 * soloist); no regression when toggle off.
+  - [x] **Phase 3**: Toggle UI in Mixer (Call-and-Response); STATE.md and VERIFICATION.md updated.

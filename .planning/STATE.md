@@ -2,9 +2,9 @@
 
 ## Current Status
 
-- **Phase**: Phase 17: Innovative Interactive Exercises ✅; Phase 18: Creative Jazz Trio Playback ✅
-- **Status**: Phase 18 completed (hybrid: place-in-cycle, song-style, soloist space; additive only)
-- **Next Milestone**: Phase 19 Soloist-Responsive Playback (call-and-response) or Phase 6 Polish
+- **Phase**: Phase 17: Innovative Interactive Exercises ✅; Phase 18: Creative Jazz Trio Playback ✅; Phase 19: Soloist-Responsive Playback ✅
+- **Status**: Phase 19 completed (toggle + soloist activity + band steering + Mixer UI; additive only)
+- **Next Milestone**: Phase 6 Polish or next phase
 - **Overall Progress**: ~97%
 
 ## Active Requirements
@@ -27,6 +27,8 @@
 
 ## Recent Achievements
 
+- **Phase 19: Soloist-Responsive Playback (Call-and-Response)**:
+  - Toggle (default off); soloist activity (0–1) from SwiftF0 pitch duty cycle; useSoloistActivity polls pitch store; useJazzBand steers effective activity when toggle on (activity *= 1 - 0.65 * soloist); Mixer UI “Call-and-Response”; no regression when off. REQ-SRP-01..08.
 - **Phase 14.2: SwiftF0 Pitch Analysis Speed Optimization**:
   - Optional dev-only timing: `setTiming` + `enableTiming` in PitchStoreOptions; worker posts `timing` with preprocessMs/inferenceMs/totalMs; DEV console logs (REQ-SF0-S01).
   - Zero allocations in hot path: single pre-allocated `inputTensorOrt` reused per frame (REQ-SF0-S02).
