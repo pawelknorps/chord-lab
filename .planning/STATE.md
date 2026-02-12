@@ -2,9 +2,9 @@
 
 ## Current Status
 
-- **Phase**: Phase 17–21 ✅; Phase 22 (Trio Hi-Fi Mixer) or Phase 6 Polish next
-- **Status**: Phase 21 completed (Tonality Segmentation, Functional Labeling, analyzeHarmony pipeline, loadSong integration)
-- **Next Milestone**: Phase 6 Polish, Phase 22 (Trio Hi-Fi Mixer), or `/gsd-complete-milestone` for harmonic-analysis-tonality
+- **Phase**: Phase 17–22 ✅; Phase 6 Polish or next roadmap phase
+- **Status**: Phase 22 completed (Trio Hi-Fi Mixer: parallel bus, soft-knee worklet, RMS makeup, Pro Mix toggle, drums Air band)
+- **Next Milestone**: Phase 6 Polish or `/gsd-complete-milestone` for trio-hifi-mixer
 - **Overall Progress**: ~98%
 
 ## Active Requirements
@@ -27,6 +27,11 @@
 
 ## Recent Achievements
 
+- **Phase 22: Trio Hi-Fi Mixer (WASM Compressor & Parallel Processing)**:
+  - Parallel bus: trio sum → dry Gain(0.4) + wet (compressor/worklet) → parallelSumGain → makeupGain → masterBus; Pro Mix toggle in Mixer (REQ-HIFI-01, REQ-HIFI-02, REQ-HIFI-08).
+  - Soft-knee compressor worklet `jazz-compressor-processor.js` (ratio 4, knee 30 dB, attack 5 ms, release 150 ms); wet path swaps when loaded; fallback Tone.Compressor (REQ-HIFI-03–05).
+  - RMS-matching makeup gain: inputMeter/outputMeter, makeup = inputRms/outputRms (0.25–4), update 100 ms when Pro Mix on (REQ-HIFI-06, REQ-HIFI-07).
+  - Drums Air band: Tone.Filter highshelf +3 dB @ 12 kHz (REQ-HIFI-09).
 - **Phase 21: Professional-Grade Harmonic Analysis (Tonality Segmentation)**:
   - TonalitySegmentationEngine: 24 key centers, getFitCost, getTransitionCost, Viterbi, getSegments (REQ-HAT-01–05).
   - FunctionalLabelingEngine: Chord DNA + context → Roman numeral; jazz cliché rules (ii–V–I, subV7, iiø7); chromatic/constant-structure → "Key shift" (REQ-HAT-06–08).
