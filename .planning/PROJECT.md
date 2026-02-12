@@ -78,6 +78,13 @@ Transition from a music theory prototype to a full-scale "Incredible Teaching Ma
 - **Tech**: Place-in-cycle resolver (loop + section + measure → role); song-style matrix (Ballad, Medium Swing, Up-tempo, Latin, Bossa, Waltz) driving RhythmEngine/DrumEngine/WalkingBassEngine and ReactiveCompingEngine; “soloist space” mode (density cap, sustain bias, bass pedal/sparse options); cross-instrument signals (e.g. piano density → drums simplify, bass variation probability) in useJazzBand.
 - **Milestone**: `.planning/milestones/jazz-trio-playback/` (PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md).
 
+### 11. SwiftF0 Pitch Analysis Speed Optimization
+
+- **Concept**: Make SwiftF0 pitch analysis **a little bit faster** so real-time feedback feels snappier and the system stays within a sub-10 ms latency budget.
+- **Goal**: Reduce per-frame inference time and pipeline cost (preprocessing, tensor lifecycle, worker scheduling) without changing model accuracy or instrument profiles.
+- **Tech**: Optional timing baseline; zero allocations in inference hot path; preprocessing cost reduction; poll interval aligned with inference; SwiftF0Worker, useHighPerformancePitch, useITMPitchStore unchanged from consumer perspective.
+- **Milestone**: `.planning/milestones/swiftf0-speed/` (PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md).
+
 ## Key Decisions
 
 | Decision | Rationale | Status |
