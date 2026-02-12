@@ -73,6 +73,18 @@ let parallelSumGain: Tone.Gain;
 /** When loaded, wet path uses this instead of Tone.Compressor (soft-knee). */
 let wetPathWorklet: AudioWorkletNode | null = null;
 
+// Phase 22 Wave 3: RMS-matching makeup gain (REQ-HIFI-06, REQ-HIFI-07)
+let makeupGain: Tone.Gain;
+let inputMeter: Tone.Meter;
+let outputMeter: Tone.Meter;
+let makeupIntervalId: ReturnType<typeof setInterval> | null = null;
+const MAKEUP_UPDATE_MS = 100;
+const MAKEUP_MIN = 0.25;
+const MAKEUP_MAX = 4;
+
+// Phase 22 Wave 4: Drums Air band +3 dB @ 12 kHz (REQ-HIFI-09)
+let drumsAirBand: Tone.Filter;
+
 // Split-Brain Modules
 let shellSynth: Tone.PolySynth | null = null;
 let extensionSynth: Tone.PolySynth | null = null;
@@ -151,8 +163,11 @@ export async function initAudio(): Promise<void> {
 
   masterBus = new Tone.Gain(1).connect(masterEQ);
 
-  // Phase 22: Parallel bus – dry (Gain) + wet (compressor) summed into masterBus
-  parallelSumGain = new Tone.Gain(1).connect(masterBus);
+  // Phase 22 Wave 3: Makeup gain (RMS-matching) between parallel sum and masterBus
+  makeupGain = new Tone.Gain(1).connect(masterBus);
+
+  // Phase 22: Parallel bus – dry (Gain) + wet (compressor) summed into makeupGain
+  parallelSumGain = new Tone.Gain(1).connect(makeupGain);
   compressor = new Tone.Compressor({
     threshold: -18,
     ratio: 4,
@@ -168,12 +183,32 @@ export async function initAudio(): Promise<void> {
 
   masterVol = new Tone.Volume(0).connect(parallelSumGain);
 
-  // --- BUSSES: piano to reverb + trio sum; bass/drums to trio sum (trio sum feeds dry + wet) ---
+  // --- BUSSES: piano to reverb + trio sum; bass to trio sum; drums via Air band (REQ-HIFI-09) ---
   pianoVol = new Tone.Volume(pianoVolumeSignal.value);
   pianoVol.connect(pianoReverb);
   pianoVol.connect(trioSum);
   bassVol = new Tone.Volume(bassVolumeSignal.value).connect(trioSum);
-  drumsVol = new Tone.Volume(drumsVolumeSignal.value).connect(trioSum);
+  drumsAirBand = new Tone.Filter({ type: 'highshelf', frequency: 12000, gain: 3 }).connect(trioSum);
+  drumsVol = new Tone.Volume(drumsVolumeSignal.value).connect(drumsAirBand);
+
+  // Phase 22 Wave 3: RMS meters for makeup (input = trio sum, output = parallel sum)
+  inputMeter = new Tone.Meter({ normalRange: true });
+  outputMeter = new Tone.Meter({ normalRange: true });
+  trioSum.connect(inputMeter);
+  parallelSumGain.connect(outputMeter);
+  if (makeupIntervalId != null) clearInterval(makeupIntervalId);
+  makeupIntervalId = setInterval(() => {
+    if (!makeupGain || !inputMeter || !outputMeter) return;
+    if (proMixEnabledSignal.value) {
+      const inRms = (typeof inputMeter.getValue === 'function' ? inputMeter.getValue() : 0) as number;
+      const outRms = (typeof outputMeter.getValue === 'function' ? outputMeter.getValue() : 0) as number;
+      const ratio = outRms > 1e-6 ? inRms / outRms : 1;
+      const makeup = Math.max(MAKEUP_MIN, Math.min(MAKEUP_MAX, ratio));
+      makeupGain.gain.rampTo(makeup, 0.1);
+    } else {
+      makeupGain.gain.rampTo(1, 0.05);
+    }
+  }, MAKEUP_UPDATE_MS);
 
   // Unify reverb routing to master limiter too
   reverb.connect(masterLimiter);
