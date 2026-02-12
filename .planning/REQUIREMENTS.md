@@ -308,6 +308,46 @@
 - **Requirement**: 4/4 backing; student plays 3/4 cross-rhythm on one note (e.g. G). Track **pitch stability**. **Win**: pitch within **5 cents** + successful 3-against-4.
 - **Tech**: Pitch pipeline for stability; 3 vs 4 grid; scoring = rhythm accuracy + 5¢ stability.
 
+## Phase 18: Creative Jazz Trio Playback Modelling
+
+*New **milestone** to push the limits of modelling jazz trio playing: band adapts to **place in the cycle**, **song type**, **inter-instrument interaction**, and **space for the soloist** (especially in ballads). Full requirements in `.planning/milestones/jazz-trio-playback/REQUIREMENTS.md`.*
+
+### REQ-TRIO-01: Place-in-Cycle Resolver
+
+- **Requirement**: Resolver that maps (loopCount, playback plan index, section labels) → role: `intro` | `head` | `solo` | `out head` | `ending`. Band density and style are influenced by this role.
+- **Integration**: useJazzBand (or shared playback state); expose via signal or ref at beat 0.
+
+### REQ-TRIO-02: Song-Style Tag
+
+- **Requirement**: Derive style tag from song metadata (Rhythm, CompStyle, Tempo): `Ballad` | `Medium Swing` | `Up-tempo` | `Latin` | `Bossa` | `Waltz`. Default `Medium Swing` when unknown.
+- **Integration**: Style tag available in useJazzBand loop so RhythmEngine, DrumEngine, and bass logic can read it.
+
+### REQ-TRIO-03: Style-Driven Comping (RhythmEngine)
+
+- **Requirement**: RhythmEngine (or ReactiveCompingEngine) selects pattern density and character based on style tag and place-in-cycle (e.g. Ballad → sustain/sparse; Latin/Bossa → appropriate pattern set; Waltz → 3-beat).
+
+### REQ-TRIO-04: Style-Driven Bass
+
+- **Requirement**: Bass feel and variation probability depend on style tag and place-in-cycle (Ballad → half-time/pedal, low variation; Latin/Bossa → two-feel or bossa; Waltz → 3-note bar).
+
+### REQ-TRIO-05: Style-Driven Drums
+
+- **Requirement**: DrumEngine selects density and character (ride vs brushes, groove) based on style tag and place-in-cycle (Ballad → brushes/light; Latin/Bossa → groove; Waltz → 3/4 feel).
+
+### REQ-TRIO-06: Soloist-Space Policy
+
+- **Requirement**: When place-in-cycle is `solo` and/or style is `Ballad`, apply “soloist space”: cap comping density, bias sustain, reduce bass variation, optional half-time/pedal bass.
+- **Goal**: In ballads and solo sections, band leaves clear space for the soloist.
+
+### REQ-TRIO-07: Cross-Instrument Interaction
+
+- **Requirement**: Coherent reaction: piano density → drums simplify; place “solo” → all reduce density; place “out head”/“last chorus” + high activity → band can build.
+- **Goal**: Trio feels like a single unit responding to form and energy.
+
+### REQ-TRIO-08: Band Loop Integration
+
+- **Requirement**: useJazzBand computes place-in-cycle and style tag once per bar and passes them into RhythmEngine, DrumEngine, WalkingBassEngine, BassRhythmVariator, and ReactiveCompingEngine; all engines use them in addition to activity/tension/BPM.
+
 ---
 
 ## Technical Priorities

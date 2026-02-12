@@ -190,7 +190,7 @@
   - [x] **Regression Head Logic**: Sub-cent refinement from bins 3-134.
   - [x] **Unified Store Integration**: `useITMPitchStore` favors SwiftF0 with MPM fallback.
 
-## Phase 17: Innovative Interactive Exercises (Ear + Rhythm)
+## Phase 17: Innovative Interactive Exercises (Ear + Rhythm) ✅
 
 *Focus: New module of pitch-centric ear exercises (Ghost Note, Intonation Heatmap, Voice-Leading Maze) and micro-timing rhythm exercises (Swing Pocket, Call and Response, Ghost Rhythm).*
 
@@ -198,5 +198,16 @@
 - **Milestone**: `.planning/milestones/innovative-exercises/` (PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md).
 - **Tasks**:
   - [x] **Wave 1 – Ear**: Ghost Note Match (lick + ghost → 10¢ match → pro sample); Intonation Heatmap (drone + scale + heatmap UI); Voice-Leading Maze (ii–V–I + GuideToneCalculator + mute on wrong note).
-  - [ ] **Wave 2 – Rhythm**: Swing Pocket Validator (onset timing, swing ratio, Pocket Gauge, Push/Lay Back ms); Call and Response (RMS envelope, waveform overlay); Ghost Rhythm Poly-Meter (3 vs 4 grid, 5¢ pitch stability win). *Stub panels only; full impl deferred.*
+  - [x] **Wave 2 – Rhythm**: Swing Pocket Validator (onset timing, swing ratio, Pocket Gauge, Push/Lay Back ms); Call and Response (reference break + student onsets, align by first attack, early/late per attack); Ghost Rhythm Poly-Meter (3 vs 4 grid, 5¢ pitch stability on G, win state).
   - [x] **Wave 3**: Module entry in app nav (`/innovative-exercises`); list of six exercises; docs and verification (SUMMARY.md, VERIFICATION.md).
+
+## Phase 18: Creative Jazz Trio Playback Modelling
+
+*Focus: Push the limits of modelling jazz trio playing—band adapts to **place in the cycle**, **song type**, **inter-instrument interaction**, and **space for the soloist** (especially in ballads).*
+
+- **Success Criteria**: Place-in-cycle (intro/head/solo/out head/ending) and song-style tag (Ballad, Medium, Latin, Bossa, Waltz) drive comping, bass, and drums; in ballads and solo sections the band leaves space; trio feels like a coherent unit.
+- **Milestone**: `.planning/milestones/jazz-trio-playback/` (PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md).
+- **Tasks**:
+  - [ ] **Phase 1**: Place-in-cycle resolver (REQ-TRIO-01) and song-style tag (REQ-TRIO-02); wire into useJazzBand at beat 0.
+  - [ ] **Phase 2**: Style-driven comping (REQ-TRIO-03), bass (REQ-TRIO-04), drums (REQ-TRIO-05); audibly distinct Ballad vs Medium vs Latin/Waltz.
+  - [ ] **Phase 3**: Soloist-space policy (REQ-TRIO-06), cross-instrument interaction (REQ-TRIO-07), band loop integration (REQ-TRIO-08).

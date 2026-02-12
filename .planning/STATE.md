@@ -2,10 +2,10 @@
 
 ## Current Status
 
-- **Phase**: Phase 16: Voice & Percussion Interactive Training
-- **Status**: ✅ Completed
-- **Next Milestone**: Phase 17 Wave 2 (Rhythm exercises) or next phase
-- **Overall Progress**: ~96%
+- **Phase**: Phase 17: Innovative Interactive Exercises ✅; Phase 18: Creative Jazz Trio Playback (planned)
+- **Status**: Phase 17 completed (Wave 1 + Wave 2 + Module Entry); Phase 18 milestone initialized
+- **Next Milestone**: Phase 18 – Creative Jazz Trio Playback Modelling (place-in-cycle, song style, soloist space, interaction) or Phase 6 Polish
+- **Overall Progress**: ~97%
 
 ## Active Requirements
 
@@ -27,12 +27,15 @@
 
 ## Recent Achievements
 
-- **Phase 17: Innovative Interactive Exercises (Wave 1 + Module Entry)**:
+- **Phase 17: Innovative Interactive Exercises (Wave 1 + Wave 2 + Wave 3)**:
   - New module at `/innovative-exercises` with nav under Practice.
-  - Ghost Note Match: lick + ghost slot, 10¢ match → pro sample replacement (REQ-IE-01).
+  - Ghost Note Match: lick + ghost slot, 10¢ match → pro sample replacement (REQ-IE-01); optional MIDI.
   - Intonation Heatmap: drone + scale, heatmap green/red per degree (REQ-IE-02).
-  - Voice-Leading Maze: ii–V–I, guide tones only, mute on wrong note (REQ-IE-03).
-  - Swing Pocket, Call and Response, Ghost Rhythm: stub panels only (Wave 2 deferred).
+  - Voice-Leading Maze: ii–V–I, guide tones only, mute on wrong note (REQ-IE-03); optional MIDI.
+  - Swing Pocket Validator: metronome 2 and 4, onset capture (mic or MIDI), SwingAnalysis (ratio + offset ms), Pocket Gauge (REQ-IR-01).
+  - Call and Response: reference 2-bar break, student onsets, align by first attack, early/late per attack (REQ-IR-02).
+  - Ghost Rhythm Poly-Meter: 4/4 backing, 3-over-4 grid, pitch G ±5¢, win state (REQ-IR-03).
+  - Wave 3: Unified input (Mic | MIDI) for Ghost Note, Voice-Leading, Swing Pocket; unit tests (SwingAnalysis, getAllowedPitchClasses).
 - **Completed Phase 12: Walking Bass Engine (Target & Enclosure Edition) (2026-02-12)**:
   - Replaced mathematical walking with "Teleological" Bebop strategies (Paul Chambers/Ray Brown style).
   - Implemented **Circle of Fifths** logic with "Dominant Drops" (Setup 5th of Target on Beat 4).
@@ -140,6 +143,10 @@
 - **Goal**: Extend Phase 13 with error heatmaps (per measure, per exercise type: Scales • Guide Tones • Arpeggios), option to record written transcription of solo (mic or MIDI), and AI analysis of performance with advice and development suggestions.
 - **Requirements**: REQ-SBE-06 (error heatmaps), REQ-SBE-07 (record + written transcription), REQ-SBE-08 (AI analysis with advice and development suggestions).
 - **Delivered**: useStandardsExercise exposes statsByMeasure and exerciseType; StandardsExerciseHeatmapOverlay + useStandardsExerciseHeatmapStore; Lead Sheet shows exercise heatmap when Exercises panel open; useSoloTranscription + SoloTranscriptionPanel (Record solo → note list + Copy); generateStandardsExerciseAnalysis in jazzTeacherLogic; "Analyze performance" button in StandardsExercisesPanel; unit tests for generateStandardsExerciseAnalysis.
+- **Phase 18: Creative Jazz Trio Playback (planned)**:
+  - Milestone `.planning/milestones/jazz-trio-playback/` created (PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md).
+  - Pillar 10 added to PROJECT.md: band adapts to place in cycle, song type, interaction, and space for soloist (ballads).
+  - Requirements REQ-TRIO-01..08 defined; Phase 18 added to ROADMAP.md.
 - **Completed Phase 14.1: SwiftF0 SOTA 2026 Integration**:
   - Web Worker infrastructure for neural offloading (non-blocking inference).
   - Instrument-aware hysteresis profiles (Vocals, Trumpet, Guitar).

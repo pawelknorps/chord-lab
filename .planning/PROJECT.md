@@ -64,6 +64,20 @@ Transition from a music theory prototype to a full-scale "Incredible Teaching Ma
 - **Tech**: SwiftF0/MPM + frequencyToNote, GuideToneCalculator, onset/RMS and high-resolution time; heatmap and waveform overlay UI.
 - **Milestone**: `.planning/milestones/innovative-exercises/` (PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md).
 
+### 9. Dynamic Meter Change Playback
+
+- **Concept**: Support **meter changes mid-song** (e.g. 4/4 → 3/4 at bar 17) so the player goes beyond a single time signature per tune.
+- **Goal**: Time map (`meterChanges`: bar → signature), Transport scheduling at bar boundaries, walking bass and drums adapting to current meter (e.g. waltz feel in 3/4), and lead sheet with variable bar width and meter markers.
+- **Tech**: Optional `meterChanges` in song data, `Tone.Transport.schedule` for signature at `${bar-1}:0:0`, meter-for-bar resolution in playback loop and UI, `meterTranslator` extended for per-bar meter.
+- **Milestone**: `.planning/milestones/dynamic-meter-playback/` (PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md).
+
+### 10. Creative Jazz Trio Playback Modelling
+
+- **Concept**: Push the limits of **creatively modelling jazz trio playing** in the playback engine: band behavior adapts to **place in the cycle**, **song type**, **inter-instrument interaction**, and **space for the soloist** (especially in ballads).
+- **Goal**: Rhythm section that feels like a real trio: different playing styles per song type (ballad vs medium swing vs Latin); explicit place-in-cycle (intro / head / solo choruses / out head / ending) driving density and space; more interaction (piano responds to bass/drums, drums to piano, bass to comping); in ballads and solo sections, leave clear space for the soloist (sparser comping, longer sustains, fewer hits).
+- **Tech**: Place-in-cycle resolver (loop + section + measure → role); song-style matrix (Ballad, Medium Swing, Up-tempo, Latin, Bossa, Waltz) driving RhythmEngine/DrumEngine/WalkingBassEngine and ReactiveCompingEngine; “soloist space” mode (density cap, sustain bias, bass pedal/sparse options); cross-instrument signals (e.g. piano density → drums simplify, bass variation probability) in useJazzBand.
+- **Milestone**: `.planning/milestones/jazz-trio-playback/` (PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md).
+
 ## Key Decisions
 
 | Decision | Rationale | Status |
