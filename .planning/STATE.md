@@ -2,9 +2,9 @@
 
 ## Current Status
 
-- **Phase**: Phase 17: Innovative Interactive Exercises ✅; Phase 18: Creative Jazz Trio Playback (planned)
-- **Status**: Phase 17 completed (Wave 1 + Wave 2 + Module Entry); Phase 18 milestone initialized
-- **Next Milestone**: Phase 18 – Creative Jazz Trio Playback Modelling (place-in-cycle, song style, soloist space, interaction) or Phase 6 Polish
+- **Phase**: Phase 17: Innovative Interactive Exercises ✅; Phase 18: Creative Jazz Trio Playback ✅
+- **Status**: Phase 18 completed (hybrid: place-in-cycle, song-style, soloist space; additive only)
+- **Next Milestone**: Phase 6 Polish or next phase
 - **Overall Progress**: ~97%
 
 ## Active Requirements
@@ -27,6 +27,11 @@
 
 ## Recent Achievements
 
+- **Phase 18: Creative Jazz Trio Playback (hybrid)**:
+  - Trio context: getPlaceInCycle, getSongStyleTag, isSoloistSpace in `trioContext.ts`; computed at beat 0 in useJazzBand.
+  - Style-driven engines: ReactiveCompingEngine (density cap), RhythmEngine (balladMode from place/style), DrumEngine (density cap), BassRhythmVariator (soloistSpace → no push/skip/rake); all optional params—backward compatible.
+  - Soloist space: when place === 'solo' or style === 'Ballad', density cap 0.5, sustain bias, bass variation 0, half-time bass; out head uncapped so band can build.
+  - Unit tests: trioContext.test.ts (15 passing). Planning: `.planning/phases/18-creative-jazz-trio-playback/` (SUMMARY.md, VERIFICATION.md).
 - **Phase 17: Innovative Interactive Exercises (Wave 1 + Wave 2 + Wave 3)**:
   - New module at `/innovative-exercises` with nav under Practice.
   - Ghost Note Match: lick + ghost slot, 10¢ match → pro sample replacement (REQ-IE-01); optional MIDI.
@@ -143,10 +148,9 @@
 - **Goal**: Extend Phase 13 with error heatmaps (per measure, per exercise type: Scales • Guide Tones • Arpeggios), option to record written transcription of solo (mic or MIDI), and AI analysis of performance with advice and development suggestions.
 - **Requirements**: REQ-SBE-06 (error heatmaps), REQ-SBE-07 (record + written transcription), REQ-SBE-08 (AI analysis with advice and development suggestions).
 - **Delivered**: useStandardsExercise exposes statsByMeasure and exerciseType; StandardsExerciseHeatmapOverlay + useStandardsExerciseHeatmapStore; Lead Sheet shows exercise heatmap when Exercises panel open; useSoloTranscription + SoloTranscriptionPanel (Record solo → note list + Copy); generateStandardsExerciseAnalysis in jazzTeacherLogic; "Analyze performance" button in StandardsExercisesPanel; unit tests for generateStandardsExerciseAnalysis.
-- **Phase 18: Creative Jazz Trio Playback (planned)**:
-  - Milestone `.planning/milestones/jazz-trio-playback/` created (PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md).
-  - Pillar 10 added to PROJECT.md: band adapts to place in cycle, song type, interaction, and space for soloist (ballads).
-  - Requirements REQ-TRIO-01..08 defined; Phase 18 added to ROADMAP.md.
+- **Phase 18: Creative Jazz Trio Playback ✅**:
+  - Milestone `.planning/milestones/jazz-trio-playback/` (PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md).
+  - Implemented hybrid: trioContext.ts (getPlaceInCycle, getSongStyleTag, isSoloistSpace); optional trio params on comping, rhythm, drum, bass engines; useJazzBand wires at beat 0. REQ-TRIO-01..08 satisfied; old system preserved (additive only).
 - **Completed Phase 14.1: SwiftF0 SOTA 2026 Integration**:
   - Web Worker infrastructure for neural offloading (non-blocking inference).
   - Instrument-aware hysteresis profiles (Vocals, Trumpet, Guitar).

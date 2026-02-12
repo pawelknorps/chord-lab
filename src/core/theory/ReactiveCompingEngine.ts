@@ -1,134 +1,138 @@
-import * as Tone from 'tone';
-import type { CompingEngine } from './CompingEngine';
-
 /**
- * Micro-timing offsets in seconds (small values for subtle "pocket").
- * Pad/Sustain: slight drag; Stabs: tight; Anticipations: push.
+ * ReactiveCompingEngine – Listens to the "Virtual Room" (drums + bass)
+ * and drives humanised piano comping: pocket (BPM-relative de-quantization),
+ * conversation logic (sparse when bass is busy, dense when open; get out when drums are loud),
+ * and vocabulary templates (Red Garland / Bill Evans / Herbie style).
+ *
+ * Combined with RhythmEngine: reactive target density drives RhythmEngine's energy;
+ * pocket + shell/full + velocity humanization apply to every piano hit.
  */
-const GROOVE_OFFSETS = {
-  LayBack: 0.012,  // +12ms (sustained chords sit back)
-  Tight: 0.006,    // +6ms (short comping)
-  Push: -0.008,    // -8ms (anticipations create urgency)
-};
 
 export type BassMode = 'Walking' | 'TwoFeel';
 
-export interface CompingHit {
-  time: string;       // "0:beat:sixteenth" relative to bar
-  duration: string;
-  velocity: number;
-  type: 'Pad' | 'Comp' | 'Ghost' | 'Push';
-  isStab: boolean;
-  isAnticipation?: boolean;
+/** Optional Phase 18 trio context: when solo or Ballad, density is capped (soloist space). */
+export interface TrioContext { placeInCycle?: string; songStyle?: string }
+
+/** Step-like shape for pocket calculation (RhythmEngine steps or internal hits). */
+export interface StepLike {
+    time: string;
+    duration: string;
+    isAnticipation?: boolean;
 }
 
-/**
- * ReactiveCompingEngine: "Virtual Room" piano that reacts to bass and drums.
- *
- * - Pocket: De-quantized timing (LayBack / Tight / Push) with small offsets.
- * - Conversation: If bass is Walking → sparse; TwoFeel → denser; drums loud → sparse.
- * - Variable articulation: Stabs use shell (3rd+7th), sustains use full voicing.
- */
+export interface CompingHit {
+    /** Tone time within bar e.g. "0:1:2" */
+    time: string;
+    duration: string;
+    velocity: number;
+    type: 'Pad' | 'Comp' | 'Ghost' | 'Push';
+    isStab: boolean;
+    /** If true, play next bar's chord (anticipation) */
+    isAnticipation?: boolean;
+}
+
+/** BPM-relative groove: fraction of one beat. Positive = late (drag), negative = early (push). */
+const GROOVE_OFFSETS = {
+    LayBack: 0.025,  // +25% of beat (pad/sustain – deep pocket)
+    Tight: 0.010,    // +10% of beat (stabs/comping)
+    Push: -0.015,    // -15% of beat (anticipation, "and of 4")
+};
+
 export class ReactiveCompingEngine {
-  private lastBarDensity = 0;
+    private lastBarDensity: number = 0;
 
-  /**
-   * Target density 0–1. Walking bass → sparse (0.3); TwoFeel → denser (0.7).
-   * Drums intensity > 0.8 → get out of the way (0.1).
-   */
-  getTargetDensity(drumIntensity: number, bassMode: BassMode): number {
-    let target = bassMode === 'Walking' ? 0.3 : 0.7;
-    if (drumIntensity > 0.8) target = 0.1;
-    return target;
-  }
-
-  /**
-   * Select a 1-bar comping template by target density.
-   * Red Garland (sparse), Bill Evans (sustain), Herbie (dense).
-   */
-  selectTemplate(targetDensity: number): CompingHit[] {
-    if (targetDensity < 0.4) {
-      // Red Garland: syncopated off-beats, good with walking bass
-      return [
-        { time: '0:1:2', duration: '16n', velocity: 0.7, type: 'Comp', isStab: true },
-        { time: '0:3:2', duration: '8n', velocity: 0.6, type: 'Comp', isStab: true, isAnticipation: true },
-      ];
+    /**
+     * Target density (0.0–1.0) from the "Virtual Room": bass mode + whole-tune intensity.
+     * Intensity spans the tune arc (calm at start → peak toward middle → wind down).
+     * Use as energy input to RhythmEngine.getRhythmPattern(bpm, targetDensity, opts)
+     * so the band stays calm rhythmically at the beginning and rises toward the middle.
+     * When trioContext indicates solo or Ballad, returned density is capped at 0.5 (hybrid—additive).
+     */
+    getTargetDensity(tuneIntensity: number, bassMode: BassMode, trioContext?: TrioContext): number {
+        if (tuneIntensity > 0.85) return 0.1;
+        const base = bassMode === 'Walking' ? 0.35 : 0.7;
+        const target = base * (0.35 + 0.65 * tuneIntensity);
+        this.lastBarDensity = Math.max(0.1, Math.min(1, target));
+        const soloistSpace = trioContext && (trioContext.placeInCycle === 'solo' || trioContext.songStyle === 'Ballad');
+        return soloistSpace ? Math.min(this.lastBarDensity, 0.5) : this.lastBarDensity;
     }
-    if (targetDensity < 0.7) {
-      // Bill Evans: sustained color, good for two-feel or ballads
-      return [
-        { time: '0:0:0', duration: '2n', velocity: 0.5, type: 'Pad', isStab: false },
-        { time: '0:2:2', duration: '8n', velocity: 0.4, type: 'Ghost', isStab: true },
-      ];
+
+    /**
+     * BPM-relative human offset in seconds for any step (RhythmEngine or reactive).
+     * Anticipations → Push; short stabs (8n/16n) → Tight; pads/sustains → LayBack.
+     */
+    getMicroTimingForStep(step: StepLike, bpm: number): number {
+        const beatSeconds = 60 / Math.max(20, Math.min(400, bpm));
+        const isAnticipation = step.isAnticipation || step.time.includes('3:2');
+        if (isAnticipation) return beatSeconds * GROOVE_OFFSETS.Push;
+        const isStab = step.duration === '8n' || step.duration === '16n';
+        if (isStab) return beatSeconds * GROOVE_OFFSETS.Tight;
+        return beatSeconds * GROOVE_OFFSETS.LayBack;
     }
-    // Herbie: aggressive rhythm, specific accents
-    return [
-      { time: '0:1:1', duration: '16n', velocity: 0.8, type: 'Comp', isStab: true },
-      { time: '0:2:0', duration: '16n', velocity: 0.4, type: 'Ghost', isStab: true },
-      { time: '0:3:2', duration: '8n', velocity: 0.9, type: 'Push', isStab: true, isAnticipation: true },
-    ];
-  }
 
-  /**
-   * Micro-timing in seconds: anticipations push, stabs tight, pads lay back.
-   */
-  getMicroTiming(hit: CompingHit): number {
-    if (hit.type === 'Push' || (hit.time.includes('3:2') && hit.isAnticipation)) {
-      return GROOVE_OFFSETS.Push;
+    /**
+     * Returns comping hits for one bar with BPM-relative human offsets.
+     * Call once per bar (e.g. at beat 0); then schedule each hit at
+     * barStart + Tone.Time(hit.time).toSeconds() + hit.humanOffsetSeconds.
+     *
+     * @param drumIntensity 0.0 (brushes) to 1.0 (full swing)
+     * @param bassMode "Walking" (busy) → sparse piano; "TwoFeel" (open) → denser
+     */
+    getCompingHitsForBar(
+        drumIntensity: number,
+        bassMode: BassMode,
+        chordSymbol: string,
+        nextChordSymbol: string,
+        bpm: number
+    ): (CompingHit & { humanOffsetSeconds: number })[] {
+        // 1. CONVERSATION: whole-tune intensity arc (calm start → middle peak) + bass mode
+        let targetDensity = this.getTargetDensity(drumIntensity, bassMode);
+
+        // 2. TEMPLATE (vocabulary)
+        const template = this.selectTemplate(targetDensity, chordSymbol);
+
+        // 3. MICRO-TIMING (pocket) – BPM-relative seconds
+        const beatSeconds = 60 / Math.max(20, Math.min(400, bpm));
+        return template.map((hit) => ({
+            ...hit,
+            humanOffsetSeconds: this.getMicroTiming(hit, beatSeconds),
+        }));
     }
-    if (hit.isStab) return GROOVE_OFFSETS.Tight;
-    return GROOVE_OFFSETS.LayBack;
-  }
 
-  /**
-   * Schedule all piano hits for one bar. Call at beat 0 with bar start time.
-   * Uses compingEngine for voicings; anticipations use nextChord.
-   */
-  scheduleBar(
-    time: number,
-    barIndex: number,
-    currentChord: string,
-    nextChord: string,
-    drumIntensity: number,
-    bassMode: BassMode,
-    compingEngine: CompingEngine,
-    pianoSampler: Tone.Sampler | null,
-    options: { addRoot?: boolean; onNote?: (note: { midi: number; velocity: number; instrument: string; type: string; duration: number }) => void } = {}
-  ): void {
-    if (!currentChord || !pianoSampler?.loaded) return;
+    /**
+     * Human offset in seconds. Anticipations push; stabs drag slightly; pads drag more.
+     */
+    getMicroTiming(hit: CompingHit, beatSeconds: number): number {
+        const isAnticipation = hit.isAnticipation || hit.type === 'Push' || (hit.time.includes('3:2'));
+        if (isAnticipation) return beatSeconds * GROOVE_OFFSETS.Push;
+        if (hit.isStab) return beatSeconds * GROOVE_OFFSETS.Tight;
+        return beatSeconds * GROOVE_OFFSETS.LayBack;
+    }
 
-    const targetDensity = this.getTargetDensity(drumIntensity, bassMode);
-    const template = this.selectTemplate(targetDensity);
-    this.lastBarDensity = targetDensity;
+    private selectTemplate(density: number, _chord: string): CompingHit[] {
+        this.lastBarDensity = density;
 
-    const { addRoot = false, onNote } = options;
-    const mainVoicing = compingEngine.getNextVoicing(currentChord, { addRoot });
-    const hasAnticipation = template.some((h) => h.isAnticipation);
-    const anticipationVoicing =
-      hasAnticipation && nextChord ? compingEngine.getNextVoicing(nextChord, { addRoot }) : null;
+        // A. Red Garland – syncopated off-beats (good for walking bass)
+        if (density < 0.4) {
+            return [
+                { time: '0:1:2', duration: '16n', velocity: 0.7, type: 'Comp', isStab: true },
+                { time: '0:3:2', duration: '8n', velocity: 0.6, type: 'Comp', isStab: true },
+            ];
+        }
 
-    template.forEach((hit) => {
-      const targetChord = hit.isAnticipation && nextChord ? nextChord : currentChord;
-      const voicing = hit.isAnticipation && anticipationVoicing?.length ? anticipationVoicing : mainVoicing;
-      const notes = hit.isStab && voicing.length >= 2 ? [voicing[0], voicing[1]] : voicing;
-      if (notes.length === 0) return;
+        // B. Bill Evans – sustained color (two-feel / ballads)
+        if (density < 0.7) {
+            return [
+                { time: '0:0:0', duration: '2n', velocity: 0.5, type: 'Pad', isStab: false },
+                { time: '0:2:2', duration: '8n', velocity: 0.4, type: 'Ghost', isStab: true },
+            ];
+        }
 
-      const timeInBar = Tone.Time(hit.time).toSeconds();
-      const humanize = this.getMicroTiming(hit);
-      const scheduleTime = time + timeInBar + humanize;
-      const vel = hit.velocity * (0.8 + Math.random() * 0.4);
-      const noteNames = notes.map((n) => Tone.Frequency(n, 'midi').toNote());
-
-      pianoSampler.triggerAttackRelease(noteNames, hit.duration, scheduleTime, vel);
-      notes.forEach((midi) => {
-        onNote?.({
-          midi,
-          velocity: vel,
-          instrument: 'piano',
-          type: 'comp',
-          duration: 1,
-        });
-      });
-    });
-  }
+        // C. Herbie – aggressive rhythm, anticipations
+        return [
+            { time: '0:1:1', duration: '16n', velocity: 0.8, type: 'Comp', isStab: true },
+            { time: '0:2:0', duration: '16n', velocity: 0.4, type: 'Ghost', isStab: true },
+            { time: '0:3:2', duration: '8n', velocity: 0.9, type: 'Push', isStab: true, isAnticipation: true },
+        ];
+    }
 }

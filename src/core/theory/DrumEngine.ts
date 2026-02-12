@@ -1,9 +1,185 @@
-export type DrumInstrument = "Ride" | "Snare" | "Kick" | "HatPedal";
+import { GrooveManager, type GrooveInstrument } from './GrooveManager';
+
+export type DrumInstrument = "Ride" | "Snare" | "Kick" | "HatPedal" | "HatOpen";
 
 export interface DrumHit {
     time: string; // Tone.js time (e.g., "0:1:2")
     velocity: number;
     instrument: DrumInstrument;
+    /** Linear phrasing: Accent | Ghost | Standard (optional, for internal use). */
+    type?: "Accent" | "Ghost" | "Standard";
+}
+
+/**
+ * LinearDrummingEngine — "Negative Space" / Linear Phrasing (Roy Haynes, Jack DeJohnette).
+ * Ride and Snare are one melody split across two hands: when Ride rests, Snare fills the hole.
+ * Starts from the standard Spang-a-Lang grid and applies a phrase mask; Snare speaks in the gaps.
+ */
+export class LinearDrummingEngine {
+    /** Standard jazz ride grid (Spang-a-Lang): [1, 2, 2&, 3, 4, 4&] in "bar:beat:sixteenth" for one bar. */
+    private readonly STANDARD_GRID = ["0:0:0", "0:1:0", "0:1:2", "0:2:0", "0:3:0", "0:3:2"];
+
+    /**
+     * Generates a 1-bar phrase: Ride + Snare interlock. Hi-hat on 2 & 4.
+     * @param barIndex Used for 2-bar motivic repetition (same mask for barIndex % 2).
+     * @param intensity 0.0–1.0 (how busy; drives snare fill probability in holes).
+     */
+    generatePhrase(barIndex: number, intensity: number): DrumHit[] {
+        const events: DrumHit[] = [];
+        const phraseMask = this.selectPhraseMask(intensity, barIndex);
+
+        this.STANDARD_GRID.forEach((timeStep, index) => {
+            const isRideActive = phraseMask[index];
+
+            if (isRideActive) {
+                events.push({
+                    time: timeStep,
+                    instrument: "Ride",
+                    velocity: this.getRideVelocity(index),
+                    type: "Standard"
+                });
+                if (Math.random() < 0.3) {
+                    events.push({ time: timeStep, instrument: "Snare", velocity: 0.2, type: "Ghost" });
+                }
+            } else {
+                if (Math.random() < intensity) {
+                    events.push({
+                        time: timeStep,
+                        instrument: "Snare",
+                        velocity: 0.85,
+                        type: "Accent"
+                    });
+                }
+            }
+        });
+
+        events.push({ time: "0:1:0", instrument: "HatPedal", velocity: 0.7, type: "Standard" });
+        events.push({ time: "0:3:0", instrument: "HatPedal", velocity: 0.7, type: "Standard" });
+        return events;
+    }
+
+    /**
+     * Triplet fill (Elvin Jones style) — rare. Quarter-note triplet grid, rolling snare + ride.
+     */
+    generateFillTriplet(barIndex: number): DrumHit[] {
+        const events: DrumHit[] = [];
+        const tripletSixteenths = [0, 1.33, 2.66, 4, 5.33, 6.66, 8, 9.33, 10.66, 12, 13.33, 14.66];
+        for (let i = 0; i < tripletSixteenths.length; i++) {
+            const s = tripletSixteenths[i];
+            const beat = Math.floor(s / 4);
+            const sixteenth = s % 4;
+            const time = `0:${beat}:${sixteenth.toFixed(2)}`;
+            const isRide = i % 3 === 0;
+            if (isRide) {
+                events.push({ time, instrument: "Ride", velocity: 0.5 + (i === 0 ? 0.3 : 0), type: "Standard" });
+            } else {
+                events.push({ time, instrument: "Snare", velocity: 0.5 + (i >= 9 ? 0.35 : 0), type: "Accent" });
+            }
+        }
+        events.push({ time: "0:1:0", instrument: "HatPedal", velocity: 0.7, type: "Standard" });
+        events.push({ time: "0:3:0", instrument: "HatPedal", velocity: 0.7, type: "Standard" });
+        return events;
+    }
+
+    /**
+     * 8th-note fill: ride keeps time, snare builds on 8ths (2 & 4, then 2& 3 4&, then full bar).
+     * Variants: light (beats 3–4), medium (2&–4), full (1–4).
+     */
+    generateFillEighths(barIndex: number): DrumHit[] {
+        const events: DrumHit[] = [];
+        // Ride: standard spang-a-lang so it stays grounded
+        this.STANDARD_GRID.forEach((timeStep, index) => {
+            events.push({
+                time: timeStep,
+                instrument: "Ride",
+                velocity: this.getRideVelocity(index),
+                type: "Standard"
+            });
+        });
+        // Snare: 8th-note build. Use barIndex to pick variant (deterministic per phrase).
+        const variant = (barIndex >> 2) % 3; // 0 = light, 1 = medium, 2 = full
+        const eighthSlots: { time: string; vel: number }[] =
+            variant === 0
+                ? [{ time: "0:2:0", vel: 0.5 }, { time: "0:2:2", vel: 0.4 }, { time: "0:3:0", vel: 0.7 }, { time: "0:3:2", vel: 0.5 }]
+                : variant === 1
+                    ? [{ time: "0:1:2", vel: 0.4 }, { time: "0:2:0", vel: 0.5 }, { time: "0:2:2", vel: 0.45 }, { time: "0:3:0", vel: 0.7 }, { time: "0:3:2", vel: 0.55 }]
+                    : [
+                            { time: "0:0:0", vel: 0.45 }, { time: "0:0:2", vel: 0.4 }, { time: "0:1:0", vel: 0.5 }, { time: "0:1:2", vel: 0.45 },
+                            { time: "0:2:0", vel: 0.55 }, { time: "0:2:2", vel: 0.5 }, { time: "0:3:0", vel: 0.75 }, { time: "0:3:2", vel: 0.6 }
+                        ];
+        eighthSlots.forEach(({ time, vel }) => {
+            events.push({ time, instrument: "Snare", velocity: vel, type: "Accent" });
+        });
+        events.push({ time: "0:1:0", instrument: "HatPedal", velocity: 0.7, type: "Standard" });
+        events.push({ time: "0:3:0", instrument: "HatPedal", velocity: 0.7, type: "Standard" });
+        return events;
+    }
+
+    /**
+     * Mixed fill: first half bar 8ths (ride + snare), second half triplets (rolling) for variety.
+     */
+    generateFillMixed(barIndex: number): DrumHit[] {
+        const events: DrumHit[] = [];
+        // Beats 1–2: 8th-note feel — ride on grid, snare on 1, 1&, 2, 2&
+        const firstHalfRide = ["0:0:0", "0:0:2", "0:1:0", "0:1:2"];
+        firstHalfRide.forEach((time, i) => {
+            events.push({ time, instrument: "Ride", velocity: i % 2 === 0 ? 0.7 : 0.5, type: "Standard" });
+        });
+        [{ time: "0:0:0", vel: 0.5 }, { time: "0:0:2", vel: 0.4 }, { time: "0:1:0", vel: 0.55 }, { time: "0:1:2", vel: 0.45 }].forEach(({ time, vel }) => {
+            events.push({ time, instrument: "Snare", velocity: vel, type: "Accent" });
+        });
+        // Beats 3–4: triplet roll (snare-heavy, ride accents on 3 and 4)
+        const tripletSecondHalf = [8, 9.33, 10.66, 12, 13.33, 14.66]; // beat 2–4 in sixteenths
+        tripletSecondHalf.forEach((s, i) => {
+            const beat = Math.floor(s / 4);
+            const sixteenth = s % 4;
+            const time = `0:${beat}:${sixteenth.toFixed(2)}`;
+            const isRide = i === 0 || i === 3;
+            if (isRide) {
+                events.push({ time, instrument: "Ride", velocity: 0.6, type: "Standard" });
+            } else {
+                events.push({ time, instrument: "Snare", velocity: 0.45 + (i >= 4 ? 0.25 : 0), type: "Accent" });
+            }
+        });
+        events.push({ time: "0:1:0", instrument: "HatPedal", velocity: 0.7, type: "Standard" });
+        events.push({ time: "0:3:0", instrument: "HatPedal", velocity: 0.7, type: "Standard" });
+        return events;
+    }
+
+    /**
+     * Chooses a fill type: triplet rare, 8ths and mixed more often. Called only when a fill is due.
+     */
+    generateFill(barIndex: number): DrumHit[] {
+        const r = Math.random();
+        if (r < 0.15) return this.generateFillTriplet(barIndex);
+        if (r < 0.65) return this.generateFillEighths(barIndex);
+        return this.generateFillMixed(barIndex);
+    }
+
+    private selectPhraseMask(intensity: number, barIndex: number): boolean[] {
+        // Pattern A: "The Skip" (DeJohnette) — Snare hits 1 and 4, Ride plays middle
+        const patternA = [false, true, true, true, false, true];
+        // Pattern B: "The Driver" (Blakey) — full except and-of-4
+        const patternB = [true, true, true, true, true, false];
+        // Pattern C: "The Sparse" (Modern) — only ands; Snare fills beats
+        const patternC = [false, false, true, false, false, true];
+
+        const patterns = [patternA, patternB, patternC];
+        let idx: number;
+        if (intensity > 0.7) idx = 1;
+        else if (intensity < 0.4) idx = 2;
+        else idx = 0;
+        // 2-bar motif: same pattern for two bars
+        const motif = (barIndex >> 1) % patterns.length;
+        return patterns[(idx + motif) % patterns.length];
+    }
+
+    /** Bebop 12-grid: downbeats (0,1,3,4) accented; skip beats (2,5 = 2&, 4&) ghosted. */
+    private getRideVelocity(index: number): number {
+        if (index === 2 || index === 5) return 0.32 + Math.random() * 0.08; // ghosted
+        if (index === 0 || index === 3) return 0.74 + Math.random() * 0.08; // 1 and 3
+        return 0.68 + Math.random() * 0.08; // 2 and 4
+    }
 }
 
 /**
@@ -14,102 +190,345 @@ export interface DrumHit {
  * 1. Broken-time Ride (Elasticity)
  * 2. Conversational Snare/Kick (Chatter)
  * 3. Hi-Hat Anchor (2 & 4)
- * 4. Micro-timing (Ride Push, Snare Drag)
+ * 4. Micro-timing (Ride Push, Snare Drag) — tempo-scaled via GrooveManager.
+ * 5. Hybrid Linear Phrasing (optional): when barIndex is passed, uses LinearDrummingEngine
+ *    for Ride/Snare/HiHat and merges with Kick + optional comping phrases.
  */
 export class DrumEngine {
+    private groove = new GrooveManager();
+    private linearEngine = new LinearDrummingEngine();
+    private phraseHistory: string[] = [];
+    private readonly MAX_HISTORY = 4;
+
+    /**
+     * Classic Bebop & Swing Comping Phrases (Snare/Kick Conversation)
+     */
+    private readonly COMPING_PHRASES: { name: string; hits: { time: string; instrument: DrumInstrument; velocity: number }[]; minDensity: number }[] = [
+        {
+            name: "The Charleston",
+            hits: [
+                { time: "0:0:0", instrument: "Snare", velocity: 0.6 },
+                { time: "0:1:2", instrument: "Snare", velocity: 0.4 }
+            ],
+            minDensity: 0.2
+        },
+        {
+            name: "Bop Drive",
+            hits: [
+                { time: "0:1:2", instrument: "Snare", velocity: 0.5 },
+                { time: "0:3:2", instrument: "Snare", velocity: 0.6 }
+            ],
+            minDensity: 0.4
+        },
+        {
+            name: "The Drop (Klook-a-mop)",
+            hits: [
+                { time: "0:2:2", instrument: "Kick", velocity: 0.7 },
+                { time: "0:3:0", instrument: "Snare", velocity: 0.5 }
+            ],
+            minDensity: 0.5
+        },
+        {
+            name: "Philly Cross",
+            hits: [
+                { time: "0:0:2", instrument: "Snare", velocity: 0.4 },
+                { time: "0:1:0", instrument: "Snare", velocity: 0.6 }
+            ],
+            minDensity: 0.3
+        },
+        {
+            name: "Syncopated HITS",
+            hits: [
+                { time: "0:0:2", instrument: "Snare", velocity: 0.6 },
+                { time: "0:2:2", instrument: "Snare", velocity: 0.6 }
+            ],
+            minDensity: 0.6
+        },
+        {
+            name: "Max Roach Triplets",
+            hits: [
+                { time: "0:0:0", instrument: "Snare", velocity: 0.5 },
+                { time: "0:0:1", instrument: "Snare", velocity: 0.4 },
+                { time: "0:0:2", instrument: "Snare", velocity: 0.3 }
+            ],
+            minDensity: 0.7
+        },
+        {
+            name: "Philly Joe Slick",
+            hits: [
+                { time: "0:2:2", instrument: "Snare", velocity: 0.5 },
+                { time: "0:3:0", instrument: "Snare", velocity: 0.4 },
+                { time: "0:3:1", instrument: "Kick", velocity: 0.6 },
+                { time: "0:3:2", instrument: "Snare", velocity: 0.5 }
+            ],
+            minDensity: 0.6
+        },
+        {
+            name: "Bop Turnaround",
+            hits: [
+                { time: "0:3:0", instrument: "Snare", velocity: 0.6 },
+                { time: "0:3:1", instrument: "Snare", velocity: 0.5 },
+                { time: "0:3:2", instrument: "Snare", velocity: 0.7 }
+            ],
+            minDensity: 0.8
+        },
+        {
+            name: "Bop Head",
+            hits: [
+                { time: "0:0:0", instrument: "Snare", velocity: 0.7 },
+                { time: "0:0:0", instrument: "Kick", velocity: 0.6 }
+            ],
+            minDensity: 0.4
+        },
+        {
+            name: "The Hemiola",
+            hits: [
+                { time: "0:0:2", instrument: "Snare", velocity: 0.5 },
+                { time: "0:1:1", instrument: "Snare", velocity: 0.5 },
+                { time: "0:2:0", instrument: "Snare", velocity: 0.5 }
+            ],
+            minDensity: 0.7
+        },
+        {
+            name: "Open Hat Accent",
+            hits: [
+                { time: "0:0:0", instrument: "Snare", velocity: 0.6 },
+                { time: "0:2:2", instrument: "HatOpen", velocity: 0.5 }
+            ],
+            minDensity: 0.5
+        },
+        {
+            name: "Anticipated 4",
+            hits: [
+                { time: "0:3:2", instrument: "Kick", velocity: 0.7 }
+            ],
+            minDensity: 0.3
+        }
+    ];
 
     /**
      * Generates a 1-bar phrase of drum hits based on density.
      * @param density 0.0 to 1.0 (How busy the drummer is)
      * @param pianoDensity 0.0 to 1.0 (Optional: Piano activity to trigger collaborative "listening")
+     * @param barIndex Optional. When provided, uses hybrid linear phrasing: LinearDrummingEngine for Ride/Snare/HiHat,
+     *                 fill on bar 4, plus Kick and optional comping phrase from the classic engine.
+     * @param answerContext Optional. When drums are "answering" another instrument: echo = fill/response, complement = backbeat, space = simple time.
+     * @param pianoStepTimes Optional. Piano comping step times (e.g. ["0:0:0", "0:1:2"]) — kick accents a subset of these instead of always 1 and 3.
+     * @param trioContext Optional Phase 18: when solo or Ballad, density is capped (soloist space). Hybrid—additive.
      */
-    public generateBar(density: number, pianoDensity: number = 0): DrumHit[] {
-        // Collaborative Listening: If piano is very busy (> 0.8), the drummer simplifies (-)
+    public generateBar(
+        density: number,
+        pianoDensity: number = 0,
+        barIndex?: number,
+        answerContext?: { questionFrom: string; answerType: 'echo' | 'complement' | 'space' },
+        pianoStepTimes?: string[],
+        trioContext?: { placeInCycle?: string; songStyle?: string }
+    ): DrumHit[] {
         const listenerAdjustment = pianoDensity > 0.8 ? -0.3 : (pianoDensity < 0.2 ? 0.1 : 0);
-        const effectiveDensity = Math.max(0.1, Math.min(1.0, density + listenerAdjustment));
+        let effectiveDensity = Math.max(0.1, Math.min(1.0, density + listenerAdjustment));
+        if (trioContext && (trioContext.placeInCycle === 'solo' || trioContext.songStyle === 'Ballad')) {
+            effectiveDensity = Math.min(effectiveDensity, 0.5);
+        }
 
         const hits: DrumHit[] = [];
 
-        // 1. The Anchor (Hi-Hat Pedal on 2 and 4)
-        // Hard-coded to ground the "weirdness"
+        // Question–Answer: adjust behavior when drums are the responder
+        let answerFillChance = 0.15;
+        let answerApplyPhraseChance = 0.35;
+        if (answerContext) {
+            if (answerContext.answerType === 'echo') {
+                answerFillChance = 0.45;
+                answerApplyPhraseChance = 0.6;
+            } else if (answerContext.answerType === 'complement') {
+                effectiveDensity = Math.min(1.0, effectiveDensity + 0.15);
+                answerApplyPhraseChance = 0.55;
+            } else {
+                effectiveDensity = Math.max(0.1, effectiveDensity - 0.2);
+                answerFillChance = 0.05;
+                answerApplyPhraseChance = 0.2;
+            }
+        }
+
+        // Hybrid: Linear phrasing (Ride/Snare interlock) when barIndex is provided
+        if (barIndex !== undefined) {
+            const isPhraseEnd = barIndex % 4 === 3;
+            // Calm start (low density) = fewer fills, longer time-keeping; builds with intensity
+            const baseFillChance = answerContext ? answerFillChance : 0.15 * (0.2 + 0.8 * effectiveDensity);
+            const isFillBar = isPhraseEnd && Math.random() < baseFillChance;
+            if (isFillBar) {
+                hits.push(...this.linearEngine.generateFill(barIndex));
+            } else {
+                hits.push(...this.linearEngine.generatePhrase(barIndex, effectiveDensity));
+            }
+            // Kick: don't always hit every beat — either accent piano comping rhythms or sparse anchor (1 and sometimes 3)
+            this.generateKickFromPianoOrSparse(hits, pianoStepTimes);
+            // Optional comping phrase (hybrid): calm start = less snare/kick chatter, more sustained time
+            const phraseChance = answerContext ? answerApplyPhraseChance : 0.35 * (0.2 + 0.8 * effectiveDensity);
+            if (!isFillBar && effectiveDensity > 0.35 && Math.random() < phraseChance) {
+                this.applyPhrase(hits, effectiveDensity);
+            }
+            return hits;
+        }
+
+        // Classic path: no barIndex
         hits.push({ time: "0:1:0", velocity: 0.7, instrument: "HatPedal" });
         hits.push({ time: "0:3:0", velocity: 0.7, instrument: "HatPedal" });
-
-        // 2. The "Elastic" Ride
         this.generateRideStream(hits, effectiveDensity);
-
-        // 3. The "Chatter" (Snare/Kick Conversation)
-        this.generateComping(hits, effectiveDensity);
-
+        if (effectiveDensity > 0.3 && Math.random() > 0.3) {
+            this.applyPhrase(hits, effectiveDensity);
+        } else {
+            this.generateChatter(hits, effectiveDensity);
+        }
         return hits;
     }
 
-    private generateRideStream(hits: DrumHit[], density: number) {
-        const quarters = ["0:0:0", "0:1:0", "0:2:0", "0:3:0"];
-        const skips = ["0:1:2", "0:3:2"]; // Triplet skip notes
-
-        quarters.forEach(time => {
-            // "Broken Time": 10% chance to skip a quarter note (creates "air")
-            if (Math.random() > 0.1) {
-                hits.push({
-                    time,
-                    instrument: "Ride",
-                    velocity: 0.6 + Math.random() * 0.2
-                });
-            }
-        });
-
-        skips.forEach(time => {
-            // Higher density = more frequent "spang-a-lang" feel.
-            // Lower density = flatter, modern jazz feel.
-            if (Math.random() < density) {
-                hits.push({
-                    time,
-                    instrument: "Ride",
-                    velocity: 0.3 + Math.random() * 0.2
-                });
-            }
-        });
-    }
-
-    private generateComping(hits: DrumHit[], density: number) {
-        // Conversation slots (mostly syncopated)
-        const slots: { time: string; type: DrumInstrument }[] = [
-            { time: "0:0:2", type: "Snare" }, // "And" of 1
-            { time: "0:1:1", type: "Kick" },  // Triplet mid
-            { time: "0:2:2", type: "Snare" }, // "And" of 3
-            { time: "0:3:1", type: "Kick" },  // Triplet mid
-            { time: "0:0:1", type: "Snare" }, // Early chatter
-            { time: "0:2:1", type: "Kick" }   // Mid bar response
+    /**
+     * Bebop ride ostinato: 12-grid Spang-a-lang. Indices 0,3,5,6,9,11 (1, 2, 2-let, 3, 4, 4-let).
+     * Downbeats (0,3,6,9) accented; skip beats (5,11) ghosted to propel momentum.
+     */
+    private generateRideStream(hits: DrumHit[], _density: number) {
+        const RIDE_GRID_12 = [
+            { time: "0:0:0", velocity: 0.78 },   // n0  downbeat
+            { time: "0:1:0", velocity: 0.72 },   // n3  downbeat
+            { time: "0:1:2", velocity: 0.34 },   // n5  skip (ghosted)
+            { time: "0:2:0", velocity: 0.74 },   // n6  downbeat
+            { time: "0:3:0", velocity: 0.72 },   // n9  downbeat
+            { time: "0:3:2", velocity: 0.36 },   // n11 skip (ghosted)
         ];
-
-        slots.forEach(slot => {
-            // Chatter probability scales with density
-            if (Math.random() < density * 0.5) {
-                const isGhost = Math.random() > 0.25; // 75% chance of ghost notes
-                const velocity = isGhost ? 0.15 + Math.random() * 0.15 : 0.6 + Math.random() * 0.25;
-                hits.push({
-                    time: slot.time,
-                    instrument: slot.type,
-                    velocity
-                });
-            }
+        RIDE_GRID_12.forEach(({ time, velocity }) => {
+            hits.push({
+                time,
+                instrument: "Ride",
+                velocity: velocity + (Math.random() * 0.06 - 0.03),
+            });
         });
     }
 
     /**
-     * Calculates the micro-timing offset for a specific instrument.
-     * Ride: Pushes ahead (-15ms)
-     * Snare: Drags behind (+20ms)
-     * @returns offset in seconds
+     * Selects and applies a classic bebop/swing phrase.
      */
-    public getMicroTiming(inst: DrumInstrument): number {
-        let baseOffset = 0;
-        if (inst === "Ride") baseOffset = -0.015;
-        if (inst === "Snare") baseOffset = 0.020;
+    private applyPhrase(hits: DrumHit[], density: number) {
+        const validPhrases = this.COMPING_PHRASES.filter(p =>
+            p.minDensity <= density && !this.phraseHistory.includes(p.name)
+        );
 
-        // Random jitter (jitter should be very small, ±5ms)
-        const jitter = (Math.random() * 0.01) - 0.005;
-        return baseOffset + jitter;
+        if (validPhrases.length === 0) {
+            this.generateChatter(hits, density);
+            return;
+        }
+
+        const phrase = validPhrases[Math.floor(Math.random() * validPhrases.length)];
+
+        // Add phrase hits to the bar
+        phrase.hits.forEach(hit => {
+            hits.push({
+                ...hit,
+                velocity: hit.velocity + (Math.random() * 0.1 - 0.05)
+            });
+        });
+
+        // Track history
+        this.phraseHistory.push(phrase.name);
+        if (this.phraseHistory.length > this.MAX_HISTORY) {
+            this.phraseHistory.shift();
+        }
+    }
+
+    /**
+     * Kick: not every beat — either accent piano comping rhythms or sparse anchor (1 and sometimes 3).
+     * When pianoStepTimes is provided, ~60% of bars accent a subset of piano step times; ~40% sparse.
+     * When not provided, sparse only: 1 always, 3 with ~60% probability.
+     */
+    private generateKickFromPianoOrSparse(hits: DrumHit[], pianoStepTimes?: string[]): void {
+        const hasPianoSteps = pianoStepTimes && pianoStepTimes.length > 0;
+        const accentPiano = hasPianoSteps && Math.random() < 0.65;
+
+        if (accentPiano && pianoStepTimes!.length > 0) {
+            // Accent what the piano is doing: kick on a subset of piano step times (prefer downbeats)
+            const downbeatTimes = ["0:0:0", "0:1:0", "0:2:0", "0:3:0"];
+            const pianoDownbeats = pianoStepTimes!.filter(t => downbeatTimes.includes(t));
+            const pianoUpbeats = pianoStepTimes!.filter(t => !downbeatTimes.includes(t));
+            const candidates: { time: string; vel: number }[] = [];
+            pianoDownbeats.forEach(t => {
+                const isOneOrThree = t === "0:0:0" || t === "0:2:0";
+                candidates.push({ time: t, vel: isOneOrThree ? 0.32 + Math.random() * 0.08 : 0.22 + Math.random() * 0.06 });
+            });
+            pianoUpbeats.forEach(t => {
+                candidates.push({ time: t, vel: 0.18 + Math.random() * 0.06 });
+            });
+            // Dedupe by time (piano might have multiple steps on same slot)
+            const byTime = new Map<string, number>();
+            candidates.forEach(({ time, vel }) => {
+                const existing = byTime.get(time);
+                if (existing === undefined || vel > existing) byTime.set(time, vel);
+            });
+            const chosen = Array.from(byTime.entries());
+            // Pick 1–3 kicks so we don't hit every beat
+            const maxKicks = Math.min(chosen.length, Math.random() < 0.4 ? 1 : Math.random() < 0.6 ? 2 : 3);
+            const shuffled = chosen.sort(() => Math.random() - 0.5).slice(0, maxKicks).sort((a, b) => a[0].localeCompare(b[0]));
+            shuffled.forEach(([time, vel]) => {
+                hits.push({ time, velocity: vel, instrument: "Kick" });
+            });
+            return;
+        }
+
+        // Sparse anchor: 1 always; 3 only sometimes (so not always "every other beat")
+        hits.push({ time: "0:0:0", velocity: 0.28 + Math.random() * 0.08, instrument: "Kick" });
+        if (Math.random() < 0.55) {
+            hits.push({ time: "0:2:0", velocity: 0.2 + Math.random() * 0.06, instrument: "Kick" });
+        }
+    }
+
+    /**
+     * Bebop comping: stochastic, conversational. 12-grid logic.
+     * Exclusion: Snare/Kick rarely on beat 1 (n0). Upbeat bias P(upbeat)≈0.7, P(downbeat)≈0.2.
+     * Kick "bombs" on and-of-2 (n5) and and-of-4 (n11). Snare: more hits, lower velocity, ghosts common.
+     */
+    private generateBebopComping(hits: DrumHit[], density: number) {
+        const upbeatSlots: { time: string; preferKick: boolean }[] = [
+            { time: "0:0:2", preferKick: false },  // n2
+            { time: "0:1:2", preferKick: true },   // n5
+            { time: "0:2:2", preferKick: false },  // n8
+            { time: "0:3:2", preferKick: true },   // n11
+        ];
+        const downbeatSlots = ["0:1:0", "0:2:0", "0:3:0"]; // exclude 0:0:0 (beat 1)
+
+        const P_UPBEAT = 0.25 + density * 0.15;   // ~0.25–0.4 per upbeat slot
+        const P_DOWNBEAT = 0.06 + density * 0.08; // ~0.06–0.14 per downbeat
+
+        upbeatSlots.forEach(({ time, preferKick }) => {
+            if (Math.random() >= P_UPBEAT) return;
+            const isKick = preferKick && Math.random() < 0.5;
+            const inst: DrumInstrument = isKick ? "Kick" : "Snare";
+            const isGhost = inst === "Snare" && Math.random() < 0.5;
+            const velocity = isKick
+                ? 0.5 + Math.random() * 0.25
+                : isGhost ? 0.12 + Math.random() * 0.18 : 0.35 + Math.random() * 0.25;
+            hits.push({ time, instrument: inst, velocity });
+        });
+
+        downbeatSlots.forEach(time => {
+            if (Math.random() >= P_DOWNBEAT) return;
+            const inst: DrumInstrument = Math.random() < 0.2 ? "Kick" : "Snare";
+            const velocity = inst === "Snare" ? 0.3 + Math.random() * 0.25 : 0.4 + Math.random() * 0.2;
+            hits.push({ time, instrument: inst, velocity });
+        });
+    }
+
+    /** @deprecated Use generateBebopComping for bebop feel. Kept for compatibility. */
+    private generateChatter(hits: DrumHit[], density: number) {
+        this.generateBebopComping(hits, density);
+    }
+
+    /**
+     * Tempo-scaled micro-timing: offset as % of beat so feel stays consistent at any BPM.
+     * Ride: tight (-0.4%, -3ms, minimal jitter). Snare: +4.5%, Kick/HatPedal: 0%.
+     * @param bpm Current tempo (used to scale offsets and jitter).
+     * @returns offset in seconds (positive = late, negative = early).
+     */
+    public getMicroTiming(bpm: number, inst: DrumInstrument): number {
+        const grooveInst: GrooveInstrument = (inst === "HatPedal" || inst === "HatOpen") ? "Kick" : inst;
+        return this.groove.getMicroTiming(bpm, grooveInst);
     }
 }
+

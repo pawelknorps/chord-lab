@@ -32,14 +32,33 @@ export class BassRhythmVariator {
      * @param barIndex - Current bar index
      * @param energy - 0.0 to 1.0 (activityLevel)
      * @param nextChordSymbol - Needed for "The Push" root targeting
+     * @param answerContext - When bass is "answering" another instrument: echo = push/skip more, complement = solid walk, space = minimal.
+     * @param soloistSpace - Phase 18: when true (solo choruses or Ballad), no push/skip/rake (leave space). Hybrid—additive.
      */
     public applyVariations(
         line: number[],
         _barIndex: number,
         energy: number,
-        nextChordSymbol: string
+        nextChordSymbol: string,
+        answerContext?: { questionFrom: string; answerType: 'echo' | 'complement' | 'space' },
+        soloistSpace?: boolean
     ): BassEvent[] {
         const events: BassEvent[] = [];
+
+        let pushChance = soloistSpace ? 0 : this.PUSH_CHANCE_BASE;
+        let skipChanceMultiplier = soloistSpace ? 0 : 1;
+        if (answerContext && !soloistSpace) {
+            if (answerContext.answerType === 'echo') {
+                pushChance = 0.5;
+                skipChanceMultiplier = 2;
+            } else if (answerContext.answerType === 'complement') {
+                pushChance = 0.35;
+                skipChanceMultiplier = 1.2;
+            } else {
+                pushChance = 0.08;
+                skipChanceMultiplier = 0.3;
+            }
+        }
 
         // 1. CHECK: Downbeat Skip (from previous bar's Push)
         let startIndex = 0;
@@ -54,8 +73,8 @@ export class BassRhythmVariator {
             const time = `0:${i}:0`;
 
             // --- BEBOP TRICK 1: THE PUSH (Anticipation) ---
-            // High energy, Beat 4 only.
-            if (i === 3 && energy > 0.5 && Math.random() < this.PUSH_CHANCE_BASE) {
+            // Only at higher energy (calm start = steady quarters, no anticipation).
+            if (i === 3 && energy > 0.55 && Math.random() < pushChance) {
                 const nextChord = Chord.get(toTonalChordSymbol(nextChordSymbol));
                 const nextRootName = nextChord.tonic || "C";
                 const nextRootMidi = Note.midi(nextRootName + "1") || 36; // Big low push
@@ -73,14 +92,14 @@ export class BassRhythmVariator {
 
             // --- BEBOP TRICK 2: DOUBLE TIME (The Skip / Run) ---
             // Replace Beat 2 or 3 with two 8th notes.
-            if ((i === 1 || i === 2) && Math.random() < (energy * this.SKIP_CHANCE_BASE * 2)) {
+            if ((i === 1 || i === 2) && Math.random() < (energy * this.SKIP_CHANCE_BASE * 2 * skipChanceMultiplier)) {
                 this.addBebopFill(events, i, note, line[i + 1] || note);
                 continue;
             }
 
             // --- BEBOP TRICK 3: THE RAKE (Quick ghost into beat) ---
-            // Happens on Beat 1 (if not skipped) or occasionally elsewhere
-            if (i === 0 && Math.random() < 0.1) {
+            // Calm start = fewer short articulations; scale with energy. Skip when soloist space.
+            if (i === 0 && !soloistSpace && energy > 0.4 && Math.random() < 0.12 * energy) {
                 events.push({ time: `0:0:0`, duration: "32n", note: note, velocity: 0.5, isGhost: true });
                 events.push({ time: `0:0:1`, duration: "8n", note: note, velocity: 1.0 });
                 continue;
