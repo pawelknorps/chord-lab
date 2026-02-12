@@ -3,8 +3,8 @@ import * as Tone from 'tone';
 import { JazzTheoryService, JazzVoicingType } from '../utils/JazzTheoryService';
 import {
     CompingEngine, RhythmEngine, DrumEngine, GrooveManager,
-    WalkingBassEngine, BassRhythmVariator, ReactiveCompingEngine, type RhythmPattern, type DrumHit,
-    type BassEvent
+    WalkingBassEngine, BassRhythmVariator, ReactiveCompingEngine, JazzMarkovEngine,
+    type RhythmPattern, type DrumHit, type BassEvent, type PatternType
 } from './../../../core/theory';
 import { QuestionAnswerCoordinator, type LastBarSummary, type AnswerDecision } from './../../../core/theory';
 import {
@@ -73,7 +73,12 @@ interface JazzPlaybackState {
     getChordAtTransportTime: (t: number) => string;
 }
 
-export const useJazzBand = (song: any, isActive: boolean = true): JazzPlaybackState => {
+export interface UseJazzBandOptions {
+    /** When provided, band output is gated: sound only when ref.current is true (e.g. for Voice-Leading Maze: unmute on correct note). */
+    outputGateRef?: React.MutableRefObject<boolean>;
+}
+
+export const useJazzBand = (song: any, isActive: boolean = true, options?: UseJazzBandOptions): JazzPlaybackState => {
     const pianoRef = useRef<Tone.Sampler | null>(null);
     const bassRef = useRef<Tone.Sampler | null>(null);
     const bassMutedRef = useRef<Tone.Sampler | null>(null);
@@ -82,6 +87,7 @@ export const useJazzBand = (song: any, isActive: boolean = true): JazzPlaybackSt
     } | null>(null);
     const reverbRef = useRef<Tone.Reverb | null>(null);
     const pianoReverbRef = useRef<Tone.Reverb | null>(null);
+    const outputGainRef = useRef<Tone.Gain | null>(null);
 
     // AI Performance State
     const lastBassNoteRef = useRef<number>(36);
@@ -110,6 +116,9 @@ export const useJazzBand = (song: any, isActive: boolean = true): JazzPlaybackSt
     const questionAnswerCoordinatorRef = useRef<QuestionAnswerCoordinator>(new QuestionAnswerCoordinator());
     const qaDecisionRef = useRef<AnswerDecision | null>(null);
     const startPendingRef = useRef(false);
+    // Phase 20: Smart Pattern Engine — Markov selection every 4 bars
+    const markovEngineRef = useRef<JazzMarkovEngine>(new JazzMarkovEngine());
+    const markovPatternTypeRef = useRef<PatternType>('MEDIUM_ENERGY');
     /** Ref so loop callback always reads current (transposed) song without recreating the loop. */
     const songRef = useRef<any>(null);
     /** Current meter (updated in effect when meterSignal changes). Callback reads this so meter is correct in Tone's thread. */
@@ -126,8 +135,14 @@ export const useJazzBand = (song: any, isActive: boolean = true): JazzPlaybackSt
                 isLoadedSignal.value = true;
         };
 
-        reverbRef.current = new Tone.Reverb({ decay: 2.2, wet: reverbVolumeSignal.value }).toDestination();
-        pianoReverbRef.current = new Tone.Reverb({ decay: 2.8, wet: pianoReverbSignal.value }).toDestination();
+        const gateRef = options?.outputGateRef;
+        const dest = gateRef
+            ? (outputGainRef.current = new Tone.Gain(0).toDestination() as Tone.Gain)
+            : (outputGainRef.current = null);
+        const reverbDest = dest ?? (Tone.getContext().destination as Tone.ToneAudioNode);
+
+        reverbRef.current = new Tone.Reverb({ decay: 2.2, wet: reverbVolumeSignal.value }).connect(reverbDest);
+        pianoReverbRef.current = new Tone.Reverb({ decay: 2.8, wet: pianoReverbSignal.value }).connect(reverbDest);
 
         pianoRef.current = new Tone.Sampler({
             urls: { "C2": "C2.m4a", "F#2": "Fs2.m4a", "C3": "C3.m4a", "F#3": "Fs3.m4a", "C4": "C4.m4a", "F#4": "Fs4.m4a", "C5": "C5.m4a" },
@@ -166,8 +181,10 @@ export const useJazzBand = (song: any, isActive: boolean = true): JazzPlaybackSt
             drumsRef.current?.ride.dispose(); drumsRef.current?.hihat.dispose();
             drumsRef.current?.snare.dispose(); drumsRef.current?.kick.dispose();
             reverbRef.current?.dispose(); pianoReverbRef.current?.dispose();
+            outputGainRef.current?.dispose();
+            outputGainRef.current = null;
         };
-    }, []);
+    }, [options?.outputGateRef]);
 
     // Helper to determine if a track should be audible
     const getOutputVolume = (id: 'piano' | 'bass' | 'drums', baseVol: number) => {
@@ -221,6 +238,7 @@ export const useJazzBand = (song: any, isActive: boolean = true): JazzPlaybackSt
             meterRef.current = parseMeter(initialMeter);
             applyMeterToTransport(initialMeter);
         } else {
+            // DMP-13: no meterChanges → unchanged single meter (non-destructive)
             applyMeterToTransport(meterSignal.value);
         }
 
@@ -235,6 +253,9 @@ export const useJazzBand = (song: any, isActive: boolean = true): JazzPlaybackSt
                 : song.music.measures.map((_: { chords?: string[] }, i: number) => i);
         if (plan.length === 0) return;
 
+        const cycledLength = (song.music as { playbackPlanCycledLength?: number }).playbackPlanCycledLength ?? plan.length;
+        const endingLength = plan.length - cycledLength;
+
         if (song.meterChanges?.length) {
             const ids = scheduleMeterChanges(
                 song.meterChanges,
@@ -247,15 +268,20 @@ export const useJazzBand = (song: any, isActive: boolean = true): JazzPlaybackSt
             meterScheduleIdsRef.current = ids;
         }
 
-        const totalBars = totalLoopsSignal.value * plan.length;
+        const totalBars = totalLoopsSignal.value * cycledLength + endingLength;
 
+        const gateRef = options?.outputGateRef;
         const loop = new Tone.Loop((time) => {
+            if (gateRef && outputGainRef.current) {
+                outputGainRef.current.gain.rampTo(gateRef.current ? 1 : 0, 0.05);
+            }
             const s = songRef.current;
             if (!s?.music?.measures) return;
 
             const positionString = Tone.Transport.position.toString();
             const barFromPosition = parseInt(positionString.split(':')[0], 10) || 0;
             const defaultMeter = s.TimeSignature ?? meterSignal.value ?? '4/4';
+            // DMP-13: no meterChanges → use existing meterRef (non-destructive)
             const m = s.meterChanges?.length
                 ? getParsedMeterAtBar(barFromPosition, s.meterChanges, defaultMeter)
                 : meterRef.current;
@@ -265,13 +291,17 @@ export const useJazzBand = (song: any, isActive: boolean = true): JazzPlaybackSt
             const { bar, beat, divisionsPerBar: beatsPerBar, midBarBeat, lastBeat } = state;
 
             const planIndices = s.music.playbackPlan?.length > 0 ? s.music.playbackPlan : s.music.measures.map((_: { chords?: string[] }, i: number) => i);
-            const planLen = planIndices.length;
+            const cycledLen = (s.music as { playbackPlanCycledLength?: number }).playbackPlanCycledLength ?? planIndices.length;
+            const endingLen = planIndices.length - cycledLen;
 
-            const logicalBar = bar % planLen;
-            const measureIndex = planIndices[logicalBar];
-            const currentLoop = Math.floor(bar / planLen);
+            const inEnding = endingLen > 0 && bar >= totalLoopsSignal.value * cycledLen;
+            const logicalBar = inEnding ? bar - totalLoopsSignal.value * cycledLen : bar % cycledLen;
+            const planIndex = inEnding ? cycledLen + logicalBar : (bar % cycledLen);
+            const measureIndex = planIndices[planIndex];
+            const currentLoop = inEnding ? totalLoopsSignal.value : Math.floor(bar / cycledLen);
+            const planLen = inEnding ? endingLen : cycledLen;
 
-            if (currentLoop >= totalLoopsSignal.value) {
+            if (bar >= totalBars) {
                 clearMeterChangeSchedules(meterScheduleIdsRef.current);
                 meterScheduleIdsRef.current = [];
                 Tone.Transport.stop();
@@ -291,7 +321,10 @@ export const useJazzBand = (song: any, isActive: boolean = true): JazzPlaybackSt
             const tuneIntensity = getTuneIntensity(tuneProgress);
 
             const nextLogicalBar = (logicalBar * beatsPerBar + beat + 1) / beatsPerBar;
-            const nextMeasureIndex = planIndices[Math.floor(nextLogicalBar) % planLen];
+            const nextPlanIndex = inEnding
+                ? cycledLen + (Math.floor(nextLogicalBar) % endingLen)
+                : Math.floor(nextLogicalBar) % cycledLen;
+            const nextMeasureIndex = planIndices[nextPlanIndex];
             const nextMeasure = s.music.measures[nextMeasureIndex];
             const chords = measure.chords || [];
             const nextChords = nextMeasure?.chords || [];
@@ -327,11 +360,11 @@ export const useJazzBand = (song: any, isActive: boolean = true): JazzPlaybackSt
             const effectiveActivity = activityLevelSignal.value * (0.3 + 0.7 * tuneIntensity);
             tensionCycleRef.current = (bar * beatsPerBar + beat) / (beatsPerBar * 4);
             const currentTension = 0.5 + Math.sin(tensionCycleRef.current) * 0.3 + (effectiveActivity * 0.2);
-            // Phase 19: Soloist-Responsive — steer band density when toggle on (more space when soloist plays, more backing when silent).
+            // Phase 19: Soloist-Responsive — steer band density from 2–3 s average soloist intensity (more reactive).
             let activity = effectiveActivity;
             if (soloistResponsiveEnabledSignal.value) {
                 const soloist = soloistActivitySignal.value;
-                activity = effectiveActivity * (1 - 0.65 * soloist);
+                activity = effectiveActivity * (1 - 0.92 * soloist);
             }
             const bpm = bpmSignal.value;
 
@@ -363,7 +396,7 @@ export const useJazzBand = (song: any, isActive: boolean = true): JazzPlaybackSt
             // Voicing type follows tension + activity (increasing intensity/reactivity of the band)
             voicingTypeRef.current = JazzTheoryService.getNextLogicalVoicingType(voicingTypeRef.current, activity, currentTension, currentTension > 0.6);
 
-            // BASS: Note choice = legacy (beat-by-beat) or engine (Friedland/target-vector); timing/ghost via BassRhythmVariator
+            // BASS: Note choice = legacy (beat-by-beat) or engine (Friedland/target-vector); timing/ghost via BassRhythmVariator. DMP-07: 3/4 waltz pattern.
             if (currentChord && (bassRef.current?.loaded || bassMutedRef.current?.loaded)) {
                 if (beat === 0) {
                     const qa = qaDecisionRef.current;
@@ -371,17 +404,20 @@ export const useJazzBand = (song: any, isActive: boolean = true): JazzPlaybackSt
                         qa?.doAnswer && qa.responder === 'bass'
                             ? { questionFrom: qa.questionFrom, answerType: qa.answerType }
                             : undefined;
-                    if (USE_LEGACY_BASS_NOTE_CHOICE) {
-                        // Target & Approach: full bar with Beat 4 leading into next chord
-                        const next = nextChord?.trim() || currentChord;
+                    const next = nextChord?.trim() || currentChord;
+                    const soloistSpace = isSoloistSpace(placeInCycleRef.current, songStyleRef.current);
+                    // DMP-07: waltz only when 3/4; else existing path (non-destructive)
+                    if (beatsPerBar === 3) {
+                        const line = JazzTheoryService.generateWaltzWalkingLine(currentChord, next, lastBassNoteRef.current);
+                        walkingLineRef.current = bassRhythmVariatorRef.current.applyVariations(line, bar, activity, next, bassAnswerContext, soloistSpace);
+                    } else if (USE_LEGACY_BASS_NOTE_CHOICE) {
                         const line = JazzTheoryService.generateTargetApproachWalkingLine(currentChord, next, lastBassNoteRef.current);
-                        const soloistSpace = isSoloistSpace(placeInCycleRef.current, songStyleRef.current);
                         walkingLineRef.current = bassRhythmVariatorRef.current.applyVariations(line, bar, activity, next, bassAnswerContext, soloistSpace);
                     } else {
                         walkingBassEngineRef.current.setLastNoteMidi(lastBassNoteRef.current);
                         walkingLineRef.current = walkingBassEngineRef.current.generateVariedWalkingLine(
                             currentChord,
-                            nextChord?.trim() || currentChord,
+                            next,
                             bar,
                             activity
                         );
@@ -456,6 +492,14 @@ export const useJazzBand = (song: any, isActive: boolean = true): JazzPlaybackSt
             // PIANO: Combined reactive + RhythmEngine — room drives density; pocket + shell/full + velocity on every hit
             // 1. At bar start: reactive target density drives RhythmEngine; drums use hybrid linear phrasing when bar is passed
             if (beat === 0) {
+                // Phase 20: Markov pattern type every 4 bars; optional density bias when soloist-responsive
+                if (bar % 4 === 0) {
+                    if (soloistResponsiveEnabledSignal.value) {
+                        markovEngineRef.current.updateIntensity(soloistActivitySignal.value);
+                    }
+                    markovPatternTypeRef.current = markovEngineRef.current.getNextPatternType();
+                }
+
                 const chordsPerBar = (measure.chords || []).length;
                 const trioContext = { placeInCycle: placeInCycleRef.current, songStyle: songStyleRef.current };
                 const targetDensity = reactiveCompingEngineRef.current.getTargetDensity(activity, bassModeSignal.value, trioContext);
@@ -472,6 +516,7 @@ export const useJazzBand = (song: any, isActive: boolean = true): JazzPlaybackSt
                     balladMode: isBallad,
                     placeInCycle: placeInCycleRef.current,
                     songStyle: songStyleRef.current,
+                    patternTypeBias: markovPatternTypeRef.current,
                 });
                 currentPatternRef.current = pianoPattern;
                 const pianoDensity = pianoPattern.steps.length / beatsPerBar;
@@ -480,14 +525,20 @@ export const useJazzBand = (song: any, isActive: boolean = true): JazzPlaybackSt
                     qa?.doAnswer && qa.responder === 'drums'
                         ? { questionFrom: qa.questionFrom, answerType: qa.answerType }
                         : undefined;
-                currentDrumHitsRef.current = drumEngineRef.current.generateBar(
-                    activity,
-                    pianoDensity,
-                    bar,
-                    drumsAnswerContext,
-                    pianoPattern.steps.map(s => s.time),
-                    trioContext
-                );
+                // Phase 20: On FILL bar use drum fill instead of time
+                if (markovPatternTypeRef.current === 'FILL') {
+                    currentDrumHitsRef.current = drumEngineRef.current.generateFill(bar);
+                } else {
+                    currentDrumHitsRef.current = drumEngineRef.current.generateBar(
+                        activity,
+                        pianoDensity,
+                        bar,
+                        drumsAnswerContext,
+                        pianoPattern.steps.map(s => s.time),
+                        trioContext,
+                        beatsPerBar
+                    );
+                }
             }
 
             const pattern = currentPatternRef.current;
@@ -581,7 +632,7 @@ export const useJazzBand = (song: any, isActive: boolean = true): JazzPlaybackSt
             meterScheduleIdsRef.current = [];
             loop.dispose();
         };
-    }, [isActive, !!song]);
+    }, [isActive, !!song, options?.outputGateRef]);
 
     const togglePlayback = () => {
         if (isPlayingSignal.value) {

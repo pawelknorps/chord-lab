@@ -19,6 +19,25 @@ export type RhythmTemplateName =
     | "LateLanding"
     | "BackbeatPhrase";
 
+/** Phase 20: Smart Pattern Engine — energy band for Markov selection. */
+export type PatternType = 'LOW_ENERGY' | 'MEDIUM_ENERGY' | 'HIGH_ENERGY' | 'FILL';
+
+/** Phase 20: Map each rhythm template to a pattern type for Markov bias. */
+export const RHYTHM_TEMPLATE_TO_PATTERN_TYPE: Record<RhythmTemplateName, PatternType> = {
+    Sustain: 'LOW_ENERGY',
+    BalladPad: 'LOW_ENERGY',
+    Standard: 'MEDIUM_ENERGY',
+    RedGarland: 'MEDIUM_ENERGY',
+    Driving: 'MEDIUM_ENERGY',
+    LateLanding: 'MEDIUM_ENERGY',
+    BackbeatPhrase: 'MEDIUM_ENERGY',
+    BebopClassic: 'HIGH_ENERGY',
+    WyntonKelly: 'HIGH_ENERGY',
+    MonkMinimal: 'HIGH_ENERGY',
+    TheSkip: 'HIGH_ENERGY',
+    ThroughTheBar: 'HIGH_ENERGY',
+};
+
 export interface RhythmPattern {
     name: RhythmTemplateName;
     steps: RhythmStep[];
@@ -54,6 +73,8 @@ export interface RhythmPatternOptions {
     placeInCycle?: string;
     /** Phase 18: song-style; when 'Ballad' biases sustain. Hybrid—additive to balladMode. */
     songStyle?: string;
+    /** Phase 20: When set, only templates of this type are eligible (Markov Smart Pattern Engine). */
+    patternTypeBias?: PatternType;
 }
 
 const RHYTHM_TEMPLATES: Record<RhythmTemplateName, RhythmStep[][]> = {
@@ -295,7 +316,25 @@ export class RhythmEngine {
             ? '4n'
             : (opts.tempoSubdivisionLimit ?? getTempoSubdivisionLimitFromBpm(bpm));
 
-        const options: RhythmTemplateName[] = ["Standard", "Sustain", "BalladPad", "Driving", "RedGarland", "BebopClassic", "WyntonKelly", "MonkMinimal", "TheSkip", "ThroughTheBar", "LateLanding", "BackbeatPhrase"];
+        let options: RhythmTemplateName[] = ["Standard", "Sustain", "BalladPad", "Driving", "RedGarland", "BebopClassic", "WyntonKelly", "MonkMinimal", "TheSkip", "ThroughTheBar", "LateLanding", "BackbeatPhrase"];
+
+        // Phase 20: When FILL, piano plays minimal comp (one chord on 1) so drums can fill.
+        if (opts.patternTypeBias === 'FILL') {
+            const fillPattern: RhythmPattern = { name: 'Sustain', steps: [{ time: '0:0:0', duration: '4n' }] };
+            return fillPattern;
+        }
+        // Phase 20: When patternTypeBias is set, restrict to templates of that type.
+        if (opts.patternTypeBias && opts.patternTypeBias !== 'FILL') {
+            const filtered = options.filter((name) => RHYTHM_TEMPLATE_TO_PATTERN_TYPE[name] === opts.patternTypeBias);
+            if (filtered.length > 0) {
+                options = filtered;
+                const optionSet = new Set(options);
+                (Object.keys(weights) as RhythmTemplateName[]).forEach((name) => {
+                    if (!optionSet.has(name)) weights[name] = 0;
+                });
+            }
+        }
+
         const lastTemplate = this.history[this.history.length - 1] || null;
 
         // More space = few chords per bar OR slow tempo → longer note values

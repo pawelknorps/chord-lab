@@ -18,27 +18,33 @@ export interface DrumHit {
 export class LinearDrummingEngine {
     /** Standard jazz ride grid (Spang-a-Lang): [1, 2, 2&, 3, 4, 4&] in "bar:beat:sixteenth" for one bar. */
     private readonly STANDARD_GRID = ["0:0:0", "0:1:0", "0:1:2", "0:2:0", "0:3:0", "0:3:2"];
+    /** Waltz (3/4) ride: 1, 2, 3. DMP-08. */
+    private readonly WALTZ_GRID = ["0:0:0", "0:1:0", "0:2:0"];
 
     /**
-     * Generates a 1-bar phrase: Ride + Snare interlock. Hi-hat on 2 & 4.
+     * Generates a 1-bar phrase: Ride + Snare interlock. Hi-hat on 2 & 4 (4/4) or 2 & 3 (3/4).
      * @param barIndex Used for 2-bar motivic repetition (same mask for barIndex % 2).
      * @param intensity 0.0–1.0 (how busy; drives snare fill probability in holes).
+     * @param divisionsPerBar When 3, use waltz ride (1, 2, 3) and hi-hat on 2 & 3.
      */
-    generatePhrase(barIndex: number, intensity: number): DrumHit[] {
+    generatePhrase(barIndex: number, intensity: number, divisionsPerBar?: number): DrumHit[] {
         const events: DrumHit[] = [];
-        const phraseMask = this.selectPhraseMask(intensity, barIndex);
+        const isWaltz = divisionsPerBar === 3;
+        const grid = isWaltz ? this.WALTZ_GRID : this.STANDARD_GRID;
+        const phraseMask = this.selectPhraseMask(intensity, barIndex, grid.length);
 
-        this.STANDARD_GRID.forEach((timeStep, index) => {
+        grid.forEach((timeStep, index) => {
             const isRideActive = phraseMask[index];
 
             if (isRideActive) {
+                const vel = isWaltz ? 0.7 + (index === 0 ? 0.1 : 0) : this.getRideVelocity(index);
                 events.push({
                     time: timeStep,
                     instrument: "Ride",
-                    velocity: this.getRideVelocity(index),
+                    velocity: vel,
                     type: "Standard"
                 });
-                if (Math.random() < 0.3) {
+                if (!isWaltz && Math.random() < 0.3) {
                     events.push({ time: timeStep, instrument: "Snare", velocity: 0.2, type: "Ghost" });
                 }
             } else {
@@ -53,8 +59,13 @@ export class LinearDrummingEngine {
             }
         });
 
-        events.push({ time: "0:1:0", instrument: "HatPedal", velocity: 0.7, type: "Standard" });
-        events.push({ time: "0:3:0", instrument: "HatPedal", velocity: 0.7, type: "Standard" });
+        if (isWaltz) {
+            events.push({ time: "0:1:0", instrument: "HatPedal", velocity: 0.7, type: "Standard" });
+            events.push({ time: "0:2:0", instrument: "HatPedal", velocity: 0.7, type: "Standard" });
+        } else {
+            events.push({ time: "0:1:0", instrument: "HatPedal", velocity: 0.7, type: "Standard" });
+            events.push({ time: "0:3:0", instrument: "HatPedal", velocity: 0.7, type: "Standard" });
+        }
         return events;
     }
 
@@ -156,7 +167,12 @@ export class LinearDrummingEngine {
         return this.generateFillMixed(barIndex);
     }
 
-    private selectPhraseMask(intensity: number, barIndex: number): boolean[] {
+    private selectPhraseMask(intensity: number, barIndex: number, gridLen: number = 6): boolean[] {
+        if (gridLen === 3) {
+            // Waltz: 1, 2, 3 — full ride or sparse (2 of 3)
+            if (intensity > 0.6) return [true, true, true];
+            return (barIndex % 2 === 0) ? [true, true, false] : [true, false, true];
+        }
         // Pattern A: "The Skip" (DeJohnette) — Snare hits 1 and 4, Ride plays middle
         const patternA = [false, true, true, true, false, true];
         // Pattern B: "The Driver" (Blakey) — full except and-of-4
@@ -199,6 +215,13 @@ export class DrumEngine {
     private linearEngine = new LinearDrummingEngine();
     private phraseHistory: string[] = [];
     private readonly MAX_HISTORY = 4;
+
+    /**
+     * Phase 20: Public fill generation for Markov FILL bars (Smart Pattern Engine).
+     */
+    public generateFill(barIndex: number): DrumHit[] {
+        return this.linearEngine.generateFill(barIndex);
+    }
 
     /**
      * Classic Bebop & Swing Comping Phrases (Snare/Kick Conversation)
@@ -315,6 +338,7 @@ export class DrumEngine {
      * @param answerContext Optional. When drums are "answering" another instrument: echo = fill/response, complement = backbeat, space = simple time.
      * @param pianoStepTimes Optional. Piano comping step times (e.g. ["0:0:0", "0:1:2"]) — kick accents a subset of these instead of always 1 and 3.
      * @param trioContext Optional Phase 18: when solo or Ballad, density is capped (soloist space). Hybrid—additive.
+     * @param divisionsPerBar Optional. When 3, use waltz ride (1, 2, 3) and hi-hat on 2 & 3. DMP-08.
      */
     public generateBar(
         density: number,
@@ -322,7 +346,8 @@ export class DrumEngine {
         barIndex?: number,
         answerContext?: { questionFrom: string; answerType: 'echo' | 'complement' | 'space' },
         pianoStepTimes?: string[],
-        trioContext?: { placeInCycle?: string; songStyle?: string }
+        trioContext?: { placeInCycle?: string; songStyle?: string },
+        divisionsPerBar?: number
     ): DrumHit[] {
         const listenerAdjustment = pianoDensity > 0.8 ? -0.3 : (pianoDensity < 0.2 ? 0.1 : 0);
         let effectiveDensity = Math.max(0.1, Math.min(1.0, density + listenerAdjustment));
@@ -351,14 +376,14 @@ export class DrumEngine {
 
         // Hybrid: Linear phrasing (Ride/Snare interlock) when barIndex is provided
         if (barIndex !== undefined) {
+            const isWaltz = divisionsPerBar === 3;
             const isPhraseEnd = barIndex % 4 === 3;
-            // Calm start (low density) = fewer fills, longer time-keeping; builds with intensity
             const baseFillChance = answerContext ? answerFillChance : 0.15 * (0.2 + 0.8 * effectiveDensity);
-            const isFillBar = isPhraseEnd && Math.random() < baseFillChance;
+            const isFillBar = !isWaltz && isPhraseEnd && Math.random() < baseFillChance;
             if (isFillBar) {
-                hits.push(...this.linearEngine.generateFill(barIndex));
+                hits.push(...this.generateFill(barIndex));
             } else {
-                hits.push(...this.linearEngine.generatePhrase(barIndex, effectiveDensity));
+                hits.push(...this.linearEngine.generatePhrase(barIndex, effectiveDensity, divisionsPerBar));
             }
             // Kick: don't always hit every beat — either accent piano comping rhythms or sparse anchor (1 and sometimes 3)
             this.generateKickFromPianoOrSparse(hits, pianoStepTimes);

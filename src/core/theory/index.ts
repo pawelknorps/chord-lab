@@ -2,7 +2,9 @@ import { spellPitchClassInKey as spellPitchClassInKeyFromEnharmonic, NOTE_NAMES 
 export * from './analysis';
 import { getChordDna, getChordDnaIntervals, getChordToneLabelMap, type ChordDnaResult } from './ChordDna';
 import { CompingEngine, type Voicing } from './CompingEngine';
-import { RhythmEngine, type RhythmPattern, type RhythmPatternOptions, type RhythmTemplateName } from './RhythmEngine';
+import { RhythmEngine, type RhythmPattern, type RhythmPatternOptions, type RhythmTemplateName, type AnswerContext, type TempoSubdivisionLimit, type PatternType } from './RhythmEngine';
+import { JazzMarkovEngine } from './JazzMarkovEngine';
+import { QuestionAnswerCoordinator, type LastBarSummary, type AnswerDecision } from './QuestionAnswerCoordinator';
 import { DrumEngine, type DrumHit, type DrumInstrument } from './DrumEngine';
 import { GrooveManager, type GrooveInstrument } from './GrooveManager';
 import { WalkingBassEngine } from './WalkingBassEngine';
@@ -12,7 +14,7 @@ import { CHORD_INTERVALS } from './chordIntervals';
 import { parseChord } from './parseChord';
 import { toTonalChordSymbol } from './chordSymbolForTonal';
 
-export { getChordDna, getChordDnaIntervals, getChordToneLabelMap, type ChordDnaResult, CompingEngine, type Voicing, RhythmEngine, type RhythmPattern, type RhythmPatternOptions, type RhythmTemplateName, DrumEngine, type DrumHit, type DrumInstrument, GrooveManager, type GrooveInstrument, WalkingBassEngine, BassRhythmVariator, type BassEvent, ReactiveCompingEngine, type CompingHit, type BassMode, type StepLike };
+export { getChordDna, getChordDnaIntervals, getChordToneLabelMap, type ChordDnaResult, CompingEngine, type Voicing, RhythmEngine, type RhythmPattern, type RhythmPatternOptions, type RhythmTemplateName, type AnswerContext, type TempoSubdivisionLimit, type PatternType, JazzMarkovEngine, DrumEngine, type DrumHit, type DrumInstrument, GrooveManager, type GrooveInstrument, WalkingBassEngine, BassRhythmVariator, type BassEvent, ReactiveCompingEngine, type CompingHit, type BassMode, type StepLike, QuestionAnswerCoordinator, type LastBarSummary, type AnswerDecision };
 export { CHORD_INTERVALS, parseChord, toTonalChordSymbol };
 
 export const NOTE_NAMES = ENHARMONIC_NOTE_NAMES;
