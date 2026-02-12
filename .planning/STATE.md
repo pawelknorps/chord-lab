@@ -114,9 +114,9 @@
 - **Planning**: `.planning/phases/14-pitch-latency/PLAN.md`, RESEARCH.md, SUMMARY.md, VERIFICATION.md.
 - **Delivered**: pitch-processor.js updated with native circular buffer, linear-interp downsampler, MPM at 16 kHz effective, inference every block (or every hopBlocks); no GC in hot path; no console in worklet. CREPE swap path in RESEARCH.md.
 
-## Phase 12: Walking Bass Engine (Target & Approach)
+## Phase 12: Walking Bass Engine (Target & Approach) ✅
 
-- **Status**: Implemented.
+- **Status**: Completed (execute-phase 12 run: SUMMARY.md, VERIFICATION.md, ROADMAP updated).
 - **WalkingBassEngine**: 4-beat strategy (Anchor → Bridge → Bridge → Approach); Beat 4 chromatic or 5th-of-destination; E1–G3 range; tonal.js Chord/Note.
 - **Band integration**: useJazzBand generates full line at beat 0, plays `line[beat]` for 0–3; fallback to JazzTheoryService.getNextWalkingBassNote if line invalid.
 - **Tests**: WalkingBassEngine.test.ts (4 notes, range, Beat 1 root, Beat 4 approach, state carry).

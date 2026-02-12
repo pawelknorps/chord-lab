@@ -117,16 +117,16 @@
   - [✅] **Micro-Timing**: Ride pushes (-4ms), Snare drags (+5ms), ±1ms jitter.
   - [✅] **Anchor Logic**: Strict Hi-Hat pedal on 2 & 4.
 
-## Phase 12: Walking Bass Engine (Target & Approach) 🚀
+## Phase 12: Walking Bass Engine (Target & Approach) ✅
 
 *Focus: Teleological walking bass—Beat 4 leads into the next chord.*
 
 - **Success Criteria**: 4-note line per bar with Beat 4 as chromatic or dominant approach; smooth voice leading across bar lines.
 - **Tasks**:
-  - [ ] **WalkingBassEngine**: Class with `generateWalkingLine(currentChord, nextChord)` (Anchor → Bridge → Bridge → Approach); E1–G3 range.
+  - [x] **WalkingBassEngine**: Class with `generateWalkingLine(currentChord, nextChord)` (Anchor → Bridge → Bridge → Approach); E1–G3 range.
   - [x] Phase 12: Walking Bass Engine (Target & Enclosure Edition) (2026-02-12)
-  - [ ] **Approach strategies**: Chromatic from below/above, 5th-of-destination; bridge notes as chord tones between Beat 1 and Beat 4.
-  - [ ] **Band integration**: useJazzBand generates line at beat 0, plays `line[beat]` for 0–3; state carried to next bar.
+  - [x] **Approach strategies**: Chromatic from below/above, 5th-of-destination; bridge notes as chord tones between Beat 1 and Beat 4.
+  - [x] **Band integration**: useJazzBand generates line at beat 0, plays `line[beat]` for 0–3; state carried to next bar.
 
 ## Phase 12.1: Bass Rhythm Variation (2026-02-12) ✅
 ## Phase 12.2: Bebop Bass Engine (2026-02-12) ✅
