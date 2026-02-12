@@ -19,6 +19,7 @@ import {
 import { useAudio } from '../../context/AudioContext';
 import { MidiSettings } from '../MidiSettings';
 import { AiAssistantSidebar } from '../AiAssistantSidebar';
+import { PerformanceScoringOverlay } from '../../modules/JazzKiller/components/PerformanceScoringOverlay';
 import { GlobalSettings } from '../shared/GlobalSettings';
 import { useTranslation } from 'react-i18next';
 import { setLanguage } from '../../utils/i18n';
@@ -80,6 +81,7 @@ const Dashboard: React.FC = () => {
             items: [
                 { to: "/functional-ear-training", icon: Activity, label: "Ear Training" },
                 { to: "/rhythm-architect", icon: Activity, label: "Rhythm" },
+                { to: "/innovative-exercises", icon: Music, label: "Innovative Exercises" },
                 { to: "/barry-harris", icon: Piano, label: "Barry Harris" },
                 { to: "/grips", icon: Grid3X3, label: "Grips" },
             ]
@@ -183,6 +185,7 @@ const Dashboard: React.FC = () => {
                 <div className="p-3 border-t border-[var(--border-subtle)] bg-[var(--bg-panel)]">
                     {!collapsed && (
                         <>
+                            <PerformanceScoringOverlay variant="sidebar" />
                             <AiAssistantSidebar />
                             <MidiSettings />
                         </>

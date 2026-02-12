@@ -4,7 +4,7 @@
 
 - **Phase**: Phase 16: Voice & Percussion Interactive Training
 - **Status**: ✅ Completed
-- **Next Milestone**: Phase 17 – Innovative Interactive Exercises (Ear + Rhythm)
+- **Next Milestone**: Phase 17 Wave 2 (Rhythm exercises) or next phase
 - **Overall Progress**: ~96%
 
 ## Active Requirements
@@ -27,6 +27,12 @@
 
 ## Recent Achievements
 
+- **Phase 17: Innovative Interactive Exercises (Wave 1 + Module Entry)**:
+  - New module at `/innovative-exercises` with nav under Practice.
+  - Ghost Note Match: lick + ghost slot, 10¢ match → pro sample replacement (REQ-IE-01).
+  - Intonation Heatmap: drone + scale, heatmap green/red per degree (REQ-IE-02).
+  - Voice-Leading Maze: ii–V–I, guide tones only, mute on wrong note (REQ-IE-03).
+  - Swing Pocket, Call and Response, Ghost Rhythm: stub panels only (Wave 2 deferred).
 - **Completed Phase 12: Walking Bass Engine (Target & Enclosure Edition) (2026-02-12)**:
   - Replaced mathematical walking with "Teleological" Bebop strategies (Paul Chambers/Ray Brown style).
   - Implemented **Circle of Fifths** logic with "Dominant Drops" (Setup 5th of Target on Beat 4).

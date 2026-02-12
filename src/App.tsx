@@ -25,6 +25,7 @@ const ProgressionsPage = lazy(() => import('./pages/ProgressionsPage'));
 const JazzKiller = lazy(() => import('./modules/JazzKiller/JazzKillerModule'));
 const TeacherDashboard = lazy(() => import('./pages/TeacherDashboard'));
 const LickFeedPage = lazy(() => import('./pages/LickFeedPage'));
+const InnovativeExercises = lazy(() => import('./modules/InnovativeExercises/InnovativeExercisesModule'));
 
 import { useSettingsStore } from './core/store/useSettingsStore';
 import { useSupabaseProgressSync } from './hooks/useSupabaseProgressSync';
@@ -119,6 +120,11 @@ function App() {
                                     <Route path="lick-feed" element={
                                         <Suspense fallback={<ModuleSkeleton label="Lick Feed" />}>
                                             <LickFeedPage />
+                                        </Suspense>
+                                    } />
+                                    <Route path="innovative-exercises" element={
+                                        <Suspense fallback={<ModuleSkeleton label="Innovative Exercises" />}>
+                                            <InnovativeExercises />
                                         </Suspense>
                                     } />
                                 </Route>
