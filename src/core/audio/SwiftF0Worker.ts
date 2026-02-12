@@ -83,6 +83,40 @@ async function runInference(pcm: Float32Array): Promise<{ pitch: number; confide
 }
 
 // Worker message handling
+import { CrepeStabilizer } from './CrepeStabilizer';
+
+let stabilizer: CrepeStabilizer | null = null;
+let isPolling = false;
+
+/**
+ * Polling loop that reads PCM from SharedArrayBuffer and runs inference.
+ */
+async function startPollingLoop(pcmSab: SharedArrayBuffer) {
+    const pcmView = new Float32Array(pcmSab);
+    isPolling = true;
+
+    // Initialize stabilizer with our current profile
+    stabilizer = new CrepeStabilizer({ profileId: currentProfile.id });
+
+    while (isPolling) {
+        // User spec: Run on PCM from SAB
+        const result = await runInference(pcmView);
+
+        if (result.pitch > 0 && stabilizer) {
+            // 5. User Spec: Instrument-Specific Hysteresis Profiles
+            const stabilized = stabilizer.process(result.pitch, result.confidence, 0 /* RMS placeholder */);
+
+            self.postMessage({
+                type: 'result',
+                data: { pitch: stabilized, confidence: result.confidence }
+            });
+        }
+
+        // Sleep for approx 8ms (hop size 128 @ 16kHz)
+        await new Promise(resolve => setTimeout(resolve, 8));
+    }
+}
+
 self.onmessage = async (e) => {
     const { type, data } = e.data;
 
@@ -91,9 +125,10 @@ self.onmessage = async (e) => {
         self.postMessage({ type: 'ready' });
     } else if (type === 'setProfile') {
         currentProfile = INSTRUMENT_PROFILES[data] || INSTRUMENT_PROFILES.auto;
-    } else if (type === 'process') {
-        // data is the PCM SharedArrayBuffer or Float32Array
-        const result = await runInference(data);
-        self.postMessage({ type: 'result', data: result });
+        if (stabilizer) stabilizer.setProfile(currentProfile.id);
+    } else if (type === 'startPolling') {
+        void startPollingLoop(data);
+    } else if (type === 'stopPolling') {
+        isPolling = false;
     }
 };

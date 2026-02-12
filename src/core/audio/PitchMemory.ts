@@ -24,6 +24,20 @@ export function createPitchMemory(): PitchMemoryResult {
   return { sab, view };
 }
 
+export interface PcmMemoryResult {
+  sab: SharedArrayBuffer;
+  view: Float32Array;
+}
+
+export function createPcmMemory(): PcmMemoryResult {
+  if (typeof SharedArrayBuffer === 'undefined') {
+    throw new Error('SharedArrayBuffer is not available.');
+  }
+  const sab = new SharedArrayBuffer(1024 * Float32Array.BYTES_PER_ELEMENT);
+  const view = new Float32Array(sab);
+  return { sab, view };
+}
+
 export function isPitchMemorySupported(): boolean {
   return typeof SharedArrayBuffer !== 'undefined';
 }
