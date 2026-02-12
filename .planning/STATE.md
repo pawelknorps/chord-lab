@@ -4,7 +4,7 @@
 
 - **Phase**: Phase 16: Voice & Percussion Interactive Training
 - **Status**: ✅ Completed
-- **Next Milestone**: Review & Refine Ecosystem
+- **Next Milestone**: Phase 17 – Innovative Interactive Exercises (Ear + Rhythm)
 - **Overall Progress**: ~96%
 
 ## Active Requirements

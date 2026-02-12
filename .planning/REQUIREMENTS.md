@@ -256,6 +256,60 @@
 - **Output**: AI-generated text (Gemini Nano or API): summary of strengths/weaknesses, specific advice (e.g. "Work on guide tones in the bridge"), and development suggestions (e.g. "Next: practice this tune in 3 keys" or "Focus on arpeggios in bars 17–24").
 - **Integration**: Reuse `generatePerformanceCritique`-style flow (jazzTeacherLogic); extend or add a dedicated `generateStandardsExerciseAnalysis(sessionData)` that accepts exercise heatmap, transcription snippet, and exercise type and returns pedagogical feedback.
 
+## Phase 16: Voice & Percussion Interactive Training
+
+### REQ-VP-01: Voice-to-Answer in Functional Ear Training
+- **Requirement**: Implement "Sing-to-Answer" mode for Melody Steps and Intervals levels.
+- **Behavior**: Use real-time pitch detection to validate the user's vocal input against the expected pitch (activeTarget). Support arpeggio sequences in Smart Lesson.
+
+### REQ-VP-02: Clap-to-Perform in Rhythm Architect
+- **Requirement**: Use onset detection from the microphone to allow users to "perform" rhythms by clapping.
+- **Behavior**: Grade accuracy of claps against the target subdivision in the "RhythmArena" (4-hit streak for success).
+
+### REQ-VP-03: Shared Interaction Model (Mic vs Mouse)
+- **Requirement**: Unified state for switching between microphone interaction and traditional mouse/MIDI interaction.
+- **Behavior**: Seamless transition and status persistence across different modules (Ear Training, Rhythm, Chord Lab).
+
+### REQ-VP-04: Deep Visual Feedback (Temporal Accuracy)
+- **Requirement**: Provide millisecond-accurate visual feedback for claps to help users refine their timing.
+- **Behavior**: "Temporal Accuracy" tape in Rhythm Architect showing early/late hits relative to the metronome.
+
+## Phase 17: Innovative Interactive Exercises (Ear + Rhythm)
+
+*New **module** of innovative exercises: pitch-centric ear (Ghost Note, Intonation Heatmap, Voice-Leading Maze) and micro-timing rhythm (Swing Pocket, Call and Response, Ghost Rhythm). Full requirements in `.planning/milestones/innovative-exercises/REQUIREMENTS.md`.*
+
+### REQ-IE-01: Ghost Note Match
+
+- **Requirement**: App plays a jazz lick with one note as “ghost” (noise/thump). Student plays the missing note. If within **10 cents**, ghost is replaced by high-fidelity pro sample → “perfect” collaborative lick. Teaches harmonic anticipation.
+- **Tech**: Pitch detection (SwiftF0/MPM) + Tonal.js; `frequencyToNote` ±10¢; target from lick metadata.
+
+### REQ-IE-02: Intonation Heatmap (Tonal Gravity)
+
+- **Requirement**: Drone (e.g. C) + scale (e.g. C Major). Student plays each degree. Map tonal gravity (e.g. Major 3rd “bright,” minor 7th “dark”). UI heatmap: **Green** = ET, **Blue** = Just, **Red** = out of tune.
+- **Tech**: Sub-cent pitch (`frequencyToNote`, cents); heatmap per scale degree.
+
+### REQ-IE-03: Voice-Leading Maze
+
+- **Requirement**: ii–V–I progression. Student plays only **guide tones** (3rds and 7ths). If student plays a non–guide-tone, **backing track mutes** until they play a correct connective note.
+- **Tech**: `GuideToneCalculator` (or equivalent); compare mic/MIDI to allowed 3rds/7ths; playback mute.
+
+### REQ-IR-01: Swing Pocket Validator
+
+- **Requirement**: Metronome 2 and 4; student plays 8th-note pattern. Analyze **swing ratio** (2:1 vs 3:1). UI “Pocket Gauge.” Challenge: “Push” or “Lay Back”; report micro-offset in ms.
+- **Tech**: Millisecond time-stamping of onsets; swing ratio and offset; Pocket Gauge UI.
+
+### REQ-IR-02: Call and Response Rhythmic Mimicry
+
+- **Requirement**: Pro drummer 2-bar break; student scats/plays rhythm back. **RMS envelopes** match attack; overlay student waveform on pro; show where “and of 4” (etc.) is late/early.
+- **Tech**: Onset + RMS from mic; align to reference; waveform overlay UI.
+
+### REQ-IR-03: Ghost Rhythm Poly-Meter
+
+- **Requirement**: 4/4 backing; student plays 3/4 cross-rhythm on one note (e.g. G). Track **pitch stability**. **Win**: pitch within **5 cents** + successful 3-against-4.
+- **Tech**: Pitch pipeline for stability; 3 vs 4 grid; scoring = rhythm accuracy + 5¢ stability.
+
+---
+
 ## Technical Priorities
 1. **High**: Pitch-to-Theory Sync (Turns app from book into teacher).
 2. **Medium**: Gemini Nano Hint Loop (Ear training "AHA!" moments).

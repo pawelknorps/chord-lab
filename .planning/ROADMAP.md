@@ -189,3 +189,14 @@
   - [x] **Atonal Gating (RMS)**: Transient bridging for "chiff" and pluck noise.
   - [x] **Regression Head Logic**: Sub-cent refinement from bins 3-134.
   - [x] **Unified Store Integration**: `useITMPitchStore` favors SwiftF0 with MPM fallback.
+
+## Phase 17: Innovative Interactive Exercises (Ear + Rhythm)
+
+*Focus: New module of pitch-centric ear exercises (Ghost Note, Intonation Heatmap, Voice-Leading Maze) and micro-timing rhythm exercises (Swing Pocket, Call and Response, Ghost Rhythm).*
+
+- **Success Criteria**: Six exercises deliverable; Ghost Note (10¢ → pro sample), Intonation Heatmap (green/blue/red per degree), Voice-Leading Maze (mute until guide tone); Swing Pocket (ratio + Pocket Gauge + ms offset), Call and Response (waveform overlay), Ghost Rhythm (5¢ stability + 3-vs-4).
+- **Milestone**: `.planning/milestones/innovative-exercises/` (PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md).
+- **Tasks**:
+  - [ ] **Wave 1 – Ear**: Ghost Note Match (lick + ghost → 10¢ match → pro sample); Intonation Heatmap (drone + scale + heatmap UI); Voice-Leading Maze (ii–V–I + GuideToneCalculator + mute on wrong note).
+  - [ ] **Wave 2 – Rhythm**: Swing Pocket Validator (onset timing, swing ratio, Pocket Gauge, Push/Lay Back ms); Call and Response (RMS envelope, waveform overlay); Ghost Rhythm Poly-Meter (3 vs 4 grid, 5¢ pitch stability win).
+  - [ ] **Wave 3**: Module entry in app nav; unified mic (and optional MIDI) input; docs and verification.

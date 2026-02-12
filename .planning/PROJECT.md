@@ -56,6 +56,14 @@ Transition from a music theory prototype to a full-scale "Incredible Teaching Ma
 - **Goal**: Enable students to sing scale degrees/intervals and clap complex rhythms for real-time validation.
 - **Tech**: SwiftF0 onset detection, frequency-to-degree mapping, low-latency mic stream integration in Functional Ear Training and Rhythm Architect.
 
+### 8. Innovative Interactive Exercises (Ear + Rhythm)
+
+- **Concept**: A **new module** of exercises that leverage sub-cent pitch, millisecond timing, and functional harmony to teach harmonic anticipation, expressive intonation, and micro-timing feel.
+- **Ear (Pitch-Centric)**: Ghost Note Match (fill missing note → ghost becomes pro sample); Intonation Heatmap (drone + scale → green/blue/red by tuning); Voice-Leading Maze (ii–V–I guide tones only, track mutes until correct).
+- **Rhythm (Micro-Timing)**: Swing Pocket Validator (swing ratio + Pocket Gauge + Push/Lay Back ms feedback); Call and Response Rhythmic Mimicry (RMS overlay vs pro waveform); Ghost Rhythm Poly-Meter (3-over-4 with 5-cent pitch-stability win).
+- **Tech**: SwiftF0/MPM + frequencyToNote, GuideToneCalculator, onset/RMS and high-resolution time; heatmap and waveform overlay UI.
+- **Milestone**: `.planning/milestones/innovative-exercises/` (PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md).
+
 ## Key Decisions
 
 | Decision | Rationale | Status |
