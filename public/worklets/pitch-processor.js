@@ -14,6 +14,8 @@ class PitchProcessor extends AudioWorkletProcessor {
     const opts = options?.processorOptions || {};
     const sab = opts.sab;
     this.sharedView = sab ? new Float32Array(sab) : null;
+    const pcmSab = opts.pcmSab;
+    this.pcmView = pcmSab ? new Float32Array(pcmSab) : null;
     const sampleRate = opts.sampleRate || 44100;
     this.sampleRate = sampleRate;
 
@@ -44,13 +46,17 @@ class PitchProcessor extends AudioWorkletProcessor {
     this.maxHz = preset.max;
 
     this.lastStablePitch = 0;
-    this.pitchHistory = [];
     this.windowSize = 7;
     this.minConfidence = 0.92;
     this.hysteresisCents = 35;
     this.stabilityThreshold = 3;
     this.stableCount = 0;
     this.pendingPitch = 0;
+    // Circular buffer for pitch history (no push/shift, no GC)
+    this.pitchHistory = new Float64Array(7);
+    this.pitchHistoryCount = 0;
+    this.pitchHistoryPtr = 0;
+    this.sortedCopy = new Float64Array(7);
   }
 
   process(inputs) {
@@ -108,16 +114,49 @@ class PitchProcessor extends AudioWorkletProcessor {
       out[j] = temp[lo] * (1 - frac) + temp[hi] * frac;
     }
 
+    // Neural Integration: Write downsampled PCM to worker SAB if present
+    if (this.pcmView) {
+      this.pcmView.set(out);
+    }
+
+    // MPM; CREPE-WASM: swap with CREPE-Tiny/Small here—same downsampled buffer (1024 @ 16 kHz), same SAB output. See .planning/phases/14-pitch-latency/RESEARCH.md
     let [pitch, confidence] = this.detectPitch(out, this.effectiveSampleRate);
 
-    // 2026 Jazz Stabilization
+    // 2026 Jazz Stabilization (circular buffer + in-place median, no GC)
     if (confidence >= this.minConfidence) {
-      this.pitchHistory.push(pitch);
-      if (this.pitchHistory.length > this.windowSize) this.pitchHistory.shift();
+      const hist = this.pitchHistory;
+      const cap = this.windowSize;
+      let count = this.pitchHistoryCount;
+      let ptr = this.pitchHistoryPtr;
+      if (count < cap) {
+        hist[count] = pitch;
+        count++;
+        this.pitchHistoryCount = count;
+      } else {
+        hist[ptr] = pitch;
+        ptr = (ptr + 1) % cap;
+        this.pitchHistoryPtr = ptr;
+      }
 
-      if (this.pitchHistory.length >= 3) {
-        const sorted = [...this.pitchHistory].sort((a, b) => a - b);
-        const medianPitch = sorted[Math.floor(sorted.length / 2)];
+      if (count >= 3) {
+        const sorted = this.sortedCopy;
+        let n = count;
+        if (count === cap) {
+          for (let i = 0; i < n; i++) sorted[i] = hist[(ptr + i) % cap];
+        } else {
+          for (let i = 0; i < n; i++) sorted[i] = hist[i];
+        }
+        // In-place insertion sort (first n elements); no allocation
+        for (let i = 1; i < n; i++) {
+          const v = sorted[i];
+          let j = i;
+          while (j > 0 && sorted[j - 1] > v) {
+            sorted[j] = sorted[j - 1];
+            j--;
+          }
+          sorted[j] = v;
+        }
+        const medianPitch = sorted[Math.floor(n / 2)];
 
         if (this.lastStablePitch === 0) {
           this.lastStablePitch = medianPitch;
