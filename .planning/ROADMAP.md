@@ -6,8 +6,8 @@
 
 - **Success Criteria**: Student can play along to a song and receive a numerical accuracy score based on microphone input with <10ms latency.
 - **Tasks**:
-  - [ ] Implement **High-Performance Pitch Detection**: Use Pitchy v3 (McLeod) or CREPE-WASM for jazz-proof accuracy.
-  - [ ] Implement **Audio Worklet + SharedArrayBuffer Pattern**: Move pitch math to a separate thread to ensure 120Hz UI smoothness.
+  - [ ] Implement **High-Performance Pitch Detection**: Use **SwiftF0 (2026 SOTA)** for neural jazz-proof accuracy.
+  - [ ] Implement **Audio Worklet + SharedArrayBuffer Pattern**: Move pitch math to a separate thread or background worker to ensure 120Hz UI smoothness.
   - [ ] Enable **MediaTrackConstraints.voiceIsolation**: Built-in browser AI for cleaning instrument input in noisy environments.
   - [ ] Implement **Zustand Scoring Logic**: Real-time comparison of Mic Pitch to Tonal.js Chord Tones.
   - [ ] Build **Guided Practice UI**: Component to manage the 15-minute routine timer and narrations.
@@ -141,7 +141,7 @@
 
 ## Phase 14: Pitch Detection Latency (Break the Latency Wall) ✅
 
-*Focus: Reduce delay between playing a note and UI updating; target ~15–25 ms with MPM; CREPE-Tiny/Small-ready.*
+*Focus: Reduce delay between playing a note and UI updating; target <10ms with **SwiftF0**; architecture neural-ready.*
 
 - **Success Criteria**: Hop size 128; 16 kHz effective input (downsample in worklet); zero-copy circular buffer; no GC in hot path; optional hop throttle via processorOptions.
 - **Tasks**:
@@ -149,7 +149,7 @@
   - [x] **Zero-copy circular buffer**: TypedArray + ptr; buffer.set(input, ptr) with wrap; no push/shift.
   - [x] **Hop size 128**: Run inference every block (or every hopBlocks) once buffer is full; overlapping frames.
   - [x] **Pre-allocated buffers**: tempNative, downsampled, nsdf; no allocations in process().
-  - [x] **CREPE-Tiny/Small swap path**: Document in RESEARCH; when WASM integrated, use Tiny/Small for ~10x speed vs Full.
+  - [x] **SwiftF0 swap path**: Document in RESEARCH; when integrated, use SwiftF0 for ~40x speed vs CREPE with SOTA accuracy.
 
 ## Phase 15: Standards Exercises — Error Heatmaps, Transcription & AI Analysis ✅
 

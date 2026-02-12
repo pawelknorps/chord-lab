@@ -18,10 +18,10 @@
 
 ### REQ-FB-04: High-Performance Pitch Engine
 
-- **Requirement**: Implement a WASM-based pitch detector (Pitchy v3 or CREPE) in an Audio Worklet.
+- **Requirement**: Implement a WASM-based neural pitch detector (**SwiftF0**) in an Audio Worklet or background worker.
 - **Performance**: Use `SharedArrayBuffer` for zero-latency communication with the React UI (PitchMemory + processorOptions.sab; public/worklets/pitch-processor.js).
 - **Input Quality**: Enable `voiceIsolation` constraints on microphone streams to filter out practice room noise.
-- **Status**: MPM in Worklet + SAB; architecture ready for CREPE-WASM swap. COOP/COEP in Vite server/preview.
+- **Status**: MPM in Worklet + SAB; **SwiftF0 integration verified as viable (SOTA 2026)**; architecture ready for neural swap. COOP/COEP in Vite server/preview.
 
 ## Phase 2: The "Mastery Tree"
 

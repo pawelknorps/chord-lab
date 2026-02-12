@@ -57,7 +57,7 @@ Transition from a music theory prototype to a full-scale "Incredible Teaching Ma
 | **Zustand for Scoring** | Centralized, performant state management for real-time microphone analysis. | [Decided] |
 | **Local-First AI** | Use Gemini Nano for instantaneous narration and performance critique feedback. | [Decided] |
 | **PWA over Native** | Maximize accessibility on iPads and phones without app store friction. | [Decided] |
-| **Pitchy v3 / CREPE** | Use McLeod or Neural Pitch detection for jazz-proof overtone handling. | [Decided] |
+| **SwiftF0 (2026 SOTA)** | Use Neural Pitch detection (SwiftF0) for jazz-proof overtone handling and ultra-low latency. | [Decided] |
 | **Audio Worklets** | Decouple pitch math from the UI thread using SharedArrayBuffer for 120Hz smoothness. | [Decided] |
 | **Supabase for Backend** | Reliable, real-time database for teacher dashboards and lick sharing. | [Proposed] |
 | **Template-Based Comping** | Switch from mathematical voicing generation to Grip-Libraries and Phrase-Templates for musicality. | [Decided] |
