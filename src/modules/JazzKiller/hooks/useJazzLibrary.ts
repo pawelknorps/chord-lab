@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import { transposeChordSymbol, midiToNoteName, noteNameToMidi } from '../../../core/theory/index';
 import standardsData from '../utils/standards.json';
+import type { MeterChange } from '../utils/meterTranslator';
 
 export interface JazzStandard {
     Title: string;
@@ -8,6 +9,8 @@ export interface JazzStandard {
     Key?: string;
     Rhythm?: string;
     TimeSignature?: string;
+    /** Optional time map for meter changes mid-song. Bar numbers are 1-based. */
+    meterChanges?: MeterChange[];
     /** Original/suggested BPM from iReal or reference. Used when loading the tune. */
     Tempo?: number;
     /** Default repeat/loop count from iReal (e.g. 3 = play 3 times). Used when loading the tune. */
@@ -109,6 +112,8 @@ export const useJazzLibrary = () => {
             style: song.Rhythm || "Swing",
             compStyle: song.CompStyle,
             key: transposedKey,
+            TimeSignature: song.TimeSignature,
+            meterChanges: song.meterChanges,
             music: {
                 measures: visualMeasures,
                 playbackPlan: playbackPlan

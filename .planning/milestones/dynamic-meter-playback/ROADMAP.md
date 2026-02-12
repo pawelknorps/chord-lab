@@ -4,7 +4,7 @@
 
 Implement mid-song meter changes: time map in song data, Transport scheduling, band adaptation (bass/drums), and lead sheet visuals. Phases are ordered so that data and scheduler are in place before band and UI depend on them.
 
-## Phase 1: Time Map & Meter-for-Bar
+## Phase 1: Time Map & Meter-for-Bar ✅
 
 **Goal**: Song data and code support a `meterChanges` array; playback and UI can resolve “meter at bar N.”
 
