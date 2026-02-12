@@ -124,8 +124,26 @@
 - **Success Criteria**: 4-note line per bar with Beat 4 as chromatic or dominant approach; smooth voice leading across bar lines.
 - **Tasks**:
   - [ ] **WalkingBassEngine**: Class with `generateWalkingLine(currentChord, nextChord)` (Anchor → Bridge → Bridge → Approach); E1–G3 range.
+  - [x] Phase 12: Walking Bass Engine (Target & Enclosure Edition) (2026-02-12)
   - [ ] **Approach strategies**: Chromatic from below/above, 5th-of-destination; bridge notes as chord tones between Beat 1 and Beat 4.
   - [ ] **Band integration**: useJazzBand generates line at beat 0, plays `line[beat]` for 0–3; state carried to next bar.
+
+## Phase 12.1: Bass Rhythm Variation (2026-02-12) ✅
+## Phase 12.2: Bebop Bass Engine (2026-02-12) ✅
+
+*Focus: Organic bass variations (Skips, Rakes, Drops) to avoid robotic 4-note loops.*
+
+- **Success Criteria**: Every bar has a small chance (15-25%) to mutate from standard walking to a rhythmic variation; including "The Skip" (and-of-2), "The Rake" (triplet into 1), and "The Drop" (space).
+- **Completed Phase 12.2: Bebop Bass Engine (2026-02-12)**:
+  - Upgraded bass logic with Paul Chambers/Ray Brown style syncopation.
+  - Implemented "The Push" (Anticipation) with stateful Bar-to-Bar memory for downbeat skipping.
+  - Added "The Skip" (Double Time) fills using Rakes, Octave jumps, and Chromatic runs.
+  - Linked `activityLevel` (energy) to variation probability for dynamic band interaction.
+- **Completed Phase 12.1: Bass Rhythm Variation (2026-02-12)**:
+  - [ ] **BassRhythmVariator**: Implement class with `applyVariations(line, barIndex)` that transforms MIDI arrays into `BassEvent[]`.
+  - [ ] **Sample Switch Logic**: Update audio engine to use staccato envelope/sample for ghost/muted notes.
+  - [ ] **JazzBand Integration**: Refactor `useJazzBand` to consume `BassEvent[]` and handle sub-beat timing for variations.
+
 
 ## Phase 13: Standards-Based Exercises (Scales, Guide Tones, Arpeggios) ✅
 

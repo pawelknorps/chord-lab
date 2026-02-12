@@ -86,12 +86,13 @@ export class BassRhythmVariator {
                 continue;
             }
 
-            // STANDARD WALK
+            // --- STANDARD WALK (Paul Chambers / Ray Brown Velocity Profile) ---
+            const bebopVelocities = [1.0, 0.6, 0.9, 0.85];
             events.push({
                 time,
                 duration: "4n",
                 note,
-                velocity: i === 0 || i === 2 ? 0.95 : 0.85
+                velocity: bebopVelocities[i]
             });
         }
 
