@@ -64,11 +64,14 @@ let masterLimiter: Tone.Limiter;
 let masterEQ: Tone.EQ3;
 let masterBus: Tone.Gain;
 
-// Phase 22: Parallel (NY) bus – trio sum → dry path + wet (compressor) → sumGain → masterBus
+// Phase 22: Parallel (NY) bus – trio sum → dry path + wet (compressor or worklet) → sumGain → masterBus
 const PARALLEL_DRY_GAIN = 0.4;
+const JAZZ_COMPRESSOR_WORKLET_URL = '/worklets/jazz-compressor-processor.js';
 let trioSum: Tone.Gain;
 let parallelDryGain: Tone.Gain;
 let parallelSumGain: Tone.Gain;
+/** When loaded, wet path uses this instead of Tone.Compressor (soft-knee). */
+let wetPathWorklet: AudioWorkletNode | null = null;
 
 // Split-Brain Modules
 let shellSynth: Tone.PolySynth | null = null;
@@ -79,6 +82,27 @@ let dissonanceTremolo: Tone.Tremolo | null = null;
 
 // Director guide instrument (Phase 5: context injection – cello-like timbre)
 let celloSynth: Tone.PolySynth | null = null;
+
+/** Phase 22 Wave 2: Load soft-knee compressor worklet and use as wet path when available (REQ-HIFI-03–05). */
+async function tryUseJazzCompressorWorklet(): Promise<void> {
+  if (wetPathWorklet || !trioSum || !compressor || !parallelSumGain) return;
+  try {
+    const toneCtx = Tone.getContext() as { rawContext?: AudioContext };
+    const ac = toneCtx?.rawContext;
+    if (!ac?.audioWorklet) return;
+    await ac.audioWorklet.addModule(JAZZ_COMPRESSOR_WORKLET_URL);
+    const workletNode = new AudioWorkletNode(ac, 'jazz-compressor-processor', {
+      processorOptions: { threshold: -18, ratio: 4, knee: 30, attack: 0.005, release: 0.15 }
+    });
+    trioSum.disconnect(compressor);
+    compressor.disconnect(parallelSumGain);
+    Tone.connect(trioSum, workletNode);
+    Tone.connect(workletNode, parallelSumGain);
+    wetPathWorklet = workletNode;
+  } catch {
+    // Keep Tone.Compressor as wet path
+  }
+}
 
 /** Ensure Tone uses a single native AudioContext with playback-optimized latency (avoids glitches when pitch + playback run together). */
 function ensureNativeAudioContext(): void {
@@ -201,6 +225,9 @@ export async function initAudio(): Promise<void> {
   effect(() => {
     if (parallelDryGain) parallelDryGain.gain.rampTo(proMixEnabledSignal.value ? PARALLEL_DRY_GAIN : 0, 0.05);
   });
+
+  // Phase 22 Wave 2: Soft-knee compressor worklet (REQ-HIFI-03, REQ-HIFI-04); fallback: keep Tone.Compressor
+  tryUseJazzCompressorWorklet();
 
   // --- SPLIT BRAIN BUSSES ---
   // Left Ear (Shells)
