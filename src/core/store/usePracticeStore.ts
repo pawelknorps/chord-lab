@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import * as Tone from 'tone';
 import { ConceptAnalyzer } from '../theory/ConceptAnalyzer';
 import { GuideToneCalculator } from '../theory/GuideToneCalculator';
+import { analyzeHarmony } from '../theory/harmonicAnalysisPipeline';
 import type { Concept } from '../theory/AnalysisTypes';
 import type { GuideTone } from '../theory/GuideToneTypes';
 
@@ -94,12 +95,14 @@ export const usePracticeStore = create<PracticeState>((set, get) => ({
             });
         });
 
-        // Analyze patterns and remap indices
-        // We analyze the flattened chords first to find the progressions
-        const analysisResult = ConceptAnalyzer.analyze(flattenedChords, song.key);
+        // Phase 21: tonality segmentation + functional labeling for overlay
+        const harmonyConcepts = analyzeHarmony(
+            { measures: song.measures, key: song.key },
+            { useSegmentation: true }
+        );
 
-        // Then we remap the indices back to measure numbers
-        // This logic assumes we have a mapping array where index = flattenedChordIndex and value = measureIndex
+        // Fallback: ConceptAnalyzer for exercise generation and when pipeline returns none
+        const analysisResult = ConceptAnalyzer.analyze(flattenedChords, song.key);
         const chordIndexToMeasureIndex: number[] = [];
         let currentChordIndex = 0;
         song.measures.forEach((measureChords, measureIndex) => {
@@ -109,13 +112,14 @@ export const usePracticeStore = create<PracticeState>((set, get) => ({
             });
         });
 
-        const mappedConcepts = analysisResult.concepts.map(c => ({
-            ...c,
-            // Map the chord index (linear) to the measure index (musical)
-            startIndex: chordIndexToMeasureIndex[c.startIndex] ?? c.startIndex,
-            // For endIndex, we want the measure where the LAST chord of the pattern resides
-            endIndex: chordIndexToMeasureIndex[c.endIndex] ?? c.endIndex
-        }));
+        const mappedConcepts =
+            harmonyConcepts.length > 0
+                ? harmonyConcepts
+                : analysisResult.concepts.map((c) => ({
+                      ...c,
+                      startIndex: chordIndexToMeasureIndex[c.startIndex] ?? c.startIndex,
+                      endIndex: chordIndexToMeasureIndex[c.endIndex] ?? c.endIndex,
+                  }));
 
         // Use original concepts (chord indices) for exercise chord slice; overlay/loop use mappedConcepts (measure indices)
         const exercises = ConceptAnalyzer.generateExercises({ ...analysisResult, concepts: analysisResult.concepts }, flattenedChords);
@@ -135,7 +139,7 @@ export const usePracticeStore = create<PracticeState>((set, get) => ({
         const hotspotData = RomanNumeralAnalyzer.detectHotspots(flattenedChords, song.key);
         const hotspots = hotspotData.filter((h: any) => h.isHotspot).map((h: any) => h.measureIndex);
 
-        console.log(`✨ Detected ${analysisResult.concepts.length} patterns`);
+        console.log(`✨ Detected ${mappedConcepts.length} patterns`);
         console.log(`🎯 Calculated guide tones for ${guideTones.size} measures`);
         console.log(`🔥 Found ${hotspots.length} hotspots`);
 
