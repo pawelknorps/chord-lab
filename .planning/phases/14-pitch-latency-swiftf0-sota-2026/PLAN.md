@@ -32,27 +32,34 @@ Create `src/core/audio/SwiftF0Worker.ts`.
 <task id="SF0-INFERENCE-LOOP" status="todo">
 Implement the high-speed inference loop in the worker.
 - Read PCM from RingBuffer at 16,000 Hz.
-- Run `session.run()` every 128 samples (hop).
-- Post result to ITM pitch store.
+- Apply logarithmic compression: $log(1 + 10 \cdot magnitude)$ to the spectrogram.
+- Run `session.run()` every 128 samples (hop) using bins 3-134.
 </task>
 
-<task id="SF0-WEIGHTED-ARGMAX" status="todo">
-Implement Weighted Argmax Interpolation.
-- Calculate the fine-grained pitch from the 360-bin output.
-- Target resolution: <5 cents.
+<task id="SF0-REGRESSION-HEAD" status="todo">
+Implement Continuous Pitch Regression.
+- Extract the regression offset from the SwiftF0 output.
+- Combine with the classification peak for sub-cent accuracy.
 </task>
 
 ## Wave 3: Integration & Stabilization
 
-<task id="SF0-STABILIZER-LINK" status="todo">
-Connect SwiftF0 output to `CrepeStabilizer`.
-- Apply Median Filter (window 7) and Schmitt Trigger (35-cent dead zone).
-- Verify stability on saxophone/trumpet sample inputs.
+<task id="SF0-ATONAL-GATE" status="todo">
+Implement RMS (Loudness) Gating.
+- Combine Pitch Confidence (< 0.85) with RMS transient detection.
+- Bridge "chiff" noise by holding the previous note for 20ms.
+</task>
+
+<task id="SF0-PROFILE-SWITCHER" status="todo">
+Implement Instrument-Specific Hysteresis Profiles.
+- Create `InstrumentProfileStore` (Vocals, Trumpet, Guitar).
+- Dynamically adjust Hysteresis (25-50 cents) and Stability (2-5 frames) based on selection.
 </task>
 
 <task id="SF0-UI-WIRE" status="todo">
-Update `useITMPitchStore` to favor SwiftF0 when active.
-- fallback to MPM if the user's browser doesn't support WebGPU/WASM or model fails to load.
+Update `useITMPitchStore` to favor SwiftF0 and throttle UI.
+- Throttle React state updates to 60Hz.
+- fallback to MPM if the user's browser doesn't support WebGPU/WASM.
 </task>
 
 ## Verification
