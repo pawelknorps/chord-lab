@@ -464,9 +464,13 @@ export const useJazzBand = (song: any, isActive: boolean = true, options?: UseJa
                         : Tone.Time(`0:0:${sixteenthOffset}`).toSeconds();
                     const bassTiming = grooveRef.current.getMicroTiming(bpm, "Bass");
                     const sampleLatencyCompensation = -0.010;
-                    const bassTime = time + offsetTime + bassTiming + sampleLatencyCompensation;
+                    let bassTime = time + offsetTime + bassTiming + sampleLatencyCompensation;
+                    // Phase 20: Bass micro-timing humanization (−5 ms to +2 ms)
+                    bassTime += (Math.random() * 7 - 5) / 1000;
 
-                    const vel = event.velocity * (0.8 + currentTension * 0.4);
+                    let vel = event.velocity * (0.8 + currentTension * 0.4);
+                    // Phase 20: Bass velocity humanization (±10%)
+                    vel *= 0.9 + Math.random() * 0.2;
                     const sampler = event.isGhost ? bassMutedRef.current : bassRef.current;
                     // Half-time walk: use the full space — two beats per note, long duration (no short-note cap).
                 const halfNoteGap = 0.01;
@@ -573,7 +577,7 @@ export const useJazzBand = (song: any, isActive: boolean = true, options?: UseJa
                             : reactiveCompingEngineRef.current.getMicroTimingForStep({ time: `0:${beat}:2`, duration: '4n', isAnticipation: false }, bpm);
                         const scheduleTime = time + humanOffset;
                         const baseVel = 0.55 + (activity * 0.2) + (Math.random() * 0.1);
-                        const vel = baseVel * (0.8 + Math.random() * 0.4);
+                        const vel = baseVel * (0.8 + Math.random() * 0.4) * (0.9 + Math.random() * 0.2); // Phase 20: ±10% humanization
 
                         pianoRef.current?.triggerAttackRelease(
                             notes.map((n) => Tone.Frequency(n, 'midi').toNote()),
@@ -603,6 +607,9 @@ export const useJazzBand = (song: any, isActive: boolean = true, options?: UseJa
 
                 const offBeatOffsetSec = grooveRef.current.getOffBeatOffsetInBeat(bpm);
                 hitsForBeat.forEach(hit => {
+                    // Phase 20: Ghost-note probability gate (low-velocity hits play 60% of the time)
+                    if (hit.velocity < 0.4 && Math.random() < 0.6) return;
+
                     const microTiming = drumEngineRef.current.getMicroTiming(bpm, hit.instrument);
                     const sixteenthOffset = hit.time.split(':')[2];
                     const isOffBeat = sixteenthOffset === '2';
