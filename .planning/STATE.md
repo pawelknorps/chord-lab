@@ -5,7 +5,7 @@
 - **Phase**: Phase 16: Voice & Percussion Interactive Training
 - **Status**: 🟢 Initializing Phase 16
 - **Next Milestone**: Sing-to-Answer in FET + Clap-to-Perform in Rhythm Architect
-- **Overall Progress**: ~92%
+- **Overall Progress**: ~93%
 
 ## Active Requirements
 
@@ -35,6 +35,11 @@
 
 ## Recent Achievements
 
+- **Completed Phase 12.1: Bass Rhythm Variation (2026-02-12)**:
+  - Implemented `BassRhythmVariator` with rhythmic variations: "The Skip" and "The Rake".
+  - Integrated variations into `WalkingBassEngine` and refactored `useJazzBand.ts`.
+  - Implemented ghost note "Sample Switching" logic using a twin-sampler approach (muted release).
+  - Verified with unit tests covering skip/rake patterns and standard fallback.
 - **Completed Phase 14: Pitch Detection Latency (Break the Latency Wall)**:
   - 16 kHz downsampling in worklet (native circular buffer, linear-interp to 1024); MPM at effective 16 kHz.
   - Zero-copy circular buffer; hop size 128; inference every block once buffer full; pre-allocated tempNative, downsampled, nsdf.
