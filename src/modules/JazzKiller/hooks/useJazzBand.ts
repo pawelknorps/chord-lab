@@ -457,6 +457,12 @@ export const useJazzBand = (song: any, isActive: boolean = true, options?: UseJa
                 );
 
                 hitsForBeat.forEach(event => {
+                    // Phase 20: Last eighth of bar = procedural approach note to next chord root
+                    const isLastEighth = event.time === '0:3:2' || (beatsPerBar === 3 && event.time === '0:2:2');
+                    const noteToPlay = isLastEighth && nextChord
+                        ? JazzTheoryService.getProceduralLeadInNote(currentChord, nextChord.trim() || currentChord, lastBassNoteRef.current)
+                        : event.note;
+
                     const sixteenthOffset = parseInt(event.time.split(':')[2], 10);
                     const isOffBeat = sixteenthOffset === 2;
                     const offsetTime = isOffBeat
@@ -483,12 +489,12 @@ export const useJazzBand = (song: any, isActive: boolean = true, options?: UseJa
                         ? Math.max(0.05, 2 * beatDurationSec - halfNoteGap)
                         : Math.min(rawDuration, maxBassDuration);
 
-                    sampler?.triggerAttackRelease(Tone.Frequency(event.note, "midi").toNote(), duration, bassTime, vel);
+                    sampler?.triggerAttackRelease(Tone.Frequency(noteToPlay, "midi").toNote(), duration, bassTime, vel);
 
                     // Track only main notes for UI/history if they are on the beat, or just the first note
                     if (sixteenthOffset === 0) {
-                        lastBassNoteRef.current = event.note;
-                        onNoteRef.current?.({ midi: event.note, velocity: vel, instrument: 'bass', type: 'root', duration: 1 });
+                        lastBassNoteRef.current = noteToPlay;
+                        onNoteRef.current?.({ midi: noteToPlay, velocity: vel, instrument: 'bass', type: 'root', duration: 1 });
                     }
                 });
             }
