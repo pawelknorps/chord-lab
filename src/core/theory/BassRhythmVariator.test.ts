@@ -6,9 +6,9 @@ describe('BassRhythmVariator', () => {
     const standardLine = [36, 38, 40, 41]; // C2, D2, E2, F2
 
     it('should generate a 4-event list for standard fallback', () => {
-        // Mocking Math.random to be > 0.20 (Standard fallback)
-        const spy = vi.spyOn(Math, 'random').mockReturnValue(0.5);
-        const events = variator.applyVariations(standardLine, 0);
+        // Mocking Math.random to be high so no variations trigger
+        const spy = vi.spyOn(Math, 'random').mockReturnValue(0.9);
+        const events = variator.applyVariations(standardLine, 0, 0.5, "G7");
 
         expect(events).toHaveLength(4);
         expect(events[0].time).toBe("0:0:0");
@@ -19,32 +19,47 @@ describe('BassRhythmVariator', () => {
         spy.mockRestore();
     });
 
-    it('should generate "The Skip" variation correctly', () => {
-        // Mocking Math.random to < 0.15 (SKIP_CHANCE)
-        const spy = vi.spyOn(Math, 'random').mockReturnValue(0.1);
-        const events = variator.applyVariations(standardLine, 0);
+    it('should generate "The Push" variation correctly', () => {
+        // Reset variator state
+        variator.reset();
 
-        // Beat 1, Beat 2, Skip (And of 2), Beat 4
-        expect(events).toHaveLength(4);
-        expect(events[0].time).toBe("0:0:0");
-        expect(events[1].time).toBe("0:1:0");
-        expect(events[2].time).toBe("0:1:2"); // Skip
-        expect(events[2].isGhost).toBe(true);
-        expect(events[3].time).toBe("0:3:0");
+        // Mocking Math.random to trigger PUSH (Beat 4 logic)
+        // PUSH_CHANCE_BASE is 0.20. Let's force it at beat 4.
+        const spy = vi.spyOn(Math, 'random').mockReturnValue(0.1);
+        const events = variator.applyVariations(standardLine, 0, 0.8, "G7");
+
+        // Should have events for 1, 2, 3 and then the Push on "and of 4" (0:3:2)
+        // Actually, in the loop:
+        // i=0: standard
+        // i=1: skip check (random < 0.16) -> triggers double time fill
+        // i=2: skip check (random < 0.16) -> triggers double time fill
+        // i=3: push check (random < 0.20) -> triggers Push
+
+        // Wait, if random=0.1, it might trigger double time on beat 1.
+        // Let's use different values or more specific mocks if needed.
+
+        const pushEvent = events.find(e => e.time === "0:3:2");
+        expect(pushEvent).toBeDefined();
+        expect(pushEvent?.note).toBe(31); // G1 root push for G7
+
         spy.mockRestore();
     });
 
-    it('should generate "The Rake" variation correctly', () => {
-        // Mocking Math.random between 0.15 and 0.20
-        const spy = vi.spyOn(Math, 'random').mockReturnValue(0.17);
-        const events = variator.applyVariations(standardLine, 0);
+    it('should skip downbeat after a Push', () => {
+        variator.reset();
 
-        // Rake (two hits on beat 0/0:0:1), then rest of bar
-        expect(events).toHaveLength(5);
-        expect(events[0].time).toBe("0:0:0");
-        expect(events[0].isGhost).toBe(true);
-        expect(events[1].time).toBe("0:0:1");
-        expect(events[2].time).toBe("0:1:0");
-        spy.mockRestore();
+        // 1. Force a Push in first call
+        const spyPush = vi.spyOn(Math, 'random').mockReturnValue(0.1);
+        variator.applyVariations(standardLine, 0, 0.8, "G7");
+        spyPush.mockRestore();
+
+        // 2. Second call should start from index 1 (skip 0:0:0)
+        const spyNormal = vi.spyOn(Math, 'random').mockReturnValue(0.9);
+        const nextEvents = variator.applyVariations(standardLine, 1, 0.5, "Cmaj7");
+
+        expect(nextEvents[0].time).not.toBe("0:0:0");
+        expect(nextEvents[0].time).toBe("0:1:0");
+
+        spyNormal.mockRestore();
     });
 });

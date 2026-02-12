@@ -1,3 +1,6 @@
+import * as Note from "@tonaljs/note";
+import * as Chord from "@tonaljs/chord";
+import { toTonalChordSymbol } from './chordSymbolForTonal';
 
 export type BassEvent = {
     time: string;       // "0:0:0"
@@ -7,69 +10,132 @@ export type BassEvent = {
     note: number;       // MIDI pitch
 };
 
+/**
+ * BassRhythmVariator (Phase 12.2: Bebop Engine)
+ * 
+ * Captures Paul Chambers / Ray Brown style:
+ * 1. The "Push" (Anticipation): Hit root of next chord on "and of 4".
+ * 2. The "Skip" (Double Time): 8th note bursts, octave jumps, rakes.
+ * 3. State Memory: Anticipation in Bar A results in silent downbeat in Bar B.
+ */
 export class BassRhythmVariator {
-    // Probability Controls (0.0 - 1.0)
-    private readonly SKIP_CHANCE = 0.15; // 15% chance (Don't overdo it!)
-    private readonly RAKE_CHANCE = 0.05; // 5% chance (Special effect)
+    // Probability Controls
+    private readonly SKIP_CHANCE_BASE = 0.15;
+    private readonly PUSH_CHANCE_BASE = 0.20;
+
+    // MEMORY: Did we push the last bar?
+    private skipNextDownbeat: boolean = false;
 
     /**
-     * Transforms a standard 4-note walking line into a rhythmic variation.
+     * Transforms a standard 4-note walking line into a rhythmic bebop variation.
      * @param line - Array of 4 MIDI notes [Beat1, Beat2, Beat3, Beat4]
-     * @param barIndex - Current bar index (can be used for structural variations)
+     * @param barIndex - Current bar index
+     * @param energy - 0.0 to 1.0 (activityLevel)
+     * @param nextChordSymbol - Needed for "The Push" root targeting
      */
-    public applyVariations(line: number[], _barIndex: number): BassEvent[] {
+    public applyVariations(
+        line: number[],
+        _barIndex: number,
+        energy: number,
+        nextChordSymbol: string
+    ): BassEvent[] {
         const events: BassEvent[] = [];
-        const roll = Math.random();
 
-        // --- VARIATION 1: THE SKIP (Pushing the "And") ---
-        // Instead of playing on Beat 3, we play on "And of 2"
-        if (roll < this.SKIP_CHANCE) {
-            // Beat 1 (Normal)
-            events.push({ time: "0:0:0", duration: "4n", velocity: 0.9, note: line[0] });
-            // Beat 2 (Shortened to 8n)
-            events.push({ time: "0:1:0", duration: "8n", velocity: 0.85, note: line[1] });
+        // 1. CHECK: Downbeat Skip (from previous bar's Push)
+        let startIndex = 0;
+        if (this.skipNextDownbeat) {
+            startIndex = 1; // Start on Beat 2
+            this.skipNextDownbeat = false;
+        }
 
-            // The Skip (Ghost/Muted note on "And of 2")
+        // 2. Iterate through beats
+        for (let i = startIndex; i < 4; i++) {
+            const note = line[i];
+            const time = `0:${i}:0`;
+
+            // --- BEBOP TRICK 1: THE PUSH (Anticipation) ---
+            // High energy, Beat 4 only.
+            if (i === 3 && energy > 0.5 && Math.random() < this.PUSH_CHANCE_BASE) {
+                const nextChord = Chord.get(toTonalChordSymbol(nextChordSymbol));
+                const nextRootName = nextChord.tonic || "C";
+                const nextRootMidi = Note.midi(nextRootName + "1") || 36; // Big low push
+
+                events.push({
+                    time: "0:3:2", // "And" of 4
+                    duration: "4n", // Let it ring over barline
+                    note: nextRootMidi,
+                    velocity: 0.95
+                });
+
+                this.skipNextDownbeat = true;
+                continue; // Skip standard beat 4
+            }
+
+            // --- BEBOP TRICK 2: DOUBLE TIME (The Skip / Run) ---
+            // Replace Beat 2 or 3 with two 8th notes.
+            if ((i === 1 || i === 2) && Math.random() < (energy * this.SKIP_CHANCE_BASE * 2)) {
+                this.addBebopFill(events, i, note, line[i + 1] || note);
+                continue;
+            }
+
+            // --- BEBOP TRICK 3: THE RAKE (Quick ghost into beat) ---
+            // Happens on Beat 1 (if not skipped) or occasionally elsewhere
+            if (i === 0 && Math.random() < 0.1) {
+                events.push({ time: `0:0:0`, duration: "32n", note: note, velocity: 0.5, isGhost: true });
+                events.push({ time: `0:0:1`, duration: "8n", note: note, velocity: 1.0 });
+                continue;
+            }
+
+            // STANDARD WALK
             events.push({
-                time: "0:1:2", // 16th note grid: 0 (on), 1 (e), 2 (and), 3 (a)
-                duration: "8n",
-                velocity: 0.6,
-                isGhost: true,
-                note: line[1] // Repeat previous note as ghost
+                time,
+                duration: "4n",
+                note,
+                velocity: i === 0 || i === 2 ? 0.95 : 0.85
             });
-
-            // Beat 3 is SKIPPED (Rest)
-
-            // Beat 4 (Normal recovery)
-            events.push({ time: "0:3:0", duration: "4n", velocity: 0.9, note: line[3] });
-
-            return events;
         }
 
-        // --- VARIATION 2: THE RAKE (Triplet into Beat 1) ---
-        // Adds muted notes BEFORE Beat 1.
-        // NOTE: In useJazzBand, we schedule this leading into Beat 1 of the current bar.
-        if (roll < this.SKIP_CHANCE + this.RAKE_CHANCE) {
-            // The Rake (Fast triplets leading to 1)
-            // We'll simulate this by playing the first ghost note slightly early or just at the start of beat 0
-            events.push({ time: "0:0:0", duration: "16t", velocity: 0.4, isGhost: true, note: line[0] }); // Ghost
-            events.push({ time: "0:0:1", duration: "8n", velocity: 1.0, note: line[0] }); // The Real Beat 1 (Slightly late/accented)
+        return events;
+    }
 
-            // Remaining beats normal
-            events.push({ time: "0:1:0", duration: "4n", velocity: 0.9, note: line[1] });
-            events.push({ time: "0:2:0", duration: "4n", velocity: 0.9, note: line[2] });
-            events.push({ time: "0:3:0", duration: "4n", velocity: 0.9, note: line[3] });
+    /**
+     * Ray Brown / Paul Chambers style 8th note fills
+     */
+    private addBebopFill(events: BassEvent[], beatIndex: number, currentNote: number, nextNote: number) {
+        const strategy = Math.random();
 
-            return events;
+        // A. The "Rake" (thud-DUM)
+        // Ghost (0) -> Real (&)
+        if (strategy < 0.3) {
+            events.push({
+                time: `0:${beatIndex}:0`,
+                duration: "16n",
+                note: currentNote,
+                velocity: 0.5,
+                isGhost: true
+            });
+            events.push({
+                time: `0:${beatIndex}:2`, // On the "And"
+                duration: "8n",
+                note: currentNote,
+                velocity: 0.9
+            });
         }
+        // B. The "Octave Skip"
+        else if (strategy < 0.6) {
+            events.push({ time: `0:${beatIndex}:0`, duration: "8n", note: currentNote, velocity: 0.9 });
+            events.push({ time: `0:${beatIndex}:2`, duration: "8n", note: currentNote + 12, velocity: 0.7, isGhost: true });
+        }
+        // C. The "Chromatic Approach"
+        else {
+            events.push({ time: `0:${beatIndex}:0`, duration: "8n", note: currentNote, velocity: 0.9 });
+            const passingTone = currentNote < nextNote ? nextNote - 1 : nextNote + 1;
+            events.push({ time: `0:${beatIndex}:2`, duration: "8n", note: passingTone, velocity: 0.8 });
+        }
+    }
 
-        // --- STANDARD (Fallback) ---
-        // Just 4 quarter notes
-        return line.map((note, i) => ({
-            time: `0:${i}:0`,
-            duration: "4n",
-            velocity: i === 0 || i === 2 ? 0.95 : 0.85, // Accent 1 and 3 slightly (2-feel pulse)
-            note: note
-        }));
+    /** Reset state (e.g. when playback stops) */
+    public reset() {
+        this.skipNextDownbeat = false;
     }
 }

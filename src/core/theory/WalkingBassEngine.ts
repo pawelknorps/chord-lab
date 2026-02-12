@@ -22,10 +22,11 @@ export class WalkingBassEngine {
   public generateVariedWalkingLine(
     currentChordSymbol: string,
     nextChordSymbol: string,
-    barIndex: number
+    barIndex: number,
+    energy: number = 0.5
   ): BassEvent[] {
     const line = this.generateWalkingLine(currentChordSymbol, nextChordSymbol);
-    return this.variator.applyVariations(line, barIndex);
+    return this.variator.applyVariations(line, barIndex, energy, nextChordSymbol);
   }
 
   /**

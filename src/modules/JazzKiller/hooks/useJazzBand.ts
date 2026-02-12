@@ -237,7 +237,8 @@ export const useJazzBand = (song: any, isActive: boolean = true): JazzPlaybackSt
                     walkingLineRef.current = walkingBassEngineRef.current.generateVariedWalkingLine(
                         currentChord,
                         nextChord?.trim() || currentChord,
-                        bar
+                        bar,
+                        activityLevelSignal.value
                     );
                 }
                 const line = walkingLineRef.current;
