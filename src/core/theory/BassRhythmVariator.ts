@@ -11,7 +11,6 @@ export class BassRhythmVariator {
     // Probability Controls (0.0 - 1.0)
     private readonly SKIP_CHANCE = 0.15; // 15% chance (Don't overdo it!)
     private readonly RAKE_CHANCE = 0.05; // 5% chance (Special effect)
-    private readonly DROP_CHANCE = 0.05; // 5% chance (Breathing room)
 
     /**
      * Transforms a standard 4-note walking line into a rhythmic variation.
@@ -59,17 +58,6 @@ export class BassRhythmVariator {
             // Remaining beats normal
             events.push({ time: "0:1:0", duration: "4n", velocity: 0.9, note: line[1] });
             events.push({ time: "0:2:0", duration: "4n", velocity: 0.9, note: line[2] });
-            events.push({ time: "0:3:0", duration: "4n", velocity: 0.9, note: line[3] });
-
-            return events;
-        }
-
-        // --- VARIATION 3: THE DROP (Space) ---
-        // Simply omit Beat 2 or 3
-        if (roll < this.SKIP_CHANCE + this.RAKE_CHANCE + this.DROP_CHANCE) {
-            events.push({ time: "0:0:0", duration: "4n", velocity: 0.9, note: line[0] });
-            // Beat 2 is SILENT
-            events.push({ time: "0:2:0", duration: "4n", velocity: 0.95, note: line[2] }); // Beat 3 (Accent recovery)
             events.push({ time: "0:3:0", duration: "4n", velocity: 0.9, note: line[3] });
 
             return events;
