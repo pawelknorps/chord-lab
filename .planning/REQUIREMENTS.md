@@ -348,6 +348,14 @@
 
 - **Requirement**: useJazzBand computes place-in-cycle and style tag once per bar and passes them into RhythmEngine, DrumEngine, WalkingBassEngine, BassRhythmVariator, and ReactiveCompingEngine; all engines use them in addition to activity/tension/BPM.
 
+## Phase 19: Soloist-Responsive Playback (Call-and-Response)
+
+*Experimental **milestone**: playback listens to the soloist via SwiftF0 and adjusts—more space when user plays more/faster, more backing when user plays less. Full requirements in `.planning/milestones/soloist-responsive-playback/REQUIREMENTS.md`.*
+
+### REQ-SRP-01..08: Soloist-Responsive Toggle, Activity from SwiftF0, Band Integration, UI
+
+- **Summary**: Toggle (default off); soloist activity (0–1) from useITMPitchStore / useHighPerformancePitch; useJazzBand reads soloist activity when on and drives effective activity/density; comping, drums, bass leave more space when soloist plays more; toggle UI; no regression when off.
+
 ---
 
 ## Technical Priorities

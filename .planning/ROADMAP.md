@@ -190,16 +190,16 @@
   - [x] **Regression Head Logic**: Sub-cent refinement from bins 3-134.
   - [x] **Unified Store Integration**: `useITMPitchStore` favors SwiftF0 with MPM fallback.
 
-## Phase 14.2: SwiftF0 Pitch Analysis Speed Optimization (Milestone)
+## Phase 14.2: SwiftF0 Pitch Analysis Speed Optimization (Milestone) ✅
 
 *Focus: Inference and pipeline optimizations so real-time pitch feels snappier; target &lt;5 ms per frame where possible.*
 
 - **Milestone**: `.planning/milestones/swiftf0-speed/` (PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md).
 - **Success Criteria**: Per-frame inference time reduced; zero allocations in hot path; poll interval aligned with inference; no regression in accuracy or instrument profiles.
 - **Tasks**:
-  - [ ] **Phase 1 – Measure and Baseline**: Optional timing around `runInference()`; document baseline on 1–2 devices; identify cost centers (REQ-SF0-S01).
-  - [ ] **Phase 2 – Inference and Hot Path**: Reuse output tensors; reduce preprocessing cost; confirm improvement (REQ-SF0-S02, S03, S05).
-  - [ ] **Phase 3 – Scheduling and Polish**: Tune poll/sleep interval; final smoke test; update STATE.md (REQ-SF0-S04, S05).
+  - [x] **Phase 1 – Measure and Baseline**: Optional timing via `setTiming` + `enableTiming` option; STATE baseline instructions (REQ-SF0-S01).
+  - [x] **Phase 2 – Inference and Hot Path**: Reused input tensor; tightened preprocessing loop (REQ-SF0-S02, S03, S05).
+  - [x] **Phase 3 – Scheduling and Polish**: Adaptive sleep `max(0, cycleMs − elapsed)`; STATE.md and SUMMARY/VERIFICATION updated (REQ-SF0-S04, S05).
 
 ## Phase 17: Innovative Interactive Exercises (Ear + Rhythm) ✅
 
@@ -223,3 +223,14 @@
   - [x] **Phase 2**: Style-driven comping (REQ-TRIO-03), bass (REQ-TRIO-04), drums (REQ-TRIO-05); audibly distinct Ballad vs Medium vs Latin/Waltz.
   - [x] **Phase 3**: Soloist-space policy (REQ-TRIO-06), cross-instrument interaction (REQ-TRIO-07), band loop integration (REQ-TRIO-08).
 - **Implementation**: Hybrid—additive only; old balladMode/activity preserved. `trioContext.ts` (getPlaceInCycle, getSongStyleTag, isSoloistSpace); optional trio params on ReactiveCompingEngine, RhythmEngine, DrumEngine, BassRhythmVariator; useJazzBand computes place/style at beat 0 and passes to all engines. See `.planning/phases/18-creative-jazz-trio-playback/SUMMARY.md`, VERIFICATION.md.
+
+## Phase 19: Soloist-Responsive Playback (Call-and-Response)
+
+*Focus: **Experimental feature** (toggle): playback listens to the soloist via SwiftF0 and adjusts—more space when user plays more/faster, more backing when user plays less.*
+
+- **Success Criteria**: Toggle (default off); soloist activity derived from SwiftF0 drives band density/space when on; no regression when off; toggle UI in Mixer or band panel.
+- **Milestone**: `.planning/milestones/soloist-responsive-playback/` (PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md).
+- **Tasks**:
+  - [ ] **Phase 1**: Toggle signal; soloist activity from useITMPitchStore / useHighPerformancePitch (onset + pitch presence → 0–1); graceful fallback when no mic.
+  - [ ] **Phase 2**: useJazzBand reads toggle + soloist activity; effective activity drives comping/drums/bass; no regression when toggle off.
+  - [ ] **Phase 3**: Toggle UI; STATE.md and VERIFICATION.md updated.

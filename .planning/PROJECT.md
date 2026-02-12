@@ -85,6 +85,13 @@ Transition from a music theory prototype to a full-scale "Incredible Teaching Ma
 - **Tech**: Optional timing baseline; zero allocations in inference hot path; preprocessing cost reduction; poll interval aligned with inference; SwiftF0Worker, useHighPerformancePitch, useITMPitchStore unchanged from consumer perspective.
 - **Milestone**: `.planning/milestones/swiftf0-speed/` (PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md).
 
+### 12. Soloist-Responsive Playback (Call-and-Response)
+
+- **Concept**: **Experimental feature** (toggle): the playback engine **listens** to the soloist via SwiftF0 and **adjusts** in real time—more space when the user plays more and faster, more backing when the user plays less.
+- **Goal**: Band breathes with the soloist: soloist activity derived from mic/SwiftF0 drives band density/space; toggle off = current Phase 18 behaviour; toggle on = call-and-response feel.
+- **Tech**: Toggle (default off); soloist activity from useITMPitchStore / useHighPerformancePitch (onset + pitch presence → 0–1); useJazzBand reads soloist activity when on and drives effective activity/density; same trio engines (ReactiveCompingEngine, DrumEngine, BassRhythmVariator) receive effective activity.
+- **Milestone**: `.planning/milestones/soloist-responsive-playback/` (PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md).
+
 ## Key Decisions
 
 | Decision | Rationale | Status |

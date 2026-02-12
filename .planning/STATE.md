@@ -4,7 +4,7 @@
 
 - **Phase**: Phase 17: Innovative Interactive Exercises ✅; Phase 18: Creative Jazz Trio Playback ✅
 - **Status**: Phase 18 completed (hybrid: place-in-cycle, song-style, soloist space; additive only)
-- **Next Milestone**: Phase 6 Polish or next phase
+- **Next Milestone**: Phase 19 Soloist-Responsive Playback (call-and-response) or Phase 6 Polish
 - **Overall Progress**: ~97%
 
 ## Active Requirements
@@ -27,6 +27,12 @@
 
 ## Recent Achievements
 
+- **Phase 14.2: SwiftF0 Pitch Analysis Speed Optimization**:
+  - Optional dev-only timing: `setTiming` + `enableTiming` in PitchStoreOptions; worker posts `timing` with preprocessMs/inferenceMs/totalMs; DEV console logs (REQ-SF0-S01).
+  - Zero allocations in hot path: single pre-allocated `inputTensorOrt` reused per frame (REQ-SF0-S02).
+  - Preprocessing: tightened loop (len, single read, inline abs) (REQ-SF0-S03).
+  - Adaptive poll: sleep `max(0, cycleMs - elapsed)` so cycle stays ~8 ms (REQ-SF0-S04).
+  - No regression: same regression head, stabilizer, instrument profiles (REQ-SF0-S05). Milestone: `.planning/milestones/swiftf0-speed/`; phase: `.planning/phases/14.2-swiftf0-speed/` (SUMMARY.md, VERIFICATION.md).
 - **Phase 18: Creative Jazz Trio Playback (hybrid)**:
   - Trio context: getPlaceInCycle, getSongStyleTag, isSoloistSpace in `trioContext.ts`; computed at beat 0 in useJazzBand.
   - Style-driven engines: ReactiveCompingEngine (density cap), RhythmEngine (balladMode from place/style), DrumEngine (density cap), BassRhythmVariator (soloistSpace → no push/skip/rake); all optional params—backward compatible.
