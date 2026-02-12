@@ -87,10 +87,17 @@ Transition from a music theory prototype to a full-scale "Incredible Teaching Ma
 
 ### 12. Soloist-Responsive Playback (Call-and-Response)
 
-- **Concept**: **Experimental feature** (toggle): the playback engine **listens** to the soloist via SwiftF0 and **adjusts** in real time—more space when the user plays more and faster, more backing when the user plays less.
-- **Goal**: Band breathes with the soloist: soloist activity derived from mic/SwiftF0 drives band density/space; toggle off = current Phase 18 behaviour; toggle on = call-and-response feel.
-- **Tech**: Toggle (default off); soloist activity from useITMPitchStore / useHighPerformancePitch (onset + pitch presence → 0–1); useJazzBand reads soloist activity when on and drives effective activity/density; same trio engines (ReactiveCompingEngine, DrumEngine, BassRhythmVariator) receive effective activity.
+- **Concept**: **Experimental feature** (toggle): the playback engine **listens** to the soloist via SwiftF0 and **steers** the band in real time—more space when the user plays more and faster, more backing when the user plays less. **Existing band rules stay intact**; this is additive only—a layer that steers inputs (e.g. effective activity) so the same engines behave in the right direction.
+- **Goal**: Band breathes with the soloist: soloist activity from SwiftF0 steers band density/space; toggle off = current Phase 18 behaviour unchanged; toggle on = call-and-response feel without replacing place-in-cycle, song style, or trio logic.
+- **Tech**: Toggle (default off); soloist activity from useITMPitchStore / useHighPerformancePitch (onset + pitch presence → 0–1); useJazzBand reads soloist activity when on and **steers** effective activity passed to same trio engines; no engine API or rule changes.
 - **Milestone**: `.planning/milestones/soloist-responsive-playback/` (PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md).
+
+### 13. Jazz Band Comping Evolution (Smart Pattern Engine)
+
+- **Concept**: Evolve the **pattern library** into a **Smart Pattern Engine** using 2026 SOTA: **Markov-Chain Pattern Sequencing** and **Stochastic Groove Injection**—band feels human (jitter, drift, procedural lead-ins) and optionally responds to soloist density.
+- **Goal**: Pattern Transition Matrix (LOW / MEDIUM / HIGH / FILL); stochastic humanization (micro-timing, velocity blur, ghost-note probability); procedural last-eighth lead-ins into next chord; optional RhythmicDensityTracker + MarkovBridge so band shifts energy with student playing.
+- **Tech**: JazzMarkovEngine (transition matrix, getNextPatternType / getPatternForBar); pattern tagging; humanization layer at schedule time; procedural lead-in using WalkingBassEngine / approach logic; RhythmicDensityTracker (SwiftF0 + onset, 4s window) + MarkovBridge when soloist-responsive on; meter independence (rhythmic atoms) deferred.
+- **Milestone**: `.planning/milestones/jazz-band-comping-evolution/` (PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md).
 
 ## Key Decisions
 
