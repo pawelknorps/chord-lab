@@ -31,7 +31,9 @@ import {
     bassSoloSignal,
     drumsSoloSignal,
     bassModeSignal,
-    meterSignal
+    meterSignal,
+    soloistResponsiveEnabledSignal,
+    soloistActivitySignal
 } from '../state/jazzSignals';
 import { getTuneIntensity } from '../utils/tuneArc';
 import { getPlaceInCycle, getSongStyleTag, isSoloistSpace, type PlaceInCycle, type SongStyleTag } from '../utils/trioContext';
@@ -325,7 +327,12 @@ export const useJazzBand = (song: any, isActive: boolean = true): JazzPlaybackSt
             const effectiveActivity = activityLevelSignal.value * (0.3 + 0.7 * tuneIntensity);
             tensionCycleRef.current = (bar * beatsPerBar + beat) / (beatsPerBar * 4);
             const currentTension = 0.5 + Math.sin(tensionCycleRef.current) * 0.3 + (effectiveActivity * 0.2);
-            const activity = effectiveActivity;
+            // Phase 19: Soloist-Responsive — steer band density when toggle on (more space when soloist plays, more backing when silent).
+            let activity = effectiveActivity;
+            if (soloistResponsiveEnabledSignal.value) {
+                const soloist = soloistActivitySignal.value;
+                activity = effectiveActivity * (1 - 0.65 * soloist);
+            }
             const bpm = bpmSignal.value;
 
             // Phase 18: Trio context at bar start (hybrid—additive; old balladMode/activity unchanged).
