@@ -235,15 +235,15 @@
   - [x] **Phase 2**: useJazzBand reads toggle + soloist activity; effective activity steered (activity *= 1 - 0.65 * soloist); no regression when toggle off.
   - [x] **Phase 3**: Toggle UI in Mixer (Call-and-Response); STATE.md and VERIFICATION.md updated.
 
-## Phase 20: Jazz Band Comping Evolution (Smart Pattern Engine)
+## Phase 20: Jazz Band Comping Evolution (Smart Pattern Engine) ✅
 
 *Focus: Evolve pattern library into Smart Pattern Engine—Markov transitions, humanization, procedural lead-ins, optional density-driven band vibe.*
 
 - **Success Criteria**: Patterns tagged (LOW / MEDIUM / HIGH / FILL); Markov engine selects next pattern every 4–8 bars; humanization (bass micro-timing, velocity blur, ghost probability); last eighth of bar procedural (approach to next chord); optional RhythmicDensityTracker + MarkovBridge when soloist-responsive on.
 - **Milestone**: `.planning/milestones/jazz-band-comping-evolution/` (PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md).
 - **Tasks**:
-  - [ ] **Phase 1**: Markov Pattern Engine + pattern tagging (REQ-JBCE-01, REQ-JBCE-02, REQ-JBCE-03).
-  - [ ] **Phase 2**: Stochastic humanization (REQ-JBCE-04, REQ-JBCE-05, REQ-JBCE-06).
-  - [ ] **Phase 3**: Procedural lead-ins at bar end (REQ-JBCE-07, REQ-JBCE-08).
-  - [ ] **Phase 4** (optional): RhythmicDensityTracker + MarkovBridge (REQ-JBCE-09, REQ-JBCE-10).
+  - [x] **Phase 1**: Markov Pattern Engine + pattern tagging (REQ-JBCE-01, REQ-JBCE-02, REQ-JBCE-03).
+  - [x] **Phase 2**: Stochastic humanization (REQ-JBCE-04, REQ-JBCE-05, REQ-JBCE-06).
+  - [x] **Phase 3**: Procedural lead-ins at bar end (REQ-JBCE-07, REQ-JBCE-08).
+  - [x] **Phase 4** (optional): MarkovBridge / updateIntensity (REQ-JBCE-09, REQ-JBCE-10).
   - [ ] **Phase 5** (future): Meter independence via rhythmic atoms (REQ-JBCE-11 deferred).

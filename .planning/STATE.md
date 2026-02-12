@@ -2,10 +2,10 @@
 
 ## Current Status
 
-- **Phase**: Phase 17: Innovative Interactive Exercises ✅; Phase 18: Creative Jazz Trio Playback ✅; Phase 19: Soloist-Responsive Playback ✅
-- **Status**: Phase 19 completed (toggle + soloist activity + band steering + Mixer UI; additive only)
+- **Phase**: Phase 17: Innovative Interactive Exercises ✅; Phase 18: Creative Jazz Trio Playback ✅; Phase 19: Soloist-Responsive Playback ✅; Phase 20: Jazz Band Comping Evolution ✅
+- **Status**: Phase 20 completed (Markov Smart Pattern Engine + humanization + procedural lead-in + MarkovBridge)
 - **Next Milestone**: Phase 6 Polish or next phase
-- **Overall Progress**: ~97%
+- **Overall Progress**: ~98%
 
 ## Active Requirements
 
@@ -27,6 +27,12 @@
 
 ## Recent Achievements
 
+- **Phase 20: Jazz Band Comping Evolution (Smart Pattern Engine)**:
+  - PatternType + RHYTHM_TEMPLATE_TO_PATTERN_TYPE in RhythmEngine; patternTypeBias filters candidates; FILL → minimal comp.
+  - JazzMarkovEngine (transition matrix, getNextPatternType, updateIntensity); useJazzBand calls every 4 bars; FILL → DrumEngine.generateFill.
+  - Humanization at schedule time: bass micro-timing (−5 to +2 ms), piano velocity ±10%, drum ghost probability 60%.
+  - getProceduralLeadInNote in JazzTheoryService; last eighth of bar bass note overridden with approach to next chord root.
+  - MarkovBridge: when soloist-responsive on, updateIntensity(soloistActivity) biases matrix before getNextPatternType(). REQ-JBCE-01..10.
 - **Phase 19: Soloist-Responsive Playback (Call-and-Response)**:
   - Toggle (default off); soloist activity (0–1) from SwiftF0 pitch duty cycle; useSoloistActivity polls pitch store; useJazzBand steers effective activity when toggle on (activity *= 1 - 0.65 * soloist); Mixer UI “Call-and-Response”; no regression when off. REQ-SRP-01..08.
 - **Phase 14.2: SwiftF0 Pitch Analysis Speed Optimization**:
