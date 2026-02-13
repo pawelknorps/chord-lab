@@ -7,11 +7,13 @@
 ## Layers
 
 1. **Presentation**: React components (`.tsx`).
-   - `src/pages/`: Route-level views.
+   - `src/pages/`: Route-level views (ProgressPage, ProgressionsPage, LickFeedPage, LickHubPage, TeacherDashboard, MidiLibraryPage).
    - `src/modules/*/components/`: Feature UI.
    - `src/components/`: Shared layout and UI (Dashboard, ChordLabDashboard, shared components, `components/ui`).
 2. **State**:
-   - `src/core/store/`: Zustand stores (Session, Mastery, Scoring, Settings, Practice, Solo, SessionHistory, MasteryTree, etc.).
+   - `src/core/store/`: Zustand stores (Session, Mastery, Scoring, Settings, Practice, Solo, SessionHistory, MasteryTree, GuidedPractice).
+   - `src/core/state/`: Signals (audioSignals, contextSignals), useInteractionStore, musicalClipboard.
+   - Module-level stores: `useITMPitchStore` (ITM), `useDirectorStore` (director), `useProfileStore` (profiles), `useFunctionalEarTrainingStore`, `useEarPerformanceStore` (FunctionalEarTraining), `useStandardsExerciseHeatmapStore` (JazzKiller), `useRhythmStore` (RhythmArchitect), `useIIVIDrillStore` (drills).
    - Component-level `useState` / `useReducer`.
    - Preact Signals for high-frequency audio/playback (e.g. `jazzSignals`, `audioSignals`).
 3. **Domain / Logic**:
@@ -20,7 +22,7 @@
    - `src/core/director/`: DirectorService for routines.
    - `src/modules/*/utils/`, `*/core/`: Module-specific engines and calculators.
 4. **Services / Integration**:
-   - `src/core/services/`: AudioManager, TrendAnalysisService, LocalAgentService, etc.
+   - `src/core/services/`: AudioManager, TrendAnalysisService, LocalAgentService, TeacherAnalyticsService, itmSyncService, aiDetection, earFocusService, earHintService, jazzLibrary, noteValidator, progressionContext, rhythmScatService, etc.
    - `src/core/supabase/`: Supabase client and auth.
 
 ## Concurrency Model
@@ -38,6 +40,6 @@
 
 ## Entry Points
 
-- **Boot**: `src/main.tsx` → `App.tsx` (StrictMode, AudioProvider, MidiProvider, AuthProvider, BrowserRouter).
-- **Routing**: `App.tsx` defines `<Routes>`; Dashboard wraps child routes; heavy modules are lazy-loaded with `ModuleSkeleton` fallbacks.
+- **Boot**: `src/main.tsx` → `App.tsx` (StrictMode, no providers in main; App wraps with AuthProvider, AudioProvider, MidiProvider, BrowserRouter).
+- **Routing**: `App.tsx` defines `<Routes>`; Dashboard wraps child routes; heavy modules are lazy-loaded with `ModuleSkeleton` fallbacks. ChordLab is eager for LCP.
 - **Audio**: `AudioManager` and user gesture (e.g. start button) resume context; pitch pipeline started via `useITMPitchStore` / `useHighPerformancePitch`.

@@ -16,11 +16,14 @@
 Shared business logic and infrastructure.
 
 - `audio/`: Global audio graph, SwiftF0, CrepeStabilizer, pitch detection, SharedArrayBuffer/PitchMemory, MpmWorker, SwiftF0Worker, AiWorker, BandWorker, MicrophoneService, SwingEngine, globalAudio, sharedAudioContext, instrumentProfiles, frequencyToNote.
-- `director/`: DirectorService.
-- `drills/`: Practice routines (if present).
+- `director/`: DirectorService, useDirectorStore.
+- `drills/`: useIIVIDrillStore and drill routines.
+- `midi/`: MIDI utilities.
+- `profiles/`: useProfileStore.
 - `routing/`: deepLinks and app-level navigation.
-- `services/`: AudioManager, TrendAnalysisService, LocalAgentService, CurriculumAnalysisService, etc.
-- `store/`: Zustand stores (useScoringStore, useSessionHistoryStore, useMasteryTreeStore, usePracticeStore, useSettingsStore, useSoloStore, etc.).
+- `services/`: AudioManager, TrendAnalysisService, LocalAgentService, TeacherAnalyticsService, itmSyncService, aiDetection, earFocusService, earHintService, jazzLibrary, noteValidator, progressionContext, rhythmScatService, etc.
+- `state/`: audioSignals, contextSignals, musicalClipboard, useInteractionStore (Zustand + signals).
+- `store/`: Zustand stores (useScoringStore, useSessionHistoryStore, useMasteryTreeStore, usePracticeStore, useSettingsStore, useSoloStore, useSessionStore, useMasteryStore, useGuidedPracticeStore); plus session.ts.
 - `supabase/`: client.ts, auth.ts.
 - `theory/`: Harmony, scales, chord parsing, GuideToneCalculator, WalkingBassEngine, DrumEngine, CompingEngine, ReactiveCompingEngine, GrooveManager, JazzMarkovEngine, ChordScaleEngine, TonalitySegmentationEngine, FunctionalLabelingEngine, ChordDna, liveHarmonicGrounding, etc.
 
@@ -32,16 +35,17 @@ Feature slices; each has components, hooks, utils or core logic as needed.
 - `JazzKiller/`: Jazz standards, playback, chart, mixer, AI teacher, lick library, standards exercises, ireal-renderer.
 - `ITM/`: ITM pitch store, high-performance pitch, MasteryTree, TrendAnalysis, SegmentBuilder, PerformanceSegment, JazzPitchMonitor, pitch worklet code.
 - `InnovativeExercises/`: Ghost note match, intonation heatmap, voice-leading maze, swing pocket, call and response, ghost rhythm; hooks and panels.
-- `FunctionalEarTraining/`: Ear training levels and flow.
-- `RhythmArchitect/`: Polyrhythm, syncopation.
+- `FunctionalEarTraining/`: Ear training levels and flow; useFunctionalEarTrainingStore, useEarPerformanceStore.
+- `RhythmArchitect/`: Polyrhythm, syncopation; useRhythmStore.
+- `ChordBuildr/`: Chord-building feature.
 - `Tonnetz/`, `NegativeMirror/`, `BarryHarris/`, `BiTonalSandbox/`, `GripSequencer/`, `CircleChords/`, `MidiLibrary/`: Additional labs/features.
 
 ### UI & Shared
 
-- `pages/`: Route pages (ProgressPage, ProgressionsPage, MidiLibraryPage, TeacherDashboard, LickFeedPage, etc.).
-- `components/`: Layout (Dashboard), ChordLabDashboard, shared widgets, SessionHUD, PerformanceMonitor, ModuleSkeleton, GlobalMidiHandler, WorkbenchAiPanel, SendToMenu; `components/ui/`: button, dialog, slider, checkbox, select, badge, command, popover (Radix-based).
+- `pages/`: ProgressPage, ProgressionsPage, LickFeedPage, LickHubPage, TeacherDashboard, MidiLibraryPage.
+- `components/`: Layout (Dashboard), ChordLabDashboard, shared widgets, SessionHUD, PerformanceMonitor, ModuleSkeleton, GlobalMidiHandler, WorkbenchAiPanel, SendToMenu; TeacherDashboard/ (StudentProgressView, ClassroomList); `components/ui/`: button, dialog, slider, checkbox, select, badge, command, popover (Radix-based).
 - `context/`: AudioContext, MidiContext, AuthContext.
-- `hooks/`: usePitchTracker, useSupabaseProgressSync, etc.
+- `hooks/`: usePitchTracker, useSupabaseProgressSync, useProfile, useLickFeed, useMidiExport, etc.
 - `utils/`: i18n, theoryEngine, polyrhythmEngine, etc.
 - `data/`: jjazzlab-style-registry, jjazzlab-drum-patterns, etc.
 - `scripts/`: scanIrealChords (and test).

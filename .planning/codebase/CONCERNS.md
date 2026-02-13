@@ -2,7 +2,8 @@
 
 ## Code Quality
 
-- **TODOs in code**: `ChordScaleEngine.ts` — "TODO: Fix mood type" (`'cool' as any`). `theoryEngine.ts` — "TODO: Implement calculation". Worth resolving to improve type safety and completeness.
+- **TODOs in code**: `ChordScaleEngine.ts` — "TODO: Fix mood type" (`'cool' as any`, `'neutral' as any`). `theoryEngine.ts` — "TODO: Implement calculation". Worth resolving to improve type safety and completeness.
+- **Type escapes**: Multiple `as any` and one `@ts-expect-error` in `src/` (ProgressPage solo isPublic, ChordScaleEngine mood, ChordLab preset key/style, InstrumentService, AudioManager triggerRelease/releaseAll, useMidiExport blob, MicrophoneService voiceIsolation, SendToMenu deepLink, FunctionalEarTraining playMode; tests use `as any` for mocks). Prefer proper types to reduce runtime risk.
 - **Legacy exclusions**: `src/circle-chords-0.1.0` and `src/chord-buildr-4.3` are excluded from app build; clarify long-term plan (remove, migrate, or document as legacy).
 
 ## Dependencies
@@ -13,7 +14,7 @@
 ## Architecture
 
 - **Duplication**: Some modules have local UI or components that overlap with `src/components/ui`; can make design system updates harder.
-- **State complexity**: Zustand + Signals is powerful but requires clear rules (when to use which) to avoid confusion.
+- **State complexity**: Zustand + Signals + multiple store locations (core/store, core/state, core/director, core/profiles, core/drills, modules/*/state) is powerful but requires clear rules (when to use which) to avoid confusion.
 - **Routing**: Many lazy routes in `App.tsx`; consider deep linking and dynamic module loading as the app grows.
 - **Lazy loading**: ModuleSkeleton and fallbacks improve perceived performance; no explicit prefetch strategy for heavy modules.
 

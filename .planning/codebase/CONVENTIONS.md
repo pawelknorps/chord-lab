@@ -21,14 +21,15 @@
 
 ## State Management
 
-- **Zustand**: Global app state (session, scoring, mastery, settings, practice, solo).
-- **Signals**: High-frequency or audio-driven state (playback, visualizers).
+- **Zustand**: Global app state (session, scoring, mastery, settings, practice, solo, session history, mastery tree, guided practice); module stores in `modules/*/state/` or `core/state/`, `core/director`, `core/profiles`, `core/drills`.
+- **Signals**: High-frequency or audio-driven state (playback, visualizers) in `core/state/` (audioSignals, contextSignals).
 - **Context**: Auth, Audio, MIDI providers; used for injection and cross-cutting concerns.
 
 ## Type Safety
 
-- **TypeScript**: Strict mode; `noUnusedLocals`, `noUnusedParameters`, `noFallthroughCasesInSwitch`, `noUncheckedSideEffectImports`.
+- **TypeScript**: Strict mode; `noUnusedLocals`, `noUnusedParameters`, `noFallthroughCasesInSwitch`, `noUncheckedSideEffectImports`, `erasableSyntaxOnly`.
 - **Types**: Interfaces for data shapes; types in `modules/*/types` or next to modules.
+- **Escapes**: Some `as any` and `@ts-expect-error` remain (see CONCERNS.md); prefer proper types where possible.
 
 ## Linting
 
