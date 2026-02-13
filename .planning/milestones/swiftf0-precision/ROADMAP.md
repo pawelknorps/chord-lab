@@ -33,6 +33,11 @@
 
 - SwiftF0Worker, swiftF0Inference, CrepeStabilizer, instrumentProfiles, frequencyToNote, useITMPitchStore (Phases 14.1, 14.2, 9).
 
+## Execution Plan
+
+- **Phase plan**: `.planning/phases/14.3-swiftf0-precision/PLAN.md` (3 waves: Verify LEV + temporal, Chromatic + cents API, Tuner bar UI).
+- **Research**: `.planning/phases/14.3-swiftf0-precision/RESEARCH.md` (LEV equivalence, hysteresis alignment, tuner bar UX).
+
 ## Verification
 
 - [ ] No argmax-only pitch path in production.
