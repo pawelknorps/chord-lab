@@ -30,6 +30,12 @@
 - **Tasks**: Bossa bass pattern + bossa drums + bossa comping; waltz ride/bass/comping hardening.
 - **Requirements**: JJ-08, JJ-09.
 
+## Phase 6: JJazzLab Library Import ✅
+
+- **Success criteria**: Styles, rhythms, and comping patterns from JJazzLab are available in our app: drum patterns from drums44DB.mid, optional bass phrases from JJSwing bass MIDI, and a style catalog derived from YamJJazzDefaultRhythms.
+- **Done**: Style catalog (`src/data/jjazzlab-style-catalog.ts`); drum patterns script + data (`scripts/import-jjazzlab-drums.mjs`, `src/data/jjazzlab-drum-patterns.*`); Yamaha format doc in LIBRARY_IMPORT.md. Bass (JJ-14) and percussion (JJ-16) deferred.
+- **Requirements**: JJ-13 ✅, JJ-15 ✅, JJ-17 ✅; JJ-14, JJ-16 optional/follow-up.
+
 ## Mapping: Requirement → Phase
 
 | Req | Phase |
@@ -39,4 +45,5 @@
 | JJ-05, JJ-06 | 3 |
 | JJ-07 | 4 |
 | JJ-08, JJ-09 | 5 |
+| JJ-13–JJ-17 | 6 (Library Import) |
 | JJ-10–JJ-12 | Backlog |
