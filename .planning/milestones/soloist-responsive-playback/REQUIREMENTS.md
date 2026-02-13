@@ -1,5 +1,7 @@
 # Soloist-Responsive Playback – Requirements
 
+**Design principle: Keep all existing playback band rules intact. This feature is additive only—a layer that steers the band (e.g. via effective activity) in the right direction without replacing or editing the core band logic.**
+
 ## Phase 1: Toggle and Soloist Activity Derivation
 
 ### REQ-SRP-01: Soloist-Responsive Toggle
@@ -23,22 +25,24 @@
 
 ## Phase 2: Band Loop Integration
 
-### REQ-SRP-04: Effective Activity in Band Loop
+**Principle: Existing band rules stay intact. Soloist-responsive layer only steers the inputs (e.g. effective activity) so the same engines behave in the right direction—additive only, no replacement.**
 
-- **Requirement**: When soloist-responsive is on, useJazzBand (or shared band loop) computes an **effective activity** that combines (or overrides) existing activity (BPM/tune intensity) with soloist activity.
-- **Behaviour**: High soloist activity → lower effective activity for band density (more space). Low soloist activity → normal or slightly higher effective activity (more backing). Exact formula is implementation-defined (e.g. invert soloist activity for “space” or blend with existing activity).
-- **Goal**: Comping density, drum density, and bass variation probability respond to soloist activity when toggle is on.
+### REQ-SRP-04: Effective Activity in Band Loop (Steering Only)
 
-### REQ-SRP-05: Trio Engines Receive Effective Activity
+- **Requirement**: When soloist-responsive is on, useJazzBand computes an **effective activity** that **steers** (modulates) the existing activity (BPM/tune intensity)—do not replace place-in-cycle, song style, or trio context logic.
+- **Behaviour**: High soloist activity → lower effective activity for band density (more space). Low soloist activity → normal or slightly higher effective activity (more backing). Exact formula is implementation-defined (e.g. blend soloist activity with existing activity). All other band rules (place-in-cycle, song style, Q&A, style-driven engines) remain unchanged.
+- **Goal**: Same comping/drums/bass engines receive a steered effective activity when toggle is on; band leaves more space when user plays more, more backing when user plays less.
 
-- **Requirement**: ReactiveCompingEngine, DrumEngine, RhythmEngine, and BassRhythmVariator receive the effective activity (and optional soloist-space override) when soloist-responsive is on.
-- **Behaviour**: Same engines as Phase 18; no new engine APIs required if effective activity is passed as the existing “activity” or “density” input. Optionally pass a “soloist is playing” flag to tighten soloist-space policy (e.g. cap density more when soloist is playing).
-- **Goal**: Band leaves more space when user plays more/faster; plays more backing when user plays less.
+### REQ-SRP-05: Trio Engines Receive Effective Activity (No Engine Changes)
+
+- **Requirement**: ReactiveCompingEngine, DrumEngine, RhythmEngine, and BassRhythmVariator continue to receive the same inputs as today; when soloist-responsive is on, the **activity** (or density) input passed to them is the **effective activity** (steered by soloist activity). No new engine APIs; no changes to engine logic—only the value of the activity/density input is steered.
+- **Behaviour**: Same engines as Phase 18; effective activity is passed as the existing “activity” or “density” parameter. Optionally pass a “soloist is playing” flag to tighten soloist-space policy. All existing rules (place-in-cycle, song style, soloist space, cross-instrument interaction) stay intact.
+- **Goal**: Band players are steered in the right direction by the modulated input; no replacement of band rules.
 
 ### REQ-SRP-06: No Regression When Toggle Off
 
-- **Requirement**: When soloist-responsive is off, band behaviour is identical to current implementation (Phase 18). No change to activityLevelSignal, place-in-cycle, or song-style logic.
-- **Goal**: Existing users and flows are unaffected.
+- **Requirement**: When soloist-responsive is off, band behaviour is identical to current implementation (Phase 18). No change to activityLevelSignal, place-in-cycle, song-style, or any existing band logic.
+- **Goal**: Existing users and flows are unaffected; old playback band rules remain the single source of behaviour when toggle is off.
 
 ## Phase 3: UI and Verification
 

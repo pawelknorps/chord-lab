@@ -34,12 +34,13 @@ files_created: [
 
 ---
 
-## Context (Existing Implementation – Preserved)
+## Context: Current Implementation to Preserve (Incorporate Fully)
 
-- **ConceptAnalyzer**: Keeps `analyze(chords, keySignature)` and concept types (MajorII-V-I, TritoneSubstitution, etc.); **extend** or **wrap** with new pipeline that produces key segments + Roman numerals.
-- **AnalysisTypes**: `Concept` can gain optional `keySegment`, `romanNumeral`, `segmentLabel`; backward compatible.
-- **ChordDna**: Reuse `getChordDna(symbol)` for chord structure; no change to ChordDna API.
-- **JazzKiller**: LeadSheet uses `patternsToDisplay` (filtered or detected); **refactor** data source to new `analyzeHarmony()` (or equivalent) so overlay shows segment-aware Roman numerals.
+- **ConceptAnalyzer**: Keep `analyze(chords, keySignature)` and all concept types (MajorII-V-I, MinorII-V-i, SecondaryDominant, TritoneSubstitution, ColtraneChanges). **Extend** or **wrap** with new pipeline; do not remove existing pattern detection—merge or delegate so overlay continues to receive compatible concepts.
+- **AnalysisTypes**: Extend `Concept` with optional `keySegment`, `romanNumeral`, `segmentLabel` only; keep existing `type`, `startIndex`, `endIndex`, `metadata`; backward compatible.
+- **ChordDna**: Reuse `getChordDna(symbol)` and ChordDnaResult as-is; no API change. Use for Fit cost and Functional Labeling; no duplicate chord parsing.
+- **JazzKiller**: LeadSheet, AnalysisOverlay, AnalysisToolbar, `loadSong`/analyze flow stay; **refactor** only the **data source** for overlay (call new pipeline instead of or in addition to ConceptAnalyzer); CONCEPT_COLORS and AnalysisBracket UI unchanged.
+- **functionalRules, JazzTheoryService**: Reuse for enharmonic spelling and theory helpers; no breaking changes.
 
 ---
 
@@ -49,17 +50,20 @@ files_created: [
 
 ### 21.1 – Key Center Representation (REQ-HAT-01)
 
-- **Key set**: Define 24 key centers (12 major + 12 minor), e.g. "C", "Cm", "F", "Gm", etc. Input = array of chord symbols (or Chord DNA descriptors) with bar/beat indices.
-- **Slot model**: One slot per bar or per chord change; output = key center per slot.
+- <task id="W1-T1">**Key set and slot model**  
+  Define 24 key centers (12 major + 12 minor), e.g. "C", "Cm", "F", "Gm". Input = array of chord symbols (or Chord DNA descriptors) with bar/beat indices. One slot per bar or per chord change; output = key center per slot. Place in TonalitySegmentationEngine or shared types.</task>
 
 ### 21.2 – Fit Cost (REQ-HAT-02)
 
-- **Fit(Chord_i, Key_k)**: Cost of assigning chord i to key k. Use scale-degree membership: diatonic = low cost; secondary dominant / borrowed = medium; chromatically distant = high. Reuse ChordDna + key scale (Tonal.js Key.scale or equivalent).
-- **Tunable**: Weights for diatonic vs secondary vs chromatic; optional pitch-class set distance.
+- <task id="W1-T2">**Fit(Chord_i, Key_k)**  
+  Implement cost of assigning chord i to key k: scale-degree membership (diatonic = low; secondary dominant / borrowed = medium; chromatic = high). Reuse ChordDna + Tonal.js Key/scale. Tunable weights; optional pitch-class set distance.</task>
 
 ### 21.3 – Transition Cost (REQ-HAT-03)
 
-- **Transition(Key_i, Key_{i+1})**: Penalty for modulating. Circle-of-fifths distance (e.g. C→F = 1 step, C→Db = 6 steps); relative major/minor = low penalty. Tunable.
+- <task id="W1-T3">**Transition(Key_i, Key_{i+1})**  
+  Implement modulation penalty: circle-of-fifths distance (C→F = 1, C→Db = 6); relative major/minor = low penalty. Tunable.</task>
+
+**Verification Wave 1**: Key set (24 keys) and slot model defined; Fit(chord, key) returns lower cost for diatonic; Transition(key_i, key_{i+1}) returns higher penalty for distant keys (e.g. C→Db). Unit test Fit and Transition with known chord/key pairs.
 
 ---
 
@@ -69,13 +73,15 @@ files_created: [
 
 ### 21.4 – Viterbi Segmentation (REQ-HAT-04)
 
-- **Algorithm**: Standard Viterbi: for each slot, for each key, compute best cost to reach that key; backpointer for path. Total cost J = Σ Fit + Σ Transition.
-- **Output**: Per-slot key center; merge consecutive same-key slots into **segments** (startBar, endBar, key).
-- **Performance**: Sub-second for 32–64 bars; run once per song/section load.
+- <task id="W2-T1">**Viterbi algorithm**  
+  In TonalitySegmentationEngine: for each slot and each key, compute best cost to reach that key; backpointer for path. Total cost J = Σ Fit + Σ Transition. Backtrack for optimal key sequence; merge consecutive same-key slots into segments (startBar, endBar, key). Sub-second for 32–64 bars.</task>
 
 ### 21.5 – Segment List API (REQ-HAT-05)
 
-- **API**: `getSegments(): { startBar, endBar, key }[]`. Used by Functional Labeling and by overlay (e.g. "Bars 1–4: Bb Major").
+- <task id="W2-T2">**getSegments()**  
+  Expose `getSegments(): { startBar, endBar, key }[]` from TonalitySegmentationEngine. Used by Functional Labeling and overlay (e.g. "Bars 1–4: Bb Major").</task>
+
+**Verification Wave 2**: Viterbi returns optimal key path for a short chord sequence; getSegments() returns merged segments; sub-second for 32 bars. Unit test with known progression (e.g. C major ii–V–I → one segment).
 
 ---
 
@@ -85,17 +91,20 @@ files_created: [
 
 ### 21.6 – Jazz Cliché Dictionary (REQ-HAT-07)
 
-- **Dictionary**: Table or rules: ii–V–I, I–VI–ii–V, back-door, tritone sub (m7 → dom7 resolving down half-step), minor ii–V–i, iiø7–V7–i, etc. Each entry: (Chord DNA pattern, prev/next context, key) → Roman numeral + optional concept type.
-- **Chord DNA**: Reuse getChordDna: m7, dom7, maj7, m7b5, etc.; context = "followed by dom7 a 4th up" → ii7; "resolving down half-step" → subV7; "target of ii–V" → Imaj7; "part of minor cadence" → iiø7.
+- <task id="W3-T1">**Jazz cliché dictionary**  
+  Create table or rules: ii–V–I, I–VI–ii–V, back-door, tritone sub, minor ii–V–i, iiø7–V7–i. Each entry: (Chord DNA pattern, prev/next context, key) → Roman numeral + optional ConceptType. Reuse getChordDna (m7, dom7, maj7, m7b5); context rules: "m7 followed by dom7 a 4th up" → ii7; "dom7 resolving down half-step" → subV7; "maj7 target of ii–V" → Imaj7; "m7b5 in minor cadence" → iiø7. Place in FunctionalLabelingEngine or shared module.</task>
 
 ### 21.7 – Functional Labeling Engine (REQ-HAT-06)
 
-- **FunctionalLabelingEngine**: Input = chord sequence + segments; for each chord, determine key from segment, get Chord DNA, check context (prev/next chord); lookup Roman numeral and optional concept type (MajorII-V-I, TritoneSubstitution, etc.).
-- **Output**: Per-chord Roman numeral + optional concept type for overlay.
+- <task id="W3-T2">**FunctionalLabelingEngine**  
+  Input = chord sequence + segments. For each chord: determine key from segment, get Chord DNA (getChordDna), check context (prev/next chord); lookup Roman numeral and optional concept type (MajorII-V-I, TritoneSubstitution, etc.). Output = per-chord Roman numeral + concept type for overlay.</task>
 
 ### 21.8 – Constant-Structure Handling (REQ-HAT-08)
 
-- **Chromatic segments**: When segment key is "chromatic" or constant-structure (e.g. half-step shift), do not force ii–V–I; label as "Key shift" or show chord roots only; avoid bogus Roman numerals.
+- <task id="W3-T3">**Chromatic / constant-structure segments**  
+  When segment key is "chromatic" or constant-structure (half-step shift), do not force ii–V–I; label as "Key shift" or chord roots only; avoid bogus Roman numerals in FunctionalLabelingEngine.</task>
+
+**Verification Wave 3**: FunctionalLabelingEngine returns Roman numerals for Dm7–G7–Cmaj7 (ii–V–I in C); Db7→Cmaj7 → subV7; chromatic segment → "Key shift" or roots only. Unit test with known progressions.
 
 ---
 
@@ -105,18 +114,20 @@ files_created: [
 
 ### 21.9 – Preprocessing (REQ-HAT-09)
 
-- **Preprocessing**: Convert song measures (iReal chord strings) to array of chord symbols with bar indices; reuse existing ChordDna / parsing; no duplicate logic.
-- **Input**: Same as current ConceptAnalyzer (e.g. measures from song.music).
+- <task id="W4-T1">**Preprocessing**  
+  Convert song measures (iReal chord strings) to array of chord symbols with bar indices; reuse ChordDna/parsing; no duplicate logic. Same input shape as ConceptAnalyzer (e.g. measures from song.music).</task>
 
 ### 21.10 – Analysis Pipeline API (REQ-HAT-10)
 
-- **analyzeHarmony(songChords, options)**: Runs Preprocessing → TonalitySegmentationEngine → FunctionalLabelingEngine; returns **concepts** (extended Concept type) with keySegment, romanNumeral, segmentLabel; backward compatible with AnalysisOverlay (existing type, concept type, startIndex, endIndex, metadata).
-- **harmonicAnalysisPipeline.ts**: Orchestrates segmentation + labeling; exports analyzeHarmony.
+- <task id="W4-T2">**analyzeHarmony() and harmonicAnalysisPipeline.ts**  
+  Create harmonicAnalysisPipeline.ts: Preprocessing → TonalitySegmentationEngine → FunctionalLabelingEngine. Export `analyzeHarmony(songChords, options)` returning concepts (extended Concept: keySegment, romanNumeral, segmentLabel); backward compatible with AnalysisOverlay (type, startIndex, endIndex, metadata).</task>
 
 ### 21.11 – JazzKiller Overlay Refactor (REQ-HAT-11)
 
-- **LeadSheet / analyze flow**: When song loads and "Show Analysis" is on, call new pipeline (e.g. analyzeHarmony) instead of (or in addition to) ConceptAnalyzer.analyze; pass result as patternsToDisplay. Overlay UI unchanged; tooltip or secondary line can show key segment and Roman numeral.
-- **Verification**: Blue Bossa (Cm7 = i in Cm), All the Things You Are (key segments and ii–V–I), one constant-structure tune (segment labels, no wrong Roman numerals); no regression in overlay visibility or click.
+- <task id="W4-T3">**LeadSheet / analyze flow**  
+  When song loads and "Show Analysis" is on, call analyzeHarmony (instead of or in addition to ConceptAnalyzer.analyze); pass result as patternsToDisplay. Overlay UI unchanged; optional tooltip or secondary line for key segment and Roman numeral. Verify: Blue Bossa (Cm7 = i), ATTYA (key segments + ii–V–I), one constant-structure tune; no regression in overlay visibility or click.</task>
+
+**Verification Wave 4**: analyzeHarmony() returns Concept[] compatible with AnalysisOverlay; LeadSheet uses new pipeline when analysis on; Blue Bossa shows Cm7 = i; ATTYA shows key segments and ii–V–I; overlay brackets/colors/click unchanged.
 
 ---
 
@@ -126,17 +137,20 @@ files_created: [
 
 ### 21.12 – Conflict Resolver (REQ-HAT-12)
 
-- **Logic**: If chart says C7 but SwiftF0 (over short window) shows student consistently playing F# and Bb (tritone sub), set or suggest subV7 label for overlay or feedback ("You're playing subV7 here").
-- **Integration**: Optional "live" mode in JazzKiller; can annotate current segment/concept without replacing offline analysis.
+- <task id="W5-T1">**Conflict Resolver**  
+  If chart says C7 but SwiftF0 (short window) shows student consistently playing F# and Bb (tritone sub), set or suggest subV7 label for overlay/feedback. Optional "live" mode in JazzKiller; annotate current segment/concept without replacing offline analysis.</task>
 
 ### 21.13 – Pedal Point Detection (REQ-HAT-13)
 
-- **Logic**: If pitch detection shows sustained low pitch (e.g. G) while chords change (F/G, Eb/G), mark section as dominant pedal; override or annotate segment label ("Pedal (G)").
-- **Integration**: Optional; segment or overlay note for educational feedback.
+- <task id="W5-T2">**Pedal Point Detection**  
+  If pitch detection shows sustained low pitch (e.g. G) while chords change (F/G, Eb/G), mark section as dominant pedal; override or annotate segment label ("Pedal (G)"). Optional; segment or overlay note for feedback.</task>
 
 ### 21.14 – Live Grounding API (REQ-HAT-14)
 
-- **API**: `getLiveOverrides(chartChord, pitchBuffer): { romanNumeral?, pedal? }` (or equivalent). Consumes chart chord at time t and SwiftF0 stream/buffer; returns overrides or annotations for current segment. Lightweight; no full re-segmentation in real time.
+- <task id="W5-T3">**getLiveOverrides()**  
+  API: `getLiveOverrides(chartChord, pitchBuffer): { romanNumeral?, pedal? }`. Consumes chart chord at time t and SwiftF0 stream/buffer; returns overrides for current segment. Lightweight; no full re-segmentation in real time.</task>
+
+**Verification Wave 5**: With mic on, playing tritone sub over C7 → overlay or feedback shows subV7; sustained low G over changing chords → "Pedal (G)"; getLiveOverrides returns overrides; no regression when live grounding off.
 
 ---
 

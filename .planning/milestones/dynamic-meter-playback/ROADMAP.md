@@ -18,7 +18,7 @@ Implement mid-song meter changes: time map in song data, Transport scheduling, b
 
 ---
 
-## Phase 2: Transport Scheduler
+## Phase 2: Transport Scheduler ✅
 
 **Goal**: Tone.Transport time signature is updated at the start of each bar where a meter change is defined.
 
@@ -32,7 +32,7 @@ Implement mid-song meter changes: time map in song data, Transport scheduling, b
 
 ---
 
-## Phase 3: Playback Loop Uses Meter-for-Bar
+## Phase 3: Playback Loop Uses Meter-for-Bar ✅
 
 **Goal**: The main playback loop (useJazzPlayback / useJazzBand) uses “meter at current bar” from the time map instead of a single global meter for the whole song.
 
@@ -45,7 +45,7 @@ Implement mid-song meter changes: time map in song data, Transport scheduling, b
 
 ---
 
-## Phase 4: Bass & Drums Adaptation
+## Phase 4: Bass & Drums Adaptation ✅
 
 **Goal**: Bass and drums switch pattern when the meter changes (e.g. 4/4 → 3/4).
 
@@ -59,7 +59,7 @@ Implement mid-song meter changes: time map in song data, Transport scheduling, b
 
 ---
 
-## Phase 5: Lead Sheet Visuals
+## Phase 5: Lead Sheet Visuals ✅
 
 **Goal**: Lead sheet reflects meter changes in layout and feedback.
 

@@ -29,7 +29,7 @@
 
 ### 2.2 Genre & Division
 
-- **Genre** (simplified): JAZZ, BOSSA, SAMBA, BLUES, ROCK, POP, LATIN, REGGAE, RnB, FUNK, etc. Used for tags and matching.
+- **Genre** (JJazzLab): JAZZ, BOSSA, SAMBA, BLUES, ROCK, POP, LATIN, REGGAE, RnB, FUNK, CUBAN, CHACHACHA, MAMBO, etc. Used for tags and matching.
 - **Division**: BINARY (straight 8ths), EIGHTH_SHUFFLE (swing), EIGHTH_TRIPLET (triplet feel). Drives grid and swing.
 
 **Borrow**: Explicit **Division** in our playback (we already have swing in `GrooveManager`); add **Genre** (or “song style”) so Ballad / Medium Swing / Bossa / Waltz drive density, bass style, and drum set (see Creative Jazz Trio milestone).
@@ -177,10 +177,81 @@ We don’t need to implement all YamJJazz styles at once; **Bossa** and **Jazz W
 
 ---
 
-## 10. References (Code Paths)
+## 10. Extractable Library (Styles, Rhythms, Comping Patterns)
+
+### 10.1 JJSwing MIDI Databases (in repo — directly usable)
+
+All under `legacy_projects/JJazzLab-master/plugins/JJSwing/src/main/resources/org/jjazz/jjswing/`:
+
+| Asset | Path | Format | Content |
+|-------|------|--------|--------|
+| **Drums** | `drums/db/drums44DB.mid` | Standard MIDI, PPQ | One track; markers `_<DRUMS_STYLE>` (e.g. `_RIDE_1`, `_BRUSHES_1`), `#fill`, `#alt`, `_END`. Notes on one channel; phrases per DrumsStyle. |
+| **Bass walking** | `bass/db/WalkingBassMidiDB.mid` | Standard MIDI, PPQ | Sessions/phrases with chord symbols as markers; 1–4 bar WbpSource phrases for walking. |
+| **Bass 2-feel A** | `bass/db/WalkingBass2feelAMidiDB.mid` | Same | Two-feel phrases (session tag "2FA", "2feel-a"). |
+| **Bass 2-feel B** | `bass/db/WalkingBass2feelBMidiDB.mid` | Same | Two-feel phrases (session tag "2FB", "2feel-b"). |
+
+**Conversion**: Parse MIDI (e.g. `midi-file` or `tonejs/midi` in npm), read markers and note events, emit our pattern format (JSON/TS: time in beats, pitch, velocity, duration, plus metadata for style/section). Use for DrumEngine pattern sets and for bass phrase tiling (optional) alongside WalkingBassEngine.
+
+### 10.2 PhraseTransform percussion (in repo)
+
+Under `core/PhraseTransform/src/main/resources/org/jjazz/phrasetransform/resources/`:
+
+- `Congas1-2bar.mid` … `Congas4-2bar.mid`, `CabasaEighths.mid`, `CowBellBeat.mid`, `ShakerSixteenths.mid`, `TambourineOffBeat.mid`, `Tambourine2-4.mid`, `TambourineEighths.mid`, `TambourineSixteenths.mid`, `TriangleEighths.mid`, `TriangleSixteenths.mid`.
+
+**Use**: Latin/percussion layers; convert to our pattern format for optional percussion channel or Bossa/Latin styles.
+
+### 10.3 Style catalog (code → data)
+
+**YamJJazzDefaultRhythms** (`plugins/YamJJazz/.../YamJJazzDefaultRhythms.java`): Map of style filename → Genre + tags. No binary dependency. We can export this to JSON as our **style library catalog** (name, genre, tags, preferred tempo if we add it), and use it for style registry and UI (e.g. “Bossa”, “Jazz Waltz”, “Cha Cha”).
+
+Example entries: `BossaNova2.S469.prs` → BOSSA, tags "bossa", "song-for-my-father"; `JazzWaltzMed.S351.sst` → JAZZ, "waltz", "jazz waltz", "footprints"; etc.
+
+### 10.4 Yamaha style files (.prs, .sst, .yjz, .sty, .bcs)
+
+- **Location**: Shipped in `YamahaDefaultFiles.zip` / `YamJJazzDefaultFiles.zip` (not in repo; part of JJazzLab build/distribution).
+- **Content**: Full patterns for many styles (comping, bass, drums, etc.) in Yamaha proprietary format. JJazzLab reads them via YamJJazz parsers (binary).
+- **Options**: (1) Obtain ZIP from JJazzLab install/source and document format for a future JS/TS parser; (2) Use only the **catalog** (10.3) and our algorithmic + JJSwing MIDI–derived patterns; (3) Long-term: port or reimplement a minimal Yamaha style reader if we need exact comping patterns from those files.
+
+**Recommendation**: Phase 1 of library import = JJSwing MIDI + style catalog. Yamaha binary = later phase or research spike.
+
+---
+
+## 11. References (Code Paths)
 
 - Rhythm DB: `core/RhythmDatabase/`, `core/Rhythm/src/main/java/org/jjazz/rhythm/api/` (Genre, Division, RhythmFeatures).
 - JJSwing: `plugins/JJSwing/` — JJSwingRhythm, BassGenerator, DrumsGenerator, BassStyle, DrumsStyle, SwingTransformations, SwingProfile, tempo adapters.
-- YamJJazz: `plugins/YamJJazz/` — YamJJazzDefaultRhythms, Style, StylePart.
+- JJSwing MIDI: `plugins/JJSwing/src/main/resources/org/jjazz/jjswing/drums/db/drums44DB.mid`, `.../bass/db/WalkingBass*.mid`.
+- YamJJazz: `plugins/YamJJazz/` — YamJJazzDefaultRhythms, Style, StylePart; default files in ZIP (not in repo).
+- PhraseTransform percussion: `core/PhraseTransform/.../resources/*.mid`.
 - Song: `core/ChordLeadSheet/`, `core/SongStructure/`, `app/ActiveSong/` (ActiveSongBackgroundMusicBuilderImpl).
-- Phrase DBs: `plugins/JJSwing/src/main/java/org/jjazz/jjswing/bass/db/`, `.../drums/db/`.
+- Phrase DBs (code): `plugins/JJSwing/.../bass/db/`, `.../drums/db/`.
+
+---
+
+## 12. Phase 1 Research Summary (Style Registry, Swing, Bass, Drums)
+
+### 12.1 Rhythm model (concept only; no Java implementation)
+
+- **RhythmDatabase / RhythmInfo / RhythmFeatures**: Central registry of rhythms by id, name, tags, time signature, preferred tempo. **Genre** (JAZZ, BOSSA, SAMBA, BLUES, …) and **Division** (BINARY, EIGHTH_SHUFFLE, EIGHTH_TRIPLET) drive matching and grid.
+- **Borrow**: A **style registry** keyed by (genre + division + tempo): e.g. "Medium Swing" = JAZZ + EIGHTH_SHUFFLE + medium tempo range. We define a small set of named styles and map each to GrooveManager / DrumEngine / WalkingBassEngine / ReactiveCompingEngine presets. No port of the Java RhythmDatabase.
+
+### 12.2 Swing: tempo–swing correlation and shared pipeline
+
+- **JJazzLab**: Slow = stronger swing, fast = straighter. `SwingProfile.swingRatios` = [50→2.3, 120→2.0, 190→1.8, 240→1.6] BPM. Upbeat position = R/(1+R) for ratio R; so **2.0 at 120 BPM** → fraction 2/3 ≈ 0.667. Bass and drums share SwingTransformations (same swing + humanization).
+- **GrooveManager (current)**: Returns fraction of beat for the upbeat; linear 0.75 @ 60 BPM, 0.5 @ 180 BPM → **120 BPM ≈ 0.625**.
+- **Alignment**: Phase 2 should tune `getSwingRatio(bpm)` so 120 BPM gives 2/3 (0.6667) and the curve matches JJazzLab’s four-point trend. Document and verify that bass and drums in `useJazzBand` use a single `getOffBeatOffsetInBeat` and `getHumanizationJitter`.
+
+| BPM (ref) | JJazzLab ratio | Upbeat fraction | GrooveManager (current) |
+|-----------|----------------|-----------------|-------------------------|
+| 50        | 2.3            | ~0.697          | —                       |
+| 120       | 2.0            | 2/3 ≈ 0.667     | ~0.625                  |
+| 190       | 1.8            | ~0.643          | —                       |
+| 240       | 1.6            | ~0.615          | —                       |
+
+### 12.3 Bass: BassStyle (Two-feel, Walking, Double-note, Intro/Ending)
+
+- **Borrow**: **Two-feel** (roots on 1 and 3 in 4/4, or 1 and 2 in 3/4) and optional **double-time walking** (8th-note subdivision). Keep our **algorithmic** WalkingBassEngine; **no Wbp phrase DB**. Intro/Ending handled by place-in-cycle (sparse/half-time).
+
+### 12.4 Drums: DrumsStyle (Ride, Brushes, Shuffle, Intro/Ending)
+
+- **Borrow**: Named feels — **Ride** (spang-a-lang), **Brushes**, **Shuffle** — and sparse **Intro/Ending** by place-in-cycle. Same shared bass/drums swing + humanization pipeline. No DpSourceDatabase port; keep algorithmic DrumEngine with style-driven pattern/density.

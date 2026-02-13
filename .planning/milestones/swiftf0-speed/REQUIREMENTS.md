@@ -27,8 +27,14 @@
 - **Requirement**: All optimizations must not regress pitch accuracy, sub-cent regression head behavior, or instrument hysteresis (CrepeStabilizer / profiles).
 - **Acceptance**: Manual or smoke test: same input produces equivalent pitch/confidence; instrument profiles and stabilizer still behave as before.
 
-## v2 / Deferred
+## v2 / Deferred (from RESEARCH.md)
 
+- **ORT session tuning**: `numThreads: 4`, SIMD build, proxy execution; see RESEARCH.md for session options.
+- **Hop 256 / 16 ms update rate**: Frame 1024, hop 256 for 16 ms update rate; circular buffer in worklet.
+- **STFT bins 3–134 only**: Compute only bins 3–134 (46.875 Hz – 2093.75 Hz); discard rest to save memory bandwidth (e.g. fft.js or equivalent).
+- **Note Filter in worker**: Confidence threshold (e.g. 0.9); emit “Note On” only if pitch stable within 50 cents for 3 consecutive frames (~48 ms).
+- **Local Expected Value for pitch**: Use \(f_{\text{Hz}} = f_{\min} \cdot 2^{\Delta \cdot \sum(i \cdot p_i) / \sum p_i}\) for cents-level precision instead of plain argmax; see RESEARCH.md.
+- **Automatic source recognition & adaptive adjustment** (see RESEARCH.md §5): Profile Controller in Web Worker; **dynamic confidence threshold** (voice ≈ 0.85, guitar/sax ≈ 0.70); **frequency range masking** per source (Voice 80–1100 Hz, Guitar 82–1000 Hz, Sax/Trumpet 140–1500 Hz); **RMS / ZCR / Spectral Flux** → auto-detect source and set smoothing (e.g. high ZCR + low RMS → skip inference; low ZCR + stable RMS → heavy smoothing; high Spectral Flux → light smoothing, median \(W=3\) for guitar, \(W=5\) for wind).
 - **Quantized model (INT8)** if/when supported by onnxruntime-web and model export.
 - **WebGPU-specific optimizations** (e.g. batch size, shader tuning) if profiling shows GPU-bound bottleneck.
 - **Moving preprocessing to Audio Worklet** (only if measurement shows it as the dominant cost and worklet budget allows).

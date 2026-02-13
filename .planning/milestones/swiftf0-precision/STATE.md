@@ -3,25 +3,25 @@
 ## Current Status
 
 - **Milestone**: SwiftF0 SOTA Precision (Local Expected Value + Temporal Smoothing + Cents Display)
-- **Status**: Not started
-- **Next**: Phase 1 – Verify LEV and temporal stack in swiftF0Inference, CrepeStabilizer, instrumentProfiles.
+- **Status**: Completed (2026-02-13)
+- **Next**: Final verification and archive.
 
 ## Progress
 
 | Phase | Status | Notes |
-|-------|--------|--------|
-| Phase 1: Verify LEV and Temporal Stack | Pending | LEV in swiftF0Inference; median + hysteresis in CrepeStabilizer. |
-| Phase 2: Chromatic Mapping and Cents API | Pending | frequencyToNote already has n and cents. |
-| Phase 3: Tuner Bar (Cents) UI | Pending | Add or wire tuner bar component. |
+| :--- | :--- | :--- |
+| Phase 1: Verify LEV and Temporal Stack | Completed | Done in swiftF0Inference/CrepeStabilizer/Worker. |
+| Phase 2: Chromatic Mapping and Cents API | Completed | frequencyToNote verified; consumers audit done. |
+| Phase 3: Tuner Bar (Cents) UI | Completed | TunerBar.tsx created and wired to pitch monitors. |
 
 ## Requirements
 
-- [ ] REQ-SF0-P01: Local Expected Value (no argmax-only)
-- [ ] REQ-SF0-P02: Median filter 5–7 frames
-- [ ] REQ-SF0-P03: Hysteresis 60¢, 3-frame stability
-- [ ] REQ-SF0-P04: Chromatic note + cents
-- [ ] REQ-SF0-P05: Tuner bar (cents display)
-- [ ] REQ-SF0-P06: Post-inference in Worker
+- [x] REQ-SF0-P01: Local Expected Value (no argmax-only)
+- [x] REQ-SF0-P02: Median filter 5–7 frames
+- [x] REQ-SF0-P03: Hysteresis 60¢, 3-frame stability
+- [x] REQ-SF0-P04: Chromatic note + cents
+- [x] REQ-SF0-P05: Tuner bar (cents display)
+- [x] REQ-SF0-P06: Post-inference in Worker
 
 ## Notes
 

@@ -17,11 +17,12 @@ Use JJazzLab (legacy Java app in `legacy_projects/JJazzLab-master`) as a **desig
 - Document what to borrow in RESEARCH.md (done).
 - Define v1 requirements (style registry, swing validation, two-feel, drum feels, optional Bossa/Waltz) in REQUIREMENTS.md.
 - Roadmap and state tracked in ROADMAP.md and STATE.md.
+- **Phase 6 — Library Import**: Pull the library of styles, rhythms, and comping patterns from JJazzLab (JJSwing MIDI + style catalog); see LIBRARY_IMPORT.md.
 
 ## Out of Scope (This Milestone)
 
-- Porting JJazzLab Java code or reading YJZ/SST files.
-- Replacing our algorithmic bass/drums with pre-recorded phrase databases (Wbp/Dp).
+- Porting JJazzLab Java code or reading Yamaha .prs/.sst/.yjz binaries in v1 (catalog + JJSwing MIDI first).
+- Replacing our algorithmic bass/drums entirely with pre-recorded phrase DBs; we use imported phrases alongside engines.
 - Implementing every YamJJazz style; focus on Swing, Bossa, Waltz, and “place in cycle” (intro/ending).
 
 ## Key Decisions

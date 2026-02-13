@@ -18,15 +18,27 @@
   - Hook: `useVoiceLeadingMaze` – progression Dm7–G7–Cmaj7, GuideToneCalculator per chord, poll pitch → checkNote(pitchClass); wrong note → isMuted true, correct → unmute and advance chord.
   - Panel: `VoiceLeadingMazePanel` – Tone.Transport + PolySynth backing (ii–V–I), Gain node for mute; Start Backing, Reset; current chord and guide-tone hints; “Muted / Playing” feedback.
 
-### Wave 2: Rhythm Exercises (Stubs)
+### Wave 2: Rhythm Exercises (REQ-IR-01–03)
 
-- **Swing Pocket, Call and Response, Ghost Rhythm** – Placeholder panels only (“Coming in Wave 2”). No onset/swing/RMS logic yet.
+- **W2-T1–T3: Swing Pocket Validator (REQ-IR-01)**  
+  - Core: `SwingAnalysis.ts` – assign onsets to grid, compute swing ratio and average offset (ms).  
+  - Hook: `useSwingPocket` – useMicrophone + useHighPerformancePitch (onset); metronome 2 and 4 via Tone.Loop; record 4 bars; Pocket Gauge and Push/Lay Back feedback.  
+  - Panel: `SwingPocketPanel` – BPM, Start metronome, Record 4 bars, ratio + offset display.
 
-### Wave 3: Module Entry
+- **W2-T4–T5: Call and Response (REQ-IR-02)**  
+  - Data: `callAndResponseBreak.ts` – REFERENCE_ONSETS_SEC (2-bar pattern).  
+  - Hook: `useCallAndResponse` – play reference (Tone.schedule), record student onsets; align by first attack; pairs with deltaMs.  
+  - Panel: `CallAndResponsePanel` – Play reference, Record my response, overlay list (early/late per attack).
 
-- **Route**: `/innovative-exercises` in App.tsx (lazy InnovativeExercises).
-- **Nav**: “Innovative Exercises” under Practice in Dashboard.
-- **Module**: `InnovativeExercisesModule.tsx` – sidebar with all six exercises, content area shows selected panel (Ghost Note, Intonation Heatmap, Voice-Leading Maze, and three stubs).
+- **W2-T6–T7: Ghost Rhythm Poly-Meter (REQ-IR-03)**  
+  - Hook: `useGhostRhythm` – 4/4 backing (Tone.Loop), 3-over-4 grid (GHOST_RHYTHM_GRID_BEATS); onset + frequency per attack; rhythm score (hits within ±80 ms) and pitch stable (G ±5¢); win when both met.  
+  - Panel: `GhostRhythmPanel` – Start backing, Record 4 bars on G, result (rhythm %, pitch stable, win).
+
+### Wave 3: Module Entry and Verification
+
+- **W3-T1**: Route `/innovative-exercises`, nav “Innovative Exercises” under Practice, sidebar with all six exercises.
+- **W3-T2**: Unified input (mic + optional MIDI): Ghost Note, Voice-Leading Maze, Swing Pocket accept `inputSource: 'mic' | 'midi'`; use `useExerciseInputAdapter` (JazzKiller) for Ghost Note and Voice-Leading; Swing Pocket uses `useMidi()` for note-on timestamps when MIDI. Panels expose Input: Mic | MIDI selector.
+- **W3-T3**: Unit tests: `SwingAnalysis.test.ts` (computeSwingPocket ratio/offset/dedup), `useVoiceLeadingMaze.test.ts` (getAllowedPitchClasses for Dm7, G7, Cmaj7); 8 tests passing.
 
 ## Files Created
 
@@ -38,9 +50,16 @@
 - `src/modules/InnovativeExercises/components/GhostNoteMatchPanel.tsx`
 - `src/modules/InnovativeExercises/components/IntonationHeatmapPanel.tsx`
 - `src/modules/InnovativeExercises/components/VoiceLeadingMazePanel.tsx`
-- `src/modules/InnovativeExercises/components/SwingPocketPanel.tsx` (stub)
-- `src/modules/InnovativeExercises/components/CallAndResponsePanel.tsx` (stub)
-- `src/modules/InnovativeExercises/components/GhostRhythmPanel.tsx` (stub)
+- `src/modules/InnovativeExercises/components/SwingPocketPanel.tsx`
+- `src/modules/InnovativeExercises/components/CallAndResponsePanel.tsx`
+- `src/modules/InnovativeExercises/components/GhostRhythmPanel.tsx`
+- `src/modules/InnovativeExercises/hooks/useSwingPocket.ts`
+- `src/modules/InnovativeExercises/hooks/useCallAndResponse.ts`
+- `src/modules/InnovativeExercises/hooks/useGhostRhythm.ts`
+- `src/modules/InnovativeExercises/core/SwingAnalysis.ts`
+- `src/modules/InnovativeExercises/core/SwingAnalysis.test.ts`
+- `src/modules/InnovativeExercises/hooks/useVoiceLeadingMaze.test.ts`
+- `src/modules/InnovativeExercises/data/callAndResponseBreak.ts`
 - `src/modules/InnovativeExercises/InnovativeExercisesModule.tsx`
 
 ## Files Modified
@@ -57,6 +76,4 @@
 
 ## Deferred
 
-- Wave 2 full implementation (onset timing, swing ratio, RMS overlay, 3-vs-4 grid, pitch stability).
-- Unit tests for heatmap classification, Ghost Note 10¢ check, Voice-Leading allowed set.
-- Optional MIDI input for ear exercises (mic-only for v1).
+- Unit tests for Intonation Heatmap classification and Ghost Note 10¢ match (optional; frequencyToNote covered elsewhere).

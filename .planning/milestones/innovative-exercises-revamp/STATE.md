@@ -2,18 +2,19 @@
 
 ## Current Status
 
-- **Phase**: Not started
-- **Status**: Milestone initialized; PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md created
-- **Next**: Phase 1 – Progress summary & data layer
+- **Phase**: Phase 30 (Innovative Exercises Revamp + Layers/Levels) – **Complete**
+- **Status**: All five waves implemented. Progress summary, AI recommendations, level config, parameterized panels, "For You" section with refresh. REQ-IER-01..10 satisfied.
+- **Next**: Optional: extend level config (more licks/keys), or teacher-assigned exercises (REQ-IER-11)
 
 ## Progress
 
 | Phase | Status | Notes |
 |-------|--------|-------|
-| Phase 1: Progress summary & data layer | Not started | REQ-IER-01, REQ-IER-02 |
-| Phase 2: AI recommendation engine | Not started | REQ-IER-03, REQ-IER-04 |
-| Phase 3: Parameterized exercises & library audio | Not started | REQ-IER-05, REQ-IER-06, REQ-IER-07 |
-| Phase 4: “For You” UI & refresh | Not started | REQ-IER-08, REQ-IER-09, REQ-IER-10 |
+| Wave 1: Progress summary & data layer | Done | InnovativeExerciseProgressService.getSummary() |
+| Wave 2: AI recommendation engine | Done | generateInnovativeExerciseRecommendations + fallback |
+| Wave 3: Level config + parameterized exercises & library audio | Done | innovativeExerciseLevels.ts; panels accept initialParams |
+| Wave 4: “For You” UI & refresh | Done | ForYouSection; sidebar preserved; refresh |
+| Wave 5: Verification & docs | Done | VERIFICATION.md, SUMMARY.md |
 
 ## Active Requirements
 
@@ -36,5 +37,6 @@
 
 - **Builds on Phase 17**: Existing Innovative Exercises module (six exercises, mic-ready, Phase 17) is extended, not replaced.
 - **Data sources**: useSessionHistoryStore, useScoringStore, useMasteryStore, useMasteryTreeStore, useProfileStore, standards heatmap store; itmSyncService for cloud history when needed.
-- **AI**: Gemini Nano + jazzTeacherLogic pattern; structured output (exerciseId, params, reason).
+- **AI**: Gemini Nano + jazzTeacherLogic pattern; structured output (exerciseId, params, level, layer, reason).
+- **Layers/Levels**: See `.planning/phases/30-innovative-exercises-revamp/RESEARCH.md` and PLAN.md Wave 3.
 - **Library**: Licks (ghost-note, call-and-response), ChordScaleEngine, GuideToneCalculator, backing/stems, standards metadata.

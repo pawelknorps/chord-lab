@@ -41,13 +41,14 @@ Users must be able to:
 
 - **Toggle**: A persistent setting (signal or preference) that enables/disables soloist-responsive mode. Default off.
 - **Soloist activity signal**: Derive from SwiftF0 (or useITMPitchStore / useHighPerformancePitch): e.g. onset rate, “is playing” (pitch present + confidence), optional “density” (notes per bar or per beat). Output a 0–1 “soloist activity” value consumed by the band loop.
-- **Band reaction**: When soloist-responsive is on, combine (or override) the existing activity/density inputs to the comping, bass, and drums with the soloist-activity signal: high soloist activity → more space (cap density, sparse comping, lighter drums/bass); low soloist activity → normal or slightly increased backing.
-- **Integration**: useJazzBand (or a shared band loop) reads the soloist-activity signal when the toggle is on and passes it into the existing trio context (density cap, sustain bias, variation probability) so behaviour is consistent with Phase 18 soloist-space logic.
+- **Band reaction**: When soloist-responsive is on, **steer** (do not replace) the existing activity/density inputs: use soloist-activity to modulate effective activity so the **same** band rules and engines react in the right direction—high soloist activity → more space; low soloist activity → normal or slightly increased backing. All existing rules (place-in-cycle, song style, trio context) remain in force.
+- **Integration**: useJazzBand reads the soloist-activity signal when the toggle is on and uses it to **steer** the inputs (e.g. effective activity) passed into the existing trio context and engines; no changes to engine APIs or to place-in-cycle/song-style logic.
 
 ## Technical Constraints
 
+- **Existing band rules stay intact.** All current playback logic remains: place-in-cycle, song style, activity from BPM/tune intensity, trio context (getPlaceInCycle, getSongStyleTag, isSoloistSpace), QuestionAnswerCoordinator, style-driven comping/bass/drums, and cross-instrument interaction. This feature is **additive only**—a layer on top that **steers** the band in the right direction by influencing the inputs (e.g. effective activity) that already drive the engines. No replacement or override of existing rules.
 - Reuse **SwiftF0** and **useITMPitchStore** / **useHighPerformancePitch**; no new pitch detector. Optionally use onset stream for “notes per bar” or “is playing” windows.
-- Changes are confined to: **JazzKiller** (toggle UI, wiring), **jazzSignals** or equivalent (new signal for toggle + optional soloist activity), **useJazzBand** (read soloist activity when enabled and drive density/space), and a small **soloist-activity** module (derive activity from pitch store).
+- Changes are confined to: **JazzKiller** (toggle UI, wiring), **jazzSignals** or equivalent (new signal for toggle + optional soloist activity), **useJazzBand** (read soloist activity when enabled and **steer** density/space via effective activity), and a small **soloist-activity** module (derive activity from pitch store).
 - Mic must be available when the toggle is on; graceful fallback when mic is not present (e.g. treat as “low activity” or ignore and use existing activity only).
 - Experimental: no commitment to default-on; can be refined (e.g. sensitivity, smoothing) in a later iteration.
 
@@ -68,10 +69,11 @@ Users must be able to:
 
 | Decision | Rationale |
 |----------|------------|
+| **Additive only; old rules intact** | All existing band rules (place-in-cycle, song style, activity, trio context, Q&A, style-driven engines) stay as-is. Soloist-responsive layer only **steers** (e.g. modulates effective activity) so the same engines behave in the right direction—no replacement of logic. |
 | **SwiftF0 as source** | Already used for ITM and Innovative Exercises; single pipeline for “what the user is playing.” |
 | **Activity-level only** | Keeps v1 simple: “how much / how busy” not “which notes”; avoids harmony logic in this milestone. |
 | **Experimental toggle** | Allows safe rollout and A/B behaviour; default off preserves current experience. |
-| **Reuse trio context** | Phase 18 already has density cap, sustain bias, soloist space; soloist activity becomes another input to that policy. |
+| **Reuse trio context** | Phase 18 already has density cap, sustain bias, soloist space; soloist activity becomes another **steering** input to that policy. |
 
 ## Integration Points
 

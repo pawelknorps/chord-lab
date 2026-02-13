@@ -378,19 +378,19 @@
 
 *Focus: Production readiness and final quality (see STATE.md for current focus).*
 
-## Phase 30: Innovative Exercises Revamp (Progress + AI + Layers/Levels)
+## Phase 30: Innovative Exercises Revamp (Progress + AI + Layers/Levels) ✅
 
 *Focus: Connect Innovative Exercises to student progress and AI recommendations; add **exercise layers** (Ear/Rhythm, optional difficulty) and **levels** (per-exercise 1–3) for parameterized, level-aware recommendations and launch.*
 
 - **Success Criteria**: Progress summary (read-only); AI recommendations with exerciseId, params (key, chords, lickId, tempo, **level**), **layer**, reason; level config per exercise; panels accept initialParams and level; "For You" section with refresh; manual list preserved; mic unchanged.
 - **Milestone**: `.planning/milestones/innovative-exercises-revamp/` (PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md).
-- **Plan**: `.planning/phases/30-innovative-exercises-revamp/` (PLAN.md, RESEARCH.md).
+- **Plan**: `.planning/phases/30-innovative-exercises-revamp/` (PLAN.md, RESEARCH.md, VERIFICATION.md).
 - **Tasks**:
-  - [ ] **Wave 1**: Progress summary & data layer (REQ-IER-01, IER-02).
-  - [ ] **Wave 2**: AI recommendation engine with level/layer in output (REQ-IER-03, IER-04).
-  - [ ] **Wave 3**: Level config + parameterized launch for all six exercises; library audio (REQ-IER-05, IER-06, IER-07).
-  - [ ] **Wave 4**: "For You" UI & refresh (REQ-IER-08, IER-09, IER-10).
-  - [ ] **Wave 5**: Verification & docs.
+  - [x] **Wave 1**: Progress summary & data layer (REQ-IER-01, IER-02).
+  - [x] **Wave 2**: AI recommendation engine with level/layer in output (REQ-IER-03, IER-04).
+  - [x] **Wave 3**: Level config + parameterized launch for all six exercises; library audio (REQ-IER-05, IER-06, IER-07).
+  - [x] **Wave 4**: "For You" UI & refresh (REQ-IER-08, IER-09, IER-10).
+  - [x] **Wave 5**: Verification & docs.
 
 ## Strategic Re-Phasing (2026 Expansion)
 

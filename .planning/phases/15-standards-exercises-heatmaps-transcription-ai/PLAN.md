@@ -6,6 +6,8 @@ dependencies: ["Phase 13: Standards-Based Exercises", "Phase 1: Feedback Engine 
 files_modified: [
   "src/modules/JazzKiller/hooks/useStandardsExercise.ts",
   "src/modules/JazzKiller/components/StandardsExercisesPanel.tsx",
+  "src/modules/JazzKiller/components/LeadSheet.tsx",
+  "src/modules/JazzKiller/JazzKillerModule.tsx",
   "src/modules/JazzKiller/ai/jazzTeacherLogic.ts"
 ]
 files_created: [
@@ -45,7 +47,7 @@ files_created: [
   Create `StandardsExerciseHeatmapOverlay.tsx` (or extend PerformanceHeatmapOverlay with a variant). For a given measure index, read from the exercise hook’s `statsByMeasure[measureIndex]`; compute accuracy = hits / (hits + misses); color: green (>80%), amber (50–80%), red (&lt;50%). If no data for measure, transparent. Props: measureIndex, statsByMeasure (or consume hook in parent and pass down). Reuse same visual style as PerformanceHeatmapOverlay (absolute overlay, pointer-events-none).</task>
 
 - <task id="W1-T3">**Wire heatmap to Lead Sheet in Exercises mode**  
-  When Standards Exercises panel is open and a session has run, show the exercise heatmap on the lead sheet (each measure cell gets StandardsExerciseHeatmapOverlay). Ensure the overlay reflects the **current** exercise type (Scales / Guide Tones / Arpeggios) so the user sees which mode the heatmap is for. Optional: toggle "Show heatmap" in StandardsExercisesPanel.</task>
+  When Standards Exercises panel is open and a session has run, show the exercise heatmap on the lead sheet (each measure cell gets StandardsExerciseHeatmapOverlay). **Integration**: LeadSheet accepts optional props (e.g. `exerciseStatsByMeasure?: Record<number, { hits: number; misses: number }>`, `showExerciseHeatmap?: boolean`); when provided, render StandardsExerciseHeatmapOverlay per measure instead of or in addition to PerformanceHeatmapOverlay. JazzKillerModule passes these from useStandardsExercise when Exercises panel is open. Ensure the overlay reflects the **current** exercise type (Scales / Guide Tones / Arpeggios). Optional: toggle "Show heatmap" in StandardsExercisesPanel.</task>
 
 - <task id="W1-T4">**Optional: Dedicated heatmap panel**  
   In StandardsExercisesPanel (or a subview), add an optional "View heatmap" section: bar chart or grid of measures (x = measure index, y = accuracy or color strip). Filter by exercise type so user can compare Scales vs Guide Tones vs Arpeggios. Can reuse same statsByMeasure data.</task>
@@ -105,3 +107,7 @@ files_created: [
 - **Heatmap data shape**: Use `Record<number, { hits: number; misses: number }>` for exercise heatmap to match statsByMeasure; for AI, derive per-measure accuracy as hits/(hits+misses) per measure.
 - **Transcription**: Prefer simple note list first; rhythm and notation (ABC/MusicXML) can be Phase 15 optional or follow-up.
 - **AI**: Reuse JAZZ_TEACHER_SYSTEM_PROMPT or extend with exercise-specific instructions; keep temperature low (0.2) for consistent pedagogical tone.
+- **LeadSheet integration**: See RESEARCH.md — LeadSheet currently only shows PerformanceHeatmapOverlay; add optional props for exercise stats and render StandardsExerciseHeatmapOverlay when in Exercises mode.---## Plan Verification- [ ] Phase 15 exists in ROADMAP.md and STATE.md; REQ-SBE-06, REQ-SBE-07, REQ-SBE-08 defined in REQUIREMENTS.md.
+- [ ] All three deliverables (heatmaps, transcription, AI analysis) are covered by waves 1–3; wave 4 covers tests and verification.
+- [ ] Dependencies (Phase 13, Phase 1 heatmap + AI, JazzKiller + useStandardsExercise) are satisfied.
+- [ ] Files modified/created list is complete (LeadSheet, JazzKillerModule added for heatmap wiring).

@@ -22,7 +22,18 @@
 | JJ-11 | Optional: User-adjustable swing intensity (SwingProfile) in UI | SwingProfile |
 | JJ-12 | Optional: Configurable anticipation (e.g. “and of 4”) and early attacks for bass/comping | AnticipatedChordProcessor |
 
+## Phase 6: JJazzLab Library Import (New Phase)
+
+| ID | Requirement | Source |
+|----|-------------|--------|
+| JJ-13 | Parse JJSwing drums44DB.mid and convert to our drum pattern format (per DrumsStyle: RIDE_1, BRUSHES_1, etc.); load into DrumEngine or pattern registry | drums/db/drums44DB.mid |
+| JJ-14 | Parse JJSwing bass MIDI (WalkingBassMidiDB, 2feel A/B) and convert to bass phrase format; optionally use for tiling or as reference for two-feel/walking patterns | bass/db/*.mid |
+| JJ-15 | Export YamJJazzDefaultRhythms to a style catalog (JSON/TS): style id, name, genre, tags; use for style registry and UI | YamJJazzDefaultRhythms.java |
+| JJ-16 | Optionally parse PhraseTransform percussion MIDI (Congas, Tambourine, etc.) for Latin/percussion layers or Bossa | PhraseTransform/resources/*.mid |
+| JJ-17 | Document Yamaha .prs/.sst/.yjz format and ZIP location; decide whether to pursue a parser in a future phase | YamJJazzDefaultFiles.zip |
+
 ## Out of Scope
 
-- Porting RhythmDatabase, YamJJazz file format, or Wbp/Dp phrase databases.
+- Porting full RhythmDatabase or running JJazzLab in the browser.
+- Implementing a Yamaha style file parser in v1 (catalog + JJSwing MIDI only unless we spike).
 - Implementing every YamJJazz genre (ChaCha, Mambo, Reggae, etc.); only Swing, Bossa, Waltz in scope for v1/v2.

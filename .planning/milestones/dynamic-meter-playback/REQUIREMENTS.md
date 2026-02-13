@@ -1,5 +1,9 @@
 # Dynamic Meter Playback – Requirements
 
+## Non-destructive principle
+
+**Dynamic meter playback must not change existing behavior.** When `meterChanges` is absent or empty, or when the current bar’s meter is 4/4 (or the existing default), playback and UI must behave exactly as before this milestone. All new logic is opt-in: only when a song has `meterChanges` do we schedule Transport changes; only when the resolved meter is 3/4 do we use waltz bass/drums. Existing 4/4-only tunes and legacy/simple playback remain unchanged (DMP-02, DMP-13).
+
 ## v1 Requirements (Must-Have)
 
 ### Data & Time Map

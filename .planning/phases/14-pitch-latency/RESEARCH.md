@@ -18,6 +18,18 @@
 - In Audio Worklet, avoid: `array.push()`, `array.shift()`, `new Float32Array()` inside `process()`.
 - Use: one pre-allocated circular buffer, `buffer.set(input, ptr)`, and `ptr = (ptr + 128) % size`; pre-allocated temp and downsampled buffers for the 16 kHz frame.
 
+## Pitch stabilization (Phase 14+)
+
+- **History**: Use a circular buffer for pitch history (fixed `Float64Array(7)` or `number[]` of length `windowSize`), not `push`/`shift`, to avoid O(n) shift and GC.
+- **Median**: Pre-allocate a `sortedCopy` buffer; copy the active window into it, then in-place insertion sort (first n elements); take median as `sortedCopy[floor(n/2)]`. Avoids `[...history].sort()` allocation every frame.
+- **CrepeStabilizer.ts** and **pitch-processor.js** use the same pattern: circular buffer + insertion-sort median, no per-frame allocations.
+
+## Latency measurement
+
+- **Store**: `startLatencyMeasurement()` records `performance.now()`; on next `getLatestPitch()` that returns confident pitch (frequency > 0, clarity ≥ 0.92), set `lastLatencyMs = now() - start` and clear start. Exposed on `useITMPitchStore` and `useHighPerformancePitch`.
+- **UI**: JazzPitchMonitor shows "Measure latency" button and "X ms" readout when measured (time from click to first confident SAB update seen by main thread).
+- **Comparison**: Use hopBlocks 1 (default) for minimum latency; historically "every 2nd full buffer" was ~46 ms at 44.1 kHz; with hop 128 + 16 kHz expect lower (measure to compare).
+
 ## CREPE-WASM swap path (when integrated)
 
 - **Input**: Same 1024 samples at 16 kHz (use existing `downsampled` buffer from worklet).

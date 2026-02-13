@@ -13,14 +13,14 @@
 
 ## Phase 2: Band Loop Integration
 
-**Focus**: Wire soloist activity into useJazzBand and trio density/space.
+**Focus**: Wire soloist activity into useJazzBand to **steer** (not replace) band density/space. Existing band rules stay intact.
 
-- **Success Criteria**: When toggle on, effective activity (or density cap) is influenced by soloist activity; comping, drums, and bass leave more space when soloist plays more, and fill when soloist rests; when toggle off, behaviour unchanged.
+- **Success Criteria**: When toggle on, effective activity is steered by soloist activity so comping, drums, and bass leave more space when soloist plays more and fill when soloist rests; same engines and rules as Phase 18; when toggle off, behaviour unchanged.
 - **Tasks**:
-  - [ ] **REQ-SRP-04**: In useJazzBand loop, when soloist-responsive is on, compute effective activity from soloist activity (e.g. “space” = high soloist activity → lower band density).
-  - [ ] **REQ-SRP-05**: Pass effective activity (and optional soloist-space override) to ReactiveCompingEngine, DrumEngine, RhythmEngine, BassRhythmVariator; reuse existing Phase 18 params.
+  - [ ] **REQ-SRP-04**: In useJazzBand loop, when soloist-responsive is on, compute effective activity by steering existing activity with soloist activity (e.g. blend; high soloist → lower band density). Do not replace place-in-cycle, song style, or trio context.
+  - [ ] **REQ-SRP-05**: Pass effective activity to ReactiveCompingEngine, DrumEngine, RhythmEngine, BassRhythmVariator as the existing “activity”/“density” input; no engine API or logic changes—only steer the input value.
   - [ ] **REQ-SRP-06**: Ensure when toggle off, no code path uses soloist activity; regression test or manual check.
-- **Deliverables**: useJazzBand reads toggle + soloist activity; effective activity formula; all engines receive it; no regression when off.
+- **Deliverables**: useJazzBand reads toggle + soloist activity; effective activity steers band; all existing band rules intact; no regression when off.
 
 ## Phase 3: UI and Verification
 

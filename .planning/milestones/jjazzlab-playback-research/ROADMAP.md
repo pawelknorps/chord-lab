@@ -6,11 +6,10 @@
 - **Deliverables**: RESEARCH.md, PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md.
 - **Requirements**: JJ-01, JJ-02.
 
-## Phase 2: Swing & Pipeline (P1)
+## Phase 2: Swing & Pipeline (P1) ✅
 
 - **Success criteria**: Swing ratio validated/tuned; single swing + humanization pipeline used by bass and drums in useJazzBand.
-- **Tasks**: Validate getSwingRatio(bpm) against JJazzLab; refactor/confirm shared pipeline in useJazzBand.
-- **Requirements**: JJ-03, JJ-04.
+- **Done**: getSwingRatio tuned to JJazzLab four-point curve (120 BPM → 2/3); bass uses getHumanizationJitter (same as drums); shared pipeline documented. JJ-03, JJ-04.
 
 ## Phase 3: Bass Two-Feel & Drum Feels (P1)
 
