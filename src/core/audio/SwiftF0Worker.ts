@@ -76,7 +76,13 @@ async function runInference(pcm: Float32Array): Promise<{ pitch: number; confide
 
     const rms = computeRMS(pcm);
 
-    preprocessPcm(pcm, inputTensor, 0.08, 0.003, 6);
+    preprocessPcm(
+        pcm,
+        inputTensor,
+        currentProfile.targetRms,
+        currentProfile.minRmsForGain,
+        currentProfile.maxGain
+    );
 
     const t1 = enableTiming ? performance.now() : 0;
 

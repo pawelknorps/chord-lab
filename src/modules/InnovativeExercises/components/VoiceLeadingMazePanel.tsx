@@ -5,6 +5,7 @@ import { useVoiceLeadingMaze } from '../hooks/useVoiceLeadingMaze';
 import { getVoiceLeadingProgressionsFromStandards } from '../core/voiceLeadingProgressions';
 import { useJazzLibrary } from '../../JazzKiller/hooks/useJazzLibrary';
 import { useJazzBand } from '../../JazzKiller/hooks/useJazzBand';
+import { currentChordSymbolSignal, currentMeasureIndexSignal } from '../../JazzKiller/state/jazzSignals';
 import { initAudio, isAudioReady } from '../../../core/audio/globalAudio';
 import type { ExerciseInputSource } from '../../JazzKiller/core/ExerciseInputAdapter';
 import type { InnovativeExerciseInitialParams } from '../types';
@@ -19,6 +20,21 @@ function buildIiVISong() {
         { chords: ['Dm7'] },
         { chords: ['G7'] },
         { chords: ['Cmaj7'] },
+      ],
+      playbackPlan: [0, 1, 2],
+    },
+    TimeSignature: '4/4',
+  };
+}
+
+function buildMinorIiViSong() {
+  return {
+    title: 'minor-ii-V-i',
+    music: {
+      measures: [
+        { chords: ['Dø7'] },
+        { chords: ['G7alt'] },
+        { chords: ['Cm7'] },
       ],
       playbackPlan: [0, 1, 2],
     },
@@ -49,8 +65,14 @@ export function VoiceLeadingMazePanel({ initialParams }: VoiceLeadingMazePanelPr
   const progressionChords = selectedProgression?.chords ?? [];
 
   const song = useMemo(() => {
-    if (selectedProgressionId === 'ii-V-I' || !selectedProgression?.standard) {
+    if (selectedProgressionId === 'ii-V-I') {
       return buildIiVISong();
+    }
+    if (selectedProgressionId === 'minor-ii-V-i') {
+        return buildMinorIiViSong();
+    }
+    if (!selectedProgression?.standard) {
+        return buildIiVISong();
     }
     return getSongAsIRealFormat(selectedProgression.standard!, 0);
   }, [selectedProgressionId, selectedProgression, getSongAsIRealFormat]);
@@ -59,8 +81,8 @@ export function VoiceLeadingMazePanel({ initialParams }: VoiceLeadingMazePanelPr
   const band = useJazzBand(song, true, { outputGateRef });
 
   const isBackingRunning = band.isPlayingSignal.value;
-  const currentChordFromBand = isBackingRunning ? (band.currentChordSymbolSignal.value ?? '') : '';
-  const playbackChordIndexFromBand = isBackingRunning ? (band.currentMeasureIndexSignal.value ?? 0) : null;
+  const currentChordFromBand = isBackingRunning ? (currentChordSymbolSignal.value ?? '') : '';
+  const playbackChordIndexFromBand = isBackingRunning ? (currentMeasureIndexSignal.value ?? 0) : null;
 
   const [inputSource, setInputSource] = useState<ExerciseInputSource>('mic');
   const { progression, currentChordIndex, currentChord, isMuted, hints, reset } = useVoiceLeadingMaze(inputSource, {

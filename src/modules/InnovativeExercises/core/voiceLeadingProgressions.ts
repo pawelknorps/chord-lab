@@ -42,14 +42,21 @@ function chordsFromSectionChords(chordsStr: string): string[] {
  * First option is always the default ii–V–I; then one progression per standard (first section).
  */
 export function getVoiceLeadingProgressionsFromStandards(standards: JazzStandard[]): VoiceLeadingProgressionOption[] {
-  const defaultOption: VoiceLeadingProgressionOption = {
-    id: 'ii-V-I',
-    name: 'ii–V–I (Dm7 G7 Cmaj7)',
-    chords: ['Dm7', 'G7', 'Cmaj7'],
-  };
+  const defaultOptions: VoiceLeadingProgressionOption[] = [
+    {
+      id: 'ii-V-I',
+      name: 'Major ii–V–I (Dm7 G7 Cmaj7)',
+      chords: ['Dm7', 'G7', 'Cmaj7'],
+    },
+    {
+      id: 'minor-ii-V-i',
+      name: 'Minor ii–V–i (Dø7 G7alt Cm7)',
+      chords: ['Dø7', 'G7alt', 'Cm7'],
+    }
+  ];
 
   const fromLibrary: VoiceLeadingProgressionOption[] = [];
-  const seenIds = new Set<string>([defaultOption.id]);
+  const seenIds = new Set<string>(defaultOptions.map(o => o.id));
 
   for (const song of standards) {
     const title = song.Title || 'Untitled';
@@ -72,5 +79,5 @@ export function getVoiceLeadingProgressionsFromStandards(standards: JazzStandard
     });
   }
 
-  return [defaultOption, ...fromLibrary];
+  return [...defaultOptions, ...fromLibrary];
 }

@@ -197,21 +197,5 @@ export class CrepeStabilizer {
         this.stableFrameCount = 0;
         this.holdTimeMs = 0;
     }
-
-    static interpolatePitch(bins: number[], peakIndex: number, frequencies: number[]): number {
-        const start = Math.max(0, peakIndex - 4);
-        const end = Math.min(bins.length - 1, peakIndex + 4);
-
-        let numerator = 0;
-        let denominator = 0;
-
-        for (let i = start; i <= end; i++) {
-            const weight = bins[i];
-            numerator += weight * frequencies[i];
-            denominator += weight;
-        }
-
-        return denominator === 0 ? 0 : numerator / denominator;
-    }
 }
 

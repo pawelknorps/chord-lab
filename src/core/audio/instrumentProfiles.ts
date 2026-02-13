@@ -17,8 +17,14 @@ export interface InstrumentProfile {
     /** Consecutive stable frames before updating note (~32ms per frame at 8ms hop; higher = more confirmation). */
     stabilityThreshold: number;
     /** Running median window size; larger = smoother confirmed pitch, more latency to change note. */
-    windowSize?: number;
+     windowSize?: number;
     description: string;
+    /** Target RMS for input normalization; higher = more aggressive normalization. */
+    targetRms?: number;
+    /** Min RMS to apply gain; prevents amplifying silence. */
+    minRmsForGain?: number;
+    /** Max gain for normalization; prevents excessive amplification of quiet sounds. */
+    maxGain?: number;
 }
 
 export const INSTRUMENT_PROFILES: Record<string, InstrumentProfile> = {
@@ -32,6 +38,9 @@ export const INSTRUMENT_PROFILES: Record<string, InstrumentProfile> = {
         stabilityThreshold: 5,
         windowSize: 7,
         description: 'Wide range; 7-frame median + 5-frame confirmation for stable pitch.',
+        targetRms: 0.08,
+        minRmsForGain: 0.003,
+        maxGain: 6,
     },
     voice: {
         id: 'voice',
@@ -43,6 +52,9 @@ export const INSTRUMENT_PROFILES: Record<string, InstrumentProfile> = {
         stabilityThreshold: 3,
         windowSize: 7,
         description: 'Sticky note (~60¢) + 3-frame confirmation; filters breath/sibilance.',
+        targetRms: 0.08,
+        minRmsForGain: 0.003,
+        maxGain: 6,
     },
     acousticGuitar: {
         id: 'acousticGuitar',
@@ -54,6 +66,9 @@ export const INSTRUMENT_PROFILES: Record<string, InstrumentProfile> = {
         stabilityThreshold: 3,
         windowSize: 5,
         description: 'Quiet plucks; 5-frame median + 3-frame confirmation.',
+        targetRms: 0.08,
+        minRmsForGain: 0.003,
+        maxGain: 6,
     },
     electricGuitar: {
         id: 'electricGuitar',
@@ -65,6 +80,9 @@ export const INSTRUMENT_PROFILES: Record<string, InstrumentProfile> = {
         stabilityThreshold: 3,
         windowSize: 5,
         description: 'Quiet and fast runs; 5-frame median + 3-frame confirmation.',
+        targetRms: 0.08,
+        minRmsForGain: 0.003,
+        maxGain: 6,
     },
     saxophone: {
         id: 'saxophone',
@@ -76,6 +94,9 @@ export const INSTRUMENT_PROFILES: Record<string, InstrumentProfile> = {
         stabilityThreshold: 5,
         windowSize: 7,
         description: 'Lower threshold for breath; 5-frame confirmation.',
+        targetRms: 0.08,
+        minRmsForGain: 0.003,
+        maxGain: 6,
     },
     trumpet: {
         id: 'trumpet',
@@ -87,6 +108,9 @@ export const INSTRUMENT_PROFILES: Record<string, InstrumentProfile> = {
         stabilityThreshold: 4,
         windowSize: 6,
         description: 'Valve changes; 6-frame median + 4-frame confirmation.',
+        targetRms: 0.08,
+        minRmsForGain: 0.003,
+        maxGain: 6,
     },
     bassGuitar: {
         id: 'bassGuitar',
@@ -98,5 +122,8 @@ export const INSTRUMENT_PROFILES: Record<string, InstrumentProfile> = {
         stabilityThreshold: 4,
         windowSize: 6,
         description: 'Low range; 6-frame median + 4-frame confirmation.',
+        targetRms: 0.08,
+        minRmsForGain: 0.003,
+        maxGain: 6,
     },
 };

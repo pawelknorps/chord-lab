@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Mic } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useITMPitchStore } from '../../ITM/state/useITMPitchStore';
+import { useITMPitchStore } from '../ITM/state/useITMPitchStore';
 import { createPitchPipeline, type PitchPipeline } from '../../core/audio/pitchDetection';
 
 interface SingingArchitectProps {

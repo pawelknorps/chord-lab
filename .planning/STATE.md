@@ -9,6 +9,7 @@
 
 ## Recent Achievements
 
+- ✅ **Phase 14.3**: SwiftF0 SOTA Precision (Flicker-Free, Semitone-Stable)
 - ✅ **Phase 30**: Innovative Exercises Revamp (Progress + AI + Layers/Levels) — "For You" section, level config, parameterized panels
 - ✅ **Phase 25**: Advanced AI Interaction (Async worker-based critique, SegmentBuilder)
 - ✅ **Phase 26**: Mastery Tree & Long-term Progression (Session history, Visual curriculum)
@@ -20,6 +21,7 @@
 
 - **Phase 1**: Feedback Engine (ITM Core) ✅
 - **Phase 2**: High-Performance Pitch Engine (SwiftF0) ✅
+- **Phase 14.3**: SwiftF0 SOTA Precision ✅
 - **Phase 15**: Standards Exercise Analysis ✅
 - **Phase 17–24**: Rhythm Section Elements ✅
 - **Phase 30**: Innovative Exercises Revamp (Progress + AI + Layers/Levels) ✅
@@ -36,7 +38,7 @@
 
 - [x] **Phase 22.1 – Studio Polish (Priority: High)** ✅: Parallel bus 70/30, Worklet 8:1, Air +2 dB, Master -14 LUFS, Note Waterfall 60fps. Milestone: `.planning/milestones/studio-polish/`.
 - [x] **Phase 23 – Glitch Defense (Priority: Critical)** ✅: Thread isolation (SwiftF0=Worker A, Gemini=Worker B); zero-copy SAB; AiWorker; verification doc. *Deferred:* zero garbage Bass/Drum, IndexedDB cache (milestone Phase 5).
-- [ ] **Phase 14.3 – SwiftF0 SOTA Precision**: Verify LEV + median + hysteresis; add tuner bar (cents). Milestone: `.planning/milestones/swiftf0-precision/`.
+- [x] **Phase 14.3 – SwiftF0 SOTA Precision**: Verify LEV + median + hysteresis; add tuner bar (cents). Milestone: `.planning/milestones/swiftf0-precision/`.
 - [ ] **Optional**: Phase 14.4 round-trip calibration wizard (bip → mic → measured lag) for Pro mode.
-- [ ] Implement local database for session persistence (if not done).
-- [ ] Create Mastery Progress Map visualization.
+- [x] Implement local database for session persistence (if not done).
+- [x] Create Mastery Progress Map visualization.

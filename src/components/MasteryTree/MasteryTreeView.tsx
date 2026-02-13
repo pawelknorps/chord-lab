@@ -1,21 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useMasteryTreeStore, CurriculumNodeId } from '../../core/store/useMasteryTreeStore';
 import { Trophy, Lock, Rocket, Music, BookOpen } from 'lucide-react';
 import { MasteryNodeDetail } from './MasteryNodeDetail';
-
-const NODE_POSITIONS: Record<string, { x: number; y: number }> = {
-    'foundations': { x: 400, y: 80 },
-    'blues-basics': { x: 200, y: 200 },
-    'major-251': { x: 600, y: 200 },
-    'swing-feel': { x: 400, y: 200 },
-    'secondary-dominants': { x: 600, y: 350 },
-    'minor-tonality': { x: 800, y: 350 },
-    'rhythm-changes': { x: 300, y: 350 },
-    'modal-interchange': { x: 600, y: 500 },
-    'tritone-sub': { x: 800, y: 500 },
-    'upper-structures': { x: 800, y: 650 }
-};
+import { useForceLayout } from '../../hooks/useForceLayout';
 
 const CATEGORY_ICONS: Record<string, any> = {
     'harmonic': Music,
@@ -27,16 +15,40 @@ const CATEGORY_ICONS: Record<string, any> = {
 export const MasteryTreeView: React.FC = () => {
     const { nodes, xpByNode } = useMasteryTreeStore();
     const [selectedNodeId, setSelectedNodeId] = useState<CurriculumNodeId | null>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
+    const [width, setWidth] = useState(1000);
+    const [height, setHeight] = useState(800);
 
-    const connections: [string, string][] = [];
-    Object.values(nodes).forEach(node => {
-        node.parentIds.forEach(parentId => {
-            connections.push([parentId, node.id]);
+    useEffect(() => {
+        if (containerRef.current) {
+            setWidth(containerRef.current.offsetWidth);
+            setHeight(containerRef.current.offsetHeight);
+        }
+    }, []);
+
+    const initialNodes = useMemo(() => Object.values(nodes).map(n => ({ id: n.id })), [nodes]);
+    const connections = useMemo(() => {
+        const edges: { source: string, target: string }[] = [];
+        Object.values(nodes).forEach(node => {
+            node.parentIds.forEach(parentId => {
+                edges.push({ source: parentId, target: node.id });
+            });
         });
-    });
+        return edges;
+    }, [nodes]);
+
+    const nodePositions = useForceLayout(initialNodes, connections, width, height);
+    const nodePositionsMap = useMemo(() => {
+        const map: Record<string, { x: number; y: number }> = {};
+        nodePositions.forEach(node => {
+            map[node.id] = { x: node.x, y: node.y };
+        });
+        return map;
+    }, [nodePositions]);
+
 
     return (
-        <div className="relative w-full h-full bg-[#0a0a0c] overflow-auto p-12 rounded-3xl border border-white/5 shadow-2xl">
+        <div ref={containerRef} className="relative w-full h-full bg-[#0a0a0c] overflow-auto p-12 rounded-3xl border border-white/5 shadow-2xl">
             {/* Header */}
             <div className="absolute top-8 left-12 z-10">
                 <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
@@ -46,23 +58,23 @@ export const MasteryTreeView: React.FC = () => {
             </div>
 
             {/* SVG Connections Layer */}
-            <svg className="absolute inset-0 w-[1000px] h-full pointer-events-none" style={{ minHeight: '800px' }}>
+            <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ minHeight: '800px' }}>
                 <defs>
                     <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="100%">
                         <stop offset="0%" stopColor="#8b5cf6" />
                         <stop offset="100%" stopColor="#ec4899" />
                     </linearGradient>
                 </defs>
-                {connections.map(([from, to], idx) => {
-                    const fromPos = NODE_POSITIONS[from];
-                    const toPos = NODE_POSITIONS[to];
+                {connections.map(({ source, target }, idx) => {
+                    const fromPos = nodePositionsMap[source];
+                    const toPos = nodePositionsMap[target];
                     if (!fromPos || !toPos) return null;
 
-                    const isMastered = nodes[from].unlockStatus === 'mastered';
+                    const isMastered = nodes[source]?.unlockStatus === 'mastered';
 
                     return (
                         <motion.line
-                            key={`${from}-${to}-${idx}`}
+                            key={`${source}-${target}-${idx}`}
                             x1={fromPos.x}
                             y1={fromPos.y}
                             x2={toPos.x}
@@ -79,9 +91,9 @@ export const MasteryTreeView: React.FC = () => {
             </svg>
 
             {/* Nodes Layer */}
-            <div className="relative w-[1000px] min-h-[800px]">
+            <div className="relative w-full h-full" style={{ minHeight: '800px' }}>
                 {Object.values(nodes).map((node) => {
-                    const pos = NODE_POSITIONS[node.id];
+                    const pos = nodePositionsMap[node.id];
                     if (!pos) return null;
 
                     const Icon = CATEGORY_ICONS[node.category] || Music;
@@ -97,6 +109,8 @@ export const MasteryTreeView: React.FC = () => {
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={() => setSelectedNodeId(node.id)}
+                            animate={{ x: pos.x, y: pos.y }}
+                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
                         >
                             {/* Outer Progress Ring */}
                             <svg className="absolute -inset-4 w-24 h-24 rotate-[-90deg]">

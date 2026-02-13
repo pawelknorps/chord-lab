@@ -20,6 +20,7 @@ function classifyCents(cents: number): IntonationClassification {
 export function useIntonationHeatmap(root: string = 'C', scaleName: string = 'major') {
   const scaleNotes = Scale.notes(root, scaleName);
   const [results, setResults] = useState<Map<number, ScaleDegreeResult>>(new Map());
+  const [pitchHistory, setPitchHistory] = useState<{ pitch: number, time: number }[]>([]);
   const [droneActive, setDroneActive] = useState(false);
   const lastDegreeRef = useRef<number | null>(null);
 
@@ -54,6 +55,9 @@ export function useIntonationHeatmap(root: string = 'C', scaleName: string = 'ma
       if (!pitch || pitch.clarity < MIN_CLARITY || pitch.frequency <= 0) return;
       const info = frequencyToNote(pitch.frequency);
       if (!info) return;
+
+      setPitchHistory(prev => [...prev, { pitch: info.centsDeviation, time: performance.now() }]);
+
       const degree = getDegreeFromPitchClass(info.pitchClass);
       if (degree == null) return;
       if (lastDegreeRef.current === degree) return;
@@ -70,6 +74,7 @@ export function useIntonationHeatmap(root: string = 'C', scaleName: string = 'ma
   }, []);
   const reset = useCallback(() => {
     setResults(new Map());
+    setPitchHistory([]);
     lastDegreeRef.current = null;
   }, []);
 
@@ -78,6 +83,7 @@ export function useIntonationHeatmap(root: string = 'C', scaleName: string = 'ma
     root,
     scaleName,
     results,
+    pitchHistory,
     droneActive,
     startDrone,
     stopDrone,

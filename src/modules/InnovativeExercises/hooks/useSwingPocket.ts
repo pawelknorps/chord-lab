@@ -17,6 +17,7 @@ export function useSwingPocket(inputSource: ExerciseInputSource = 'mic') {
   const { lastNote } = useMidi();
 
   const [bpm, setBpm] = useState(DEFAULT_BPM);
+  const [swingRatio, setSwingRatio] = useState(0.66);
   const [isMetronomeRunning, setIsMetronomeRunning] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [startTime, setStartTime] = useState<number | null>(null);
@@ -66,6 +67,7 @@ export function useSwingPocket(inputSource: ExerciseInputSource = 'mic') {
   const startMetronome = useCallback(async () => {
     await Tone.start();
     Tone.Transport.bpm.value = bpm;
+    Tone.Transport.swing = swingRatio;
     Tone.Transport.timeSignature = [4, 4];
     if (!clickRef.current) {
       clickRef.current = new Tone.Synth({ oscillator: { type: 'sine' }, volume: -6 }).toDestination();
@@ -80,7 +82,7 @@ export function useSwingPocket(inputSource: ExerciseInputSource = 'mic') {
     }, '4n').start(0);
     Tone.Transport.start();
     setIsMetronomeRunning(true);
-  }, [bpm]);
+  }, [bpm, swingRatio]);
 
   const stopMetronome = useCallback(() => {
     metronomeLoopRef.current?.dispose();
@@ -137,6 +139,8 @@ export function useSwingPocket(inputSource: ExerciseInputSource = 'mic') {
   return {
     bpm,
     setBpm,
+    swingRatio,
+    setSwingRatio,
     isMetronomeRunning,
     isRecording,
     onsets,

@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Mic, Keyboard, RotateCcw } from 'lucide-react';
 import { useSwingPocket } from '../hooks/useSwingPocket';
+import { gamificationService } from '../services/gamificationService';
+import { AchievementsList } from './AchievementsList';
 import type { ExerciseInputSource } from '../../JazzKiller/core/ExerciseInputAdapter';
 import type { InnovativeExerciseInitialParams } from '../types';
 import { innovativePanelContainerClass, innovativeSectionLabelClass } from '../InnovativeExercisesModule';
@@ -11,9 +13,12 @@ export interface SwingPocketPanelProps {
 
 export function SwingPocketPanel({ initialParams }: SwingPocketPanelProps) {
   const [inputSource, setInputSource] = useState<ExerciseInputSource>('mic');
+  const [score, setScore] = useState<number | null>(null);
   const {
     bpm,
     setBpm,
+    swingRatio,
+    setSwingRatio,
     isMetronomeRunning,
     isRecording,
     onsets,
@@ -31,6 +36,13 @@ export function SwingPocketPanel({ initialParams }: SwingPocketPanelProps) {
       setBpm(initialParams.tempo);
     }
   }, [initialParams?.tempo, setBpm]);
+
+  useEffect(() => {
+    if (result) {
+      const newScore = gamificationService.calculateSwingPocketScore(result);
+      setScore(newScore);
+    }
+  }, [result]);
 
   return (
     <div className={`${innovativePanelContainerClass} flex flex-col gap-6`}>
@@ -73,6 +85,19 @@ export function SwingPocketPanel({ initialParams }: SwingPocketPanelProps) {
             className="w-16 rounded-xl border border-white/10 bg-black/30 px-2 py-1.5 text-sm font-mono text-white"
           />
         </label>
+        <label className="flex items-center gap-2 text-xs font-bold text-neutral-400">
+          Swing
+          <input
+            type="range"
+            min={0.5}
+            max={0.75}
+            step={0.01}
+            value={swingRatio}
+            onChange={(e) => setSwingRatio(Number(e.target.value))}
+            className="w-24"
+          />
+          <span className="font-mono text-white">{swingRatio.toFixed(2)}</span>
+        </label>
         {!isMetronomeRunning ? (
           <button type="button" onClick={startMetronome} className="px-4 py-2 rounded-xl border border-amber-500 bg-amber-500/20 text-amber-400 text-xs font-bold hover:bg-amber-500/30 transition-all">
             Start metronome
@@ -105,9 +130,12 @@ export function SwingPocketPanel({ initialParams }: SwingPocketPanelProps) {
           <p className={innovativeSectionLabelClass}>Pocket Gauge</p>
           <p className="text-sm font-bold text-white">Swing ratio: <span className="text-amber-400 font-mono">{result.ratio.toFixed(2)}:1</span></p>
           <p className="text-sm font-bold text-white">Offset: <span className="font-mono">{result.offsetMs > 0 ? '+' : ''}{result.offsetMs.toFixed(0)} ms</span> {result.offsetMs > 0 ? '(lay back)' : result.offsetMs < 0 ? '(push)' : '(on grid)'}</p>
+          {score !== null && <p className="text-sm font-bold text-white">Score: <span className="text-amber-400 font-mono">{score.toFixed(0)}</span></p>}
           {feedbackText && <p className="text-xs text-amber-400 font-medium">{feedbackText}</p>}
         </div>
       )}
+
+      <AchievementsList />
 
       <p className="text-[10px] text-neutral-500">Play 8th notes in time with the metronome. Recording captures onset times and computes swing ratio and timing offset.</p>
     </div>

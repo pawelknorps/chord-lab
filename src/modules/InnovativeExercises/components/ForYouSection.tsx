@@ -1,13 +1,8 @@
-/**
- * Phase 30: "For You" / Recommended section (REQ-IER-08, REQ-IER-10).
- * Shows AI-generated recommendations; click launches exercise with recommended params.
- */
-
 import { useState, useEffect, useCallback } from 'react';
 import { Sparkles, RefreshCw, Loader2 } from 'lucide-react';
 import { getSummary } from '../services/InnovativeExerciseProgressService';
-import { generateInnovativeExerciseRecommendations } from '../ai/generateInnovativeExerciseRecommendations';
-import { getParamsForLevel } from '../config/innovativeExerciseLevels';
+import { generateInnovativeExerciseRecommendations, InnovativeExerciseDifficulty } from '../ai/generateInnovativeExerciseRecommendations';
+import { getParamsForDifficulty } from '../config/innovativeExerciseDifficulty';
 import type { InnovativeExerciseRecommendation, InnovativeExerciseId } from '../ai/generateInnovativeExerciseRecommendations';
 import type { InnovativeExerciseInitialParams } from '../types';
 
@@ -18,6 +13,17 @@ const EXERCISE_LABELS: Record<InnovativeExerciseId, string> = {
   'swing-pocket': 'Swing Pocket Validator',
   'call-response': 'Call and Response',
   'ghost-rhythm': 'Ghost Rhythm Poly-Meter',
+};
+
+const difficultyToNumber = (difficulty: InnovativeExerciseDifficulty | number | undefined): number => {
+  if (typeof difficulty === 'number') return difficulty;
+  if (!difficulty) return 50;
+  switch (difficulty) {
+    case 'beginner': return 25;
+    case 'intermediate': return 50;
+    case 'advanced': return 75;
+    default: return 50;
+  }
 };
 
 export interface ForYouSectionProps {
@@ -50,17 +56,8 @@ export function ForYouSection({ onSelect }: ForYouSectionProps) {
   }, [loadRecommendations]);
 
   const handleCardClick = (rec: InnovativeExerciseRecommendation) => {
-    const level = rec.params?.level;
-    const params: InnovativeExerciseInitialParams = level != null
-      ? getParamsForLevel(rec.exerciseId, level) as InnovativeExerciseInitialParams
-      : {
-          key: rec.params?.key,
-          progressionId: rec.params?.progressionId,
-          chords: rec.params?.chords,
-          lickId: rec.params?.lickId,
-          tempo: rec.params?.tempo,
-          level: rec.params?.level,
-        };
+    const difficulty = difficultyToNumber(rec.difficulty);
+    const params: InnovativeExerciseInitialParams = getParamsForDifficulty(rec.exerciseId, difficulty);
     onSelect(rec.exerciseId, params);
   };
 
@@ -103,9 +100,9 @@ export function ForYouSection({ onSelect }: ForYouSectionProps) {
             >
               <span className="font-bold text-white block">
                 {EXERCISE_LABELS[rec.exerciseId]}
-                {(rec.difficulty || rec.params?.level) && (
+                {rec.difficulty && (
                   <span className="text-neutral-500 font-normal ml-1">
-                    • {rec.difficulty ?? `Level ${rec.params?.level ?? 1}`}
+                    • {typeof rec.difficulty === 'number' ? `Difficulty ${rec.difficulty}` : rec.difficulty}
                   </span>
                 )}
               </span>
@@ -117,3 +114,4 @@ export function ForYouSection({ onSelect }: ForYouSectionProps) {
     </div>
   );
 }
+
