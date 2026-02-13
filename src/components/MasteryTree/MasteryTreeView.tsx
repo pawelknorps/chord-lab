@@ -20,10 +20,20 @@ export const MasteryTreeView: React.FC = () => {
     const [height, setHeight] = useState(800);
 
     useEffect(() => {
-        if (containerRef.current) {
-            setWidth(containerRef.current.offsetWidth);
-            setHeight(containerRef.current.offsetHeight);
-        }
+        const el = containerRef.current;
+        if (!el) return;
+        const updateSize = () => {
+            if (containerRef.current) {
+                const w = containerRef.current.offsetWidth;
+                const h = containerRef.current.offsetHeight;
+                setWidth(w || 1000);
+                setHeight(h || 800);
+            }
+        };
+        updateSize();
+        const ro = new ResizeObserver(updateSize);
+        ro.observe(el);
+        return () => ro.disconnect();
     }, []);
 
     const initialNodes = useMemo(() => Object.values(nodes).map(n => ({ id: n.id })), [nodes]);
@@ -71,16 +81,15 @@ export const MasteryTreeView: React.FC = () => {
                     if (!fromPos || !toPos) return null;
 
                     const isMastered = nodes[source]?.unlockStatus === 'mastered';
+                    const d = `M ${fromPos.x} ${fromPos.y} L ${toPos.x} ${toPos.y}`;
 
                     return (
-                        <motion.line
+                        <motion.path
                             key={`${source}-${target}-${idx}`}
-                            x1={fromPos.x}
-                            y1={fromPos.y}
-                            x2={toPos.x}
-                            y2={toPos.y}
+                            d={d}
+                            fill="none"
                             stroke={isMastered ? "url(#lineGrad)" : "rgba(255,255,255,0.1)"}
-                            strokeWidth={isMastered ? "3" : "2"}
+                            strokeWidth={isMastered ? 3 : 2}
                             strokeDasharray={isMastered ? "0" : "5,5"}
                             initial={{ pathLength: 0 }}
                             animate={{ pathLength: 1 }}
@@ -109,8 +118,6 @@ export const MasteryTreeView: React.FC = () => {
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={() => setSelectedNodeId(node.id)}
-                            animate={{ x: pos.x, y: pos.y }}
-                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
                         >
                             {/* Outer Progress Ring */}
                             <svg className="absolute -inset-4 w-24 h-24 rotate-[-90deg]">

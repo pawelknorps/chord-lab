@@ -62,6 +62,8 @@ export const GHOST_RHYTHM_GRID_BEATS = [0, 4 / 3, 8 / 3] as const;
 /** Phase 30: Optional initial params for parameterized launch (AI recommendation or level). */
 export interface InnovativeExerciseInitialParams {
   key?: string;
+  root?: string;
+  scale?: string;
   progressionId?: string;
   chords?: string[];
   lickId?: string;
