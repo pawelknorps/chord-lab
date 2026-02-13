@@ -271,3 +271,14 @@
   - [ ] **Wave 2**: WASM/Worklet soft-knee compressor; jazz trio params; trio connected to parallel mixer (REQ-HIFI-03–05).
   - [ ] **Wave 3**: RMS pre/post measurement; automatic makeup gain; "Mastering" / "Pro Mix" toggle (REQ-HIFI-06–08).
   - [ ] **Wave 4**: Drums Air band (+3 dB @ 12 kHz) (REQ-HIFI-09).
+
+## Phase 23: Audio Glitches & Architecture (Critical Feasibility)
+
+*Focus: Fix audio glitches forever via **strict thread isolation** and **architecture expansion**—Main / AudioWorklet / Worker A (analysis) / Worker B (AI); &lt;10 ms real-time path; AI feedback post-phrase only.*
+
+- **Success Criteria**: No dropouts when mic + playback + SwiftF0 + optional Gemini; worklet stays light; pitch inference in workers only; data flow and SAB ownership documented.
+- **Milestone**: `.planning/milestones/audio-glitches-architecture/` (PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md, RESEARCH.md).
+- **Tasks**:
+  - [ ] **Phase 1**: Verify worklet light (REQ-AG-01), pitch in workers only (REQ-AG-02), document data flow (REQ-AG-06).
+  - [ ] **Phase 2**: Async AI—Gemini never blocks real-time path (REQ-AG-03); main-thread guarantees (REQ-AG-04).
+  - [ ] **Phase 3**: Latency budget &lt;10 ms (REQ-AG-05); glitch verification under combined load (REQ-AG-07).
