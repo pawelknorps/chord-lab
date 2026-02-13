@@ -1,33 +1,43 @@
 # Architecture
 
 ## High-Level Pattern
-The application follows a **Modular Monolith** architecture within a React frontend.
-- **Modules**: Features are encapsulated in `src/modules/` (e.g., `ChordBuildr`, `JazzKiller`, `Tonnetz`).
-- **Core**: Shared business logic, state, and services reside in `src/core/`.
-- **UI**: Components are split between module-specific components and shared primitives.
+
+**Modular Monolith** inside a React SPA. Features live in `src/modules/`; shared logic and services in `src/core/`. UI is split between module-specific components and shared primitives.
 
 ## Layers
-1. **Presentation Layer**: React Components (`.tsx`).
-   - `pages/`: Top-level route views.
-   - `modules/*/components/`: Feature-specific UI.
-   - `shared/components/` & `src/components/`: Reusable UI bricks.
-2. **State Management Layer**:
-   - `src/core/store/`: Global Zustand stores (Session, Mastery, Settings).
+
+1. **Presentation**: React components (`.tsx`).
+   - `src/pages/`: Route-level views.
+   - `src/modules/*/components/`: Feature UI.
+   - `src/components/`: Shared layout and UI (Dashboard, ChordLabDashboard, shared components, `components/ui`).
+2. **State**:
+   - `src/core/store/`: Zustand stores (Session, Mastery, Scoring, Settings, Practice, Solo, SessionHistory, MasteryTree, etc.).
    - Component-level `useState` / `useReducer`.
-   - `signals`: For high-frequency audio parameters (e.g. current playback time, volume).
-3. **Domain/Logic Layer**:
-   - `src/core/theory/`: Music theory engines (Harmony, Scales).
-   - `src/core/audio/`: Global audio context and signal chains.
-   - `src/modules/*/utils/` or `logic.ts`: Module-specific calculators.
-4. **Service/Integration Layer**:
-   - `src/core/services/`: Bridges to external libs (Tone.js wrapper, MIDI handlers).
+   - Preact Signals for high-frequency audio/playback (e.g. `jazzSignals`, `audioSignals`).
+3. **Domain / Logic**:
+   - `src/core/theory/`: Music theory (harmony, scales, walking bass, comping, groove, chord DNA, tonality segmentation).
+   - `src/core/audio/`: Audio context, pitch detection, SwiftF0, worklets, workers, global audio graph.
+   - `src/core/director/`: DirectorService for routines.
+   - `src/modules/*/utils/`, `*/core/`: Module-specific engines and calculators.
+4. **Services / Integration**:
+   - `src/core/services/`: AudioManager, TrendAnalysisService, LocalAgentService, etc.
+   - `src/core/supabase/`: Supabase client and auth.
+
+## Concurrency Model
+
+- **Main thread**: React UI, Zustand, routing.
+- **AudioWorklet**: Pitch-processor worklet (MPM or passthrough to PCM); runs in audio thread; writes to SharedArrayBuffer. Requires COOP/COEP (set in Vite server/preview).
+- **Workers**: SwiftF0Worker (ONNX pitch), MpmWorker (NSDF fallback), BandWorker, AiWorker. Used for heavy or blocking work off the main thread.
+- **Pitch pipeline**: Mic → dedicated AudioContext (not Tone’s) → worklet → SharedArrayBuffer; optional SwiftF0 worker reads PCM SAB and writes refined pitch; UI/useITMPitchStore poll or subscribe to pitch state.
 
 ## Data Flow
-- **Unidirectional**: React props for UI state.
-- **Global Actions**: Components dispatch actions to Zustand stores.
-- **Reactive Signals**: Audio engine updates signals; UI subscribes directly to signals to update visuals (e.g. piano key press) without full component re-renders.
 
-## Key Entry Points
-- **Application Boot**: `src/main.tsx` -> `src/App.tsx`.
-- **Routing**: `src/App.tsx` (likely defines `Routes`).
-- **Audio Init**: `src/core/services/AudioManager.ts` (initialized on user interaction).
+- **UI**: Unidirectional; props and context.
+- **Global actions**: Components call Zustand actions.
+- **Reactive signals**: Audio/playback update signals; UI subscribes for smooth visuals without full tree re-renders.
+
+## Entry Points
+
+- **Boot**: `src/main.tsx` → `App.tsx` (StrictMode, AudioProvider, MidiProvider, AuthProvider, BrowserRouter).
+- **Routing**: `App.tsx` defines `<Routes>`; Dashboard wraps child routes; heavy modules are lazy-loaded with `ModuleSkeleton` fallbacks.
+- **Audio**: `AudioManager` and user gesture (e.g. start button) resume context; pitch pipeline started via `useITMPitchStore` / `useHighPerformancePitch`.

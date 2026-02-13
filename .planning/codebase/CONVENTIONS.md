@@ -1,30 +1,42 @@
 # Coding Conventions
 
 ## File Naming
-- **Components**: PascalCase (e.g., `ChordPianoComponent.tsx`, `Tonnetz.tsx`).
-- **Logic/Utilities**: camelCase (e.g., `tonnetzLogic.ts`, `chordManager.ts`).
-- **Stores/Hooks**: `use` prefix + PascalCase (e.g., `useSessionStore.ts`).
-- **Styles**: PascalCase matches component (e.g., `Layout.css`), though newer code uses Tailwind.
+
+- **Components**: PascalCase (e.g. `ChordLabDashboard.tsx`, `MasteryTreeView.tsx`).
+- **Logic/utilities**: camelCase (e.g. `jazzTeacherLogic.ts`, `meterTranslator.ts`).
+- **Stores/hooks**: `use` prefix + PascalCase (e.g. `useITMPitchStore.ts`, `useJazzBand.ts`).
+- **Styles**: Component-matched names; Tailwind preferred; some CSS modules (e.g. `NoteWaterfall.module.css`).
 
 ## Component Structure
-- **Functional Components**: React Functional Components with Hooks.
-- **Props Interface**: Defined usually above the component or imported types.
-- **Colocation**: Module-specific components stay within `src/modules/<ModuleName>/components`.
+
+- **Functional components**: React function components with hooks.
+- **Props**: Interfaces above or beside the component or imported from types.
+- **Colocation**: Module UI lives under `src/modules/<ModuleName>/components/`.
 
 ## Styling
-- **Tailwind CSS**: The primary direction (v4).
-- **CSS Modules/Files**: Legacy usage exists (`.css` files in modules), but new development prefers utility classes.
-- **Radix UI**: Used for complex interactives (Dialog, Slider, Popover).
+
+- **Tailwind CSS 4**: Primary styling (utility-first).
+- **CSS modules**: Used where needed (e.g. NoteWaterfall).
+- **Radix UI**: Dialogs, sliders, popovers, checkbox, select, etc.
 
 ## State Management
-- **Zustand**: Preferred for global app state (user session, global settings).
-- **Signals**: Used for performance-critical mutable state (audio playback head, visualizers).
-- **Context**: Used sparingly, mostly for dependency injection or theming.
+
+- **Zustand**: Global app state (session, scoring, mastery, settings, practice, solo).
+- **Signals**: High-frequency or audio-driven state (playback, visualizers).
+- **Context**: Auth, Audio, MIDI providers; used for injection and cross-cutting concerns.
 
 ## Type Safety
-- **Strict Mode**: TypeScript strict mode seems enabled.
-- **Interfaces**: Used for defining data shapes (Chords, Scales, UserSettings).
+
+- **TypeScript**: Strict mode; `noUnusedLocals`, `noUnusedParameters`, `noFallthroughCasesInSwitch`, `noUncheckedSideEffectImports`.
+- **Types**: Interfaces for data shapes; types in `modules/*/types` or next to modules.
+
+## Linting
+
+- **ESLint**: Flat config (`eslint.config.js`): `@eslint/js`, `typescript-eslint`, `eslint-plugin-react-hooks`, `eslint-plugin-react-refresh`.
+- **Script**: `npm run lint` runs ESLint on the project.
 
 ## Audio
-- **Tone.js**: The standard for all synthesis and scheduling.
-- **User Interaction**: Audio context must resume on first user interaction. Usually handled by an overlay or start button.
+
+- **Tone.js**: Synthesis and transport/scheduling.
+- **User gesture**: Audio context resumed on first user interaction (overlay or start button).
+- **Pitch**: Dedicated AudioContext for mic (not Tone’s); worklets + workers; SharedArrayBuffer where used.

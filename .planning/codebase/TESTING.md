@@ -1,17 +1,29 @@
 # Testing Strategy
 
 ## Framework
-- **Runner**: `vitest`
-- **Frontend**: Likely `react-testing-library` (implied by typical Vitest usage, though explicit dependency check needed).
+
+- **Runner**: Vitest (`vitest`, `^4.0.18`).
+- **Config**: In `vite.config.ts`: `include: ['src/**/*.test.{ts,tsx}']`, `globals: true`, `environment: 'jsdom'`.
+- **No React Testing Library**: Not in package.json; tests are unit/integration style with Vitest + jsdom.
 
 ## Test Locations
-- **Co-located**: Some tests are found near the code (`src/utils/theoryEngine.test.ts`).
-- **Module Tests**: `src/modules/ChordBuildr/test/` suggests some modules have dedicated test folders.
+
+- **Co-located**: Tests sit next to source (`*.test.ts`, `*.test.tsx`) under `src/`.
+- **Examples**: `core/theory/GrooveManager.test.ts`, `RhythmEngine.test.ts`, `DrumEngine.test.ts`, `WalkingBassEngine.test.ts`, `CompingEngine.test.ts`, `TonalitySegmentationEngine.test.ts`, `FunctionalLabelingEngine.test.ts`, `liveHarmonicGrounding.test.ts`, `BassRhythmVariator.test.ts`, `ConceptAnalyzer.test.ts`; `core/audio/SwiftF0Worker.test.ts`, `swiftF0Inference.test.ts`, `CrepeStabilizer.test.ts`, `PitchMemory.test.ts`, `sharedAudioContext.test.ts`, `audioGlitchDiagnosis.test.ts`; `modules/InnovativeExercises/hooks/useVoiceLeadingMaze.test.ts`, `core/SwingAnalysis.test.ts`; `modules/JazzKiller/hooks/useJazzPlayback.test.ts`, `useJazzBand.playback.test.ts`, `StandardsExerciseEngine.test.ts`, `trioContext.test.ts`, `meterTranslator.test.ts`, `jazzTeacherLogic.phase15.test.ts`; `scripts/scanIrealChords.test.ts`; `utils/theoryEngine.test.ts`; `core/services/aiDetection.test.ts`; `core/theory/chordDetection.test.ts`.
 
 ## Coverage
-- **Unit Tests**: Logic in `utils` and `core/theory` is the primary target.
-- **Component Tests**: Sparse. Focusing on logic engines seems to be the current pattern.
-- **E2E**: No Playwright/Cypress config found in root, suggesting no E2E tests currently.
+
+- **Unit**: Strong in `core/theory` and `core/audio`; engines and pure logic are primary targets.
+- **Hooks/modules**: Some hook and module tests (e.g. JazzKiller, InnovativeExercises).
+- **Component tests**: Sparse; no RTL, so UI is mostly untested.
+- **E2E**: No Playwright/Cypress config in root.
+
+## Scripts
+
+- `npm run test`: Vitest watch.
+- `npm run test:run`: Vitest single run.
+- `npm run scan:chords`: `vitest run --run src/scripts/scanIrealChords.test.ts`.
 
 ## Mocking
-- **Audio**: `tone` often needs mocking in CI environments. `setup.ts` likely handles this.
+
+- **Audio/Tone**: Tests that touch Tone or Web Audio may need mocks or stubs; no global test setup file was found in root — consider a `vitest.setup.ts` if needed for Tone/audio.

@@ -2,60 +2,67 @@
 
 ## Root
 
-- `vite.config.ts`: Build configuration.
-- `package.json`: Dependencies.
-- `tsconfig.json`: TypeScript configuration.
-- `.eslintrc.cjs` / `eslint.config.js`: Linting rules.
+- `vite.config.ts`: Vite config, Vitest (`src/**/*.test.{ts,tsx}`), PWA, COOP/COEP headers.
+- `package.json`: Scripts (`dev`, `build`, `test`, `test:run`, `lint`, `generate:midi`, `generate:lessons`, etc.).
+- `tsconfig.json`: References `tsconfig.app.json`, `tsconfig.node.json`.
+- `tsconfig.app.json`: App TS config (ES2022, strict, `src` only; excludes `src/circle-chords-0.1.0`, `src/chord-buildr-4.3`).
+- `eslint.config.js`: ESLint flat config (TypeScript, react-hooks, react-refresh).
+- `.env.example`, `.env.local`: Env templates; app uses `VITE_*` for Supabase.
 
 ## Source (`src/`)
 
 ### Core (`src/core/`)
 
-The heart of the application, independent of specific UI modules.
+Shared business logic and infrastructure.
 
-The heart of the application, independent of specific UI modules.
-
-- `audio/`: Global audio graph setup (Tone.js context).
-- `drills/`: Logic for practice routines and exercises.
-- `midi/`: MIDI export/import logic.
-- `profiles/`: User profile and mastery data management.
-- `routing/`: Application-level navigation logic.
-- `services/`: Singleton services (AudioManager, JazzLibrary).
-- `state/`: Global state management utilities.
-- `store/`: Global state stores (Zustand).
-- `theory/`: Pure functions for harmonic analysis and generation.
+- `audio/`: Global audio graph, SwiftF0, CrepeStabilizer, pitch detection, SharedArrayBuffer/PitchMemory, MpmWorker, SwiftF0Worker, AiWorker, BandWorker, MicrophoneService, SwingEngine, globalAudio, sharedAudioContext, instrumentProfiles, frequencyToNote.
+- `director/`: DirectorService.
+- `drills/`: Practice routines (if present).
+- `routing/`: deepLinks and app-level navigation.
+- `services/`: AudioManager, TrendAnalysisService, LocalAgentService, CurriculumAnalysisService, etc.
+- `store/`: Zustand stores (useScoringStore, useSessionHistoryStore, useMasteryTreeStore, usePracticeStore, useSettingsStore, useSoloStore, etc.).
+- `supabase/`: client.ts, auth.ts.
+- `theory/`: Harmony, scales, chord parsing, GuideToneCalculator, WalkingBassEngine, DrumEngine, CompingEngine, ReactiveCompingEngine, GrooveManager, JazzMarkovEngine, ChordScaleEngine, TonalitySegmentationEngine, FunctionalLabelingEngine, ChordDna, liveHarmonicGrounding, etc.
 
 ### Modules (`src/modules/`)
 
-Vertical slices of functionality. Each folder corresponds to a major feature or "Lab".
+Feature slices; each has components, hooks, utils or core logic as needed.
 
-Vertical slices of functionality. Each folder corresponds to a major feature or "Lab".
-
-- `BarryHarris`: Chromatic approach notes and scale-of-6th concepts.
-- `BiTonalSandbox/`: Experimentation with bitonality.
-- `ChordBuildr/`: Interactive chord construction and discovery.
-- `ChordLab/`: Likely the original/main module or a specific lab.
-- `CircleChords/`: Circle of Fifths visualization.
-- `FunctionalEarTraining/`: Ear training games.
-- `GripSequencer/`: Fretboard-based sequencing.
-- `JazzKiller/`: Jazz standard analysis and playback.
-- `MidiLibrary/`: Browser for MIDI resources.
-- `NegativeMirror/`: Negative harmony visualization.
-- `RhythmArchitect/`: Polyrhythm and subdivision tools.
-- `tonnetz/`: Isometric grid visualization of harmony.
+- `ChordLab/`: Core chord lab UI.
+- `JazzKiller/`: Jazz standards, playback, chart, mixer, AI teacher, lick library, standards exercises, ireal-renderer.
+- `ITM/`: ITM pitch store, high-performance pitch, MasteryTree, TrendAnalysis, SegmentBuilder, PerformanceSegment, JazzPitchMonitor, pitch worklet code.
+- `InnovativeExercises/`: Ghost note match, intonation heatmap, voice-leading maze, swing pocket, call and response, ghost rhythm; hooks and panels.
+- `FunctionalEarTraining/`: Ear training levels and flow.
+- `RhythmArchitect/`: Polyrhythm, syncopation.
+- `Tonnetz/`, `NegativeMirror/`, `BarryHarris/`, `BiTonalSandbox/`, `GripSequencer/`, `CircleChords/`, `MidiLibrary/`: Additional labs/features.
 
 ### UI & Shared
 
-- `pages/`: Page components mapped to routes.
+- `pages/`: Route pages (ProgressPage, ProgressionsPage, MidiLibraryPage, TeacherDashboard, LickFeedPage, etc.).
+- `components/`: Layout (Dashboard), ChordLabDashboard, shared widgets, SessionHUD, PerformanceMonitor, ModuleSkeleton, GlobalMidiHandler, WorkbenchAiPanel, SendToMenu; `components/ui/`: button, dialog, slider, checkbox, select, badge, command, popover (Radix-based).
+- `context/`: AudioContext, MidiContext, AuthContext.
+- `hooks/`: usePitchTracker, useSupabaseProgressSync, etc.
+- `utils/`: i18n, theoryEngine, polyrhythmEngine, etc.
+- `data/`: jjazzlab-style-registry, jjazzlab-drum-patterns, etc.
+- `scripts/`: scanIrealChords (and test).
 
-- `pages/`: Page components mapped to routes.
-- `components/`: Generic UI components (likely ShadCN/Radix wrappers).
-- `shared/`: Shared domain components (e.g., Virtual Piano, Fretboard).
-- `context/`: React Context providers for Audio and MIDI.
-- `utils/`: Legacy or general helper functions (`i18n.ts`, `standards.ts`).
-- `hooks/`: Custom React hooks (e.g., `useAudio`, `useWindowSize`).
+### Assets & Entry
 
-### Assets
-- `index.css`: Tailwind imports and global styles.
-- `App.tsx`: Main layout and router.
-- `main.tsx`: Entry point.
+- `index.css`: Global/Tailwind.
+- `App.tsx`: Providers, router, lazy routes.
+- `main.tsx`: React root.
+
+## Public
+
+- `worklets/pitch-processor.js`: Bundled/copied pitch worklet (or built from ITM worklet code).
+
+## Excluded from App Build
+
+- `src/circle-chords-0.1.0`, `src/chord-buildr-4.3`: Excluded via tsconfig.app.json.
+- `legacy_projects/`: Separate legacy apps (e.g. circle-chords-0.1.0, chord-buildr-4.3).
+
+## Naming
+
+- **Components**: PascalCase (e.g. `ChordLabDashboard.tsx`).
+- **Stores/hooks**: `use*` for hooks, `use*Store` for Zustand.
+- **Theory/audio**: camelCase modules (e.g. `walkingBassEngine.ts`).

@@ -2,24 +2,24 @@
 
 ## External Services & APIs
 
-- **None detected**: No explicit AWS, Firebase, Supabase, or other cloud service SDKs found in `package.json`.
-- **Local/Browser APIs**: Heavy usage of Web Audio API (via Tone.js) and Web MIDI API.
-- **Context Providers**: Custom React Contexts (`AudioContext`, `MidiContext`) manage global state and lifecycle for these APIs.
+- **Supabase**: Backend for auth and data. Used via `@supabase/supabase-js`; client in `src/core/supabase/client.ts`. Requires `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`. When either is missing or URL invalid, a no-op mock client is used (no real SDK calls). `.env.example` references `VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY` — code expects `VITE_SUPABASE_ANON_KEY`; align env var names for new setups.
+- **Local/Browser APIs**: Web Audio API (via Tone.js), Web MIDI API (`@types/webmidi`). Custom contexts: `AudioContext`, `MidiContext`, `AuthContext`.
 
-## Data formats
+## Data Formats
 
-- **iReal Pro**: `ireal-reader` integration to parse charts locally.
-- **MIDI**: `@tonejs/midi` for parsing/generating MIDI files.
-- **JSON Standards**: Custom JSON format for jazz standards storage and analysis.
+- **iReal Pro**: `ireal-reader` for parsing charts locally.
+- **MIDI**: `@tonejs/midi` for parsing/generating MIDI.
+- **JSON Standards**: Custom JSON for jazz standards (e.g. `src/modules/JazzKiller/utils/standards.json`).
 
 ## Internationalization
 
-- **i18next**: Local translation files (`src/utils/languages.json`) handle content localization.
+- **i18next**: Local translation files and `src/utils/i18n` for content localization.
 
 ## Machine Learning
 
-- **ml5.js**: Browser-based ML, likely accessing webcam or microphone for input.
+- **ml5.js**: Browser-based ML (e.g. input devices).
+- **ONNX (SwiftF0)**: `onnxruntime-web` for neural pitch detection in workers.
 
-## Instruments
+## PWA
 
-- **ToneJS Instruments**: Uses hosted or local sample libraries for playback (Piano, Guitar, Harp).
+- **Vite PWA**: `vite-plugin-pwa` with `registerType: 'autoUpdate'`; manifest and assets configured.
