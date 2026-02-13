@@ -1,5 +1,12 @@
 import React, { useRef, useEffect } from 'react';
-import * as Tone from 'tone';
+import { midiToPianoKeyLayout, DEFAULT_WATERFALL_OCTAVE_RANGE, type OctaveRange } from '../utils/pianoKeyLayout';
+import { UnifiedPiano } from '../../../components/shared/UnifiedPiano';
+import styles from './NoteWaterfall.module.css';
+
+/** Wall-clock time in seconds for 60fps scroll independent of Transport (REQ-STUDIO-06). */
+function wallClockSeconds(): number {
+    return typeof performance !== 'undefined' ? performance.now() / 1000 : 0;
+}
 
 interface NoteEvent {
     midi: number;
@@ -11,21 +18,25 @@ interface NoteEvent {
 
 interface NoteWaterfallProps {
     onNoteEvent?: (callback: (note: NoteEvent) => void) => void;
+    /** Octave range — must match the piano so falling notes align with keys */
+    octaveRange?: OctaveRange;
 }
 
-const NOTE_COLORS = {
-    'root': '#3b82f6',   // Blue
-    'third': '#10b981',  // Green
-    'fifth': '#eab308',  // Yellow
-    'seventh': '#ef4444', // Red
-    'extension': '#a855f7' // Purple
+const NOTE_COLORS: Record<NoteEvent['type'], string> = {
+    root: '#3b82f6',
+    third: '#10b981',
+    fifth: '#eab308',
+    seventh: '#ef4444',
+    extension: '#a855f7',
 };
 
-export const NoteWaterfall: React.FC<NoteWaterfallProps> = ({ onNoteEvent }) => {
+export const NoteWaterfall: React.FC<NoteWaterfallProps> = ({ onNoteEvent, octaveRange = DEFAULT_WATERFALL_OCTAVE_RANGE }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const activeNotesRef = useRef<NoteEvent[]>([]);
     const requestRef = useRef<number>();
+    const octaveRangeRef = useRef(octaveRange);
+    octaveRangeRef.current = octaveRange;
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -50,7 +61,7 @@ export const NoteWaterfall: React.FC<NoteWaterfallProps> = ({ onNoteEvent }) => 
             onNoteEvent((note) => {
                 activeNotesRef.current.push({
                     ...note,
-                    startTime: Tone.Transport.seconds
+                    startTime: wallClockSeconds()
                 });
             });
         }
@@ -62,39 +73,43 @@ export const NoteWaterfall: React.FC<NoteWaterfallProps> = ({ onNoteEvent }) => 
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
 
-        // Use Transport.seconds for frame-perfect alignment with audio (stops when transport stops)
-        const now = Tone.Transport.seconds;
-        const scrollSpeed = 200; // pixels per second
+        const now = wallClockSeconds();
+        const scrollSpeed = 180;
+        const viewH = canvas.height;
+        const maxAge = viewH / scrollSpeed + 0.5;
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        activeNotesRef.current = activeNotesRef.current.filter(n => {
-            const age = now - n.startTime;
-            return age < 5;
-        });
+        activeNotesRef.current = activeNotesRef.current.filter(n => now - n.startTime < maxAge);
 
-        const keyWidth = canvas.width / 48;
-        const startMidi = 36;
+        const w = canvas.width;
 
         activeNotesRef.current.forEach(note => {
-            const x = (note.midi - startMidi) * keyWidth;
+            const layout = midiToPianoKeyLayout(note.midi, octaveRangeRef.current);
+            if (!layout) return;
+
+            const x = layout.xCenter * w - (layout.width * w) / 2;
+            const keyWidthPx = layout.width * w;
             const age = now - note.startTime;
             const y = age * scrollSpeed;
-            const height = (note.duration || 0.5) * scrollSpeed;
+            const height = (note.duration || 0.4) * scrollSpeed;
 
-            const color = NOTE_COLORS[note.type] || '#ffffff';
+            const color = NOTE_COLORS[note.type] ?? '#ffffff';
             ctx.fillStyle = color;
-            ctx.globalAlpha = Math.max(0, 1 - (age / 5));
+            ctx.globalAlpha = Math.max(0, 1 - age / maxAge);
+
+            const pad = layout.isBlack ? 1 : 2;
+            const drawW = Math.max(2, keyWidthPx - pad * 2);
+            const drawX = x + (keyWidthPx - drawW) / 2;
 
             ctx.beginPath();
             if (ctx.roundRect) {
-                ctx.roundRect(x + 2, y, keyWidth - 4, height, 4);
+                ctx.roundRect(drawX, y, drawW, height, 3);
             } else {
-                ctx.rect(x + 2, y, keyWidth - 4, height);
+                ctx.rect(drawX, y, drawW, height);
             }
             ctx.fill();
-
-            ctx.shadowBlur = 15;
+            ctx.shadowBlur = 8;
             ctx.shadowColor = color;
             ctx.fill();
             ctx.shadowBlur = 0;
@@ -111,11 +126,18 @@ export const NoteWaterfall: React.FC<NoteWaterfallProps> = ({ onNoteEvent }) => 
     }, []);
 
     return (
-        <div ref={containerRef} className="w-full h-full">
+        <div ref={containerRef} className={styles.combined}>
+            <div className={styles.pianoWrap}>
+                <UnifiedPiano
+                    mode="playback"
+                    octaveRange={octaveRange}
+                    showLabels="none"
+                />
+            </div>
             <canvas
                 ref={canvasRef}
-                className="w-full h-full pointer-events-none opacity-40 mix-blend-screen block"
-                style={{ filter: 'blur(0.5px)' }}
+                className={styles.overlay}
+                aria-hidden
             />
         </div>
     );

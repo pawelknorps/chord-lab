@@ -37,6 +37,7 @@ export let drums: {
 } | null = null;
 
 let isInitialized = false;
+let initPromise: Promise<void> | null = null;
 
 // Visualization Callback
 type VisualizationCallback = (notes: number[]) => void;
@@ -61,14 +62,22 @@ let bassVol: Tone.Volume;
 let drumsVol: Tone.Volume;
 
 let masterLimiter: Tone.Limiter;
+/** Phase 22.1: Gain before limiter to target ~-14 LUFS on typical trio playback (REQ-STUDIO-05). Tune if needed. */
+let masterOutputGain: Tone.Gain;
 let masterEQ: Tone.EQ3;
 let masterBus: Tone.Gain;
+let backingBus: Tone.Gain;
+let monitorBus: Tone.Gain;
 
 // Phase 22: Parallel (NY) bus – trio sum → dry path + wet (compressor or worklet) → sumGain → masterBus
-const PARALLEL_DRY_GAIN = 0.4;
+// Phase 22.1 Studio Polish: 70% dry / 30% wet (REQ-STUDIO-01, REQ-STUDIO-03)
+const PARALLEL_DRY_GAIN = 0.7;
+const PARALLEL_WET_GAIN = 0.3;
 const JAZZ_COMPRESSOR_WORKLET_URL = '/worklets/jazz-compressor-processor.js';
 let trioSum: Tone.Gain;
 let parallelDryGain: Tone.Gain;
+/** Wet path gain (30%) so blended sum is 70 dry + 30 wet (REQ-STUDIO-03). */
+let parallelWetGain: Tone.Gain;
 let parallelSumGain: Tone.Gain;
 /** When loaded, wet path uses this instead of Tone.Compressor (soft-knee). */
 let wetPathWorklet: AudioWorkletNode | null = null;
@@ -82,7 +91,7 @@ const MAKEUP_UPDATE_MS = 100;
 const MAKEUP_MIN = 0.25;
 const MAKEUP_MAX = 4;
 
-// Phase 22 Wave 4: Drums Air band +3 dB @ 12 kHz (REQ-HIFI-09)
+// Phase 22 Wave 4 / 22.1: Drums Air band +2 dB @ 12 kHz (REQ-HIFI-09, REQ-STUDIO-04)
 let drumsAirBand: Tone.Filter;
 
 // Split-Brain Modules
@@ -95,327 +104,351 @@ let dissonanceTremolo: Tone.Tremolo | null = null;
 // Director guide instrument (Phase 5: context injection – cello-like timbre)
 let celloSynth: Tone.PolySynth | null = null;
 
-/** Phase 22 Wave 2: Load soft-knee compressor worklet and use as wet path when available (REQ-HIFI-03–05). */
+/** Phase 22 Wave 2 / 22.1: Load soft-knee compressor worklet (8:1, fast attack) as wet path (REQ-HIFI-03–05, REQ-STUDIO-02). */
 async function tryUseJazzCompressorWorklet(): Promise<void> {
-  if (wetPathWorklet || !trioSum || !compressor || !parallelSumGain) return;
+  if (wetPathWorklet || !trioSum || !compressor || !parallelWetGain) return;
   try {
     const toneCtx = Tone.getContext() as { rawContext?: AudioContext };
     const ac = toneCtx?.rawContext;
     if (!ac?.audioWorklet) return;
     await ac.audioWorklet.addModule(JAZZ_COMPRESSOR_WORKLET_URL);
     const workletNode = new AudioWorkletNode(ac, 'jazz-compressor-processor', {
-      processorOptions: { threshold: -18, ratio: 4, knee: 30, attack: 0.005, release: 0.15 }
+      processorOptions: { threshold: -18, ratio: 8, knee: 30, attack: 0.005, release: 0.15 }
     });
     trioSum.disconnect(compressor);
-    compressor.disconnect(parallelSumGain);
+    compressor.disconnect(parallelWetGain);
     Tone.connect(trioSum, workletNode);
-    Tone.connect(workletNode, parallelSumGain);
+    Tone.connect(workletNode, parallelWetGain);
     wetPathWorklet = workletNode;
   } catch {
     // Keep Tone.Compressor as wet path
   }
 }
 
-/** Ensure Tone uses a single native AudioContext with playback-optimized latency (avoids glitches when pitch + playback run together). */
+/** Ensure Tone uses a single native AudioContext with playback-optimized latency.
+ *  Only creates/sets a new context if Tone has none or an invalid one — never replaces
+ *  an existing valid context so the app stays on one engine (no detached playback).
+ *  Never replace if Tone already has a non-closed context (e.g. JazzKiller band nodes). */
 function ensureNativeAudioContext(): void {
   const NativeAC = typeof window !== 'undefined' ? (window as Window & { AudioContext?: typeof AudioContext }).AudioContext : undefined;
   if (!NativeAC) return;
   try {
     const toneCtx = Tone.getContext();
-    const raw = (toneCtx as { rawContext?: unknown }).rawContext;
-    if (!raw || !(raw instanceof NativeAC)) {
-      const nativeCtx = new NativeAC({ latencyHint: 'playback', sampleRate: 44100 });
-      Tone.setContext(nativeCtx);
-    }
+    const raw = (toneCtx as { rawContext?: AudioContext }).rawContext;
+    // Keep existing context if it's already a native AudioContext (single engine for whole app)
+    if (raw && raw instanceof NativeAC) return;
+    // Never replace a context that is in use (running or suspended) — avoids orphaning JazzKiller band nodes
+    if (raw && (raw as AudioContext).state !== 'closed') return;
+    const nativeCtx = new NativeAC({ latencyHint: 'playback', sampleRate: 44100 });
+    Tone.setContext(nativeCtx);
   } catch {
     // Tone not ready or no window
   }
 }
 
 export async function initAudio(): Promise<void> {
-  if (isInitialized) return;
-  ensureNativeAudioContext();
-  await Tone.start();
+  if (isInitialized) return Promise.resolve();
+  if (initPromise) return initPromise;
 
-  // --- FX CHAIN ---
-  reverb = new Tone.Reverb({
-    decay: 2.5,
-    preDelay: 0.1,
-    wet: reverbVolumeSignal.value
-  }).toDestination();
-  await reverb.generate();
+  initPromise = (async () => {
+    ensureNativeAudioContext();
+    await Tone.start();
 
-  pianoReverb = new Tone.Reverb({
-    decay: 3.0,
-    preDelay: 0.15,
-    wet: pianoReverbSignal.value
-  }).toDestination();
-  await pianoReverb.generate();
+    // --- FX CHAIN ---
+    reverb = new Tone.Reverb({
+      decay: 2.5,
+      preDelay: 0.1,
+      wet: reverbVolumeSignal.value
+    }).toDestination();
+    await reverb.generate();
 
-  masterLimiter = new Tone.Limiter(-0.5).toDestination();
-  masterEQ = new Tone.EQ3({
-    low: 0,
-    mid: -1,
-    high: 0,
-    lowFrequency: 250,
-    highFrequency: 2500
-  }).connect(masterLimiter);
+    pianoReverb = new Tone.Reverb({
+      decay: 3.0,
+      preDelay: 0.15,
+      wet: pianoReverbSignal.value
+    }).toDestination();
+    await pianoReverb.generate();
 
-  masterBus = new Tone.Gain(1).connect(masterEQ);
+    masterLimiter = new Tone.Limiter(-0.5).toDestination();
+    masterOutputGain = new Tone.Gain(1.8).connect(masterLimiter);
+    masterEQ = new Tone.EQ3({
+      low: 0,
+      mid: -1,
+      high: 0,
+      lowFrequency: 250,
+      highFrequency: 2500
+    }).connect(masterOutputGain);
 
-  // Phase 22 Wave 3: Makeup gain (RMS-matching) between parallel sum and masterBus
-  makeupGain = new Tone.Gain(1).connect(masterBus);
+    masterBus = new Tone.Gain(1).connect(masterEQ);
 
-  // Phase 22: Parallel bus – dry (Gain) + wet (compressor) summed into makeupGain
-  parallelSumGain = new Tone.Gain(1).connect(makeupGain);
-  compressor = new Tone.Compressor({
-    threshold: -18,
-    ratio: 4,
-    attack: 0.03,
-    release: 0.1
-  }).connect(parallelSumGain);
+    // REQ-SL-04: Strict signal path separation (Backing vs Monitor)
+    backingBus = new Tone.Gain(1).connect(masterBus);
+    monitorBus = new Tone.Gain(1).connect(masterBus);
 
-  trioSum = new Tone.Gain(1);
-  trioSum.connect(compressor);
-  parallelDryGain = new Tone.Gain(0);
-  trioSum.connect(parallelDryGain);
-  parallelDryGain.connect(parallelSumGain);
+    // Phase 22 Wave 3: Makeup gain (RMS-matching) between parallel sum and backingBus
+    makeupGain = new Tone.Gain(1).connect(backingBus);
 
-  masterVol = new Tone.Volume(0).connect(parallelSumGain);
+    // Phase 22: Parallel bus – dry (Gain) + wet (compressor) summed into makeupGain
+    parallelSumGain = new Tone.Gain(1).connect(makeupGain);
+    // Phase 22.1: Wet path sum node (30% gain) then into parallel sum (REQ-STUDIO-02, REQ-STUDIO-03)
+    parallelWetGain = new Tone.Gain(PARALLEL_WET_GAIN).connect(parallelSumGain);
+    compressor = new Tone.Compressor({
+      threshold: -18,
+      ratio: 8,
+      attack: 0.005,
+      release: 0.1
+    }).connect(parallelWetGain);
 
-  // --- BUSSES: piano to reverb + trio sum; bass to trio sum; drums via Air band (REQ-HIFI-09) ---
-  pianoVol = new Tone.Volume(pianoVolumeSignal.value);
-  pianoVol.connect(pianoReverb);
-  pianoVol.connect(trioSum);
-  bassVol = new Tone.Volume(bassVolumeSignal.value).connect(trioSum);
-  drumsAirBand = new Tone.Filter({ type: 'highshelf', frequency: 12000, gain: 3 }).connect(trioSum);
-  drumsVol = new Tone.Volume(drumsVolumeSignal.value).connect(drumsAirBand);
+    trioSum = new Tone.Gain(1);
+    trioSum.connect(compressor);
+    parallelDryGain = new Tone.Gain(0);
+    trioSum.connect(parallelDryGain);
+    parallelDryGain.connect(parallelSumGain);
 
-  // Phase 22 Wave 3: RMS meters for makeup (input = trio sum, output = parallel sum)
-  inputMeter = new Tone.Meter({ normalRange: true });
-  outputMeter = new Tone.Meter({ normalRange: true });
-  trioSum.connect(inputMeter);
-  parallelSumGain.connect(outputMeter);
-  if (makeupIntervalId != null) clearInterval(makeupIntervalId);
-  makeupIntervalId = setInterval(() => {
-    if (!makeupGain || !inputMeter || !outputMeter) return;
-    if (proMixEnabledSignal.value) {
-      const inRms = (typeof inputMeter.getValue === 'function' ? inputMeter.getValue() : 0) as number;
-      const outRms = (typeof outputMeter.getValue === 'function' ? outputMeter.getValue() : 0) as number;
-      const ratio = outRms > 1e-6 ? inRms / outRms : 1;
-      const makeup = Math.max(MAKEUP_MIN, Math.min(MAKEUP_MAX, ratio));
-      makeupGain.gain.rampTo(makeup, 0.1);
-    } else {
-      makeupGain.gain.rampTo(1, 0.05);
-    }
-  }, MAKEUP_UPDATE_MS);
+    masterVol = new Tone.Volume(0).connect(parallelSumGain);
 
-  // Unify reverb routing to master limiter too
-  reverb.connect(masterLimiter);
-  pianoReverb.connect(masterLimiter);
+    // --- BUSSES: piano to reverb + trio sum; bass to trio sum; drums via Air band (REQ-HIFI-09) ---
+    pianoVol = new Tone.Volume(pianoVolumeSignal.value);
+    pianoVol.connect(pianoReverb);
+    pianoVol.connect(trioSum);
+    bassVol = new Tone.Volume(bassVolumeSignal.value).connect(trioSum);
+    drumsAirBand = new Tone.Filter({ type: 'highshelf', frequency: 12000, gain: 2 }).connect(trioSum);
+    drumsVol = new Tone.Volume(drumsVolumeSignal.value).connect(drumsAirBand);
 
-  // Helper to determine if a track should be audible
-  const getOutputVolume = (id: 'piano' | 'bass' | 'drums', baseVol: number) => {
-    const isMuted =
-      (id === 'piano' && pianoMutedSignal.value) ||
-      (id === 'bass' && bassMutedSignal.value) ||
-      (id === 'drums' && drumsMutedSignal.value);
+    // Phase 22 Wave 3: RMS meters for makeup (input = trio sum, output = parallel sum)
+    inputMeter = new Tone.Meter({ normalRange: true });
+    outputMeter = new Tone.Meter({ normalRange: true });
+    trioSum.connect(inputMeter);
+    parallelSumGain.connect(outputMeter);
+    if (makeupIntervalId != null) clearInterval(makeupIntervalId);
+    makeupIntervalId = setInterval(() => {
+      if (!makeupGain || !inputMeter || !outputMeter) return;
+      if (proMixEnabledSignal.value) {
+        const inRms = (typeof inputMeter.getValue === 'function' ? inputMeter.getValue() : 0) as number;
+        const outRms = (typeof outputMeter.getValue === 'function' ? outputMeter.getValue() : 0) as number;
+        const ratio = outRms > 1e-6 ? inRms / outRms : 1;
+        const makeup = Math.max(MAKEUP_MIN, Math.min(MAKEUP_MAX, ratio));
+        makeupGain.gain.rampTo(makeup, 0.1);
+      } else {
+        makeupGain.gain.rampTo(1, 0.05);
+      }
+    }, MAKEUP_UPDATE_MS);
 
-    const anySolo = pianoSoloSignal.value || bassSoloSignal.value || drumsSoloSignal.value;
-    const isSolo =
-      (id === 'piano' && pianoSoloSignal.value) ||
-      (id === 'bass' && bassSoloSignal.value) ||
-      (id === 'drums' && drumsSoloSignal.value);
+    // Unify reverb routing to master limiter too
+    reverb.connect(masterLimiter);
+    pianoReverb.connect(masterLimiter);
 
-    if (isMuted) return -Infinity;
-    if (anySolo && !isSolo) return -Infinity;
-    return baseVol;
-  };
+    // Helper to determine if a track should be audible
+    const getOutputVolume = (id: 'piano' | 'bass' | 'drums', baseVol: number) => {
+      const isMuted =
+        (id === 'piano' && pianoMutedSignal.value) ||
+        (id === 'bass' && bassMutedSignal.value) ||
+        (id === 'drums' && drumsMutedSignal.value);
 
-  // Bind signals to Tone nodes
-  effect(() => {
-    if (pianoVol) {
-      const vol = getOutputVolume('piano', pianoVolumeSignal.value);
-      pianoVol.volume.rampTo(vol, 0.05);
-    }
-  });
-  effect(() => {
-    if (bassVol) {
-      const vol = getOutputVolume('bass', bassVolumeSignal.value);
-      bassVol.volume.rampTo(vol, 0.05);
-    }
-  });
-  effect(() => {
-    if (drumsVol) {
-      const vol = getOutputVolume('drums', drumsVolumeSignal.value);
-      drumsVol.volume.rampTo(vol, 0.05);
-    }
-  });
-  effect(() => {
-    if (reverb) reverb.wet.rampTo(reverbVolumeSignal.value, 0.1);
-  });
-  effect(() => {
-    if (pianoReverb) pianoReverb.wet.rampTo(pianoReverbSignal.value, 0.1);
-  });
-  effect(() => {
-    if (parallelDryGain) parallelDryGain.gain.rampTo(proMixEnabledSignal.value ? PARALLEL_DRY_GAIN : 0, 0.05);
-  });
+      const anySolo = pianoSoloSignal.value || bassSoloSignal.value || drumsSoloSignal.value;
+      const isSolo =
+        (id === 'piano' && pianoSoloSignal.value) ||
+        (id === 'bass' && bassSoloSignal.value) ||
+        (id === 'drums' && drumsSoloSignal.value);
 
-  // Phase 22 Wave 2: Soft-knee compressor worklet (REQ-HIFI-03, REQ-HIFI-04); fallback: keep Tone.Compressor
-  tryUseJazzCompressorWorklet();
+      if (isMuted) return -Infinity;
+      if (anySolo && !isSolo) return -Infinity;
+      return baseVol;
+    };
 
-  // --- SPLIT BRAIN BUSSES ---
-  // Left Ear (Shells)
-  shellPanner = new Tone.Panner(-0.8).connect(masterVol);
-  // Right Ear (Extensions)
-  extensionPanner = new Tone.Panner(0.8).connect(masterVol);
+    // Bind signals to Tone nodes
+    effect(() => {
+      if (pianoVol) {
+        const vol = getOutputVolume('piano', pianoVolumeSignal.value);
+        pianoVol.volume.rampTo(vol, 0.05);
+      }
+    });
+    effect(() => {
+      if (bassVol) {
+        const vol = getOutputVolume('bass', bassVolumeSignal.value);
+        bassVol.volume.rampTo(vol, 0.05);
+      }
+    });
+    effect(() => {
+      if (drumsVol) {
+        const vol = getOutputVolume('drums', drumsVolumeSignal.value);
+        drumsVol.volume.rampTo(vol, 0.05);
+      }
+    });
+    effect(() => {
+      if (reverb) reverb.wet.rampTo(reverbVolumeSignal.value, 0.1);
+    });
+    effect(() => {
+      if (pianoReverb) pianoReverb.wet.rampTo(pianoReverbSignal.value, 0.1);
+    });
+    effect(() => {
+      if (parallelDryGain) parallelDryGain.gain.rampTo(proMixEnabledSignal.value ? PARALLEL_DRY_GAIN : 0, 0.05);
+    });
 
-  // Dissonance Effect (Right Ear)
-  dissonanceTremolo = new Tone.Tremolo(10, 0).start();
-  dissonanceTremolo.wet.value = 1;
-  dissonanceTremolo.connect(extensionPanner);
+    // Phase 22 Wave 2: Soft-knee compressor worklet (REQ-HIFI-03, REQ-HIFI-04); fallback: keep Tone.Compressor
+    tryUseJazzCompressorWorklet();
 
-  // --- INSTRUMENTS ---
+    // --- SPLIT BRAIN BUSSES ---
+    // Left Ear (Shells)
+    shellPanner = new Tone.Panner(-0.8).connect(masterVol);
+    // Right Ear (Extensions)
+    extensionPanner = new Tone.Panner(0.8).connect(masterVol);
 
-  // 1. Main Piano (Center/Global) - REALISTIC SAMPLER
-  piano = new Tone.Sampler({
-    urls: {
-      "C1": "C1.mp3",
-      "D#1": "Ds1.mp3",
-      "F#1": "Fs1.mp3",
-      "A1": "A1.mp3",
-      "C2": "C2.mp3",
-      "D#2": "Ds2.mp3",
-      "F#2": "Fs2.mp3",
-      "A2": "A2.mp3",
-      "C3": "C3.mp3",
-      "D#3": "Ds3.mp3",
-      "F#3": "Fs3.mp3",
-      "A3": "A3.mp3",
-      "C4": "C4.mp3",
-      "D#4": "Ds4.mp3",
-      "F#4": "Fs4.mp3",
-      "A4": "A4.mp3",
-      "C5": "C5.mp3",
-      "D#5": "Ds5.mp3",
-      "F#5": "Fs5.mp3",
-      "A5": "A5.mp3",
-      "C6": "C6.mp3",
-      "D#6": "Ds6.mp3",
-      "F#6": "Fs6.mp3",
-      "A6": "A6.mp3",
-      "C7": "C7.mp3",
-      "D#7": "Ds7.mp3",
-      "F#7": "Fs7.mp3",
-      "A7": "A7.mp3",
-      "C8": "C8.mp3"
-    },
-    release: 1,
-    baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/piano/",
-    onload: () => console.log('Piano loaded')
-  }).connect(pianoVol);
+    // Dissonance Effect (Right Ear)
+    dissonanceTremolo = new Tone.Tremolo(10, 0).start();
+    dissonanceTremolo.wet.value = 1;
+    dissonanceTremolo.connect(extensionPanner);
 
-  // 2. Shell Synth (Left - Warm)
-  shellSynth = new Tone.PolySynth(Tone.Synth, {
-    oscillator: { type: 'triangle' },
-    envelope: { attack: 0.05, decay: 0.2, sustain: 0.5, release: 1 },
-    volume: -5
-  }).connect(shellPanner);
+    // --- INSTRUMENTS ---
 
-  // 3. Extension Synth (Right - Bright + Wobble)
-  extensionSynth = new Tone.PolySynth(Tone.Synth, {
-    oscillator: { type: 'sine' },
-    envelope: { attack: 0.05, decay: 0.1, sustain: 0.8, release: 1 },
-    volume: -5
-  }).connect(dissonanceTremolo);
-
-  // 3b. Cello-style synth (Director context injection – warm, rounded)
-  celloSynth = new Tone.PolySynth(Tone.Synth, {
-    oscillator: { type: 'triangle' },
-    envelope: { attack: 0.08, decay: 0.3, sustain: 0.6, release: 1.2 },
-    volume: -4
-  }).connect(pianoReverb);
-
-  // 4. Guitar (Nylon)
-  guitar = new Tone.Sampler({
-    urls: {
-      "A2": "A2.mp3",
-      "E3": "E3.mp3",
-      "G3": "G3.mp3",
-    },
-    baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/guitar-nylon/",
-    onload: () => console.log('Guitar loaded')
-  }).connect(pianoVol);
-
-  // 5. Electric Bass Sampler
-  bass = new Tone.Sampler({
-    urls: {
-      "A#1": "As1.mp3",
-      "C#1": "Cs1.mp3",
-      "E1": "E1.mp3",
-      "G1": "G1.mp3",
-      "A#2": "As2.mp3",
-      "C#2": "Cs2.mp3",
-      "E2": "E2.mp3",
-      "G2": "G2.mp3",
-      "A#3": "As3.mp3",
-      "C#3": "Cs3.mp3",
-      "E3": "E3.mp3",
-      "G3": "G3.mp3",
-      "A#4": "As4.mp3",
-      "C#4": "Cs4.mp3",
-      "E4": "E4.mp3",
-      "G4": "G4.mp3",
-      "C#5": "Cs5.mp3"
-    },
-    baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/bass-electric/",
-    onload: () => console.log('Electric Bass loaded')
-  }).connect(bassVol);
-
-  // 6. Drums (Nate Smith Local Samples - Multi-Sampled)
-  const drumBaseUrl = "/drum_samples/";
-  drums = {
-    kick: new Tone.Sampler({
+    // 1. Main Piano (Center/Global) - REALISTIC SAMPLER
+    piano = new Tone.Sampler({
       urls: {
-        "C1": "KickTight1_NateSmith.wav",
-        "D1": "KickTight2_NateSmith.wav",
-        "E1": "KickOpen1_NateSmith.wav"
+        "C1": "C1.mp3",
+        "D#1": "Ds1.mp3",
+        "F#1": "Fs1.mp3",
+        "A1": "A1.mp3",
+        "C2": "C2.mp3",
+        "D#2": "Ds2.mp3",
+        "F#2": "Fs2.mp3",
+        "A2": "A2.mp3",
+        "C3": "C3.mp3",
+        "D#3": "Ds3.mp3",
+        "F#3": "Fs3.mp3",
+        "A3": "A3.mp3",
+        "C4": "C4.mp3",
+        "D#4": "Ds4.mp3",
+        "F#4": "Fs4.mp3",
+        "A4": "A4.mp3",
+        "C5": "C5.mp3",
+        "D#5": "Ds5.mp3",
+        "F#5": "Fs5.mp3",
+        "A5": "A5.mp3",
+        "C6": "C6.mp3",
+        "D#6": "Ds6.mp3",
+        "F#6": "Fs6.mp3",
+        "A6": "A6.mp3",
+        "C7": "C7.mp3",
+        "D#7": "Ds7.mp3",
+        "F#7": "Fs7.mp3",
+        "A7": "A7.mp3",
+        "C8": "C8.mp3"
       },
-      baseUrl: drumBaseUrl,
-      onload: () => console.log('Kick sampler loaded (multi)')
-    }).connect(drumsVol),
-    snare: new Tone.Sampler({
-      urls: {
-        "C1": "SnareTight1_NateSmith.wav",
-        "D1": "SnareDeep1_NateSmith.wav",
-        "E1": "CrossStick1_NateSmith.wav"
-      },
-      baseUrl: drumBaseUrl,
-      onload: () => console.log('Snare sampler loaded (multi)')
-    }).connect(drumsVol),
-    hihat: new Tone.Sampler({
-      urls: {
-        "C1": "HiHatClosed1_NateSmith.wav",
-        "D1": "HiHatClosed2_NateSmith.wav",
-        "E1": "HiHatClosed3_NateSmith.wav",
-        "F1": "HiHatOpen1_NateSmith.wav"
-      },
-      baseUrl: drumBaseUrl,
-      onload: () => console.log('HiHat sampler loaded (multi)')
-    }).connect(drumsVol),
-    ride: new Tone.Sampler({
-      urls: {
-        "C1": "Ride1_NateSmith.wav",
-        "D1": "Ride2_NateSmith.wav",
-        "E1": "RideBell_NateSmith.wav",
-        "F1": "CrashRide1_NateSmith.wav"
-      },
-      baseUrl: drumBaseUrl,
-      onload: () => console.log('Ride sampler loaded (multi)')
-    }).connect(drumsVol)
-  };
+      release: 1,
+      baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/piano/",
+      onload: () => console.log('Piano loaded')
+    }).connect(pianoVol);
 
-  isInitialized = true;
+    // 2. Shell Synth (Left - Warm)
+    shellSynth = new Tone.PolySynth(Tone.Synth, {
+      oscillator: { type: 'triangle' },
+      envelope: { attack: 0.05, decay: 0.2, sustain: 0.5, release: 1 },
+      volume: -5
+    }).connect(shellPanner);
+
+    // 3. Extension Synth (Right - Bright + Wobble)
+    extensionSynth = new Tone.PolySynth(Tone.Synth, {
+      oscillator: { type: 'sine' },
+      envelope: { attack: 0.05, decay: 0.1, sustain: 0.8, release: 1 },
+      volume: -5
+    }).connect(dissonanceTremolo);
+
+    // 3b. Cello-style synth (Director context injection – warm, rounded)
+    celloSynth = new Tone.PolySynth(Tone.Synth, {
+      oscillator: { type: 'triangle' },
+      envelope: { attack: 0.08, decay: 0.3, sustain: 0.6, release: 1.2 },
+      volume: -4
+    }).connect(pianoReverb);
+
+    // 4. Guitar (Nylon)
+    guitar = new Tone.Sampler({
+      urls: {
+        "A2": "A2.mp3",
+        "E3": "E3.mp3",
+        "G3": "G3.mp3",
+      },
+      baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/guitar-nylon/",
+      onload: () => console.log('Guitar loaded')
+    }).connect(pianoVol);
+
+    // 5. Electric Bass Sampler
+    bass = new Tone.Sampler({
+      urls: {
+        "A#1": "As1.mp3",
+        "C#1": "Cs1.mp3",
+        "E1": "E1.mp3",
+        "G1": "G1.mp3",
+        "A#2": "As2.mp3",
+        "C#2": "Cs2.mp3",
+        "E2": "E2.mp3",
+        "G2": "G2.mp3",
+        "A#3": "As3.mp3",
+        "C#3": "Cs3.mp3",
+        "E3": "E3.mp3",
+        "G3": "G3.mp3",
+        "A#4": "As4.mp3",
+        "C#4": "Cs4.mp3",
+        "E4": "E4.mp3",
+        "G4": "G4.mp3",
+        "C#5": "Cs5.mp3"
+      },
+      baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/bass-electric/",
+      onload: () => console.log('Electric Bass loaded')
+    }).connect(bassVol);
+
+    // 6. Drums (Nate Smith Local Samples - Multi-Sampled)
+    const drumBaseUrl = "/drum_samples/";
+    drums = {
+      kick: new Tone.Sampler({
+        urls: {
+          "C1": "KickTight1_NateSmith.wav",
+          "D1": "KickTight2_NateSmith.wav",
+          "E1": "KickOpen1_NateSmith.wav"
+        },
+        baseUrl: drumBaseUrl,
+        onload: () => console.log('Kick sampler loaded (multi)')
+      }).connect(drumsVol),
+      snare: new Tone.Sampler({
+        urls: {
+          "C1": "SnareTight1_NateSmith.wav",
+          "D1": "SnareDeep1_NateSmith.wav",
+          "E1": "CrossStick1_NateSmith.wav"
+        },
+        baseUrl: drumBaseUrl,
+        onload: () => console.log('Snare sampler loaded (multi)')
+      }).connect(drumsVol),
+      hihat: new Tone.Sampler({
+        urls: {
+          "C1": "HiHatClosed1_NateSmith.wav",
+          "D1": "HiHatClosed2_NateSmith.wav",
+          "E1": "HiHatClosed3_NateSmith.wav",
+          "F1": "HiHatOpen1_NateSmith.wav"
+        },
+        baseUrl: drumBaseUrl,
+        onload: () => console.log('HiHat sampler loaded (multi)')
+      }).connect(drumsVol),
+      ride: new Tone.Sampler({
+        urls: {
+          "C1": "Ride1_NateSmith.wav",
+          "D1": "Ride2_NateSmith.wav",
+          "E1": "RideBell_NateSmith.wav",
+          "F1": "CrashRide1_NateSmith.wav"
+        },
+        baseUrl: drumBaseUrl,
+        onload: () => console.log('Ride sampler loaded (multi)')
+      }).connect(drumsVol)
+    };
+
+    isInitialized = true;
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('audio-engine-ready'));
+    }
+  })().catch((err) => {
+    initPromise = null;
+    throw err;
+  });
+
+  return initPromise;
 }
 
 export function setVolume(type: 'piano' | 'bass' | 'drums', val: number) {
@@ -500,7 +533,8 @@ export function triggerAttack(midiNote: number, velocity: number = 0.7) {
   if (!piano || !isInitialized) return;
   const noteName = midiToNoteName(midiNote);
   if (noteName) {
-    safePianoTrigger(() => piano.triggerAttack(noteName, Tone.now(), velocity));
+    const p = piano; // Local ref for closure
+    safePianoTrigger(() => p.triggerAttack(noteName, Tone.now(), velocity));
   }
 }
 
@@ -508,7 +542,8 @@ export function triggerRelease(midiNote: number) {
   if (!piano || !isInitialized) return;
   const noteName = midiToNoteName(midiNote);
   if (noteName) {
-    safePianoTrigger(() => piano.triggerRelease(noteName, Tone.now()));
+    const p = piano;
+    safePianoTrigger(() => p.triggerRelease(noteName, Tone.now()));
   }
 }
 
@@ -516,7 +551,15 @@ export function triggerAttackRelease(midiNote: number, duration: string | number
   if (!piano || !isInitialized) return;
   const noteName = midiToNoteName(midiNote);
   if (noteName) {
-    safePianoTrigger(() => piano.triggerAttackRelease(noteName, duration, time, velocity));
+    const p = piano;
+    safePianoTrigger(() => p.triggerAttackRelease(noteName, duration, time, velocity));
+  }
+}
+
+/** REQ-AG-05: Monitor bus utility for isolated mic/ai routing. */
+export function connectToMonitorBus(node: Tone.ToneAudioNode) {
+  if (monitorBus) {
+    node.connect(monitorBus);
   }
 }
 
@@ -573,25 +616,62 @@ export function setDissonance(amount: number) {
 }
 
 // Schedule playback
+/** Long-duration piano comping patterns (quarters, halves, dotted, triplets) — used when intensity is low. */
+const LONG_PIANO_PATTERNS_44: { beat: number; dur: string; velMult: number }[][] = [
+  [{ beat: 0, dur: '2n', velMult: 0.9 }],
+  [{ beat: 0, dur: '2n', velMult: 0.9 }, { beat: 2, dur: '2n', velMult: 0.85 }],
+  [{ beat: 0, dur: '4n', velMult: 0.9 }, { beat: 1, dur: '4n', velMult: 0.85 }, { beat: 2, dur: '4n', velMult: 0.85 }, { beat: 3, dur: '4n', velMult: 0.8 }],
+  [{ beat: 0, dur: '4n', velMult: 0.9 }, { beat: 1, dur: '4n', velMult: 0.85 }, { beat: 2, dur: '4n', velMult: 0.85 }],
+  [{ beat: 0, dur: '4n', velMult: 0.9 }, { beat: 2, dur: '4n', velMult: 0.85 }],
+  [{ beat: 0, dur: '4n', velMult: 0.9 }, { beat: 1, dur: '2n', velMult: 0.88 }],
+  [{ beat: 0, dur: '4n.', velMult: 0.9 }, { beat: 1.5, dur: '4n', velMult: 0.85 }],
+  [{ beat: 0, dur: '4n', velMult: 0.9 }, { beat: 1.5, dur: '4n.', velMult: 0.85 }],
+  [{ beat: 0, dur: '2n', velMult: 0.9 }, { beat: 2, dur: '4n', velMult: 0.85 }],
+  [{ beat: 0, dur: '2t', velMult: 0.88 }],
+  [{ beat: 0, dur: '4t', velMult: 0.9 }, { beat: 0.667, dur: '4t', velMult: 0.85 }],
+  [{ beat: 0, dur: '4t', velMult: 0.9 }, { beat: 0.667, dur: '4t', velMult: 0.85 }, { beat: 1.333, dur: '4t', velMult: 0.85 }],
+  [{ beat: 0, dur: '2n', velMult: 0.9 }, { beat: 2, dur: '2t', velMult: 0.85 }],
+  [{ beat: 0, dur: '4n', velMult: 0.88 }, { beat: 0.5, dur: '8n.', velMult: 0.8 }, { beat: 1.5, dur: '4n', velMult: 0.85 }],
+];
+
+/** Mixed patterns (some short) for higher intensity. */
+const MIXED_PIANO_PATTERNS_44: { beat: number; dur: string; velMult: number }[][] = [
+  [{ beat: 0, dur: '4n.', velMult: 1 }, { beat: 1.5, dur: '8n', velMult: 0.8 }],
+  [{ beat: 0, dur: '8n', velMult: 0.6 }, { beat: 1.66, dur: '4n', velMult: 1 }, { beat: 3.66, dur: '8n', velMult: 0.8 }],
+  [{ beat: 0, dur: '2n', velMult: 0.9 }],
+  [{ beat: 0, dur: '2n', velMult: 0.9 }, { beat: 2, dur: '2n', velMult: 0.85 }],
+  [{ beat: 0, dur: '4n', velMult: 0.9 }, { beat: 2, dur: '4n', velMult: 0.85 }],
+  [{ beat: 0, dur: '4n', velMult: 0.85 }, { beat: 1, dur: '2n', velMult: 0.9 }],
+  [{ beat: 0.5, dur: '4n', velMult: 0.7 }, { beat: 2.5, dur: '4n', velMult: 1 }],
+  [{ beat: 0, dur: '2n', velMult: 1 }, { beat: 3.5, dur: '8n', velMult: 0.9 }],
+];
+
 export function playProgression(
   progression: { root: string; quality: string; duration: number; notes: number[] }[],
   style: Style,
   bpm: number,
   onChordStart?: (index: number) => void,
   onFinish?: () => void,
-  onActiveNotesChange?: (notes: number[]) => void
+  onActiveNotesChange?: (notes: number[]) => void,
+  /** 0 = calm (prioritize long durations: quarters, halves, dots, triplets), 1 = peak. If omitted, derived from chord index (intro = low). */
+  intensity?: number
 ) {
   if (!isInitialized) return;
 
   stop();
   Tone.Transport.bpm.value = bpm;
+  Tone.Transport.position = 0;
+  Tone.Transport.timeSignature = [4, 4];
   isPlayingSignal.value = true;
 
   let currentTime = 0; // in beats (quarter notes)
+  const totalChords = progression.length;
 
   progression.forEach((chord, i) => {
     const duration = chord.duration; // in beats
     const nextChord = progression[i + 1] || progression[0]; // Loop back to start for target
+    // Derive intensity from position when not provided: intro/outro = lower (more long patterns)
+    const chordIntensity = intensity ?? (totalChords > 1 ? (i + 0.5) / totalChords : 0.5);
 
     // Schedule UI update
     Tone.Transport.schedule((time) => {
@@ -614,44 +694,29 @@ export function playProgression(
       const velocity = 0.5 + Math.random() * 0.2;
       const jitter = () => (Math.random() - 0.5) * 0.015;
 
-      // Decide on a rhythm pattern for this measure
-      const patternType = Math.floor(Math.random() * 5);
-      const beatsToPlay: { beat: number; dur: string; velMult: number }[] = [];
-
-      if (isThreeFour) {
-        // 3/4 Patterns
-        if (patternType === 0) beatsToPlay.push({ beat: 0, dur: '2.n', velMult: 1 });
-        else if (patternType === 1) {
-          beatsToPlay.push({ beat: 0, dur: '4n', velMult: 1 });
-          beatsToPlay.push({ beat: 1.66, dur: '8n', velMult: 0.8 });
-        } else {
-          beatsToPlay.push({ beat: 0, dur: '4n', velMult: 1 });
-          beatsToPlay.push({ beat: 2, dur: '4n', velMult: 0.7 });
-        }
-      } else {
-        // 4/4 Patterns
-        if (patternType === 0) {
-          // The Charleston
-          beatsToPlay.push({ beat: 0, dur: '4n.', velMult: 1 });
-          beatsToPlay.push({ beat: 1.5, dur: '8n', velMult: 0.8 });
-        } else if (patternType === 1) {
-          // Red Garland / Syncopated
-          beatsToPlay.push({ beat: 0, dur: '8n', velMult: 0.6 });
-          beatsToPlay.push({ beat: 1.66, dur: '4n', velMult: 1 });
-          beatsToPlay.push({ beat: 3.66, dur: '8n', velMult: 0.8 });
-        } else if (patternType === 2) {
-          // Sparse / Languid
-          beatsToPlay.push({ beat: 0, dur: '1n', velMult: 0.9 });
-        } else if (patternType === 3) {
-          // Offbeat clusters
-          beatsToPlay.push({ beat: 0.5, dur: '4n', velMult: 0.7 });
-          beatsToPlay.push({ beat: 2.5, dur: '4n', velMult: 1 });
-        } else {
-          // Anticipation
-          beatsToPlay.push({ beat: 0, dur: '2n', velMult: 1 });
-          beatsToPlay.push({ beat: 3.5, dur: '8n', velMult: 0.9 });
-        }
-      }
+      const useLongOnly = chordIntensity < 0.45;
+      const beatsToPlay: { beat: number; dur: string; velMult: number }[] = isThreeFour
+        ? (() => {
+          // 3/4: long-duration options (half note max)
+          if (useLongOnly) {
+            const long34 = [
+              [{ beat: 0, dur: '2n', velMult: 1 }],
+              [{ beat: 0, dur: '4n', velMult: 1 }, { beat: 1, dur: '4n', velMult: 0.85 }],
+              [{ beat: 0, dur: '2n', velMult: 1 }, { beat: 2, dur: '4n', velMult: 0.7 }],
+              [{ beat: 0, dur: '4n', velMult: 1 }, { beat: 2, dur: '4n', velMult: 0.7 }],
+            ];
+            return long34[Math.floor(Math.random() * long34.length)]!;
+          }
+          const mixed34 = [
+            [{ beat: 0, dur: '2n', velMult: 1 }],
+            [{ beat: 0, dur: '4n', velMult: 1 }, { beat: 1.66, dur: '8n', velMult: 0.8 }],
+            [{ beat: 0, dur: '4n', velMult: 1 }, { beat: 2, dur: '4n', velMult: 0.7 }],
+          ];
+          return mixed34[Math.floor(Math.random() * mixed34.length)]!;
+        })()
+        : useLongOnly
+          ? LONG_PIANO_PATTERNS_44[Math.floor(Math.random() * LONG_PIANO_PATTERNS_44.length)]!
+          : MIXED_PIANO_PATTERNS_44[Math.floor(Math.random() * MIXED_PIANO_PATTERNS_44.length)]!;
 
       beatsToPlay.forEach(config => {
         const beatTime = startSec + config.beat * Tone.Time('4n').toSeconds();
@@ -748,41 +813,46 @@ export function playProgression(
       }
     }
 
-    // --- DRUMS ---
+    // --- DRUMS (Elastic Pulse: variable swing, rebound ride, lazy hi-hat) ---
     if ((style === 'Swing' || style === 'Jazz') && drums) {
       const groove = new GrooveManager();
       const beatSec = Tone.Time('4n').toSeconds();
       const rideSwingOffset = groove.getOffBeatOffsetInBeat(bpm);
-      const jitter = () => (Math.random() - 0.5) * 0.008;
+      const rideJitter = () => groove.getHumanizationJitter(3);
+      const bandJitter = () => groove.getHumanizationJitter(4);
+      const lazyHatMs = 0.007;
 
       for (let b = 0; b < duration; b++) {
         const beatTime = startSec + b * beatSec;
+        const isBackbeat = b === 1 || b === 3;
 
-        // Ride: spang-a-lang — downbeat + swung upbeat per beat
-        // Accents: 1 strong, 3 strong, 2 & 4 medium, upbeats light; optional bell on 2 & 4
-        const isOneOrThree = b === 0 || b === 2;
-        const downbeatVel = (isOneOrThree ? 0.72 : 0.52) + Math.random() * 0.06;
-        const upbeatVel = 0.32 + Math.random() * 0.06;
-        const useBell = (b === 1 || b === 3) && Math.random() > 0.6;
+        // Ride: 4 pulses + skip only on 2 & 4 (V_skip = 0.65 × V_down). Backbeats 2 & 4 accented 1.2×.
+        const rideDownbeatScale = (b === 0 || b === 2) ? 1.0 : 1.2;
+        const baseVel = 0.65;
+        const pulseVel = baseVel * rideDownbeatScale + Math.random() * 0.06;
+        const skipVel = pulseVel * 0.65;
+        const useBell = isBackbeat && Math.random() > 0.6;
         const rideNote = useBell ? "D1" : "C1";
 
         Tone.Transport.schedule(t => {
-          drums?.ride.triggerAttack(rideNote, t + jitter(), downbeatVel);
+          drums?.ride.triggerAttack(rideNote, t + rideJitter(), pulseVel);
         }, beatTime);
-        Tone.Transport.schedule(t => {
-          drums?.ride.triggerAttack("C1", t + jitter(), upbeatVel);
-        }, beatTime + rideSwingOffset);
+        if (isBackbeat) {
+          Tone.Transport.schedule(t => {
+            drums?.ride.triggerAttack("C1", t + rideJitter(), skipVel);
+          }, beatTime + rideSwingOffset);
+        }
 
         if (b % 2 === 1) {
           Tone.Transport.schedule(t => {
-            drums?.hihat.triggerAttack("C1", t + jitter(), 0.6);
+            drums?.hihat.triggerAttack("C1", t + lazyHatMs + bandJitter(), 0.6);
           }, beatTime);
         }
 
-        // Kick: 1 and 3 strong, 2 and 4 lighter — more active, less feathering
+        // Kick: 1 and 3 strong, 2 and 4 lighter
         const kickVel = (b === 0 || b === 2) ? 0.42 + Math.random() * 0.08 : 0.24 + Math.random() * 0.06;
         Tone.Transport.schedule(t => {
-          drums?.kick.triggerAttack("C1", t + jitter(), kickVel);
+          drums?.kick.triggerAttack("C1", t + bandJitter(), kickVel);
         }, beatTime);
       }
     }

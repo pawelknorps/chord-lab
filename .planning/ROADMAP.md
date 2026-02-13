@@ -296,17 +296,17 @@
   - [ ] **Wave 3**: RMS pre/post measurement; automatic makeup gain; "Mastering" / "Pro Mix" toggle (REQ-HIFI-06–08).
   - [ ] **Wave 4**: Drums Air band (+3 dB @ 12 kHz) (REQ-HIFI-09).
 
-## Phase 22.1: The "Studio" Polish (Priority: High)
+## Phase 22.1: The "Studio" Polish (Priority: High) ✅
 
-*Focus: When a user puts on headphones, the app must **sound like a mastered record, not a MIDI file**—what justifies $29/mo. Current status: 0% complete.*
+*Focus: When a user puts on headphones, the app must **sound like a mastered record, not a MIDI file**—what justifies $29/mo.*
 
 - **Success Criteria**: Parallel compression bus (NY: DryBus + WetBus, 70/30, Worklet 8:1 fast attack); "Air" band +2 dB @ 12 kHz on Drum Bus; Master limiter -14 LUFS; Note Waterfall 60fps decoupled from audio ticks.
 - **Milestone**: `.planning/milestones/studio-polish/` (PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md).
 - **Tasks**:
-  - [ ] **Parallel Compression Bus**: DryBus and WetBus; WetBus = heavy Worklet Compressor (8:1, fast attack); blend 70/30 (REQ-STUDIO-01, 02, 03).
-  - [ ] **The "Air" Band**: High-shelf EQ +2 dB @ 12 kHz on Drum Bus (REQ-STUDIO-04).
-  - [ ] **Auto-Leveling (LUFS)**: Limiter on Master Output for -14 LUFS (REQ-STUDIO-05).
-  - [ ] **Visualizer Interpolation**: Note Waterfall 60fps independent of audio logic; decouple UI ticks from audio ticks (REQ-STUDIO-06).
+  - [x] **Parallel Compression Bus**: DryBus and WetBus; WetBus = heavy Worklet Compressor (8:1, fast attack); blend 70/30 (REQ-STUDIO-01, 02, 03).
+  - [x] **The "Air" Band**: High-shelf EQ +2 dB @ 12 kHz on Drum Bus (REQ-STUDIO-04).
+  - [x] **Auto-Leveling (LUFS)**: Limiter on Master Output for -14 LUFS (REQ-STUDIO-05); masterOutputGain 1.8 before limiter.
+  - [x] **Visualizer Interpolation**: Note Waterfall 60fps independent of audio logic (wall-clock time in NoteWaterfall.tsx) (REQ-STUDIO-06).
 
 ## Phase 23: The "Glitch" Defense – Audio Glitches & Architecture (Priority: Critical) ✅
 

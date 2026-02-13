@@ -21,6 +21,7 @@
 - **Phase 2**: High-Performance Pitch Engine (SwiftF0) ✅
 - **Phase 15**: Standards Exercise Analysis ✅
 - **Phase 17–24**: Rhythm Section Elements ✅
+- **Phase 22.1**: Studio Polish ✅ (70/30 parallel bus, 8:1 Worklet, Air +2 dB, Master -14 LUFS, Note Waterfall 60fps)
 - **Phase 23**: Glitch Defense – Audio Glitches & Architecture ✅ (thread isolation, zero-copy SAB, AiWorker, verification doc)
 
 ## Active Requirements
@@ -31,7 +32,7 @@
 
 ## Next Steps
 
-- [ ] **Phase 22.1 – Studio Polish (Priority: High)**: Parallel compression bus (70/30, 8:1 Worklet), Air band +2 dB @ 12 kHz, Master -14 LUFS, Note Waterfall 60fps. Milestone: `.planning/milestones/studio-polish/`.
+- [x] **Phase 22.1 – Studio Polish (Priority: High)** ✅: Parallel bus 70/30, Worklet 8:1, Air +2 dB, Master -14 LUFS, Note Waterfall 60fps. Milestone: `.planning/milestones/studio-polish/`.
 - [x] **Phase 23 – Glitch Defense (Priority: Critical)** ✅: Thread isolation (SwiftF0=Worker A, Gemini=Worker B); zero-copy SAB; AiWorker; verification doc. *Deferred:* zero garbage Bass/Drum, IndexedDB cache (milestone Phase 5).
 - [ ] **Phase 14.3 – SwiftF0 SOTA Precision**: Verify LEV + median + hysteresis; add tuner bar (cents). Milestone: `.planning/milestones/swiftf0-precision/`.
 - [ ] **Optional**: Phase 14.4 round-trip calibration wizard (bip → mic → measured lag) for Pro mode.
