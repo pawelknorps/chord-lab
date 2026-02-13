@@ -1,0 +1,5176 @@
+[
+  {
+    "styleId": "BRUSHES_1",
+    "name": "BRUSHES 1 (alt)",
+    "events": [
+      {
+        "timeBeats": 0.0020833333333333333,
+        "instrument": "Ride",
+        "velocity": 0.44881889763779526
+      },
+      {
+        "timeBeats": 0.9895833333333334,
+        "instrument": "HatPedal",
+        "velocity": 0.49606299212598426
+      },
+      {
+        "timeBeats": 3,
+        "instrument": "HatPedal",
+        "velocity": 0.5118110236220472
+      },
+      {
+        "timeBeats": 5.004166666666666,
+        "instrument": "HatPedal",
+        "velocity": 0.5039370078740157
+      },
+      {
+        "timeBeats": 7,
+        "instrument": "HatPedal",
+        "velocity": 0.5196850393700787
+      },
+      {
+        "timeBeats": 9,
+        "instrument": "HatPedal",
+        "velocity": 0.5275590551181102
+      },
+      {
+        "timeBeats": 10.666666666666666,
+        "instrument": "Kick",
+        "velocity": 0.4566929133858268
+      },
+      {
+        "timeBeats": 10.995833333333334,
+        "instrument": "HatPedal",
+        "velocity": 0.5196850393700787
+      },
+      {
+        "timeBeats": 12,
+        "instrument": "Kick",
+        "velocity": 0.5118110236220472
+      },
+      {
+        "timeBeats": 13,
+        "instrument": "HatPedal",
+        "velocity": 0.5196850393700787
+      },
+      {
+        "timeBeats": 15.004166666666666,
+        "instrument": "HatPedal",
+        "velocity": 0.49606299212598426
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "std"
+  },
+  {
+    "styleId": "BRUSHES_1",
+    "name": "BRUSHES 1 (alt)",
+    "events": [
+      {
+        "timeBeats": 0.0020833333333333333,
+        "instrument": "Ride",
+        "velocity": 0.47244094488188976
+      },
+      {
+        "timeBeats": 0.9895833333333334,
+        "instrument": "HatPedal",
+        "velocity": 0.5275590551181102
+      },
+      {
+        "timeBeats": 3,
+        "instrument": "HatPedal",
+        "velocity": 0.5511811023622047
+      },
+      {
+        "timeBeats": 5.004166666666666,
+        "instrument": "HatPedal",
+        "velocity": 0.49606299212598426
+      },
+      {
+        "timeBeats": 7,
+        "instrument": "HatPedal",
+        "velocity": 0.5196850393700787
+      },
+      {
+        "timeBeats": 8.002083333333333,
+        "instrument": "Ride",
+        "velocity": 0.47244094488188976
+      },
+      {
+        "timeBeats": 9,
+        "instrument": "HatPedal",
+        "velocity": 0.5354330708661418
+      },
+      {
+        "timeBeats": 10.995833333333334,
+        "instrument": "HatPedal",
+        "velocity": 0.5433070866141733
+      },
+      {
+        "timeBeats": 11.666666666666666,
+        "instrument": "Kick",
+        "velocity": 0.4645669291338583
+      },
+      {
+        "timeBeats": 12,
+        "instrument": "Kick",
+        "velocity": 0.5433070866141733
+      },
+      {
+        "timeBeats": 13,
+        "instrument": "HatPedal",
+        "velocity": 0.5511811023622047
+      },
+      {
+        "timeBeats": 15.004166666666666,
+        "instrument": "HatPedal",
+        "velocity": 0.5511811023622047
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "std"
+  },
+  {
+    "styleId": "BRUSHES_1",
+    "name": "BRUSHES 1 (fill)",
+    "events": [
+      {
+        "timeBeats": 0.0020833333333333333,
+        "instrument": "Ride",
+        "velocity": 0.47244094488188976
+      },
+      {
+        "timeBeats": 0.9895833333333334,
+        "instrument": "HatPedal",
+        "velocity": 0.5354330708661418
+      },
+      {
+        "timeBeats": 1.6666666666666667,
+        "instrument": "Kick",
+        "velocity": 0.4645669291338583
+      },
+      {
+        "timeBeats": 2.6666666666666665,
+        "instrument": "Kick",
+        "velocity": 0.5590551181102362
+      },
+      {
+        "timeBeats": 3,
+        "instrument": "HatPedal",
+        "velocity": 0.5433070866141733
+      },
+      {
+        "timeBeats": 5,
+        "instrument": "HatPedal",
+        "velocity": 0.5354330708661418
+      },
+      {
+        "timeBeats": 7,
+        "instrument": "HatOpen",
+        "velocity": 0.5354330708661418
+      },
+      {
+        "timeBeats": 9,
+        "instrument": "HatPedal",
+        "velocity": 0.5354330708661418
+      },
+      {
+        "timeBeats": 10.995833333333334,
+        "instrument": "HatPedal",
+        "velocity": 0.5433070866141733
+      },
+      {
+        "timeBeats": 11,
+        "instrument": "Kick",
+        "velocity": 0.44881889763779526
+      },
+      {
+        "timeBeats": 13,
+        "instrument": "HatPedal",
+        "velocity": 0.5275590551181102
+      },
+      {
+        "timeBeats": 15.004166666666666,
+        "instrument": "HatPedal",
+        "velocity": 0.5433070866141733
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "fill"
+  },
+  {
+    "styleId": "BRUSHES_1",
+    "name": "BRUSHES 1 (alt)",
+    "events": [
+      {
+        "timeBeats": 0,
+        "instrument": "Kick",
+        "velocity": 0.3779527559055118
+      },
+      {
+        "timeBeats": 0.6666666666666666,
+        "instrument": "Kick",
+        "velocity": 0.5511811023622047
+      },
+      {
+        "timeBeats": 0.6708333333333333,
+        "instrument": "HatOpen",
+        "velocity": 0.30708661417322836
+      },
+      {
+        "timeBeats": 1,
+        "instrument": "HatPedal",
+        "velocity": 0.47244094488188976
+      },
+      {
+        "timeBeats": 1.6666666666666667,
+        "instrument": "Snare",
+        "velocity": 0.1889763779527559
+      },
+      {
+        "timeBeats": 1.9958333333333333,
+        "instrument": "Snare",
+        "velocity": 0.33070866141732286
+      },
+      {
+        "timeBeats": 2,
+        "instrument": "Kick",
+        "velocity": 0.5039370078740157
+      },
+      {
+        "timeBeats": 2.6625,
+        "instrument": "Snare",
+        "velocity": 0.28346456692913385
+      },
+      {
+        "timeBeats": 3.0104166666666665,
+        "instrument": "HatOpen",
+        "velocity": 0.5039370078740157
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "std"
+  },
+  {
+    "styleId": "BRUSHES_1",
+    "name": "BRUSHES 1",
+    "events": [
+      {
+        "timeBeats": 0,
+        "instrument": "Kick",
+        "velocity": 0.5511811023622047
+      },
+      {
+        "timeBeats": 0.6666666666666666,
+        "instrument": "Kick",
+        "velocity": 0.3543307086614173
+      },
+      {
+        "timeBeats": 1,
+        "instrument": "Kick",
+        "velocity": 0.5511811023622047
+      },
+      {
+        "timeBeats": 1,
+        "instrument": "Snare",
+        "velocity": 0.44881889763779526
+      },
+      {
+        "timeBeats": 2,
+        "instrument": "HatPedal",
+        "velocity": 0.5748031496062992
+      },
+      {
+        "timeBeats": 2.8875,
+        "instrument": "Snare",
+        "velocity": 0.23622047244094488
+      },
+      {
+        "timeBeats": 3,
+        "instrument": "Snare",
+        "velocity": 0.3543307086614173
+      },
+      {
+        "timeBeats": 3.3375,
+        "instrument": "Snare",
+        "velocity": 0.23622047244094488
+      },
+      {
+        "timeBeats": 3.6666666666666665,
+        "instrument": "Snare",
+        "velocity": 0.4015748031496063
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "fill"
+  },
+  {
+    "styleId": "BRUSHES_2",
+    "name": "BRUSHES 2 (alt)",
+    "events": [
+      {
+        "timeBeats": 0.9791666666666666,
+        "instrument": "HatPedal",
+        "velocity": 0.5196850393700787
+      },
+      {
+        "timeBeats": 2.9791666666666665,
+        "instrument": "HatPedal",
+        "velocity": 0.5354330708661418
+      },
+      {
+        "timeBeats": 4.979166666666667,
+        "instrument": "HatPedal",
+        "velocity": 0.5196850393700787
+      },
+      {
+        "timeBeats": 6.979166666666667,
+        "instrument": "HatPedal",
+        "velocity": 0.5196850393700787
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "std"
+  },
+  {
+    "styleId": "BRUSHES_2",
+    "name": "BRUSHES 2 (alt)",
+    "events": [
+      {
+        "timeBeats": 0,
+        "instrument": "Snare",
+        "velocity": 0.28346456692913385
+      },
+      {
+        "timeBeats": 0.9791666666666666,
+        "instrument": "HatPedal",
+        "velocity": 0.5275590551181102
+      },
+      {
+        "timeBeats": 1.6666666666666667,
+        "instrument": "Kick",
+        "velocity": 0.4330708661417323
+      },
+      {
+        "timeBeats": 2.9791666666666665,
+        "instrument": "HatPedal",
+        "velocity": 0.5433070866141733
+      },
+      {
+        "timeBeats": 4.979166666666667,
+        "instrument": "HatPedal",
+        "velocity": 0.5118110236220472
+      },
+      {
+        "timeBeats": 5.666666666666667,
+        "instrument": "Kick",
+        "velocity": 0.5039370078740157
+      },
+      {
+        "timeBeats": 6.979166666666667,
+        "instrument": "HatPedal",
+        "velocity": 0.5275590551181102
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "std"
+  },
+  {
+    "styleId": "BRUSHES_2",
+    "name": "BRUSHES 2 (fill)",
+    "events": [
+      {
+        "timeBeats": 0.9791666666666666,
+        "instrument": "HatOpen",
+        "velocity": 0.4409448818897638
+      },
+      {
+        "timeBeats": 2.9791666666666665,
+        "instrument": "HatPedal",
+        "velocity": 0.5433070866141733
+      },
+      {
+        "timeBeats": 3.7291666666666665,
+        "instrument": "Snare",
+        "velocity": 0.28346456692913385
+      },
+      {
+        "timeBeats": 4,
+        "instrument": "Kick",
+        "velocity": 0.4330708661417323
+      },
+      {
+        "timeBeats": 4.979166666666667,
+        "instrument": "HatPedal",
+        "velocity": 0.5196850393700787
+      },
+      {
+        "timeBeats": 6.666666666666667,
+        "instrument": "Kick",
+        "velocity": 0.5511811023622047
+      },
+      {
+        "timeBeats": 6.979166666666667,
+        "instrument": "HatPedal",
+        "velocity": 0.5118110236220472
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "fill"
+  },
+  {
+    "styleId": "BRUSHES_2",
+    "name": "BRUSHES 2 (alt)",
+    "events": [
+      {
+        "timeBeats": 0,
+        "instrument": "Kick",
+        "velocity": 0.5433070866141733
+      },
+      {
+        "timeBeats": 0.0020833333333333333,
+        "instrument": "Snare",
+        "velocity": 0.41732283464566927
+      },
+      {
+        "timeBeats": 0.9791666666666666,
+        "instrument": "HatPedal",
+        "velocity": 0.6850393700787402
+      },
+      {
+        "timeBeats": 1.6666666666666667,
+        "instrument": "Kick",
+        "velocity": 0.5669291338582677
+      },
+      {
+        "timeBeats": 1.6666666666666667,
+        "instrument": "Kick",
+        "velocity": 0.3228346456692913
+      },
+      {
+        "timeBeats": 2.9791666666666665,
+        "instrument": "Kick",
+        "velocity": 0.3937007874015748
+      },
+      {
+        "timeBeats": 3,
+        "instrument": "HatPedal",
+        "velocity": 0.6062992125984252
+      },
+      {
+        "timeBeats": 3,
+        "instrument": "Snare",
+        "velocity": 0.4015748031496063
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "std"
+  },
+  {
+    "styleId": "BRUSHES_2",
+    "name": "BRUSHES 2",
+    "events": [
+      {
+        "timeBeats": 0,
+        "instrument": "Kick",
+        "velocity": 0.5748031496062992
+      },
+      {
+        "timeBeats": 0.6666666666666666,
+        "instrument": "HatOpen",
+        "velocity": 0.5039370078740157
+      },
+      {
+        "timeBeats": 0.9791666666666666,
+        "instrument": "HatPedal",
+        "velocity": 0.6141732283464567
+      },
+      {
+        "timeBeats": 1,
+        "instrument": "Snare",
+        "velocity": 0.33070866141732286
+      },
+      {
+        "timeBeats": 2,
+        "instrument": "HatPedal",
+        "velocity": 0.4015748031496063
+      },
+      {
+        "timeBeats": 3,
+        "instrument": "HatPedal",
+        "velocity": 0.6141732283464567
+      },
+      {
+        "timeBeats": 3.6666666666666665,
+        "instrument": "Kick",
+        "velocity": 0.5984251968503937
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "fill"
+  },
+  {
+    "styleId": "HI_HAT_1",
+    "name": "HI HAT 1 (alt)",
+    "events": [
+      {
+        "timeBeats": 0,
+        "instrument": "Kick",
+        "velocity": 0.44881889763779526
+      },
+      {
+        "timeBeats": 0,
+        "instrument": "HatPedal",
+        "velocity": 0.48031496062992124
+      },
+      {
+        "timeBeats": 1,
+        "instrument": "HatPedal",
+        "velocity": 0.6141732283464567
+      },
+      {
+        "timeBeats": 1.6625,
+        "instrument": "HatPedal",
+        "velocity": 0.3937007874015748
+      },
+      {
+        "timeBeats": 2.0083333333333333,
+        "instrument": "HatPedal",
+        "velocity": 0.3858267716535433
+      },
+      {
+        "timeBeats": 2.6666666666666665,
+        "instrument": "Kick",
+        "velocity": 0.3543307086614173
+      },
+      {
+        "timeBeats": 2.995833333333333,
+        "instrument": "HatPedal",
+        "velocity": 0.5590551181102362
+      },
+      {
+        "timeBeats": 3.6625,
+        "instrument": "HatPedal",
+        "velocity": 0.4094488188976378
+      },
+      {
+        "timeBeats": 4,
+        "instrument": "HatPedal",
+        "velocity": 0.4409448818897638
+      },
+      {
+        "timeBeats": 5,
+        "instrument": "HatPedal",
+        "velocity": 0.5826771653543307
+      },
+      {
+        "timeBeats": 5.666666666666667,
+        "instrument": "Kick",
+        "velocity": 0.5433070866141733
+      },
+      {
+        "timeBeats": 5.666666666666667,
+        "instrument": "HatPedal",
+        "velocity": 0.3937007874015748
+      },
+      {
+        "timeBeats": 6.008333333333334,
+        "instrument": "HatPedal",
+        "velocity": 0.41732283464566927
+      },
+      {
+        "timeBeats": 6.995833333333334,
+        "instrument": "HatPedal",
+        "velocity": 0.5984251968503937
+      },
+      {
+        "timeBeats": 7.6625,
+        "instrument": "HatPedal",
+        "velocity": 0.3858267716535433
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "std"
+  },
+  {
+    "styleId": "HI_HAT_1",
+    "name": "HI HAT 1 (alt)",
+    "events": [
+      {
+        "timeBeats": 0,
+        "instrument": "HatPedal",
+        "velocity": 0.48031496062992124
+      },
+      {
+        "timeBeats": 1,
+        "instrument": "HatPedal",
+        "velocity": 0.6141732283464567
+      },
+      {
+        "timeBeats": 1.6625,
+        "instrument": "HatPedal",
+        "velocity": 0.3937007874015748
+      },
+      {
+        "timeBeats": 2.0083333333333333,
+        "instrument": "HatPedal",
+        "velocity": 0.3858267716535433
+      },
+      {
+        "timeBeats": 2.6666666666666665,
+        "instrument": "HatOpen",
+        "velocity": 0.5826771653543307
+      },
+      {
+        "timeBeats": 3.6625,
+        "instrument": "HatPedal",
+        "velocity": 0.4094488188976378
+      },
+      {
+        "timeBeats": 3.6666666666666665,
+        "instrument": "Kick",
+        "velocity": 0.2992125984251969
+      },
+      {
+        "timeBeats": 4,
+        "instrument": "Kick",
+        "velocity": 0.47244094488188976
+      },
+      {
+        "timeBeats": 4,
+        "instrument": "HatPedal",
+        "velocity": 0.4409448818897638
+      },
+      {
+        "timeBeats": 5,
+        "instrument": "HatPedal",
+        "velocity": 0.5826771653543307
+      },
+      {
+        "timeBeats": 5.666666666666667,
+        "instrument": "HatPedal",
+        "velocity": 0.3937007874015748
+      },
+      {
+        "timeBeats": 6.008333333333334,
+        "instrument": "HatPedal",
+        "velocity": 0.41732283464566927
+      },
+      {
+        "timeBeats": 6.995833333333334,
+        "instrument": "HatPedal",
+        "velocity": 0.5984251968503937
+      },
+      {
+        "timeBeats": 7.6625,
+        "instrument": "HatPedal",
+        "velocity": 0.3858267716535433
+      },
+      {
+        "timeBeats": 7.666666666666667,
+        "instrument": "Kick",
+        "velocity": 0.4251968503937008
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "std"
+  },
+  {
+    "styleId": "HI_HAT_1",
+    "name": "HI HAT 1 (fill)",
+    "events": [
+      {
+        "timeBeats": 0,
+        "instrument": "Kick",
+        "velocity": 0.49606299212598426
+      },
+      {
+        "timeBeats": 0,
+        "instrument": "HatPedal",
+        "velocity": 0.48031496062992124
+      },
+      {
+        "timeBeats": 1,
+        "instrument": "HatPedal",
+        "velocity": 0.6141732283464567
+      },
+      {
+        "timeBeats": 1.6625,
+        "instrument": "HatPedal",
+        "velocity": 0.3937007874015748
+      },
+      {
+        "timeBeats": 2.0083333333333333,
+        "instrument": "HatPedal",
+        "velocity": 0.3858267716535433
+      },
+      {
+        "timeBeats": 3,
+        "instrument": "HatPedal",
+        "velocity": 0.5590551181102362
+      },
+      {
+        "timeBeats": 3.6625,
+        "instrument": "HatPedal",
+        "velocity": 0.4094488188976378
+      },
+      {
+        "timeBeats": 4,
+        "instrument": "Kick",
+        "velocity": 0.44881889763779526
+      },
+      {
+        "timeBeats": 4,
+        "instrument": "HatPedal",
+        "velocity": 0.4409448818897638
+      },
+      {
+        "timeBeats": 5,
+        "instrument": "HatPedal",
+        "velocity": 0.5433070866141733
+      },
+      {
+        "timeBeats": 5.666666666666667,
+        "instrument": "HatOpen",
+        "velocity": 0.4645669291338583
+      },
+      {
+        "timeBeats": 6.008333333333334,
+        "instrument": "HatPedal",
+        "velocity": 0.3937007874015748
+      },
+      {
+        "timeBeats": 6.995833333333334,
+        "instrument": "HatPedal",
+        "velocity": 0.5984251968503937
+      },
+      {
+        "timeBeats": 7.6625,
+        "instrument": "HatPedal",
+        "velocity": 0.3858267716535433
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "fill"
+  },
+  {
+    "styleId": "HI_HAT_1",
+    "name": "HI HAT 1 (alt)",
+    "events": [
+      {
+        "timeBeats": 0.0020833333333333333,
+        "instrument": "Kick",
+        "velocity": 0.48031496062992124
+      },
+      {
+        "timeBeats": 0.010416666666666666,
+        "instrument": "HatOpen",
+        "velocity": 0.5196850393700787
+      },
+      {
+        "timeBeats": 1,
+        "instrument": "Kick",
+        "velocity": 0.5118110236220472
+      },
+      {
+        "timeBeats": 1,
+        "instrument": "HatPedal",
+        "velocity": 0.6614173228346457
+      },
+      {
+        "timeBeats": 1.6666666666666667,
+        "instrument": "HatPedal",
+        "velocity": 0.47244094488188976
+      },
+      {
+        "timeBeats": 2.3229166666666665,
+        "instrument": "Snare",
+        "velocity": 0.4251968503937008
+      },
+      {
+        "timeBeats": 2.6791666666666667,
+        "instrument": "Snare",
+        "velocity": 0.23622047244094488
+      },
+      {
+        "timeBeats": 2.9833333333333334,
+        "instrument": "HatPedal",
+        "velocity": 0.5984251968503937
+      },
+      {
+        "timeBeats": 2.9875,
+        "instrument": "Kick",
+        "velocity": 0.30708661417322836
+      },
+      {
+        "timeBeats": 3.31875,
+        "instrument": "Kick",
+        "velocity": 0.1889763779527559
+      },
+      {
+        "timeBeats": 3.6666666666666665,
+        "instrument": "Kick",
+        "velocity": 0.47244094488188976
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "std"
+  },
+  {
+    "styleId": "HI_HAT_1",
+    "name": "HI HAT 1",
+    "events": [
+      {
+        "timeBeats": 0,
+        "instrument": "Kick",
+        "velocity": 0.5433070866141733
+      },
+      {
+        "timeBeats": 1,
+        "instrument": "HatPedal",
+        "velocity": 0.5748031496062992
+      },
+      {
+        "timeBeats": 1,
+        "instrument": "Snare",
+        "velocity": 0.33070866141732286
+      },
+      {
+        "timeBeats": 1.6666666666666667,
+        "instrument": "Kick",
+        "velocity": 0.3464566929133858
+      },
+      {
+        "timeBeats": 1.6666666666666667,
+        "instrument": "HatPedal",
+        "velocity": 0.4094488188976378
+      },
+      {
+        "timeBeats": 2,
+        "instrument": "Kick",
+        "velocity": 0.5826771653543307
+      },
+      {
+        "timeBeats": 2,
+        "instrument": "HatOpen",
+        "velocity": 0.5118110236220472
+      },
+      {
+        "timeBeats": 3,
+        "instrument": "HatOpen",
+        "velocity": 0.48031496062992124
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "fill"
+  },
+  {
+    "styleId": "HI_HAT_2",
+    "name": "HI HAT 2 (alt)",
+    "events": [
+      {
+        "timeBeats": 0,
+        "instrument": "HatOpen",
+        "velocity": 0.5196850393700787
+      },
+      {
+        "timeBeats": 0.6666666666666666,
+        "instrument": "Snare",
+        "velocity": 0.3543307086614173
+      },
+      {
+        "timeBeats": 1,
+        "instrument": "HatPedal",
+        "velocity": 0.5118110236220472
+      },
+      {
+        "timeBeats": 1.6666666666666667,
+        "instrument": "Snare",
+        "velocity": 0.5511811023622047
+      },
+      {
+        "timeBeats": 1.6666666666666667,
+        "instrument": "HatPedal",
+        "velocity": 0.4015748031496063
+      },
+      {
+        "timeBeats": 2,
+        "instrument": "HatOpen",
+        "velocity": 0.41732283464566927
+      },
+      {
+        "timeBeats": 3,
+        "instrument": "HatPedal",
+        "velocity": 0.5590551181102362
+      },
+      {
+        "timeBeats": 3.6666666666666665,
+        "instrument": "HatPedal",
+        "velocity": 0.41732283464566927
+      },
+      {
+        "timeBeats": 4,
+        "instrument": "HatOpen",
+        "velocity": 0.41732283464566927
+      },
+      {
+        "timeBeats": 4.666666666666667,
+        "instrument": "Snare",
+        "velocity": 0.44881889763779526
+      },
+      {
+        "timeBeats": 5,
+        "instrument": "HatPedal",
+        "velocity": 0.5511811023622047
+      },
+      {
+        "timeBeats": 5.666666666666667,
+        "instrument": "HatPedal",
+        "velocity": 0.31496062992125984
+      },
+      {
+        "timeBeats": 6,
+        "instrument": "HatOpen",
+        "velocity": 0.41732283464566927
+      },
+      {
+        "timeBeats": 6.666666666666667,
+        "instrument": "Snare",
+        "velocity": 0.5511811023622047
+      },
+      {
+        "timeBeats": 7,
+        "instrument": "HatPedal",
+        "velocity": 0.5354330708661418
+      },
+      {
+        "timeBeats": 7.666666666666667,
+        "instrument": "Snare",
+        "velocity": 0.44881889763779526
+      },
+      {
+        "timeBeats": 7.666666666666667,
+        "instrument": "HatPedal",
+        "velocity": 0.33070866141732286
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "std"
+  },
+  {
+    "styleId": "HI_HAT_2",
+    "name": "HI HAT 2 (alt)",
+    "events": [
+      {
+        "timeBeats": 0,
+        "instrument": "HatOpen",
+        "velocity": 0.41732283464566927
+      },
+      {
+        "timeBeats": 1,
+        "instrument": "HatPedal",
+        "velocity": 0.5039370078740157
+      },
+      {
+        "timeBeats": 1.6666666666666667,
+        "instrument": "Snare",
+        "velocity": 0.3543307086614173
+      },
+      {
+        "timeBeats": 2,
+        "instrument": "HatOpen",
+        "velocity": 0.44881889763779526
+      },
+      {
+        "timeBeats": 3,
+        "instrument": "Snare",
+        "velocity": 0.5826771653543307
+      },
+      {
+        "timeBeats": 3,
+        "instrument": "HatPedal",
+        "velocity": 0.5275590551181102
+      },
+      {
+        "timeBeats": 3.3333333333333335,
+        "instrument": "Snare",
+        "velocity": 0.4094488188976378
+      },
+      {
+        "timeBeats": 3.3333333333333335,
+        "instrument": "Snare",
+        "velocity": 0.5511811023622047
+      },
+      {
+        "timeBeats": 3.6666666666666665,
+        "instrument": "HatPedal",
+        "velocity": 0.3464566929133858
+      },
+      {
+        "timeBeats": 4,
+        "instrument": "HatOpen",
+        "velocity": 0.4015748031496063
+      },
+      {
+        "timeBeats": 5,
+        "instrument": "HatPedal",
+        "velocity": 0.6062992125984252
+      },
+      {
+        "timeBeats": 5.666666666666667,
+        "instrument": "HatPedal",
+        "velocity": 0.33070866141732286
+      },
+      {
+        "timeBeats": 6,
+        "instrument": "HatOpen",
+        "velocity": 0.4015748031496063
+      },
+      {
+        "timeBeats": 7,
+        "instrument": "Snare",
+        "velocity": 0.4330708661417323
+      },
+      {
+        "timeBeats": 7,
+        "instrument": "HatPedal",
+        "velocity": 0.5590551181102362
+      },
+      {
+        "timeBeats": 7.666666666666667,
+        "instrument": "HatPedal",
+        "velocity": 0.3779527559055118
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "std"
+  },
+  {
+    "styleId": "HI_HAT_2",
+    "name": "HI HAT 2 (fill)",
+    "events": [
+      {
+        "timeBeats": 0,
+        "instrument": "HatOpen",
+        "velocity": 0.49606299212598426
+      },
+      {
+        "timeBeats": 0.6666666666666666,
+        "instrument": "Snare",
+        "velocity": 0.3543307086614173
+      },
+      {
+        "timeBeats": 1,
+        "instrument": "Snare",
+        "velocity": 0.5511811023622047
+      },
+      {
+        "timeBeats": 1,
+        "instrument": "HatPedal",
+        "velocity": 0.5118110236220472
+      },
+      {
+        "timeBeats": 1.6666666666666667,
+        "instrument": "HatPedal",
+        "velocity": 0.4015748031496063
+      },
+      {
+        "timeBeats": 2,
+        "instrument": "HatOpen",
+        "velocity": 0.41732283464566927
+      },
+      {
+        "timeBeats": 3,
+        "instrument": "HatPedal",
+        "velocity": 0.5590551181102362
+      },
+      {
+        "timeBeats": 3.6666666666666665,
+        "instrument": "HatPedal",
+        "velocity": 0.41732283464566927
+      },
+      {
+        "timeBeats": 4,
+        "instrument": "HatOpen",
+        "velocity": 0.47244094488188976
+      },
+      {
+        "timeBeats": 4.666666666666667,
+        "instrument": "Snare",
+        "velocity": 0.5511811023622047
+      },
+      {
+        "timeBeats": 5,
+        "instrument": "HatPedal",
+        "velocity": 0.28346456692913385
+      },
+      {
+        "timeBeats": 5.666666666666667,
+        "instrument": "Snare",
+        "velocity": 0.5984251968503937
+      },
+      {
+        "timeBeats": 6,
+        "instrument": "HatOpen",
+        "velocity": 0.41732283464566927
+      },
+      {
+        "timeBeats": 6.666666666666667,
+        "instrument": "Snare",
+        "velocity": 0.5511811023622047
+      },
+      {
+        "timeBeats": 7,
+        "instrument": "HatPedal",
+        "velocity": 0.44881889763779526
+      },
+      {
+        "timeBeats": 7.666666666666667,
+        "instrument": "Snare",
+        "velocity": 0.44881889763779526
+      },
+      {
+        "timeBeats": 7.666666666666667,
+        "instrument": "HatPedal",
+        "velocity": 0.33070866141732286
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "fill"
+  },
+  {
+    "styleId": "HI_HAT_2",
+    "name": "HI HAT 2 (alt)",
+    "events": [
+      {
+        "timeBeats": 0,
+        "instrument": "HatOpen",
+        "velocity": 0.5590551181102362
+      },
+      {
+        "timeBeats": 1,
+        "instrument": "HatPedal",
+        "velocity": 0.5511811023622047
+      },
+      {
+        "timeBeats": 2,
+        "instrument": "Snare",
+        "velocity": 0.3779527559055118
+      },
+      {
+        "timeBeats": 3,
+        "instrument": "HatPedal",
+        "velocity": 0.5511811023622047
+      },
+      {
+        "timeBeats": 3.0229166666666667,
+        "instrument": "Snare",
+        "velocity": 0.4251968503937008
+      },
+      {
+        "timeBeats": 3.6666666666666665,
+        "instrument": "Snare",
+        "velocity": 0.25984251968503935
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "std"
+  },
+  {
+    "styleId": "HI_HAT_2",
+    "name": "HI HAT 2",
+    "events": [
+      {
+        "timeBeats": 0,
+        "instrument": "HatOpen",
+        "velocity": 0.4645669291338583
+      },
+      {
+        "timeBeats": 0,
+        "instrument": "HatOpen",
+        "velocity": 0.5511811023622047
+      },
+      {
+        "timeBeats": 1,
+        "instrument": "HatPedal",
+        "velocity": 0.5511811023622047
+      },
+      {
+        "timeBeats": 2.3333333333333335,
+        "instrument": "Snare",
+        "velocity": 0.29133858267716534
+      },
+      {
+        "timeBeats": 2.6666666666666665,
+        "instrument": "Snare",
+        "velocity": 0.48031496062992124
+      },
+      {
+        "timeBeats": 3.3333333333333335,
+        "instrument": "Kick",
+        "velocity": 0.2755905511811024
+      },
+      {
+        "timeBeats": 3.6666666666666665,
+        "instrument": "Kick",
+        "velocity": 0.41732283464566927
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "fill"
+  },
+  {
+    "styleId": "RIDE_1",
+    "name": "RIDE 1 (alt)",
+    "events": [
+      {
+        "timeBeats": 0,
+        "instrument": "HatOpen",
+        "velocity": 0.4566929133858268
+      },
+      {
+        "timeBeats": 0,
+        "instrument": "Ride",
+        "velocity": 0.47244094488188976
+      },
+      {
+        "timeBeats": 1,
+        "instrument": "HatPedal",
+        "velocity": 0.48031496062992124
+      },
+      {
+        "timeBeats": 1.6979166666666667,
+        "instrument": "Snare",
+        "velocity": 0.48031496062992124
+      },
+      {
+        "timeBeats": 1.6979166666666667,
+        "instrument": "Ride",
+        "velocity": 0.36220472440944884
+      },
+      {
+        "timeBeats": 1.9916666666666667,
+        "instrument": "Ride",
+        "velocity": 0.44881889763779526
+      },
+      {
+        "timeBeats": 3.0104166666666665,
+        "instrument": "HatPedal",
+        "velocity": 0.48031496062992124
+      },
+      {
+        "timeBeats": 3.7020833333333334,
+        "instrument": "Ride",
+        "velocity": 0.33070866141732286
+      },
+      {
+        "timeBeats": 4.010416666666667,
+        "instrument": "Ride",
+        "velocity": 0.41732283464566927
+      },
+      {
+        "timeBeats": 5,
+        "instrument": "Snare",
+        "velocity": 0.48031496062992124
+      },
+      {
+        "timeBeats": 5,
+        "instrument": "HatPedal",
+        "velocity": 0.4015748031496063
+      },
+      {
+        "timeBeats": 5.71875,
+        "instrument": "Ride",
+        "velocity": 0.2755905511811024
+      },
+      {
+        "timeBeats": 6.010416666666667,
+        "instrument": "Ride",
+        "velocity": 0.47244094488188976
+      },
+      {
+        "timeBeats": 7,
+        "instrument": "HatPedal",
+        "velocity": 0.48031496062992124
+      },
+      {
+        "timeBeats": 7.004166666666666,
+        "instrument": "Ride",
+        "velocity": 0.28346456692913385
+      },
+      {
+        "timeBeats": 7.697916666666667,
+        "instrument": "Ride",
+        "velocity": 0.3858267716535433
+      },
+      {
+        "timeBeats": 8.004166666666666,
+        "instrument": "Ride",
+        "velocity": 0.4409448818897638
+      },
+      {
+        "timeBeats": 9,
+        "instrument": "Snare",
+        "velocity": 0.48031496062992124
+      },
+      {
+        "timeBeats": 9,
+        "instrument": "HatPedal",
+        "velocity": 0.48031496062992124
+      },
+      {
+        "timeBeats": 9.697916666666666,
+        "instrument": "Ride",
+        "velocity": 0.3464566929133858
+      },
+      {
+        "timeBeats": 10,
+        "instrument": "Ride",
+        "velocity": 0.47244094488188976
+      },
+      {
+        "timeBeats": 11.010416666666666,
+        "instrument": "HatPedal",
+        "velocity": 0.48031496062992124
+      },
+      {
+        "timeBeats": 11.697916666666666,
+        "instrument": "Snare",
+        "velocity": 0.48031496062992124
+      },
+      {
+        "timeBeats": 11.708333333333334,
+        "instrument": "Ride",
+        "velocity": 0.2992125984251969
+      },
+      {
+        "timeBeats": 12.010416666666666,
+        "instrument": "Ride",
+        "velocity": 0.4015748031496063
+      },
+      {
+        "timeBeats": 12.697916666666666,
+        "instrument": "Ride",
+        "velocity": 0.30708661417322836
+      },
+      {
+        "timeBeats": 13,
+        "instrument": "HatPedal",
+        "velocity": 0.48031496062992124
+      },
+      {
+        "timeBeats": 13.697916666666666,
+        "instrument": "Snare",
+        "velocity": 0.48031496062992124
+      },
+      {
+        "timeBeats": 13.708333333333334,
+        "instrument": "Ride",
+        "velocity": 0.2677165354330709
+      },
+      {
+        "timeBeats": 14.010416666666666,
+        "instrument": "Ride",
+        "velocity": 0.4330708661417323
+      },
+      {
+        "timeBeats": 15,
+        "instrument": "HatPedal",
+        "velocity": 0.48031496062992124
+      },
+      {
+        "timeBeats": 15.6875,
+        "instrument": "Ride",
+        "velocity": 0.3779527559055118
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "std"
+  },
+  {
+    "styleId": "RIDE_1",
+    "name": "RIDE 1 (alt)",
+    "events": [
+      {
+        "timeBeats": 0,
+        "instrument": "Ride",
+        "velocity": 0.47244094488188976
+      },
+      {
+        "timeBeats": 0.9895833333333334,
+        "instrument": "HatPedal",
+        "velocity": 0.48031496062992124
+      },
+      {
+        "timeBeats": 1,
+        "instrument": "Snare",
+        "velocity": 0.48031496062992124
+      },
+      {
+        "timeBeats": 1.6895833333333334,
+        "instrument": "Ride",
+        "velocity": 0.36220472440944884
+      },
+      {
+        "timeBeats": 1.9895833333333333,
+        "instrument": "Ride",
+        "velocity": 0.4330708661417323
+      },
+      {
+        "timeBeats": 3,
+        "instrument": "Snare",
+        "velocity": 0.48031496062992124
+      },
+      {
+        "timeBeats": 3.004166666666667,
+        "instrument": "HatPedal",
+        "velocity": 0.48031496062992124
+      },
+      {
+        "timeBeats": 3.6979166666666665,
+        "instrument": "Ride",
+        "velocity": 0.31496062992125984
+      },
+      {
+        "timeBeats": 4.010416666666667,
+        "instrument": "Ride",
+        "velocity": 0.4330708661417323
+      },
+      {
+        "timeBeats": 5.010416666666667,
+        "instrument": "HatPedal",
+        "velocity": 0.48031496062992124
+      },
+      {
+        "timeBeats": 5.666666666666667,
+        "instrument": "Ride",
+        "velocity": 0.31496062992125984
+      },
+      {
+        "timeBeats": 6,
+        "instrument": "Ride",
+        "velocity": 0.47244094488188976
+      },
+      {
+        "timeBeats": 6.71875,
+        "instrument": "HatPedal",
+        "velocity": 0.48031496062992124
+      },
+      {
+        "timeBeats": 7,
+        "instrument": "Snare",
+        "velocity": 0.48031496062992124
+      },
+      {
+        "timeBeats": 7.708333333333333,
+        "instrument": "Ride",
+        "velocity": 0.4015748031496063
+      },
+      {
+        "timeBeats": 8.010416666666666,
+        "instrument": "Ride",
+        "velocity": 0.47244094488188976
+      },
+      {
+        "timeBeats": 9,
+        "instrument": "Snare",
+        "velocity": 0.48031496062992124
+      },
+      {
+        "timeBeats": 9.010416666666666,
+        "instrument": "HatPedal",
+        "velocity": 0.48031496062992124
+      },
+      {
+        "timeBeats": 9.7125,
+        "instrument": "Ride",
+        "velocity": 0.3858267716535433
+      },
+      {
+        "timeBeats": 10.010416666666666,
+        "instrument": "Ride",
+        "velocity": 0.44881889763779526
+      },
+      {
+        "timeBeats": 11,
+        "instrument": "Snare",
+        "velocity": 0.48031496062992124
+      },
+      {
+        "timeBeats": 11.010416666666666,
+        "instrument": "HatPedal",
+        "velocity": 0.48031496062992124
+      },
+      {
+        "timeBeats": 11.71875,
+        "instrument": "Ride",
+        "velocity": 0.33070866141732286
+      },
+      {
+        "timeBeats": 12.020833333333334,
+        "instrument": "Ride",
+        "velocity": 0.4094488188976378
+      },
+      {
+        "timeBeats": 13.004166666666666,
+        "instrument": "HatPedal",
+        "velocity": 0.48031496062992124
+      },
+      {
+        "timeBeats": 13.708333333333334,
+        "instrument": "Ride",
+        "velocity": 0.3543307086614173
+      },
+      {
+        "timeBeats": 14,
+        "instrument": "Ride",
+        "velocity": 0.44881889763779526
+      },
+      {
+        "timeBeats": 14.708333333333334,
+        "instrument": "HatPedal",
+        "velocity": 0.48031496062992124
+      },
+      {
+        "timeBeats": 15.697916666666666,
+        "instrument": "Ride",
+        "velocity": 0.33070866141732286
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "std"
+  },
+  {
+    "styleId": "RIDE_1",
+    "name": "RIDE 1 (fill)",
+    "events": [
+      {
+        "timeBeats": 0,
+        "instrument": "Ride",
+        "velocity": 0.47244094488188976
+      },
+      {
+        "timeBeats": 0.9895833333333334,
+        "instrument": "HatPedal",
+        "velocity": 0.48031496062992124
+      },
+      {
+        "timeBeats": 1,
+        "instrument": "Snare",
+        "velocity": 0.48031496062992124
+      },
+      {
+        "timeBeats": 1.6895833333333334,
+        "instrument": "Ride",
+        "velocity": 0.36220472440944884
+      },
+      {
+        "timeBeats": 1.9895833333333333,
+        "instrument": "Ride",
+        "velocity": 0.4330708661417323
+      },
+      {
+        "timeBeats": 3.004166666666667,
+        "instrument": "HatPedal",
+        "velocity": 0.48031496062992124
+      },
+      {
+        "timeBeats": 3.6666666666666665,
+        "instrument": "Ride",
+        "velocity": 0.33070866141732286
+      },
+      {
+        "timeBeats": 4,
+        "instrument": "Ride",
+        "velocity": 0.47244094488188976
+      },
+      {
+        "timeBeats": 4.666666666666667,
+        "instrument": "Snare",
+        "velocity": 0.48031496062992124
+      },
+      {
+        "timeBeats": 5,
+        "instrument": "HatPedal",
+        "velocity": 0.48031496062992124
+      },
+      {
+        "timeBeats": 5.710416666666666,
+        "instrument": "Ride",
+        "velocity": 0.33070866141732286
+      },
+      {
+        "timeBeats": 6,
+        "instrument": "Ride",
+        "velocity": 0.4330708661417323
+      },
+      {
+        "timeBeats": 6.71875,
+        "instrument": "HatPedal",
+        "velocity": 0.48031496062992124
+      },
+      {
+        "timeBeats": 7,
+        "instrument": "Snare",
+        "velocity": 0.48031496062992124
+      },
+      {
+        "timeBeats": 7.020833333333333,
+        "instrument": "Ride",
+        "velocity": 0.30708661417322836
+      },
+      {
+        "timeBeats": 7.708333333333333,
+        "instrument": "Ride",
+        "velocity": 0.3543307086614173
+      },
+      {
+        "timeBeats": 8.010416666666666,
+        "instrument": "Ride",
+        "velocity": 0.47244094488188976
+      },
+      {
+        "timeBeats": 8.666666666666666,
+        "instrument": "Snare",
+        "velocity": 0.48031496062992124
+      },
+      {
+        "timeBeats": 9.010416666666666,
+        "instrument": "HatPedal",
+        "velocity": 0.48031496062992124
+      },
+      {
+        "timeBeats": 9.7125,
+        "instrument": "Ride",
+        "velocity": 0.3858267716535433
+      },
+      {
+        "timeBeats": 10.010416666666666,
+        "instrument": "Ride",
+        "velocity": 0.5511811023622047
+      },
+      {
+        "timeBeats": 11.010416666666666,
+        "instrument": "HatPedal",
+        "velocity": 0.48031496062992124
+      },
+      {
+        "timeBeats": 11.71875,
+        "instrument": "Ride",
+        "velocity": 0.33070866141732286
+      },
+      {
+        "timeBeats": 12.020833333333334,
+        "instrument": "Ride",
+        "velocity": 0.47244094488188976
+      },
+      {
+        "timeBeats": 13.004166666666666,
+        "instrument": "HatPedal",
+        "velocity": 0.48031496062992124
+      },
+      {
+        "timeBeats": 13.708333333333334,
+        "instrument": "Ride",
+        "velocity": 0.47244094488188976
+      },
+      {
+        "timeBeats": 14.708333333333334,
+        "instrument": "HatPedal",
+        "velocity": 0.48031496062992124
+      },
+      {
+        "timeBeats": 15.004166666666666,
+        "instrument": "Ride",
+        "velocity": 0.31496062992125984
+      },
+      {
+        "timeBeats": 15.697916666666666,
+        "instrument": "Ride",
+        "velocity": 0.47244094488188976
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "fill"
+  },
+  {
+    "styleId": "RIDE_1",
+    "name": "RIDE 1 (alt)",
+    "events": [
+      {
+        "timeBeats": 0.027083333333333334,
+        "instrument": "Ride",
+        "velocity": 0.5748031496062992
+      },
+      {
+        "timeBeats": 0.99375,
+        "instrument": "HatPedal",
+        "velocity": 0.5748031496062992
+      },
+      {
+        "timeBeats": 0.99375,
+        "instrument": "Snare",
+        "velocity": 0.4015748031496063
+      },
+      {
+        "timeBeats": 1.66875,
+        "instrument": "Snare",
+        "velocity": 0.30708661417322836
+      },
+      {
+        "timeBeats": 1.6833333333333333,
+        "instrument": "Kick",
+        "velocity": 0.5905511811023622
+      },
+      {
+        "timeBeats": 1.9979166666666666,
+        "instrument": "Snare",
+        "velocity": 0.47244094488188976
+      },
+      {
+        "timeBeats": 2.652083333333333,
+        "instrument": "Snare",
+        "velocity": 0.2283464566929134
+      },
+      {
+        "timeBeats": 2.995833333333333,
+        "instrument": "Snare",
+        "velocity": 0.2677165354330709
+      },
+      {
+        "timeBeats": 3.004166666666667,
+        "instrument": "HatPedal",
+        "velocity": 0.5748031496062992
+      },
+      {
+        "timeBeats": 3.339583333333333,
+        "instrument": "Snare",
+        "velocity": 0.31496062992125984
+      },
+      {
+        "timeBeats": 3.6458333333333335,
+        "instrument": "Snare",
+        "velocity": 0.4566929133858268
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "std"
+  },
+  {
+    "styleId": "RIDE_1",
+    "name": "RIDE 1",
+    "events": [
+      {
+        "timeBeats": 0.010416666666666666,
+        "instrument": "Ride",
+        "velocity": 0.4881889763779528
+      },
+      {
+        "timeBeats": 0.66875,
+        "instrument": "Snare",
+        "velocity": 0.4645669291338583
+      },
+      {
+        "timeBeats": 1.3166666666666667,
+        "instrument": "Ride",
+        "velocity": 0.33070866141732286
+      },
+      {
+        "timeBeats": 1.3375,
+        "instrument": "Kick",
+        "velocity": 0.4566929133858268
+      },
+      {
+        "timeBeats": 1.6708333333333334,
+        "instrument": "Kick",
+        "velocity": 0.5590551181102362
+      },
+      {
+        "timeBeats": 1.675,
+        "instrument": "Ride",
+        "velocity": 0.44881889763779526
+      },
+      {
+        "timeBeats": 2.65,
+        "instrument": "Kick",
+        "velocity": 0.4409448818897638
+      },
+      {
+        "timeBeats": 2.654166666666667,
+        "instrument": "Snare",
+        "velocity": 0.4409448818897638
+      },
+      {
+        "timeBeats": 3.01875,
+        "instrument": "Kick",
+        "velocity": 0.4330708661417323
+      },
+      {
+        "timeBeats": 3.6458333333333335,
+        "instrument": "Kick",
+        "velocity": 0.6299212598425197
+      },
+      {
+        "timeBeats": 3.691666666666667,
+        "instrument": "Ride",
+        "velocity": 0.33070866141732286
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "fill"
+  },
+  {
+    "styleId": "RIDE_2",
+    "name": "RIDE 2 (alt)",
+    "events": [
+      {
+        "timeBeats": 0,
+        "instrument": "HatPedal",
+        "velocity": 0.28346456692913385
+      },
+      {
+        "timeBeats": 0,
+        "instrument": "Ride",
+        "velocity": 0.4015748031496063
+      },
+      {
+        "timeBeats": 1,
+        "instrument": "HatPedal",
+        "velocity": 0.4409448818897638
+      },
+      {
+        "timeBeats": 1,
+        "instrument": "Ride",
+        "velocity": 0.4015748031496063
+      },
+      {
+        "timeBeats": 2,
+        "instrument": "HatPedal",
+        "velocity": 0.28346456692913385
+      },
+      {
+        "timeBeats": 2,
+        "instrument": "Ride",
+        "velocity": 0.36220472440944884
+      },
+      {
+        "timeBeats": 3,
+        "instrument": "HatPedal",
+        "velocity": 0.4409448818897638
+      },
+      {
+        "timeBeats": 3,
+        "instrument": "Ride",
+        "velocity": 0.36220472440944884
+      },
+      {
+        "timeBeats": 4,
+        "instrument": "HatPedal",
+        "velocity": 0.28346456692913385
+      },
+      {
+        "timeBeats": 4,
+        "instrument": "Ride",
+        "velocity": 0.4015748031496063
+      },
+      {
+        "timeBeats": 5,
+        "instrument": "HatPedal",
+        "velocity": 0.4409448818897638
+      },
+      {
+        "timeBeats": 5,
+        "instrument": "Ride",
+        "velocity": 0.3779527559055118
+      },
+      {
+        "timeBeats": 6,
+        "instrument": "HatPedal",
+        "velocity": 0.28346456692913385
+      },
+      {
+        "timeBeats": 6,
+        "instrument": "Ride",
+        "velocity": 0.3700787401574803
+      },
+      {
+        "timeBeats": 7,
+        "instrument": "HatPedal",
+        "velocity": 0.4409448818897638
+      },
+      {
+        "timeBeats": 7,
+        "instrument": "Ride",
+        "velocity": 0.3779527559055118
+      },
+      {
+        "timeBeats": 7.666666666666667,
+        "instrument": "Ride",
+        "velocity": 0.2992125984251969
+      },
+      {
+        "timeBeats": 8,
+        "instrument": "HatPedal",
+        "velocity": 0.28346456692913385
+      },
+      {
+        "timeBeats": 8,
+        "instrument": "Ride",
+        "velocity": 0.3543307086614173
+      },
+      {
+        "timeBeats": 9,
+        "instrument": "HatPedal",
+        "velocity": 0.4409448818897638
+      },
+      {
+        "timeBeats": 9,
+        "instrument": "Ride",
+        "velocity": 0.4015748031496063
+      },
+      {
+        "timeBeats": 10,
+        "instrument": "HatPedal",
+        "velocity": 0.28346456692913385
+      },
+      {
+        "timeBeats": 10,
+        "instrument": "Ride",
+        "velocity": 0.3858267716535433
+      },
+      {
+        "timeBeats": 11,
+        "instrument": "HatPedal",
+        "velocity": 0.4409448818897638
+      },
+      {
+        "timeBeats": 11,
+        "instrument": "Ride",
+        "velocity": 0.3779527559055118
+      },
+      {
+        "timeBeats": 11.666666666666666,
+        "instrument": "Ride",
+        "velocity": 0.30708661417322836
+      },
+      {
+        "timeBeats": 12,
+        "instrument": "HatPedal",
+        "velocity": 0.28346456692913385
+      },
+      {
+        "timeBeats": 12,
+        "instrument": "Ride",
+        "velocity": 0.3937007874015748
+      },
+      {
+        "timeBeats": 13,
+        "instrument": "HatPedal",
+        "velocity": 0.4409448818897638
+      },
+      {
+        "timeBeats": 13,
+        "instrument": "Ride",
+        "velocity": 0.4015748031496063
+      },
+      {
+        "timeBeats": 14,
+        "instrument": "HatPedal",
+        "velocity": 0.28346456692913385
+      },
+      {
+        "timeBeats": 14,
+        "instrument": "Ride",
+        "velocity": 0.3858267716535433
+      },
+      {
+        "timeBeats": 15,
+        "instrument": "HatPedal",
+        "velocity": 0.4409448818897638
+      },
+      {
+        "timeBeats": 15,
+        "instrument": "Ride",
+        "velocity": 0.3937007874015748
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "std"
+  },
+  {
+    "styleId": "RIDE_2",
+    "name": "RIDE 2 (alt)",
+    "events": [
+      {
+        "timeBeats": 0,
+        "instrument": "HatPedal",
+        "velocity": 0.28346456692913385
+      },
+      {
+        "timeBeats": 0,
+        "instrument": "Ride",
+        "velocity": 0.36220472440944884
+      },
+      {
+        "timeBeats": 1,
+        "instrument": "HatPedal",
+        "velocity": 0.4409448818897638
+      },
+      {
+        "timeBeats": 1,
+        "instrument": "Ride",
+        "velocity": 0.3858267716535433
+      },
+      {
+        "timeBeats": 2,
+        "instrument": "HatPedal",
+        "velocity": 0.28346456692913385
+      },
+      {
+        "timeBeats": 2,
+        "instrument": "Ride",
+        "velocity": 0.4015748031496063
+      },
+      {
+        "timeBeats": 3,
+        "instrument": "HatPedal",
+        "velocity": 0.4409448818897638
+      },
+      {
+        "timeBeats": 3,
+        "instrument": "Ride",
+        "velocity": 0.3700787401574803
+      },
+      {
+        "timeBeats": 4,
+        "instrument": "HatPedal",
+        "velocity": 0.28346456692913385
+      },
+      {
+        "timeBeats": 4,
+        "instrument": "Ride",
+        "velocity": 0.4015748031496063
+      },
+      {
+        "timeBeats": 5,
+        "instrument": "HatPedal",
+        "velocity": 0.4409448818897638
+      },
+      {
+        "timeBeats": 5,
+        "instrument": "Ride",
+        "velocity": 0.3700787401574803
+      },
+      {
+        "timeBeats": 6,
+        "instrument": "HatPedal",
+        "velocity": 0.28346456692913385
+      },
+      {
+        "timeBeats": 6,
+        "instrument": "Ride",
+        "velocity": 0.3858267716535433
+      },
+      {
+        "timeBeats": 7,
+        "instrument": "HatOpen",
+        "velocity": 0.49606299212598426
+      },
+      {
+        "timeBeats": 7,
+        "instrument": "Ride",
+        "velocity": 0.3700787401574803
+      },
+      {
+        "timeBeats": 8,
+        "instrument": "HatPedal",
+        "velocity": 0.28346456692913385
+      },
+      {
+        "timeBeats": 8,
+        "instrument": "Ride",
+        "velocity": 0.36220472440944884
+      },
+      {
+        "timeBeats": 9,
+        "instrument": "HatPedal",
+        "velocity": 0.4409448818897638
+      },
+      {
+        "timeBeats": 9,
+        "instrument": "Ride",
+        "velocity": 0.3937007874015748
+      },
+      {
+        "timeBeats": 10,
+        "instrument": "HatPedal",
+        "velocity": 0.28346456692913385
+      },
+      {
+        "timeBeats": 10,
+        "instrument": "Ride",
+        "velocity": 0.3858267716535433
+      },
+      {
+        "timeBeats": 11,
+        "instrument": "HatPedal",
+        "velocity": 0.4409448818897638
+      },
+      {
+        "timeBeats": 11,
+        "instrument": "Ride",
+        "velocity": 0.3937007874015748
+      },
+      {
+        "timeBeats": 12,
+        "instrument": "HatPedal",
+        "velocity": 0.28346456692913385
+      },
+      {
+        "timeBeats": 12,
+        "instrument": "Ride",
+        "velocity": 0.36220472440944884
+      },
+      {
+        "timeBeats": 13,
+        "instrument": "HatPedal",
+        "velocity": 0.4409448818897638
+      },
+      {
+        "timeBeats": 13,
+        "instrument": "Ride",
+        "velocity": 0.36220472440944884
+      },
+      {
+        "timeBeats": 14,
+        "instrument": "HatPedal",
+        "velocity": 0.28346456692913385
+      },
+      {
+        "timeBeats": 14,
+        "instrument": "Ride",
+        "velocity": 0.36220472440944884
+      },
+      {
+        "timeBeats": 15,
+        "instrument": "HatPedal",
+        "velocity": 0.4409448818897638
+      },
+      {
+        "timeBeats": 15,
+        "instrument": "Ride",
+        "velocity": 0.3543307086614173
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "std"
+  },
+  {
+    "styleId": "RIDE_2",
+    "name": "RIDE 2 (fill)",
+    "events": [
+      {
+        "timeBeats": 0,
+        "instrument": "HatPedal",
+        "velocity": 0.28346456692913385
+      },
+      {
+        "timeBeats": 0,
+        "instrument": "Snare",
+        "velocity": 0.3543307086614173
+      },
+      {
+        "timeBeats": 1,
+        "instrument": "HatPedal",
+        "velocity": 0.4409448818897638
+      },
+      {
+        "timeBeats": 1,
+        "instrument": "Ride",
+        "velocity": 0.33858267716535434
+      },
+      {
+        "timeBeats": 1.6666666666666667,
+        "instrument": "Ride",
+        "velocity": 0.29133858267716534
+      },
+      {
+        "timeBeats": 2,
+        "instrument": "HatPedal",
+        "velocity": 0.28346456692913385
+      },
+      {
+        "timeBeats": 2,
+        "instrument": "Ride",
+        "velocity": 0.3700787401574803
+      },
+      {
+        "timeBeats": 3,
+        "instrument": "HatPedal",
+        "velocity": 0.4409448818897638
+      },
+      {
+        "timeBeats": 3,
+        "instrument": "Ride",
+        "velocity": 0.3937007874015748
+      },
+      {
+        "timeBeats": 4,
+        "instrument": "HatPedal",
+        "velocity": 0.28346456692913385
+      },
+      {
+        "timeBeats": 4,
+        "instrument": "Ride",
+        "velocity": 0.3543307086614173
+      },
+      {
+        "timeBeats": 5,
+        "instrument": "HatPedal",
+        "velocity": 0.4409448818897638
+      },
+      {
+        "timeBeats": 5,
+        "instrument": "Ride",
+        "velocity": 0.4015748031496063
+      },
+      {
+        "timeBeats": 6,
+        "instrument": "HatPedal",
+        "velocity": 0.28346456692913385
+      },
+      {
+        "timeBeats": 6,
+        "instrument": "Ride",
+        "velocity": 0.4409448818897638
+      },
+      {
+        "timeBeats": 7,
+        "instrument": "HatPedal",
+        "velocity": 0.4015748031496063
+      },
+      {
+        "timeBeats": 7,
+        "instrument": "Ride",
+        "velocity": 0.3700787401574803
+      },
+      {
+        "timeBeats": 8,
+        "instrument": "HatPedal",
+        "velocity": 0.28346456692913385
+      },
+      {
+        "timeBeats": 8,
+        "instrument": "Ride",
+        "velocity": 0.3858267716535433
+      },
+      {
+        "timeBeats": 9,
+        "instrument": "HatPedal",
+        "velocity": 0.4409448818897638
+      },
+      {
+        "timeBeats": 9,
+        "instrument": "Ride",
+        "velocity": 0.3779527559055118
+      },
+      {
+        "timeBeats": 10,
+        "instrument": "HatPedal",
+        "velocity": 0.28346456692913385
+      },
+      {
+        "timeBeats": 10,
+        "instrument": "Ride",
+        "velocity": 0.4015748031496063
+      },
+      {
+        "timeBeats": 11,
+        "instrument": "HatPedal",
+        "velocity": 0.4409448818897638
+      },
+      {
+        "timeBeats": 11,
+        "instrument": "Ride",
+        "velocity": 0.41732283464566927
+      },
+      {
+        "timeBeats": 12,
+        "instrument": "HatPedal",
+        "velocity": 0.28346456692913385
+      },
+      {
+        "timeBeats": 12,
+        "instrument": "Ride",
+        "velocity": 0.47244094488188976
+      },
+      {
+        "timeBeats": 13,
+        "instrument": "HatPedal",
+        "velocity": 0.5118110236220472
+      },
+      {
+        "timeBeats": 13,
+        "instrument": "Ride",
+        "velocity": 0.3858267716535433
+      },
+      {
+        "timeBeats": 14,
+        "instrument": "HatPedal",
+        "velocity": 0.28346456692913385
+      },
+      {
+        "timeBeats": 14,
+        "instrument": "Ride",
+        "velocity": 0.33858267716535434
+      },
+      {
+        "timeBeats": 15,
+        "instrument": "HatPedal",
+        "velocity": 0.4409448818897638
+      },
+      {
+        "timeBeats": 15,
+        "instrument": "Ride",
+        "velocity": 0.4015748031496063
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "fill"
+  },
+  {
+    "styleId": "RIDE_2",
+    "name": "RIDE 2 (alt)",
+    "events": [
+      {
+        "timeBeats": 0,
+        "instrument": "HatPedal",
+        "velocity": 0.4251968503937008
+      },
+      {
+        "timeBeats": 0,
+        "instrument": "Ride",
+        "velocity": 0.41732283464566927
+      },
+      {
+        "timeBeats": 0.6666666666666666,
+        "instrument": "Ride",
+        "velocity": 0.47244094488188976
+      },
+      {
+        "timeBeats": 1,
+        "instrument": "HatPedal",
+        "velocity": 0.5748031496062992
+      },
+      {
+        "timeBeats": 1.6666666666666667,
+        "instrument": "Snare",
+        "velocity": 0.3779527559055118
+      },
+      {
+        "timeBeats": 2,
+        "instrument": "HatPedal",
+        "velocity": 0.4251968503937008
+      },
+      {
+        "timeBeats": 2.3333333333333335,
+        "instrument": "Kick",
+        "velocity": 0.3543307086614173
+      },
+      {
+        "timeBeats": 2.6666666666666665,
+        "instrument": "Kick",
+        "velocity": 0.49606299212598426
+      },
+      {
+        "timeBeats": 3,
+        "instrument": "HatPedal",
+        "velocity": 0.5748031496062992
+      },
+      {
+        "timeBeats": 3,
+        "instrument": "Ride",
+        "velocity": 0.41732283464566927
+      },
+      {
+        "timeBeats": 3.6666666666666665,
+        "instrument": "Ride",
+        "velocity": 0.30708661417322836
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "std"
+  },
+  {
+    "styleId": "RIDE_2",
+    "name": "RIDE 2",
+    "events": [
+      {
+        "timeBeats": 0,
+        "instrument": "HatPedal",
+        "velocity": 0.3464566929133858
+      },
+      {
+        "timeBeats": 0,
+        "instrument": "Snare",
+        "velocity": 0.29133858267716534
+      },
+      {
+        "timeBeats": 1,
+        "instrument": "HatPedal",
+        "velocity": 0.5039370078740157
+      },
+      {
+        "timeBeats": 1,
+        "instrument": "Ride",
+        "velocity": 0.41732283464566927
+      },
+      {
+        "timeBeats": 1.6666666666666667,
+        "instrument": "Snare",
+        "velocity": 0.4330708661417323
+      },
+      {
+        "timeBeats": 2,
+        "instrument": "HatPedal",
+        "velocity": 0.3464566929133858
+      },
+      {
+        "timeBeats": 2,
+        "instrument": "Ride",
+        "velocity": 0.41732283464566927
+      },
+      {
+        "timeBeats": 3,
+        "instrument": "HatPedal",
+        "velocity": 0.5039370078740157
+      },
+      {
+        "timeBeats": 3,
+        "instrument": "Ride",
+        "velocity": 0.41732283464566927
+      },
+      {
+        "timeBeats": 3.6666666666666665,
+        "instrument": "Ride",
+        "velocity": 0.25984251968503935
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "fill"
+  },
+  {
+    "styleId": "RIDE_3",
+    "name": "RIDE 3 (alt)",
+    "events": [
+      {
+        "timeBeats": 0.0020833333333333333,
+        "instrument": "Ride",
+        "velocity": 0.4330708661417323
+      },
+      {
+        "timeBeats": 0.99375,
+        "instrument": "HatPedal",
+        "velocity": 0.49606299212598426
+      },
+      {
+        "timeBeats": 1.0020833333333334,
+        "instrument": "Ride",
+        "velocity": 0.4330708661417323
+      },
+      {
+        "timeBeats": 1.7104166666666667,
+        "instrument": "Ride",
+        "velocity": 0.1968503937007874
+      },
+      {
+        "timeBeats": 2.002083333333333,
+        "instrument": "Ride",
+        "velocity": 0.4330708661417323
+      },
+      {
+        "timeBeats": 3.002083333333333,
+        "instrument": "HatPedal",
+        "velocity": 0.49606299212598426
+      },
+      {
+        "timeBeats": 3.004166666666667,
+        "instrument": "Ride",
+        "velocity": 0.4330708661417323
+      },
+      {
+        "timeBeats": 3.71875,
+        "instrument": "Ride",
+        "velocity": 0.1968503937007874
+      },
+      {
+        "timeBeats": 4.004166666666666,
+        "instrument": "Ride",
+        "velocity": 0.4330708661417323
+      },
+      {
+        "timeBeats": 5,
+        "instrument": "HatPedal",
+        "velocity": 0.49606299212598426
+      },
+      {
+        "timeBeats": 5.010416666666667,
+        "instrument": "Ride",
+        "velocity": 0.4330708661417323
+      },
+      {
+        "timeBeats": 5.71875,
+        "instrument": "Ride",
+        "velocity": 0.1968503937007874
+      },
+      {
+        "timeBeats": 6.010416666666667,
+        "instrument": "Ride",
+        "velocity": 0.4330708661417323
+      },
+      {
+        "timeBeats": 7.002083333333333,
+        "instrument": "HatPedal",
+        "velocity": 0.49606299212598426
+      },
+      {
+        "timeBeats": 7.010416666666667,
+        "instrument": "Ride",
+        "velocity": 0.4330708661417323
+      },
+      {
+        "timeBeats": 7.71875,
+        "instrument": "Ride",
+        "velocity": 0.2755905511811024
+      },
+      {
+        "timeBeats": 8.010416666666666,
+        "instrument": "Ride",
+        "velocity": 0.4330708661417323
+      },
+      {
+        "timeBeats": 9.002083333333333,
+        "instrument": "HatPedal",
+        "velocity": 0.49606299212598426
+      },
+      {
+        "timeBeats": 9.002083333333333,
+        "instrument": "Ride",
+        "velocity": 0.4330708661417323
+      },
+      {
+        "timeBeats": 10.014583333333333,
+        "instrument": "Ride",
+        "velocity": 0.3700787401574803
+      },
+      {
+        "timeBeats": 11,
+        "instrument": "HatPedal",
+        "velocity": 0.49606299212598426
+      },
+      {
+        "timeBeats": 11.010416666666666,
+        "instrument": "Ride",
+        "velocity": 0.4330708661417323
+      },
+      {
+        "timeBeats": 11.71875,
+        "instrument": "Ride",
+        "velocity": 0.1968503937007874
+      },
+      {
+        "timeBeats": 12,
+        "instrument": "Ride",
+        "velocity": 0.4330708661417323
+      },
+      {
+        "timeBeats": 13,
+        "instrument": "HatPedal",
+        "velocity": 0.49606299212598426
+      },
+      {
+        "timeBeats": 13.004166666666666,
+        "instrument": "Ride",
+        "velocity": 0.4330708661417323
+      },
+      {
+        "timeBeats": 13.708333333333334,
+        "instrument": "Ride",
+        "velocity": 0.2125984251968504
+      },
+      {
+        "timeBeats": 14,
+        "instrument": "Ride",
+        "velocity": 0.4330708661417323
+      },
+      {
+        "timeBeats": 15.002083333333333,
+        "instrument": "HatPedal",
+        "velocity": 0.49606299212598426
+      },
+      {
+        "timeBeats": 15.002083333333333,
+        "instrument": "Ride",
+        "velocity": 0.4330708661417323
+      },
+      {
+        "timeBeats": 15.010416666666666,
+        "instrument": "Snare",
+        "velocity": 0.30708661417322836
+      },
+      {
+        "timeBeats": 15.702083333333333,
+        "instrument": "Snare",
+        "velocity": 0.3858267716535433
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "std"
+  },
+  {
+    "styleId": "RIDE_3",
+    "name": "RIDE 3 (alt)",
+    "events": [
+      {
+        "timeBeats": 0.0020833333333333333,
+        "instrument": "Ride",
+        "velocity": 0.4330708661417323
+      },
+      {
+        "timeBeats": 1.0020833333333334,
+        "instrument": "HatPedal",
+        "velocity": 0.49606299212598426
+      },
+      {
+        "timeBeats": 1.0020833333333334,
+        "instrument": "Ride",
+        "velocity": 0.4330708661417323
+      },
+      {
+        "timeBeats": 1.7104166666666667,
+        "instrument": "Ride",
+        "velocity": 0.2755905511811024
+      },
+      {
+        "timeBeats": 2.002083333333333,
+        "instrument": "Ride",
+        "velocity": 0.4330708661417323
+      },
+      {
+        "timeBeats": 3,
+        "instrument": "HatPedal",
+        "velocity": 0.49606299212598426
+      },
+      {
+        "timeBeats": 3.004166666666667,
+        "instrument": "Ride",
+        "velocity": 0.4330708661417323
+      },
+      {
+        "timeBeats": 3.71875,
+        "instrument": "Ride",
+        "velocity": 0.2755905511811024
+      },
+      {
+        "timeBeats": 4.004166666666666,
+        "instrument": "Ride",
+        "velocity": 0.4330708661417323
+      },
+      {
+        "timeBeats": 5.002083333333333,
+        "instrument": "HatPedal",
+        "velocity": 0.49606299212598426
+      },
+      {
+        "timeBeats": 5.010416666666667,
+        "instrument": "Ride",
+        "velocity": 0.4330708661417323
+      },
+      {
+        "timeBeats": 5.71875,
+        "instrument": "Ride",
+        "velocity": 0.2755905511811024
+      },
+      {
+        "timeBeats": 6.010416666666667,
+        "instrument": "Ride",
+        "velocity": 0.4330708661417323
+      },
+      {
+        "timeBeats": 7,
+        "instrument": "HatPedal",
+        "velocity": 0.49606299212598426
+      },
+      {
+        "timeBeats": 7.010416666666667,
+        "instrument": "Ride",
+        "velocity": 0.4330708661417323
+      },
+      {
+        "timeBeats": 7.71875,
+        "instrument": "Ride",
+        "velocity": 0.3543307086614173
+      },
+      {
+        "timeBeats": 8,
+        "instrument": "Snare",
+        "velocity": 0.3543307086614173
+      },
+      {
+        "timeBeats": 9.002083333333333,
+        "instrument": "HatPedal",
+        "velocity": 0.49606299212598426
+      },
+      {
+        "timeBeats": 9.002083333333333,
+        "instrument": "Ride",
+        "velocity": 0.4330708661417323
+      },
+      {
+        "timeBeats": 10.014583333333333,
+        "instrument": "Ride",
+        "velocity": 0.3700787401574803
+      },
+      {
+        "timeBeats": 10.99375,
+        "instrument": "HatPedal",
+        "velocity": 0.49606299212598426
+      },
+      {
+        "timeBeats": 11.010416666666666,
+        "instrument": "Ride",
+        "velocity": 0.4330708661417323
+      },
+      {
+        "timeBeats": 11.71875,
+        "instrument": "Ride",
+        "velocity": 0.2755905511811024
+      },
+      {
+        "timeBeats": 12,
+        "instrument": "Ride",
+        "velocity": 0.4330708661417323
+      },
+      {
+        "timeBeats": 13,
+        "instrument": "HatPedal",
+        "velocity": 0.49606299212598426
+      },
+      {
+        "timeBeats": 13.004166666666666,
+        "instrument": "Ride",
+        "velocity": 0.4330708661417323
+      },
+      {
+        "timeBeats": 13.708333333333334,
+        "instrument": "Ride",
+        "velocity": 0.29133858267716534
+      },
+      {
+        "timeBeats": 14,
+        "instrument": "Ride",
+        "velocity": 0.4330708661417323
+      },
+      {
+        "timeBeats": 14.991666666666667,
+        "instrument": "HatPedal",
+        "velocity": 0.49606299212598426
+      },
+      {
+        "timeBeats": 15.002083333333333,
+        "instrument": "Ride",
+        "velocity": 0.4330708661417323
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "std"
+  },
+  {
+    "styleId": "RIDE_3",
+    "name": "RIDE 3 (fill)",
+    "events": [
+      {
+        "timeBeats": 0.0020833333333333333,
+        "instrument": "Ride",
+        "velocity": 0.4330708661417323
+      },
+      {
+        "timeBeats": 1.0020833333333334,
+        "instrument": "HatPedal",
+        "velocity": 0.49606299212598426
+      },
+      {
+        "timeBeats": 1.0020833333333334,
+        "instrument": "Ride",
+        "velocity": 0.4330708661417323
+      },
+      {
+        "timeBeats": 1.7104166666666667,
+        "instrument": "Ride",
+        "velocity": 0.2755905511811024
+      },
+      {
+        "timeBeats": 2.002083333333333,
+        "instrument": "Ride",
+        "velocity": 0.4330708661417323
+      },
+      {
+        "timeBeats": 3,
+        "instrument": "HatOpen",
+        "velocity": 0.49606299212598426
+      },
+      {
+        "timeBeats": 3.004166666666667,
+        "instrument": "Ride",
+        "velocity": 0.4330708661417323
+      },
+      {
+        "timeBeats": 3.71875,
+        "instrument": "Ride",
+        "velocity": 0.2755905511811024
+      },
+      {
+        "timeBeats": 4.004166666666666,
+        "instrument": "Ride",
+        "velocity": 0.4330708661417323
+      },
+      {
+        "timeBeats": 5.002083333333333,
+        "instrument": "HatPedal",
+        "velocity": 0.49606299212598426
+      },
+      {
+        "timeBeats": 5.010416666666667,
+        "instrument": "Ride",
+        "velocity": 0.4330708661417323
+      },
+      {
+        "timeBeats": 5.71875,
+        "instrument": "Ride",
+        "velocity": 0.2755905511811024
+      },
+      {
+        "timeBeats": 6.010416666666667,
+        "instrument": "Ride",
+        "velocity": 0.4330708661417323
+      },
+      {
+        "timeBeats": 7,
+        "instrument": "HatPedal",
+        "velocity": 0.49606299212598426
+      },
+      {
+        "timeBeats": 7.010416666666667,
+        "instrument": "Ride",
+        "velocity": 0.4330708661417323
+      },
+      {
+        "timeBeats": 7.71875,
+        "instrument": "Ride",
+        "velocity": 0.3543307086614173
+      },
+      {
+        "timeBeats": 8.010416666666666,
+        "instrument": "Ride",
+        "velocity": 0.4330708661417323
+      },
+      {
+        "timeBeats": 9.002083333333333,
+        "instrument": "HatPedal",
+        "velocity": 0.49606299212598426
+      },
+      {
+        "timeBeats": 9.002083333333333,
+        "instrument": "Ride",
+        "velocity": 0.4251968503937008
+      },
+      {
+        "timeBeats": 10.014583333333333,
+        "instrument": "Ride",
+        "velocity": 0.4251968503937008
+      },
+      {
+        "timeBeats": 10.99375,
+        "instrument": "HatPedal",
+        "velocity": 0.49606299212598426
+      },
+      {
+        "timeBeats": 11.010416666666666,
+        "instrument": "Ride",
+        "velocity": 0.4330708661417323
+      },
+      {
+        "timeBeats": 11.71875,
+        "instrument": "Ride",
+        "velocity": 0.2755905511811024
+      },
+      {
+        "timeBeats": 12,
+        "instrument": "Ride",
+        "velocity": 0.4330708661417323
+      },
+      {
+        "timeBeats": 13,
+        "instrument": "HatPedal",
+        "velocity": 0.49606299212598426
+      },
+      {
+        "timeBeats": 13.004166666666666,
+        "instrument": "Ride",
+        "velocity": 0.4330708661417323
+      },
+      {
+        "timeBeats": 13.708333333333334,
+        "instrument": "Ride",
+        "velocity": 0.29133858267716534
+      },
+      {
+        "timeBeats": 14,
+        "instrument": "Ride",
+        "velocity": 0.4330708661417323
+      },
+      {
+        "timeBeats": 14.991666666666667,
+        "instrument": "HatPedal",
+        "velocity": 0.49606299212598426
+      },
+      {
+        "timeBeats": 15.002083333333333,
+        "instrument": "Ride",
+        "velocity": 0.4330708661417323
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "fill"
+  },
+  {
+    "styleId": "RIDE_3",
+    "name": "RIDE 3 (alt)",
+    "events": [
+      {
+        "timeBeats": 0,
+        "instrument": "Snare",
+        "velocity": 0.36220472440944884
+      },
+      {
+        "timeBeats": 0,
+        "instrument": "Snare",
+        "velocity": 0.4015748031496063
+      },
+      {
+        "timeBeats": 0.6666666666666666,
+        "instrument": "Snare",
+        "velocity": 0.31496062992125984
+      },
+      {
+        "timeBeats": 1,
+        "instrument": "HatPedal",
+        "velocity": 0.4094488188976378
+      },
+      {
+        "timeBeats": 1,
+        "instrument": "Snare",
+        "velocity": 0.5118110236220472
+      },
+      {
+        "timeBeats": 2,
+        "instrument": "Snare",
+        "velocity": 0.31496062992125984
+      },
+      {
+        "timeBeats": 2.9916666666666667,
+        "instrument": "HatPedal",
+        "velocity": 0.6299212598425197
+      },
+      {
+        "timeBeats": 3,
+        "instrument": "Kick",
+        "velocity": 0.41732283464566927
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "std"
+  },
+  {
+    "styleId": "RIDE_3",
+    "name": "RIDE 3",
+    "events": [
+      {
+        "timeBeats": 1,
+        "instrument": "HatOpen",
+        "velocity": 0.49606299212598426
+      },
+      {
+        "timeBeats": 1,
+        "instrument": "Snare",
+        "velocity": 0.4566929133858268
+      },
+      {
+        "timeBeats": 2,
+        "instrument": "Kick",
+        "velocity": 0.4566929133858268
+      },
+      {
+        "timeBeats": 2.9916666666666667,
+        "instrument": "HatOpen",
+        "velocity": 0.5748031496062992
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "fill"
+  },
+  {
+    "styleId": "RIDE_4",
+    "name": "RIDE 4 (alt)",
+    "events": [
+      {
+        "timeBeats": 0,
+        "instrument": "Ride",
+        "velocity": 0.44881889763779526
+      },
+      {
+        "timeBeats": 1,
+        "instrument": "HatPedal",
+        "velocity": 0.5039370078740157
+      },
+      {
+        "timeBeats": 1.0041666666666667,
+        "instrument": "Ride",
+        "velocity": 0.41732283464566927
+      },
+      {
+        "timeBeats": 1.6625,
+        "instrument": "Ride",
+        "velocity": 0.30708661417322836
+      },
+      {
+        "timeBeats": 2.0125,
+        "instrument": "Ride",
+        "velocity": 0.3858267716535433
+      },
+      {
+        "timeBeats": 3,
+        "instrument": "HatPedal",
+        "velocity": 0.49606299212598426
+      },
+      {
+        "timeBeats": 3,
+        "instrument": "Snare",
+        "velocity": 0.4094488188976378
+      },
+      {
+        "timeBeats": 3.6625,
+        "instrument": "Ride",
+        "velocity": 0.28346456692913385
+      },
+      {
+        "timeBeats": 4,
+        "instrument": "Ride",
+        "velocity": 0.31496062992125984
+      },
+      {
+        "timeBeats": 5.004166666666666,
+        "instrument": "HatPedal",
+        "velocity": 0.5196850393700787
+      },
+      {
+        "timeBeats": 5.004166666666666,
+        "instrument": "Ride",
+        "velocity": 0.4094488188976378
+      },
+      {
+        "timeBeats": 5.6625,
+        "instrument": "Ride",
+        "velocity": 0.29133858267716534
+      },
+      {
+        "timeBeats": 6.0125,
+        "instrument": "Ride",
+        "velocity": 0.3858267716535433
+      },
+      {
+        "timeBeats": 6.995833333333334,
+        "instrument": "HatPedal",
+        "velocity": 0.49606299212598426
+      },
+      {
+        "timeBeats": 7,
+        "instrument": "Ride",
+        "velocity": 0.44881889763779526
+      },
+      {
+        "timeBeats": 7.6625,
+        "instrument": "Ride",
+        "velocity": 0.2992125984251969
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "std"
+  },
+  {
+    "styleId": "RIDE_4",
+    "name": "RIDE 4 (alt)",
+    "events": [
+      {
+        "timeBeats": 0,
+        "instrument": "Ride",
+        "velocity": 0.47244094488188976
+      },
+      {
+        "timeBeats": 1,
+        "instrument": "HatPedal",
+        "velocity": 0.6220472440944882
+      },
+      {
+        "timeBeats": 1.0041666666666667,
+        "instrument": "Ride",
+        "velocity": 0.41732283464566927
+      },
+      {
+        "timeBeats": 1.6541666666666666,
+        "instrument": "Ride",
+        "velocity": 0.2677165354330709
+      },
+      {
+        "timeBeats": 2.0125,
+        "instrument": "Ride",
+        "velocity": 0.3543307086614173
+      },
+      {
+        "timeBeats": 2.995833333333333,
+        "instrument": "HatPedal",
+        "velocity": 0.6141732283464567
+      },
+      {
+        "timeBeats": 3,
+        "instrument": "Ride",
+        "velocity": 0.3858267716535433
+      },
+      {
+        "timeBeats": 3.658333333333333,
+        "instrument": "Ride",
+        "velocity": 0.1968503937007874
+      },
+      {
+        "timeBeats": 4,
+        "instrument": "Ride",
+        "velocity": 0.47244094488188976
+      },
+      {
+        "timeBeats": 4,
+        "instrument": "Snare",
+        "velocity": 0.4015748031496063
+      },
+      {
+        "timeBeats": 4.995833333333334,
+        "instrument": "Ride",
+        "velocity": 0.4251968503937008
+      },
+      {
+        "timeBeats": 5,
+        "instrument": "HatPedal",
+        "velocity": 0.6456692913385826
+      },
+      {
+        "timeBeats": 5.6625,
+        "instrument": "Ride",
+        "velocity": 0.2283464566929134
+      },
+      {
+        "timeBeats": 6.0125,
+        "instrument": "Ride",
+        "velocity": 0.3700787401574803
+      },
+      {
+        "timeBeats": 6.995833333333334,
+        "instrument": "HatPedal",
+        "velocity": 0.5669291338582677
+      },
+      {
+        "timeBeats": 7,
+        "instrument": "Ride",
+        "velocity": 0.4251968503937008
+      },
+      {
+        "timeBeats": 7.641666666666667,
+        "instrument": "Ride",
+        "velocity": 0.2125984251968504
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "std"
+  },
+  {
+    "styleId": "RIDE_4",
+    "name": "RIDE 4 (fill)",
+    "events": [
+      {
+        "timeBeats": 0,
+        "instrument": "Ride",
+        "velocity": 0.3543307086614173
+      },
+      {
+        "timeBeats": 1,
+        "instrument": "HatPedal",
+        "velocity": 0.6220472440944882
+      },
+      {
+        "timeBeats": 1.0041666666666667,
+        "instrument": "Ride",
+        "velocity": 0.41732283464566927
+      },
+      {
+        "timeBeats": 1.6541666666666666,
+        "instrument": "Ride",
+        "velocity": 0.2677165354330709
+      },
+      {
+        "timeBeats": 2.0125,
+        "instrument": "Ride",
+        "velocity": 0.3543307086614173
+      },
+      {
+        "timeBeats": 2.995833333333333,
+        "instrument": "HatPedal",
+        "velocity": 0.6141732283464567
+      },
+      {
+        "timeBeats": 3,
+        "instrument": "Ride",
+        "velocity": 0.3858267716535433
+      },
+      {
+        "timeBeats": 3.6666666666666665,
+        "instrument": "Ride",
+        "velocity": 0.2677165354330709
+      },
+      {
+        "timeBeats": 4,
+        "instrument": "Ride",
+        "velocity": 0.5275590551181102
+      },
+      {
+        "timeBeats": 4.995833333333334,
+        "instrument": "Ride",
+        "velocity": 0.4251968503937008
+      },
+      {
+        "timeBeats": 5,
+        "instrument": "HatPedal",
+        "velocity": 0.6456692913385826
+      },
+      {
+        "timeBeats": 5.6625,
+        "instrument": "Snare",
+        "velocity": 0.4015748031496063
+      },
+      {
+        "timeBeats": 6.995833333333334,
+        "instrument": "HatPedal",
+        "velocity": 0.5669291338582677
+      },
+      {
+        "timeBeats": 7,
+        "instrument": "Ride",
+        "velocity": 0.33070866141732286
+      },
+      {
+        "timeBeats": 7.666666666666667,
+        "instrument": "Ride",
+        "velocity": 0.33070866141732286
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "fill"
+  },
+  {
+    "styleId": "RIDE_4",
+    "name": "RIDE 4 (alt)",
+    "events": [
+      {
+        "timeBeats": 0,
+        "instrument": "Ride",
+        "velocity": 0.5511811023622047
+      },
+      {
+        "timeBeats": 1,
+        "instrument": "HatPedal",
+        "velocity": 0.7795275590551181
+      },
+      {
+        "timeBeats": 1.3166666666666667,
+        "instrument": "Snare",
+        "velocity": 0.33070866141732286
+      },
+      {
+        "timeBeats": 1.6541666666666666,
+        "instrument": "Snare",
+        "velocity": 0.47244094488188976
+      },
+      {
+        "timeBeats": 2.675,
+        "instrument": "Snare",
+        "velocity": 0.5118110236220472
+      },
+      {
+        "timeBeats": 3,
+        "instrument": "HatOpen",
+        "velocity": 0.6220472440944882
+      },
+      {
+        "timeBeats": 3.6666666666666665,
+        "instrument": "HatPedal",
+        "velocity": 0.5984251968503937
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "std"
+  },
+  {
+    "styleId": "RIDE_4",
+    "name": "RIDE 4",
+    "events": [
+      {
+        "timeBeats": 0,
+        "instrument": "Snare",
+        "velocity": 0.4645669291338583
+      },
+      {
+        "timeBeats": 0.6666666666666666,
+        "instrument": "Snare",
+        "velocity": 0.3228346456692913
+      },
+      {
+        "timeBeats": 1,
+        "instrument": "HatPedal",
+        "velocity": 0.7559055118110236
+      },
+      {
+        "timeBeats": 1,
+        "instrument": "Snare",
+        "velocity": 0.3858267716535433
+      },
+      {
+        "timeBeats": 2,
+        "instrument": "Kick",
+        "velocity": 0.36220472440944884
+      },
+      {
+        "timeBeats": 2.6666666666666665,
+        "instrument": "Kick",
+        "velocity": 0.3228346456692913
+      },
+      {
+        "timeBeats": 3,
+        "instrument": "HatPedal",
+        "velocity": 0.7795275590551181
+      },
+      {
+        "timeBeats": 3,
+        "instrument": "Kick",
+        "velocity": 0.41732283464566927
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "fill"
+  },
+  {
+    "styleId": "SHUFFLE_1",
+    "name": "SHUFFLE 1 (alt)",
+    "events": [
+      {
+        "timeBeats": 0,
+        "instrument": "Kick",
+        "velocity": 0.47244094488188976
+      },
+      {
+        "timeBeats": 0.9979166666666667,
+        "instrument": "HatPedal",
+        "velocity": 0.3779527559055118
+      },
+      {
+        "timeBeats": 1.6729166666666666,
+        "instrument": "Kick",
+        "velocity": 0.31496062992125984
+      },
+      {
+        "timeBeats": 2.0083333333333333,
+        "instrument": "Kick",
+        "velocity": 0.47244094488188976
+      },
+      {
+        "timeBeats": 3.0125,
+        "instrument": "HatPedal",
+        "velocity": 0.3858267716535433
+      },
+      {
+        "timeBeats": 4.002083333333333,
+        "instrument": "Kick",
+        "velocity": 0.49606299212598426
+      },
+      {
+        "timeBeats": 4.991666666666666,
+        "instrument": "HatPedal",
+        "velocity": 0.33070866141732286
+      },
+      {
+        "timeBeats": 5.664583333333334,
+        "instrument": "Kick",
+        "velocity": 0.33070866141732286
+      },
+      {
+        "timeBeats": 5.989583333333333,
+        "instrument": "Kick",
+        "velocity": 0.49606299212598426
+      },
+      {
+        "timeBeats": 7.00625,
+        "instrument": "HatPedal",
+        "velocity": 0.3858267716535433
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "std"
+  },
+  {
+    "styleId": "SHUFFLE_1",
+    "name": "SHUFFLE 1 (alt)",
+    "events": [
+      {
+        "timeBeats": 0,
+        "instrument": "Kick",
+        "velocity": 0.47244094488188976
+      },
+      {
+        "timeBeats": 0.9979166666666667,
+        "instrument": "HatPedal",
+        "velocity": 0.3779527559055118
+      },
+      {
+        "timeBeats": 2.0083333333333333,
+        "instrument": "Kick",
+        "velocity": 0.47244094488188976
+      },
+      {
+        "timeBeats": 3.0125,
+        "instrument": "HatOpen",
+        "velocity": 0.3858267716535433
+      },
+      {
+        "timeBeats": 4,
+        "instrument": "HatPedal",
+        "velocity": 0.33070866141732286
+      },
+      {
+        "timeBeats": 4.002083333333333,
+        "instrument": "Kick",
+        "velocity": 0.49606299212598426
+      },
+      {
+        "timeBeats": 4.991666666666666,
+        "instrument": "HatPedal",
+        "velocity": 0.33070866141732286
+      },
+      {
+        "timeBeats": 5.664583333333334,
+        "instrument": "Kick",
+        "velocity": 0.33070866141732286
+      },
+      {
+        "timeBeats": 5.989583333333333,
+        "instrument": "Kick",
+        "velocity": 0.49606299212598426
+      },
+      {
+        "timeBeats": 6.666666666666667,
+        "instrument": "Kick",
+        "velocity": 0.33070866141732286
+      },
+      {
+        "timeBeats": 7,
+        "instrument": "HatPedal",
+        "velocity": 0.3858267716535433
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "std"
+  },
+  {
+    "styleId": "SHUFFLE_1",
+    "name": "SHUFFLE 1 (fill)",
+    "events": [
+      {
+        "timeBeats": 0,
+        "instrument": "Kick",
+        "velocity": 0.47244094488188976
+      },
+      {
+        "timeBeats": 0,
+        "instrument": "Snare",
+        "velocity": 0.3700787401574803
+      },
+      {
+        "timeBeats": 0.9979166666666667,
+        "instrument": "HatPedal",
+        "velocity": 0.3779527559055118
+      },
+      {
+        "timeBeats": 2.0083333333333333,
+        "instrument": "Kick",
+        "velocity": 0.47244094488188976
+      },
+      {
+        "timeBeats": 3.0125,
+        "instrument": "HatPedal",
+        "velocity": 0.3858267716535433
+      },
+      {
+        "timeBeats": 4,
+        "instrument": "HatPedal",
+        "velocity": 0.33070866141732286
+      },
+      {
+        "timeBeats": 4.002083333333333,
+        "instrument": "Kick",
+        "velocity": 0.49606299212598426
+      },
+      {
+        "timeBeats": 4.991666666666666,
+        "instrument": "HatPedal",
+        "velocity": 0.33070866141732286
+      },
+      {
+        "timeBeats": 5.664583333333334,
+        "instrument": "Kick",
+        "velocity": 0.33070866141732286
+      },
+      {
+        "timeBeats": 5.989583333333333,
+        "instrument": "Kick",
+        "velocity": 0.5511811023622047
+      },
+      {
+        "timeBeats": 6.666666666666667,
+        "instrument": "Kick",
+        "velocity": 0.4251968503937008
+      },
+      {
+        "timeBeats": 7,
+        "instrument": "HatPedal",
+        "velocity": 0.3858267716535433
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "fill"
+  },
+  {
+    "styleId": "SHUFFLE_1",
+    "name": "SHUFFLE 1 (alt)",
+    "events": [
+      {
+        "timeBeats": 0,
+        "instrument": "Kick",
+        "velocity": 0.6299212598425197
+      },
+      {
+        "timeBeats": 0,
+        "instrument": "Snare",
+        "velocity": 0.4251968503937008
+      },
+      {
+        "timeBeats": 0.6666666666666666,
+        "instrument": "Kick",
+        "velocity": 0.4094488188976378
+      },
+      {
+        "timeBeats": 1,
+        "instrument": "HatPedal",
+        "velocity": 0.6141732283464567
+      },
+      {
+        "timeBeats": 1.3333333333333333,
+        "instrument": "Kick",
+        "velocity": 0.49606299212598426
+      },
+      {
+        "timeBeats": 2,
+        "instrument": "Kick",
+        "velocity": 0.6299212598425197
+      },
+      {
+        "timeBeats": 2.6666666666666665,
+        "instrument": "Kick",
+        "velocity": 0.3937007874015748
+      },
+      {
+        "timeBeats": 2.6666666666666665,
+        "instrument": "HatOpen",
+        "velocity": 0.5905511811023622
+      },
+      {
+        "timeBeats": 3.6666666666666665,
+        "instrument": "HatPedal",
+        "velocity": 0.3228346456692913
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "std"
+  },
+  {
+    "styleId": "SHUFFLE_1",
+    "name": "SHUFFLE 1",
+    "events": [
+      {
+        "timeBeats": 0,
+        "instrument": "Snare",
+        "velocity": 0.3464566929133858
+      },
+      {
+        "timeBeats": 0.66875,
+        "instrument": "Kick",
+        "velocity": 0.6692913385826772
+      },
+      {
+        "timeBeats": 0.9916666666666667,
+        "instrument": "HatPedal",
+        "velocity": 0.5275590551181102
+      },
+      {
+        "timeBeats": 1,
+        "instrument": "Snare",
+        "velocity": 0.30708661417322836
+      },
+      {
+        "timeBeats": 1.0125,
+        "instrument": "Kick",
+        "velocity": 0.31496062992125984
+      },
+      {
+        "timeBeats": 1.675,
+        "instrument": "Kick",
+        "velocity": 0.6220472440944882
+      },
+      {
+        "timeBeats": 2.00625,
+        "instrument": "Kick",
+        "velocity": 0.1732283464566929
+      },
+      {
+        "timeBeats": 2.35,
+        "instrument": "Kick",
+        "velocity": 0.2677165354330709
+      },
+      {
+        "timeBeats": 2.652083333333333,
+        "instrument": "Kick",
+        "velocity": 0.5039370078740157
+      },
+      {
+        "timeBeats": 2.995833333333333,
+        "instrument": "HatPedal",
+        "velocity": 0.5275590551181102
+      },
+      {
+        "timeBeats": 3.004166666666667,
+        "instrument": "Snare",
+        "velocity": 0.25984251968503935
+      },
+      {
+        "timeBeats": 3.0145833333333334,
+        "instrument": "Kick",
+        "velocity": 0.2440944881889764
+      },
+      {
+        "timeBeats": 3.3125,
+        "instrument": "Snare",
+        "velocity": 0.41732283464566927
+      },
+      {
+        "timeBeats": 3.3375,
+        "instrument": "Kick",
+        "velocity": 0.29133858267716534
+      },
+      {
+        "timeBeats": 3.6666666666666665,
+        "instrument": "Kick",
+        "velocity": 0.5748031496062992
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "fill"
+  },
+  {
+    "styleId": "SHUFFLE_2",
+    "name": "SHUFFLE 2 (alt)",
+    "events": [
+      {
+        "timeBeats": 0.0020833333333333333,
+        "instrument": "Kick",
+        "velocity": 0.5275590551181102
+      },
+      {
+        "timeBeats": 0.0020833333333333333,
+        "instrument": "Ride",
+        "velocity": 0.3779527559055118
+      },
+      {
+        "timeBeats": 0.675,
+        "instrument": "Ride",
+        "velocity": 0.11811023622047244
+      },
+      {
+        "timeBeats": 0.9916666666666667,
+        "instrument": "HatPedal",
+        "velocity": 0.3858267716535433
+      },
+      {
+        "timeBeats": 1.0041666666666667,
+        "instrument": "Ride",
+        "velocity": 0.3779527559055118
+      },
+      {
+        "timeBeats": 1.65625,
+        "instrument": "Kick",
+        "velocity": 0.33070866141732286
+      },
+      {
+        "timeBeats": 1.6645833333333333,
+        "instrument": "Ride",
+        "velocity": 0.14960629921259844
+      },
+      {
+        "timeBeats": 1.9895833333333333,
+        "instrument": "Ride",
+        "velocity": 0.3779527559055118
+      },
+      {
+        "timeBeats": 1.9979166666666666,
+        "instrument": "Kick",
+        "velocity": 0.5275590551181102
+      },
+      {
+        "timeBeats": 2.660416666666667,
+        "instrument": "Ride",
+        "velocity": 0.11811023622047244
+      },
+      {
+        "timeBeats": 2.997916666666667,
+        "instrument": "HatPedal",
+        "velocity": 0.3937007874015748
+      },
+      {
+        "timeBeats": 3.002083333333333,
+        "instrument": "Ride",
+        "velocity": 0.4015748031496063
+      },
+      {
+        "timeBeats": 3.6729166666666666,
+        "instrument": "Ride",
+        "velocity": 0.10236220472440945
+      },
+      {
+        "timeBeats": 3.9895833333333335,
+        "instrument": "Kick",
+        "velocity": 0.5748031496062992
+      },
+      {
+        "timeBeats": 4.002083333333333,
+        "instrument": "Ride",
+        "velocity": 0.4094488188976378
+      },
+      {
+        "timeBeats": 4.677083333333333,
+        "instrument": "Ride",
+        "velocity": 0.14173228346456693
+      },
+      {
+        "timeBeats": 5.00625,
+        "instrument": "Ride",
+        "velocity": 0.36220472440944884
+      },
+      {
+        "timeBeats": 5.010416666666667,
+        "instrument": "HatPedal",
+        "velocity": 0.4251968503937008
+      },
+      {
+        "timeBeats": 5.670833333333333,
+        "instrument": "Kick",
+        "velocity": 0.3543307086614173
+      },
+      {
+        "timeBeats": 5.675,
+        "instrument": "Ride",
+        "velocity": 0.14960629921259844
+      },
+      {
+        "timeBeats": 5.989583333333333,
+        "instrument": "Kick",
+        "velocity": 0.5669291338582677
+      },
+      {
+        "timeBeats": 6.004166666666666,
+        "instrument": "Ride",
+        "velocity": 0.36220472440944884
+      },
+      {
+        "timeBeats": 6.670833333333333,
+        "instrument": "Ride",
+        "velocity": 0.11811023622047244
+      },
+      {
+        "timeBeats": 7.004166666666666,
+        "instrument": "HatPedal",
+        "velocity": 0.41732283464566927
+      },
+      {
+        "timeBeats": 7.00625,
+        "instrument": "Ride",
+        "velocity": 0.36220472440944884
+      },
+      {
+        "timeBeats": 7.666666666666667,
+        "instrument": "Ride",
+        "velocity": 0.14173228346456693
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "std"
+  },
+  {
+    "styleId": "SHUFFLE_2",
+    "name": "SHUFFLE 2 (alt)",
+    "events": [
+      {
+        "timeBeats": 0.0020833333333333333,
+        "instrument": "Kick",
+        "velocity": 0.5275590551181102
+      },
+      {
+        "timeBeats": 0.0020833333333333333,
+        "instrument": "Snare",
+        "velocity": 0.30708661417322836
+      },
+      {
+        "timeBeats": 0.9916666666666667,
+        "instrument": "HatPedal",
+        "velocity": 0.3858267716535433
+      },
+      {
+        "timeBeats": 1.0041666666666667,
+        "instrument": "Ride",
+        "velocity": 0.3779527559055118
+      },
+      {
+        "timeBeats": 1.65625,
+        "instrument": "Kick",
+        "velocity": 0.33070866141732286
+      },
+      {
+        "timeBeats": 1.6645833333333333,
+        "instrument": "Ride",
+        "velocity": 0.25984251968503935
+      },
+      {
+        "timeBeats": 1.9895833333333333,
+        "instrument": "Ride",
+        "velocity": 0.3779527559055118
+      },
+      {
+        "timeBeats": 1.9979166666666666,
+        "instrument": "Kick",
+        "velocity": 0.5275590551181102
+      },
+      {
+        "timeBeats": 2.660416666666667,
+        "instrument": "Ride",
+        "velocity": 0.11811023622047244
+      },
+      {
+        "timeBeats": 2.997916666666667,
+        "instrument": "HatPedal",
+        "velocity": 0.3937007874015748
+      },
+      {
+        "timeBeats": 3.002083333333333,
+        "instrument": "Ride",
+        "velocity": 0.4015748031496063
+      },
+      {
+        "timeBeats": 3.6729166666666666,
+        "instrument": "Ride",
+        "velocity": 0.2125984251968504
+      },
+      {
+        "timeBeats": 3.9895833333333335,
+        "instrument": "Kick",
+        "velocity": 0.5748031496062992
+      },
+      {
+        "timeBeats": 4.002083333333333,
+        "instrument": "Ride",
+        "velocity": 0.4094488188976378
+      },
+      {
+        "timeBeats": 4.677083333333333,
+        "instrument": "Ride",
+        "velocity": 0.30708661417322836
+      },
+      {
+        "timeBeats": 5.00625,
+        "instrument": "Ride",
+        "velocity": 0.36220472440944884
+      },
+      {
+        "timeBeats": 5.010416666666667,
+        "instrument": "HatPedal",
+        "velocity": 0.49606299212598426
+      },
+      {
+        "timeBeats": 5.670833333333333,
+        "instrument": "Kick",
+        "velocity": 0.3543307086614173
+      },
+      {
+        "timeBeats": 5.675,
+        "instrument": "Ride",
+        "velocity": 0.14960629921259844
+      },
+      {
+        "timeBeats": 5.989583333333333,
+        "instrument": "Kick",
+        "velocity": 0.5669291338582677
+      },
+      {
+        "timeBeats": 6.004166666666666,
+        "instrument": "Ride",
+        "velocity": 0.36220472440944884
+      },
+      {
+        "timeBeats": 6.666666666666667,
+        "instrument": "Kick",
+        "velocity": 0.49606299212598426
+      },
+      {
+        "timeBeats": 6.670833333333333,
+        "instrument": "Ride",
+        "velocity": 0.11811023622047244
+      },
+      {
+        "timeBeats": 7.004166666666666,
+        "instrument": "HatPedal",
+        "velocity": 0.41732283464566927
+      },
+      {
+        "timeBeats": 7.00625,
+        "instrument": "Ride",
+        "velocity": 0.36220472440944884
+      },
+      {
+        "timeBeats": 7.666666666666667,
+        "instrument": "Ride",
+        "velocity": 0.14173228346456693
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "std"
+  },
+  {
+    "styleId": "SHUFFLE_2",
+    "name": "SHUFFLE 2 (fill)",
+    "events": [
+      {
+        "timeBeats": 0.0020833333333333333,
+        "instrument": "Kick",
+        "velocity": 0.5275590551181102
+      },
+      {
+        "timeBeats": 0.0020833333333333333,
+        "instrument": "Ride",
+        "velocity": 0.47244094488188976
+      },
+      {
+        "timeBeats": 0.675,
+        "instrument": "Ride",
+        "velocity": 0.11811023622047244
+      },
+      {
+        "timeBeats": 1,
+        "instrument": "HatOpen",
+        "velocity": 0.3858267716535433
+      },
+      {
+        "timeBeats": 1.0041666666666667,
+        "instrument": "Ride",
+        "velocity": 0.3779527559055118
+      },
+      {
+        "timeBeats": 1.65625,
+        "instrument": "Kick",
+        "velocity": 0.4015748031496063
+      },
+      {
+        "timeBeats": 1.6645833333333333,
+        "instrument": "Ride",
+        "velocity": 0.14960629921259844
+      },
+      {
+        "timeBeats": 1.6666666666666667,
+        "instrument": "HatPedal",
+        "velocity": 0.3937007874015748
+      },
+      {
+        "timeBeats": 1.9895833333333333,
+        "instrument": "Ride",
+        "velocity": 0.3779527559055118
+      },
+      {
+        "timeBeats": 2.660416666666667,
+        "instrument": "Ride",
+        "velocity": 0.28346456692913385
+      },
+      {
+        "timeBeats": 2.997916666666667,
+        "instrument": "HatPedal",
+        "velocity": 0.3937007874015748
+      },
+      {
+        "timeBeats": 3.002083333333333,
+        "instrument": "Ride",
+        "velocity": 0.4015748031496063
+      },
+      {
+        "timeBeats": 3.6666666666666665,
+        "instrument": "Kick",
+        "velocity": 0.4015748031496063
+      },
+      {
+        "timeBeats": 3.6729166666666666,
+        "instrument": "Ride",
+        "velocity": 0.10236220472440945
+      },
+      {
+        "timeBeats": 3.9895833333333335,
+        "instrument": "Kick",
+        "velocity": 0.5748031496062992
+      },
+      {
+        "timeBeats": 4.002083333333333,
+        "instrument": "Ride",
+        "velocity": 0.4094488188976378
+      },
+      {
+        "timeBeats": 4.677083333333333,
+        "instrument": "Ride",
+        "velocity": 0.14173228346456693
+      },
+      {
+        "timeBeats": 5.00625,
+        "instrument": "Ride",
+        "velocity": 0.36220472440944884
+      },
+      {
+        "timeBeats": 5.010416666666667,
+        "instrument": "HatPedal",
+        "velocity": 0.4251968503937008
+      },
+      {
+        "timeBeats": 5.670833333333333,
+        "instrument": "Kick",
+        "velocity": 0.33070866141732286
+      },
+      {
+        "timeBeats": 5.675,
+        "instrument": "Ride",
+        "velocity": 0.14960629921259844
+      },
+      {
+        "timeBeats": 5.989583333333333,
+        "instrument": "Kick",
+        "velocity": 0.4015748031496063
+      },
+      {
+        "timeBeats": 6.004166666666666,
+        "instrument": "Ride",
+        "velocity": 0.4251968503937008
+      },
+      {
+        "timeBeats": 6.670833333333333,
+        "instrument": "Ride",
+        "velocity": 0.11811023622047244
+      },
+      {
+        "timeBeats": 7.004166666666666,
+        "instrument": "HatPedal",
+        "velocity": 0.41732283464566927
+      },
+      {
+        "timeBeats": 7.00625,
+        "instrument": "Ride",
+        "velocity": 0.36220472440944884
+      },
+      {
+        "timeBeats": 7.666666666666667,
+        "instrument": "Ride",
+        "velocity": 0.33070866141732286
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "fill"
+  },
+  {
+    "styleId": "SHUFFLE_2",
+    "name": "SHUFFLE 2 (alt)",
+    "events": [
+      {
+        "timeBeats": 0.00625,
+        "instrument": "Kick",
+        "velocity": 0.6062992125984252
+      },
+      {
+        "timeBeats": 0.9958333333333333,
+        "instrument": "HatPedal",
+        "velocity": 0.4566929133858268
+      },
+      {
+        "timeBeats": 1.6854166666666666,
+        "instrument": "Snare",
+        "velocity": 0.25984251968503935
+      },
+      {
+        "timeBeats": 1.98125,
+        "instrument": "Kick",
+        "velocity": 0.5511811023622047
+      },
+      {
+        "timeBeats": 2.0083333333333333,
+        "instrument": "HatPedal",
+        "velocity": 0.4566929133858268
+      },
+      {
+        "timeBeats": 2.0125,
+        "instrument": "Snare",
+        "velocity": 0.4566929133858268
+      },
+      {
+        "timeBeats": 2.658333333333333,
+        "instrument": "Snare",
+        "velocity": 0.30708661417322836
+      },
+      {
+        "timeBeats": 2.99375,
+        "instrument": "HatPedal",
+        "velocity": 0.4566929133858268
+      },
+      {
+        "timeBeats": 2.99375,
+        "instrument": "Snare",
+        "velocity": 0.4566929133858268
+      },
+      {
+        "timeBeats": 3,
+        "instrument": "Kick",
+        "velocity": 0.5039370078740157
+      },
+      {
+        "timeBeats": 3.68125,
+        "instrument": "Kick",
+        "velocity": 0.5511811023622047
+      },
+      {
+        "timeBeats": 3.9875,
+        "instrument": "Snare",
+        "velocity": 0.3543307086614173
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "std"
+  },
+  {
+    "styleId": "SHUFFLE_2",
+    "name": "SHUFFLE 2",
+    "events": [
+      {
+        "timeBeats": 0,
+        "instrument": "Ride",
+        "velocity": 0.5196850393700787
+      },
+      {
+        "timeBeats": 1.0083333333333333,
+        "instrument": "HatPedal",
+        "velocity": 0.5826771653543307
+      },
+      {
+        "timeBeats": 1.3229166666666667,
+        "instrument": "Kick",
+        "velocity": 0.4094488188976378
+      },
+      {
+        "timeBeats": 1.6604166666666667,
+        "instrument": "Kick",
+        "velocity": 0.48031496062992124
+      },
+      {
+        "timeBeats": 2,
+        "instrument": "Kick",
+        "velocity": 0.6062992125984252
+      },
+      {
+        "timeBeats": 2,
+        "instrument": "Snare",
+        "velocity": 0.4251968503937008
+      },
+      {
+        "timeBeats": 3,
+        "instrument": "HatPedal",
+        "velocity": 0.5826771653543307
+      },
+      {
+        "timeBeats": 3.34375,
+        "instrument": "Snare",
+        "velocity": 0.33858267716535434
+      },
+      {
+        "timeBeats": 3.65625,
+        "instrument": "Snare",
+        "velocity": 0.48031496062992124
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "fill"
+  },
+  {
+    "styleId": "DOUBLE_1",
+    "name": "DOUBLE 1 (alt)",
+    "events": [
+      {
+        "timeBeats": 0,
+        "instrument": "Kick",
+        "velocity": 0.5433070866141733
+      },
+      {
+        "timeBeats": 0,
+        "instrument": "Ride",
+        "velocity": 0.29133858267716534
+      },
+      {
+        "timeBeats": 0.5,
+        "instrument": "Ride",
+        "velocity": 0.2755905511811024
+      },
+      {
+        "timeBeats": 0.5166666666666667,
+        "instrument": "HatPedal",
+        "velocity": 0.49606299212598426
+      },
+      {
+        "timeBeats": 0.8625,
+        "instrument": "Ride",
+        "velocity": 0.3937007874015748
+      },
+      {
+        "timeBeats": 1.03125,
+        "instrument": "Ride",
+        "velocity": 0.3700787401574803
+      },
+      {
+        "timeBeats": 1.5,
+        "instrument": "Ride",
+        "velocity": 0.3700787401574803
+      },
+      {
+        "timeBeats": 1.5145833333333334,
+        "instrument": "HatPedal",
+        "velocity": 0.47244094488188976
+      },
+      {
+        "timeBeats": 2.0125,
+        "instrument": "Ride",
+        "velocity": 0.49606299212598426
+      },
+      {
+        "timeBeats": 2.50625,
+        "instrument": "HatPedal",
+        "velocity": 0.4251968503937008
+      },
+      {
+        "timeBeats": 2.51875,
+        "instrument": "Ride",
+        "velocity": 0.30708661417322836
+      },
+      {
+        "timeBeats": 2.841666666666667,
+        "instrument": "Ride",
+        "velocity": 0.3858267716535433
+      },
+      {
+        "timeBeats": 3.0166666666666666,
+        "instrument": "Ride",
+        "velocity": 0.4330708661417323
+      },
+      {
+        "timeBeats": 3.48125,
+        "instrument": "HatPedal",
+        "velocity": 0.5196850393700787
+      },
+      {
+        "timeBeats": 3.5145833333333334,
+        "instrument": "Ride",
+        "velocity": 0.3858267716535433
+      },
+      {
+        "timeBeats": 3.775,
+        "instrument": "Kick",
+        "velocity": 0.49606299212598426
+      },
+      {
+        "timeBeats": 3.8291666666666666,
+        "instrument": "Ride",
+        "velocity": 0.36220472440944884
+      },
+      {
+        "timeBeats": 4.008333333333334,
+        "instrument": "Ride",
+        "velocity": 0.4409448818897638
+      },
+      {
+        "timeBeats": 4.479166666666667,
+        "instrument": "HatPedal",
+        "velocity": 0.5118110236220472
+      },
+      {
+        "timeBeats": 4.495833333333334,
+        "instrument": "Ride",
+        "velocity": 0.3858267716535433
+      },
+      {
+        "timeBeats": 4.827083333333333,
+        "instrument": "Ride",
+        "velocity": 0.33858267716535434
+      },
+      {
+        "timeBeats": 4.997916666666667,
+        "instrument": "Ride",
+        "velocity": 0.3700787401574803
+      },
+      {
+        "timeBeats": 5.483333333333333,
+        "instrument": "HatPedal",
+        "velocity": 0.47244094488188976
+      },
+      {
+        "timeBeats": 5.508333333333334,
+        "instrument": "Ride",
+        "velocity": 0.4015748031496063
+      },
+      {
+        "timeBeats": 5.835416666666666,
+        "instrument": "Ride",
+        "velocity": 0.30708661417322836
+      },
+      {
+        "timeBeats": 6.00625,
+        "instrument": "Ride",
+        "velocity": 0.3543307086614173
+      },
+      {
+        "timeBeats": 6.4875,
+        "instrument": "HatPedal",
+        "velocity": 0.5984251968503937
+      },
+      {
+        "timeBeats": 6.5,
+        "instrument": "Ride",
+        "velocity": 0.3700787401574803
+      },
+      {
+        "timeBeats": 7.022916666666666,
+        "instrument": "Ride",
+        "velocity": 0.3543307086614173
+      },
+      {
+        "timeBeats": 7.49375,
+        "instrument": "HatPedal",
+        "velocity": 0.4015748031496063
+      },
+      {
+        "timeBeats": 7.522916666666666,
+        "instrument": "Ride",
+        "velocity": 0.31496062992125984
+      },
+      {
+        "timeBeats": 7.852083333333334,
+        "instrument": "Ride",
+        "velocity": 0.33858267716535434
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "std"
+  },
+  {
+    "styleId": "DOUBLE_1",
+    "name": "DOUBLE 1 (alt)",
+    "events": [
+      {
+        "timeBeats": 0,
+        "instrument": "Kick",
+        "velocity": 0.49606299212598426
+      },
+      {
+        "timeBeats": 0,
+        "instrument": "Snare",
+        "velocity": 0.3543307086614173
+      },
+      {
+        "timeBeats": 0.5,
+        "instrument": "Ride",
+        "velocity": 0.2755905511811024
+      },
+      {
+        "timeBeats": 0.5166666666666667,
+        "instrument": "HatPedal",
+        "velocity": 0.5511811023622047
+      },
+      {
+        "timeBeats": 0.8625,
+        "instrument": "Ride",
+        "velocity": 0.3937007874015748
+      },
+      {
+        "timeBeats": 1.03125,
+        "instrument": "Ride",
+        "velocity": 0.3700787401574803
+      },
+      {
+        "timeBeats": 1.5145833333333334,
+        "instrument": "HatPedal",
+        "velocity": 0.4251968503937008
+      },
+      {
+        "timeBeats": 1.8395833333333333,
+        "instrument": "Ride",
+        "velocity": 0.3858267716535433
+      },
+      {
+        "timeBeats": 2.0145833333333334,
+        "instrument": "Ride",
+        "velocity": 0.4330708661417323
+      },
+      {
+        "timeBeats": 2.50625,
+        "instrument": "HatPedal",
+        "velocity": 0.44881889763779526
+      },
+      {
+        "timeBeats": 2.51875,
+        "instrument": "Ride",
+        "velocity": 0.30708661417322836
+      },
+      {
+        "timeBeats": 2.841666666666667,
+        "instrument": "Ride",
+        "velocity": 0.3858267716535433
+      },
+      {
+        "timeBeats": 3.0166666666666666,
+        "instrument": "Ride",
+        "velocity": 0.4330708661417323
+      },
+      {
+        "timeBeats": 3.48125,
+        "instrument": "HatPedal",
+        "velocity": 0.49606299212598426
+      },
+      {
+        "timeBeats": 3.5145833333333334,
+        "instrument": "Ride",
+        "velocity": 0.3858267716535433
+      },
+      {
+        "timeBeats": 3.8291666666666666,
+        "instrument": "Ride",
+        "velocity": 0.36220472440944884
+      },
+      {
+        "timeBeats": 4,
+        "instrument": "Kick",
+        "velocity": 0.4251968503937008
+      },
+      {
+        "timeBeats": 4.008333333333334,
+        "instrument": "Ride",
+        "velocity": 0.4409448818897638
+      },
+      {
+        "timeBeats": 4.479166666666667,
+        "instrument": "HatPedal",
+        "velocity": 0.5511811023622047
+      },
+      {
+        "timeBeats": 4.495833333333334,
+        "instrument": "Ride",
+        "velocity": 0.3858267716535433
+      },
+      {
+        "timeBeats": 4.997916666666667,
+        "instrument": "Ride",
+        "velocity": 0.3700787401574803
+      },
+      {
+        "timeBeats": 5.483333333333333,
+        "instrument": "HatPedal",
+        "velocity": 0.44881889763779526
+      },
+      {
+        "timeBeats": 5.508333333333334,
+        "instrument": "Ride",
+        "velocity": 0.4015748031496063
+      },
+      {
+        "timeBeats": 6.00625,
+        "instrument": "Ride",
+        "velocity": 0.3543307086614173
+      },
+      {
+        "timeBeats": 6.4875,
+        "instrument": "HatPedal",
+        "velocity": 0.5196850393700787
+      },
+      {
+        "timeBeats": 6.5,
+        "instrument": "Ride",
+        "velocity": 0.3700787401574803
+      },
+      {
+        "timeBeats": 6.84375,
+        "instrument": "Ride",
+        "velocity": 0.33858267716535434
+      },
+      {
+        "timeBeats": 7.022916666666666,
+        "instrument": "Ride",
+        "velocity": 0.3543307086614173
+      },
+      {
+        "timeBeats": 7.49375,
+        "instrument": "HatPedal",
+        "velocity": 0.44881889763779526
+      },
+      {
+        "timeBeats": 7.522916666666666,
+        "instrument": "Ride",
+        "velocity": 0.31496062992125984
+      },
+      {
+        "timeBeats": 7.852083333333334,
+        "instrument": "Ride",
+        "velocity": 0.33858267716535434
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "std"
+  },
+  {
+    "styleId": "DOUBLE_1",
+    "name": "DOUBLE 1 (fill)",
+    "events": [
+      {
+        "timeBeats": 0,
+        "instrument": "Kick",
+        "velocity": 0.4251968503937008
+      },
+      {
+        "timeBeats": 0,
+        "instrument": "Ride",
+        "velocity": 0.29133858267716534
+      },
+      {
+        "timeBeats": 0.5,
+        "instrument": "Ride",
+        "velocity": 0.2755905511811024
+      },
+      {
+        "timeBeats": 0.5166666666666667,
+        "instrument": "HatPedal",
+        "velocity": 0.4251968503937008
+      },
+      {
+        "timeBeats": 0.8625,
+        "instrument": "Ride",
+        "velocity": 0.3937007874015748
+      },
+      {
+        "timeBeats": 1.03125,
+        "instrument": "Ride",
+        "velocity": 0.3700787401574803
+      },
+      {
+        "timeBeats": 1.5,
+        "instrument": "Ride",
+        "velocity": 0.2755905511811024
+      },
+      {
+        "timeBeats": 1.5145833333333334,
+        "instrument": "HatPedal",
+        "velocity": 0.5196850393700787
+      },
+      {
+        "timeBeats": 2.0125,
+        "instrument": "Ride",
+        "velocity": 0.4015748031496063
+      },
+      {
+        "timeBeats": 2.50625,
+        "instrument": "HatPedal",
+        "velocity": 0.4015748031496063
+      },
+      {
+        "timeBeats": 2.51875,
+        "instrument": "Ride",
+        "velocity": 0.30708661417322836
+      },
+      {
+        "timeBeats": 3.0166666666666666,
+        "instrument": "Ride",
+        "velocity": 0.4330708661417323
+      },
+      {
+        "timeBeats": 3.48125,
+        "instrument": "HatPedal",
+        "velocity": 0.4251968503937008
+      },
+      {
+        "timeBeats": 3.5145833333333334,
+        "instrument": "Ride",
+        "velocity": 0.3858267716535433
+      },
+      {
+        "timeBeats": 3.775,
+        "instrument": "Kick",
+        "velocity": 0.3543307086614173
+      },
+      {
+        "timeBeats": 4,
+        "instrument": "Kick",
+        "velocity": 0.47244094488188976
+      },
+      {
+        "timeBeats": 4.008333333333334,
+        "instrument": "Ride",
+        "velocity": 0.4409448818897638
+      },
+      {
+        "timeBeats": 4.479166666666667,
+        "instrument": "HatPedal",
+        "velocity": 0.5118110236220472
+      },
+      {
+        "timeBeats": 4.495833333333334,
+        "instrument": "Ride",
+        "velocity": 0.3858267716535433
+      },
+      {
+        "timeBeats": 4.827083333333333,
+        "instrument": "Ride",
+        "velocity": 0.33858267716535434
+      },
+      {
+        "timeBeats": 4.997916666666667,
+        "instrument": "Ride",
+        "velocity": 0.3700787401574803
+      },
+      {
+        "timeBeats": 5.483333333333333,
+        "instrument": "HatPedal",
+        "velocity": 0.4251968503937008
+      },
+      {
+        "timeBeats": 5.508333333333334,
+        "instrument": "Ride",
+        "velocity": 0.4015748031496063
+      },
+      {
+        "timeBeats": 5.835416666666666,
+        "instrument": "Ride",
+        "velocity": 0.30708661417322836
+      },
+      {
+        "timeBeats": 6.00625,
+        "instrument": "Ride",
+        "velocity": 0.3543307086614173
+      },
+      {
+        "timeBeats": 6.4875,
+        "instrument": "HatPedal",
+        "velocity": 0.4015748031496063
+      },
+      {
+        "timeBeats": 6.5,
+        "instrument": "Ride",
+        "velocity": 0.3700787401574803
+      },
+      {
+        "timeBeats": 6.84375,
+        "instrument": "Ride",
+        "velocity": 0.33858267716535434
+      },
+      {
+        "timeBeats": 7.022916666666666,
+        "instrument": "Ride",
+        "velocity": 0.3543307086614173
+      },
+      {
+        "timeBeats": 7.49375,
+        "instrument": "HatPedal",
+        "velocity": 0.47244094488188976
+      },
+      {
+        "timeBeats": 7.522916666666666,
+        "instrument": "Ride",
+        "velocity": 0.31496062992125984
+      },
+      {
+        "timeBeats": 7.852083333333334,
+        "instrument": "Ride",
+        "velocity": 0.33858267716535434
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "fill"
+  },
+  {
+    "styleId": "DOUBLE_1",
+    "name": "DOUBLE 1 (alt)",
+    "events": [
+      {
+        "timeBeats": 0,
+        "instrument": "Kick",
+        "velocity": 0.5511811023622047
+      },
+      {
+        "timeBeats": 0,
+        "instrument": "Ride",
+        "velocity": 0.44881889763779526
+      },
+      {
+        "timeBeats": 0.48541666666666666,
+        "instrument": "HatPedal",
+        "velocity": 0.44881889763779526
+      },
+      {
+        "timeBeats": 0.4979166666666667,
+        "instrument": "Ride",
+        "velocity": 0.4015748031496063
+      },
+      {
+        "timeBeats": 1.3229166666666667,
+        "instrument": "Snare",
+        "velocity": 0.5275590551181102
+      },
+      {
+        "timeBeats": 1.4979166666666666,
+        "instrument": "HatPedal",
+        "velocity": 0.49606299212598426
+      },
+      {
+        "timeBeats": 2.1395833333333334,
+        "instrument": "Snare",
+        "velocity": 0.047244094488188976
+      },
+      {
+        "timeBeats": 2.3291666666666666,
+        "instrument": "Snare",
+        "velocity": 0.25984251968503935
+      },
+      {
+        "timeBeats": 2.3625,
+        "instrument": "Snare",
+        "velocity": 0.031496062992125984
+      },
+      {
+        "timeBeats": 2.466666666666667,
+        "instrument": "HatPedal",
+        "velocity": 0.49606299212598426
+      },
+      {
+        "timeBeats": 2.5083333333333333,
+        "instrument": "Snare",
+        "velocity": 0.3464566929133858
+      },
+      {
+        "timeBeats": 2.816666666666667,
+        "instrument": "Snare",
+        "velocity": 0.2677165354330709
+      },
+      {
+        "timeBeats": 3.0145833333333334,
+        "instrument": "Kick",
+        "velocity": 0.1732283464566929
+      },
+      {
+        "timeBeats": 3.3375,
+        "instrument": "Kick",
+        "velocity": 0.2992125984251969
+      },
+      {
+        "timeBeats": 3.4770833333333333,
+        "instrument": "HatPedal",
+        "velocity": 0.44881889763779526
+      },
+      {
+        "timeBeats": 3.5125,
+        "instrument": "Kick",
+        "velocity": 0.44881889763779526
+      },
+      {
+        "timeBeats": 3.816666666666667,
+        "instrument": "Kick",
+        "velocity": 0.4645669291338583
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "std"
+  },
+  {
+    "styleId": "DOUBLE_1",
+    "name": "DOUBLE 1",
+    "events": [
+      {
+        "timeBeats": 0,
+        "instrument": "Kick",
+        "velocity": 0.5511811023622047
+      },
+      {
+        "timeBeats": 0,
+        "instrument": "Ride",
+        "velocity": 0.44881889763779526
+      },
+      {
+        "timeBeats": 0.48541666666666666,
+        "instrument": "HatPedal",
+        "velocity": 0.44881889763779526
+      },
+      {
+        "timeBeats": 0.5,
+        "instrument": "Ride",
+        "velocity": 0.5039370078740157
+      },
+      {
+        "timeBeats": 1.4979166666666666,
+        "instrument": "HatPedal",
+        "velocity": 0.49606299212598426
+      },
+      {
+        "timeBeats": 1.8333333333333333,
+        "instrument": "Kick",
+        "velocity": 0.5511811023622047
+      },
+      {
+        "timeBeats": 1.8333333333333333,
+        "instrument": "Snare",
+        "velocity": 0.4015748031496063
+      },
+      {
+        "timeBeats": 2.5,
+        "instrument": "HatPedal",
+        "velocity": 0.49606299212598426
+      },
+      {
+        "timeBeats": 3.0145833333333334,
+        "instrument": "Kick",
+        "velocity": 0.1732283464566929
+      },
+      {
+        "timeBeats": 3.4770833333333333,
+        "instrument": "HatPedal",
+        "velocity": 0.44881889763779526
+      },
+      {
+        "timeBeats": 3.816666666666667,
+        "instrument": "Kick",
+        "velocity": 0.4645669291338583
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "fill"
+  },
+  {
+    "styleId": "INTRO",
+    "name": "INTRO (alt)",
+    "events": [
+      {
+        "timeBeats": 0,
+        "instrument": "HatPedal",
+        "velocity": 0.41732283464566927
+      },
+      {
+        "timeBeats": 1,
+        "instrument": "HatPedal",
+        "velocity": 0.4015748031496063
+      },
+      {
+        "timeBeats": 2,
+        "instrument": "HatPedal",
+        "velocity": 0.44881889763779526
+      },
+      {
+        "timeBeats": 3.0104166666666665,
+        "instrument": "HatPedal",
+        "velocity": 0.4251968503937008
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "std"
+  },
+  {
+    "styleId": "INTRO",
+    "name": "INTRO",
+    "events": [
+      {
+        "timeBeats": 0,
+        "instrument": "HatPedal",
+        "velocity": 0.41732283464566927
+      },
+      {
+        "timeBeats": 1,
+        "instrument": "HatOpen",
+        "velocity": 0.3779527559055118
+      },
+      {
+        "timeBeats": 2,
+        "instrument": "Kick",
+        "velocity": 0.3464566929133858
+      },
+      {
+        "timeBeats": 2,
+        "instrument": "HatPedal",
+        "velocity": 0.47244094488188976
+      },
+      {
+        "timeBeats": 2.6666666666666665,
+        "instrument": "Kick",
+        "velocity": 0.3779527559055118
+      },
+      {
+        "timeBeats": 3.0104166666666665,
+        "instrument": "HatPedal",
+        "velocity": 0.44881889763779526
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "std"
+  },
+  {
+    "styleId": "ENDING",
+    "name": "ENDING (alt)",
+    "events": [
+      {
+        "timeBeats": 0.004166666666666667,
+        "instrument": "Kick",
+        "velocity": 0.4566929133858268
+      },
+      {
+        "timeBeats": 0.041666666666666664,
+        "instrument": "Ride",
+        "velocity": 0.41732283464566927
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "std"
+  },
+  {
+    "styleId": "ENDING",
+    "name": "ENDING",
+    "events": [
+      {
+        "timeBeats": 0.004166666666666667,
+        "instrument": "Kick",
+        "velocity": 0.4566929133858268
+      },
+      {
+        "timeBeats": 0.041666666666666664,
+        "instrument": "HatOpen",
+        "velocity": 0.41732283464566927
+      }
+    ],
+    "timeSignature": [
+      4,
+      4
+    ],
+    "type": "std"
+  }
+]
