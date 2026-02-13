@@ -76,7 +76,7 @@ export function ChordLabDashboard({
     availableChords, userPresets, onSaveUserPreset
 }: ChordLabDashboardProps) {
 
-    useAudioCleanup('chordlab-dashboard');
+    useAudioCleanup('pawelsonik-dashboard');
     const [showMixer, setShowMixer] = useState(false);
     const [showPracticeTips, setShowPracticeTips] = useState(false);
 
@@ -154,7 +154,7 @@ export function ChordLabDashboard({
                 {progressionData && (
                     <SendToMenu
                         progression={progressionData}
-                        sourceModule="chordlab"
+                        sourceModule="pawelsonik"
                     />
                 )}
             </div>
@@ -227,6 +227,7 @@ export function ChordLabDashboard({
                                         highlightedNotes={[...highlightedNotes, ...buildingNotes]}
                                         showLabels="chord-tone"
                                         rootNote={builtChord ? noteNameToMidi(builtChord.root + '4') : (buildingNotes.length > 0 ? Math.min(...buildingNotes) : (displayedNotes.length > 0 ? Math.min(...displayedNotes) : undefined))}
+                                        chordSymbol={builtChord ? builtChord.root + (builtChord.quality === 'maj' ? '' : builtChord.quality === 'min' ? 'm' : builtChord.quality) + (builtChord.bass ? `/${builtChord.bass}` : '') : undefined}
                                         onNoteClick={onNoteToggle}
                                     />
                                 </div>
@@ -245,6 +246,7 @@ export function ChordLabDashboard({
                                         interactive={true}
                                         playSound={false}
                                         rootNote={builtChord ? noteNameToMidi(builtChord.root + '4') : (buildingNotes.length > 0 ? Math.min(...buildingNotes) : (displayedNotes.length > 0 ? Math.min(...displayedNotes) : undefined))}
+                                        chordSymbol={builtChord ? builtChord.root + (builtChord.quality === 'maj' ? '' : builtChord.quality === 'min' ? 'm' : builtChord.quality) + (builtChord.bass ? `/${builtChord.bass}` : '') : undefined}
                                         onNoteClick={onNoteToggle}
                                     />
                                 </div>

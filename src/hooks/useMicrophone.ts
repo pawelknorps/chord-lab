@@ -7,6 +7,10 @@ export interface UseMicrophoneResult {
   isActive: boolean;
   stream: MediaStream | null;
   error: Error | null;
+  /** Label of the current mic (e.g. "Built-in Microphone"). Null if no stream. */
+  currentDeviceLabel: string | null;
+  getAudioInputDevices: () => Promise<MediaDeviceInfo[]>;
+  setPreferredDeviceId: (deviceId: string | null) => void;
 }
 
 /**
@@ -16,12 +20,14 @@ export interface UseMicrophoneResult {
 export function useMicrophone(): UseMicrophoneResult {
   const [isActive, setIsActive] = useState(MicrophoneService.isActive());
   const [stream, setStream] = useState<MediaStream | null>(MicrophoneService.getStream());
+  const [currentDeviceLabel, setCurrentDeviceLabel] = useState<string | null>(MicrophoneService.getCurrentDeviceLabel());
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
     const unsubscribe = MicrophoneService.subscribe(() => {
       setIsActive(MicrophoneService.isActive());
       setStream(MicrophoneService.getStream());
+      setCurrentDeviceLabel(MicrophoneService.getCurrentDeviceLabel());
     });
     return unsubscribe;
   }, []);
@@ -40,5 +46,18 @@ export function useMicrophone(): UseMicrophoneResult {
     setError(null);
   }, []);
 
-  return { start, stop, isActive, stream, error };
+  const setPreferredDeviceId = useCallback((deviceId: string | null) => {
+    MicrophoneService.setPreferredDeviceId(deviceId);
+  }, []);
+
+  return {
+    start,
+    stop,
+    isActive,
+    stream,
+    error,
+    currentDeviceLabel,
+    getAudioInputDevices: MicrophoneService.getAudioInputDevices,
+    setPreferredDeviceId,
+  };
 }

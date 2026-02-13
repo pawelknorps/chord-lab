@@ -21,16 +21,18 @@ function insertionSort(arr: number[], n: number): void {
 
 import { InstrumentProfile, INSTRUMENT_PROFILES } from './instrumentProfiles';
 
+/** 'full' = median + hysteresis + stability timer; 'light' = confidence gate only (no median/hysteresis). */
+export type CrepeStabilizerMode = 'full' | 'light';
+
 export class CrepeStabilizer {
     private lastStablePitch: number = 0;
     private currentNote: number = -1; // MIDI Note
-    private lastRms: number = 0;
     private holdTimeMs: number = 0;
 
-    // 2026 Jazz-Optimized Parameters
     private windowSize: number = 7;
     private minConfidence: number = 0.92;
-    private profile: InstrumentProfile = INSTRUMENT_PROFILES.auto;
+    private profile: InstrumentProfile = INSTRUMENT_PROFILES.general;
+    private mode: CrepeStabilizerMode = 'full';
 
     private stableFrameCount: number = 0;
     private pendingPitch: number = 0;
@@ -44,18 +46,43 @@ export class CrepeStabilizer {
         windowSize?: number;
         minConfidence?: number;
         profileId?: string;
+        /** 'light' = confidence gate only (no median/hysteresis); lower CPU. */
+        mode?: CrepeStabilizerMode;
     }) {
         if (options?.windowSize !== undefined) this.windowSize = options.windowSize;
         if (options?.minConfidence !== undefined) this.minConfidence = options.minConfidence;
         if (options?.profileId) {
-            this.profile = INSTRUMENT_PROFILES[options.profileId] || INSTRUMENT_PROFILES.auto;
+            this.profile = INSTRUMENT_PROFILES[options.profileId] || INSTRUMENT_PROFILES.general;
+            if (this.profile.windowSize) this.windowSize = this.profile.windowSize;
+            if (this.profile.confidenceThreshold !== undefined) {
+                this.minConfidence = this.profile.confidenceThreshold;
+            }
         }
+        if (options?.mode) this.mode = options.mode;
+
+        // REQ-SF0-P02: Align buffer size with effective window size
         this.pitchHistory = new Array(this.windowSize);
         this.sortedCopy = new Array(this.windowSize);
     }
 
     setProfile(profileId: string): void {
-        this.profile = INSTRUMENT_PROFILES[profileId] || INSTRUMENT_PROFILES.auto;
+        const newProfile = INSTRUMENT_PROFILES[profileId] || INSTRUMENT_PROFILES.general;
+        if (newProfile.id === this.profile.id) return;
+
+        this.profile = newProfile;
+        if (this.profile.confidenceThreshold !== undefined) {
+            this.minConfidence = this.profile.confidenceThreshold;
+        }
+
+        // REQ-SF0-P02: If window size changed, reset buffers
+        const newWindow = this.profile.windowSize ?? 7;
+        if (newWindow !== this.windowSize) {
+            this.windowSize = newWindow;
+            this.pitchHistoryCount = 0;
+            this.pitchHistoryPtr = 0;
+            this.pitchHistory = new Array(this.windowSize);
+            this.sortedCopy = new Array(this.windowSize);
+        }
     }
 
     /**
@@ -65,16 +92,12 @@ export class CrepeStabilizer {
      * @param rms Current frame loudness
      * @returns The stabilized frequency in Hz.
      */
-    process(rawPitch: number, confidence: number, rms: number = 0): number {
-        // 1. Atonal/Transient Gating (RMS + Confidence)
-        // If confidence is low but volume is rising sharply, it's likely a "chiff" or pluck.
-        // We bridge this noise gap (approx 20ms/3 frames at 60fps) by holding the previous note.
-        const rmsRising = rms > this.lastRms * 1.5;
-        this.lastRms = rms;
-
+    process(rawPitch: number, confidence: number, _rms: number = 0): number {
         if (confidence < this.minConfidence) {
-            if (rmsRising && this.lastStablePitch > 0 && this.holdTimeMs < 40) {
-                this.holdTimeMs += 16; // approx ms per frame at 60fps
+            // Hold last confirmed pitch for a short window when confidence dips (e.g. onset/breath)
+            const holdWindowMs = 72;
+            if (this.lastStablePitch > 0 && this.holdTimeMs < holdWindowMs) {
+                this.holdTimeMs += 16;
                 return this.lastStablePitch;
             }
             this.stableFrameCount = 0;
@@ -83,6 +106,11 @@ export class CrepeStabilizer {
         }
 
         this.holdTimeMs = 0;
+
+        if (this.mode === 'light') {
+            this.lastStablePitch = rawPitch;
+            return rawPitch;
+        }
 
         // 2. Running Median (circular buffer + in-place sort)
         const hist = this.pitchHistory;
@@ -99,17 +127,18 @@ export class CrepeStabilizer {
             this.pitchHistoryPtr = ptr;
         }
 
-        if (count < 3) {
+        const effectiveWindow = this.profile.windowSize ?? this.windowSize;
+        const n = Math.min(count, effectiveWindow);
+        if (n < 2) {
             this.lastStablePitch = rawPitch;
             return rawPitch;
         }
 
         const sorted = this.sortedCopy;
-        const n = count;
         if (count === cap) {
-            for (let i = 0; i < n; i++) sorted[i] = hist[(ptr + i) % cap];
+            for (let i = 0; i < n; i++) sorted[i] = hist[(ptr + cap - n + i) % cap];
         } else {
-            for (let i = 0; i < n; i++) sorted[i] = hist[i];
+            for (let i = 0; i < n; i++) sorted[i] = hist[count - n + i];
         }
         insertionSort(sorted, n);
         const medianPitch = sorted[Math.floor(n / 2)];
@@ -166,7 +195,6 @@ export class CrepeStabilizer {
         this.lastStablePitch = 0;
         this.currentNote = -1;
         this.stableFrameCount = 0;
-        this.lastRms = 0;
         this.holdTimeMs = 0;
     }
 

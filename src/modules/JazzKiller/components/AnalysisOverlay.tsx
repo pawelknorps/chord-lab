@@ -1,12 +1,19 @@
 import { Concept } from '../../../core/theory/AnalysisTypes';
+import type { LiveOverrides } from '../../../core/theory/liveHarmonicGrounding';
 import { useState, useEffect, RefObject } from 'react';
 
 interface AnalysisOverlayProps {
     concepts: Concept[];
-    measureCount: number;
+    measureCount?: number;
     onConceptClick?: (concept: Concept, index: number) => void;
     activeFocusIndex?: number | null;
     gridRef?: RefObject<HTMLDivElement | null>;
+    /** Phase 21: live overrides (subV7, pedal, chordTone) from mic; shown on bracket that contains currentMeasureIndex */
+    liveOverrides?: LiveOverrides | null;
+    /** Current playback measure index; used with liveOverrides to show live label on the right bracket */
+    currentMeasureIndex?: number;
+    /** When true, show chord tone/extension (e.g. R, 3rd, #11) from mic in the live label */
+    showLiveChordTone?: boolean;
 }
 
 const CONCEPT_COLORS: Record<string, { bg: string; border: string; text: string; label: string }> = {
@@ -46,7 +53,10 @@ export function AnalysisOverlay({
     concepts,
     onConceptClick,
     activeFocusIndex,
-    gridRef
+    gridRef,
+    liveOverrides = null,
+    currentMeasureIndex = -1,
+    showLiveChordTone = false,
 }: Omit<AnalysisOverlayProps, 'measureCount'>) {
     if (concepts.length === 0) return null;
 
@@ -55,6 +65,11 @@ export function AnalysisOverlay({
             {concepts.map((concept, index) => {
                 const colorScheme = CONCEPT_COLORS[concept.type] || CONCEPT_COLORS['MajorII-V-I'];
                 const isActive = activeFocusIndex === index;
+                const isCurrentBracket =
+                    currentMeasureIndex >= 0 &&
+                    currentMeasureIndex >= concept.startIndex &&
+                    currentMeasureIndex <= concept.endIndex;
+                const bracketLiveOverrides = isCurrentBracket ? liveOverrides : null;
 
                 return (
                     <AnalysisBracket
@@ -65,6 +80,8 @@ export function AnalysisOverlay({
                         colorScheme={colorScheme}
                         onConceptClick={onConceptClick}
                         gridRef={gridRef}
+                        liveOverrides={bracketLiveOverrides}
+                        showLiveChordTone={showLiveChordTone}
                     />
                 );
             })}
@@ -86,7 +103,25 @@ interface CurrentSegment {
     bottom: number;
 }
 
-function AnalysisBracket({ concept, index, isActive, colorScheme, onConceptClick, gridRef }: any) {
+function AnalysisBracket({
+    concept,
+    index,
+    isActive,
+    colorScheme,
+    onConceptClick,
+    gridRef,
+    liveOverrides = null,
+    showLiveChordTone = false,
+}: {
+    concept: Concept;
+    index: number;
+    isActive: boolean;
+    colorScheme: { bg: string; border: string; text: string; label: string };
+    onConceptClick?: (concept: Concept, index: number) => void;
+    gridRef?: RefObject<HTMLDivElement | null>;
+    liveOverrides?: LiveOverrides | null;
+    showLiveChordTone?: boolean;
+}) {
     const [segments, setSegments] = useState<Segment[]>([]);
     const [hidden, setHidden] = useState(true);
 
@@ -212,20 +247,43 @@ function AnalysisBracket({ concept, index, isActive, colorScheme, onConceptClick
                 >
                     {/* Label only on first segment */}
                     {segIndex === 0 && (
-                        <div
-                            className={`
-                                absolute -top-3.5 left-3
-                                px-2 py-0.5 rounded-md
-                                text-[9px] font-black uppercase tracking-widest
-                                ${colorScheme.border.replace('border-', 'bg-')} text-black
-                                shadow-[0_4px_12px_rgba(0,0,0,0.5)]
-                                border border-white/20
-                                ${isActive ? 'animate-pulse scale-110' : ''}
-                                z-40 whitespace-nowrap transition-all
-                            `}
-                        >
-                            {colorScheme.label}
-                        </div>
+                        <>
+                            <div
+                                className={`
+                                    absolute -top-3.5 left-3
+                                    px-2 py-0.5 rounded-md
+                                    text-[9px] font-black uppercase tracking-widest
+                                    ${colorScheme.border.replace('border-', 'bg-')} text-black
+                                    shadow-[0_4px_12px_rgba(0,0,0,0.5)]
+                                    border border-white/20
+                                    ${isActive ? 'animate-pulse scale-110' : ''}
+                                    z-40 whitespace-nowrap transition-all
+                                `}
+                            >
+                                {colorScheme.label}
+                            </div>
+                            {/* Phase 21: live override label (subV7, Pedal) when mic is on and current bracket */}
+                            {liveOverrides &&
+                                (liveOverrides.romanNumeral ||
+                                    liveOverrides.pedal ||
+                                    (showLiveChordTone && liveOverrides.chordTone)) && (
+                                <div
+                                    className="absolute -top-3.5 left-3 mt-4 px-2 py-0.5 rounded-md text-[8px] font-bold uppercase tracking-wide bg-amber-500/90 text-black border border-amber-600 z-40 whitespace-nowrap"
+                                    title="Live from mic"
+                                >
+                                    {liveOverrides.romanNumeral && <span>Live: {liveOverrides.romanNumeral}</span>}
+                                    {liveOverrides.romanNumeral && liveOverrides.pedal && ' · '}
+                                    {liveOverrides.pedal && <span>Pedal ({liveOverrides.pedal})</span>}
+                                    {(liveOverrides.romanNumeral || liveOverrides.pedal) &&
+                                        showLiveChordTone &&
+                                        liveOverrides.chordTone &&
+                                        ' · '}
+                                    {showLiveChordTone && liveOverrides.chordTone && (
+                                        <span>Chord: {liveOverrides.chordTone}</span>
+                                    )}
+                                </div>
+                            )}
+                        </>
                     )}
 
                     {/* Corner brackets */}

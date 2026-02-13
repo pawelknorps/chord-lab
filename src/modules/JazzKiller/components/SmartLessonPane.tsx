@@ -46,8 +46,9 @@ export function SmartLessonPane({
             return;
         }
 
-        import(`../../../public/lessons/${songId}.json`)
-            .then(m => setLesson(m.default))
+        fetch(`/lessons/${songId}.json`)
+            .then(res => (res.ok ? res.json() : Promise.reject(res)))
+            .then(data => setLesson(data))
             .catch(() => setLesson(null))
             .finally(() => setLoading(false));
     }, [songId]);
@@ -142,14 +143,14 @@ export function SmartLessonPane({
                     </div>
 
                     <div className="space-y-4">
-                        {lesson.hotspots.length > 0 && (
+                        {(lesson.hotspots?.length ?? 0) > 0 && (
                             <div className="space-y-2">
                                 <div className="flex items-center gap-2 text-[10px] text-white/40 font-bold uppercase tracking-wider leading-none">
                                     <Target size={12} />
                                     Critical Hotspots
                                 </div>
                                 <div className="grid gap-2">
-                                    {lesson.hotspots.map((h, i) => (
+                                    {(lesson.hotspots ?? []).map((h, i) => (
                                         <div key={i} className="text-xs text-white/80 bg-white/5 p-3 rounded-xl border border-white/5 hover:border-white/10 transition-colors">
                                             <div className="flex justify-between items-center mb-1">
                                                 <div className="font-black text-purple-300">m.{h.measures.join('-')}</div>

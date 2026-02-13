@@ -1,19 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { ChordScaleEngine } from '../../../../core/theory/ChordScaleEngine';
 import { ChordScaleMapping, ScaleOption } from '../../../../core/theory/ChordScaleTypes';
-import { VoicingEngine, Voicing } from '../../../../core/theory/VoicingEngine';
+import { JazzTheoryService } from '../../utils/JazzTheoryService';
+import { noteNameToMidi, recognizeChordFromSymbol } from '../../../../core/theory';
 import { X, Box, Check, Keyboard, Info } from 'lucide-react';
 import { UnifiedPiano } from '../../../../components/shared/UnifiedPiano';
-import * as Note from '@tonaljs/note';
 
 interface ChordScalePanelProps {
     chordSymbol: string;
     onClose: () => void;
 }
 
+type VoicingOption = { id: string; name: string; notes: number[]; description: string };
+
 export const ChordScalePanel: React.FC<ChordScalePanelProps> = ({ chordSymbol, onClose }) => {
     const [scales, setScales] = useState<ChordScaleMapping | null>(null);
-    const [voicings, setVoicings] = useState<Voicing[]>([]);
+    const [voicings, setVoicings] = useState<VoicingOption[]>([]);
     const [selectedScale, setSelectedScale] = useState<ScaleOption | null>(null);
     const [selectedVoicingId, setSelectedVoicingId] = useState<string | null>(null);
 
@@ -25,7 +27,7 @@ export const ChordScalePanel: React.FC<ChordScalePanelProps> = ({ chordSymbol, o
                 setSelectedScale(result.primary);
             }
 
-            const voicingResults = VoicingEngine.getVoicings(chordSymbol);
+            const voicingResults = JazzTheoryService.getPianoVoicingOptions(chordSymbol, 3, 6);
             setVoicings(voicingResults);
             if (voicingResults.length > 0) {
                 setSelectedVoicingId(voicingResults[0].id);
@@ -35,9 +37,13 @@ export const ChordScalePanel: React.FC<ChordScalePanelProps> = ({ chordSymbol, o
 
     const selectedVoicing = voicings.find(v => v.id === selectedVoicingId);
 
-    const getMidiNotes = (notes: string[]) => {
-        return notes.map(n => Note.midi(n + "4")).filter(m => m !== null) as number[];
-    };
+    const rootNoteMidi = chordSymbol
+        ? (() => {
+            const cleaned = JazzTheoryService.normalizeChordSymbolForTheory(chordSymbol);
+            const { root } = recognizeChordFromSymbol(cleaned);
+            return (3 + 1) * 12 + (noteNameToMidi(root + "0") % 12);
+        })()
+        : undefined;
 
     if (!scales || !selectedScale) return (
         <div className="p-4 text-center text-neutral-500">
@@ -138,20 +144,22 @@ export const ChordScalePanel: React.FC<ChordScalePanelProps> = ({ chordSymbol, o
                                     }`}
                             >
                                 <span className={`text-[10px] font-bold block ${selectedVoicingId === v.id ? 'text-emerald-300' : 'text-white'}`}>{v.name}</span>
-                                <span className="text-[8px] text-neutral-500 truncate block">{v.notes.join(' ')}</span>
+                                <span className="text-[8px] text-neutral-500 truncate block">{v.notes.length} notes</span>
                             </button>
                         ))}
                     </div>
                 </div>
 
-                {/* Visualization Section */}
+                {/* Visualization Section — same voicings as iReal chart player */}
                 <div className="space-y-4 pt-4 border-t border-white/5">
                     <div className="bg-black/40 rounded-2xl p-4 border border-white/5 overflow-hidden">
                         <UnifiedPiano
                             mode="display"
-                            octaveRange={[3, 5]}
-                            highlightedNotes={selectedVoicing ? getMidiNotes(selectedVoicing.notes) : []}
-                            showLabels="note-name"
+                            octaveRange={[2, 5]}
+                            highlightedNotes={selectedVoicing ? selectedVoicing.notes : []}
+                            rootNote={rootNoteMidi}
+                            chordSymbol={chordSymbol}
+                            showLabels="chord-tone"
                             className="h-24"
                         />
                         {selectedVoicing && (

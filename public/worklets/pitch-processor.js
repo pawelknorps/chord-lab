@@ -1,11 +1,10 @@
 /**
  * High-Performance Ear (2026): Low-latency pitch processor.
- * - Zero-copy circular buffer: 128-sample blocks copied with buffer.set(); ptr wrap.
- * - Downsamples native mic to 16 kHz (CREPE-trained rate) for ~3x faster inference.
- * - Hop size 128: run MPM every block once buffer is full (overlapping frames).
- * - Writes stabilized frequency + confidence to SAB. No console in hot path.
+ * - AUDIO-THREAD LIGHT: Only copy, downsample, and write RMS/onset to SAB.
+ * - MPM (autocorrelation) runs in MpmWorker; SwiftF0 runs in SwiftF0Worker (CREPE not used).
+ * - Zero-copy circular buffer; downsample to 16 kHz for SwiftF0 and MPM worker.
  */
-const CREPE_TARGET_HZ = 16000;
+const CREPE_TARGET_HZ = 16000; // Frame format (16 kHz); SwiftF0 uses same format
 const CREPE_FRAME_LEN = 1024;
 
 class PitchProcessor extends AudioWorkletProcessor {
@@ -33,6 +32,12 @@ class PitchProcessor extends AudioWorkletProcessor {
     this.nsdf = new Float32Array(CREPE_FRAME_LEN);
     this.effectiveSampleRate = CREPE_TARGET_HZ;
 
+    // Onset / RMS Tracking
+    this.currentRms = 0;
+    this.lastRms = 0;
+    this.onsetThreshold = 0.05; // Relative jump for "clap" detection
+    this.onsetTime = 0;
+
     const presets = {
       auto: { min: 20, max: 4000 },
       bass: { min: 30, max: 400 },
@@ -41,22 +46,11 @@ class PitchProcessor extends AudioWorkletProcessor {
       saxophone: { min: 100, max: 1100 },
       voice: { min: 80, max: 1200 },
     };
+    // Presets kept for possible future use; MPM runs in MpmWorker now
     const preset = presets[opts.instrumentId] || presets.auto;
     this.minHz = preset.min;
     this.maxHz = preset.max;
-
-    this.lastStablePitch = 0;
-    this.windowSize = 7;
-    this.minConfidence = 0.92;
-    this.hysteresisCents = 35;
-    this.stabilityThreshold = 3;
-    this.stableCount = 0;
-    this.pendingPitch = 0;
-    // Circular buffer for pitch history (no push/shift, no GC)
-    this.pitchHistory = new Float64Array(7);
-    this.pitchHistoryCount = 0;
-    this.pitchHistoryPtr = 0;
-    this.sortedCopy = new Float64Array(7);
+    this.performanceOffset = opts.performanceOffset || 0;
   }
 
   process(inputs) {
@@ -67,6 +61,13 @@ class PitchProcessor extends AudioWorkletProcessor {
     const buf = this.nativeBuffer;
     const size = this.nativeBufferSize;
     let ptr = this.ptr;
+
+    // RMS calculation for current block
+    let sum = 0;
+    for (let i = 0; i < blockLen; i++) {
+      sum += input[i] * input[i];
+    }
+    this.currentRms = Math.sqrt(sum / blockLen);
 
     // Zero-copy: copy block into circular buffer (handle wrap)
     if (ptr + blockLen <= size) {
@@ -80,159 +81,48 @@ class PitchProcessor extends AudioWorkletProcessor {
     this.ptr = ptr;
     this.samplesWritten += blockLen;
 
-    // Run inference every hopBlocks once we have a full frame
+    // Write RMS and onset every block (light; no MPM here)
+    let onset = 0;
+    if (this.currentRms > this.lastRms + this.onsetThreshold && this.currentRms > 0.02) {
+      onset = 1;
+    }
+    this.lastRms = this.currentRms;
+    this.sharedView[2] = this.currentRms;
+    this.sharedView[3] = onset;
+
+    // When buffer full: copy + downsample + write to pcmSab only. MPM runs in MpmWorker.
+    // CRITICAL: consume the frame (samplesWritten -= size) so we only do this once per frame.
+    // Without this we ran downsampling every process() call (~2.9 ms) and blocked the audio
+    // thread → playback dropouts when pitch detection and playback run together.
     if (this.samplesWritten >= size) {
-      this.blockCount++;
-      if (this.blockCount >= this.hopBlocks) {
-        this.blockCount = 0;
-        this.runInference();
+      const buf = this.nativeBuffer;
+      const temp = this.tempNative;
+      const out = this.downsampled;
+      for (let i = 0; i < size; i++) {
+        temp[i] = buf[(ptr + i) % size];
       }
+      const ratio = size / CREPE_FRAME_LEN;
+      for (let j = 0; j < CREPE_FRAME_LEN; j++) {
+        const srcIdx = j * ratio;
+        const lo = Math.floor(srcIdx);
+        const hi = Math.min(lo + 1, size - 1);
+        const frac = srcIdx - lo;
+        out[j] = temp[lo] * (1 - frac) + temp[hi] * frac;
+      }
+      if (this.pcmView) {
+        this.pcmView.set(out);
+      }
+      // REQ-AG-05: Record capture timestamp for latency tracking
+      if (this.sharedView) {
+        // Use provided offset + currentTime if performance.now() is missing (REQ-FIX-01)
+        this.sharedView[4] = (typeof performance !== 'undefined')
+          ? performance.now()
+          : (currentTime * 1000 + this.performanceOffset);
+      }
+      this.samplesWritten -= size;
     }
 
     return true;
-  }
-
-  runInference() {
-    const buf = this.nativeBuffer;
-    const size = this.nativeBufferSize;
-    const ptr = this.ptr;
-    const temp = this.tempNative;
-    const out = this.downsampled;
-
-    // Chronological copy: last `size` samples (oldest at ptr)
-    for (let i = 0; i < size; i++) {
-      temp[i] = buf[(ptr + i) % size];
-    }
-
-    // Downsample to 1024 @ 16 kHz (linear interpolation)
-    const ratio = size / CREPE_FRAME_LEN;
-    for (let j = 0; j < CREPE_FRAME_LEN; j++) {
-      const srcIdx = j * ratio;
-      const lo = Math.floor(srcIdx);
-      const hi = Math.min(lo + 1, size - 1);
-      const frac = srcIdx - lo;
-      out[j] = temp[lo] * (1 - frac) + temp[hi] * frac;
-    }
-
-    // Neural Integration: Write downsampled PCM to worker SAB if present
-    if (this.pcmView) {
-      this.pcmView.set(out);
-    }
-
-    // MPM; CREPE-WASM: swap with CREPE-Tiny/Small here—same downsampled buffer (1024 @ 16 kHz), same SAB output. See .planning/phases/14-pitch-latency/RESEARCH.md
-    let [pitch, confidence] = this.detectPitch(out, this.effectiveSampleRate);
-
-    // 2026 Jazz Stabilization (circular buffer + in-place median, no GC)
-    if (confidence >= this.minConfidence) {
-      const hist = this.pitchHistory;
-      const cap = this.windowSize;
-      let count = this.pitchHistoryCount;
-      let ptr = this.pitchHistoryPtr;
-      if (count < cap) {
-        hist[count] = pitch;
-        count++;
-        this.pitchHistoryCount = count;
-      } else {
-        hist[ptr] = pitch;
-        ptr = (ptr + 1) % cap;
-        this.pitchHistoryPtr = ptr;
-      }
-
-      if (count >= 3) {
-        const sorted = this.sortedCopy;
-        let n = count;
-        if (count === cap) {
-          for (let i = 0; i < n; i++) sorted[i] = hist[(ptr + i) % cap];
-        } else {
-          for (let i = 0; i < n; i++) sorted[i] = hist[i];
-        }
-        // In-place insertion sort (first n elements); no allocation
-        for (let i = 1; i < n; i++) {
-          const v = sorted[i];
-          let j = i;
-          while (j > 0 && sorted[j - 1] > v) {
-            sorted[j] = sorted[j - 1];
-            j--;
-          }
-          sorted[j] = v;
-        }
-        const medianPitch = sorted[Math.floor(n / 2)];
-
-        if (this.lastStablePitch === 0) {
-          this.lastStablePitch = medianPitch;
-        } else {
-          const newMidi = 12 * Math.log2(medianPitch / 440) + 69;
-          const currentMidi = 12 * Math.log2(this.lastStablePitch / 440) + 69;
-
-          if (Math.abs(newMidi - currentMidi) > (this.hysteresisCents / 100)) {
-            if (Math.abs(12 * Math.log2(medianPitch / this.pendingPitch)) < 0.1) {
-              this.stableCount++;
-            } else {
-              this.stableCount = 1;
-              this.pendingPitch = medianPitch;
-            }
-            if (this.stableCount >= this.stabilityThreshold) {
-              this.lastStablePitch = medianPitch;
-              this.stableCount = 0;
-            }
-          } else {
-            this.stableCount = 0;
-          }
-        }
-      } else {
-        this.lastStablePitch = pitch;
-      }
-    }
-
-    this.sharedView[0] = this.lastStablePitch;
-    this.sharedView[1] = confidence;
-  }
-
-  detectPitch(buffer, sampleRate) {
-    const n = buffer.length;
-    const nsdf = this.nsdf;
-
-    for (let tau = 0; tau < n; tau++) {
-      let acf = 0;
-      let divisor = 0;
-      for (let i = 0; i < n - tau; i++) {
-        acf += buffer[i] * buffer[i + tau];
-        divisor += buffer[i] * buffer[i] + buffer[i + tau] * buffer[i + tau];
-      }
-      nsdf[tau] = (2 * acf) / (divisor || 1e-6);
-    }
-
-    const peaks = [];
-    for (let i = 1; i < n - 1; i++) {
-      if (nsdf[i] > nsdf[i - 1] && nsdf[i] > nsdf[i + 1]) peaks.push(i);
-    }
-    if (peaks.length === 0) return [0, 0];
-
-    let maxNsdf = 0;
-    for (let i = 0; i < peaks.length; i++) {
-      if (nsdf[peaks[i]] > maxNsdf) maxNsdf = nsdf[peaks[i]];
-    }
-    const threshold = 0.9 * maxNsdf;
-    let targetPeak = -1;
-    for (let i = 0; i < peaks.length; i++) {
-      if (nsdf[peaks[i]] >= threshold) {
-        targetPeak = peaks[i];
-        break;
-      }
-    }
-    if (targetPeak === -1) return [0, 0];
-
-    const x0 = targetPeak - 1;
-    const x1 = targetPeak;
-    const x2 = targetPeak + 1;
-    const y0 = nsdf[x0];
-    const y1 = nsdf[x1];
-    const y2 = nsdf[x2];
-    const p = x1 + (y0 - y2) / (2 * (y0 - 2 * y1 + y2) || 1e-6);
-    const frequency = sampleRate / p;
-    const clarity = nsdf[targetPeak];
-    if (frequency < this.minHz || frequency > this.maxHz) return [0, 0];
-    return [frequency, clarity];
   }
 }
 

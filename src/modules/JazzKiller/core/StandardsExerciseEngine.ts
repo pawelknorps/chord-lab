@@ -7,6 +7,7 @@ import * as Chord from '@tonaljs/chord';
 import * as Note from '@tonaljs/note';
 import { ChordScaleEngine } from '../../../core/theory/ChordScaleEngine';
 import { GuideToneCalculator } from '../../../core/theory/GuideToneCalculator';
+import { toTonalChordSymbol } from '../../../core/theory/chordSymbolForTonal';
 
 const REFERENCE_OCTAVE = 4;
 
@@ -79,7 +80,7 @@ export function getTargetSet(chordSymbol: string, exerciseType: ExerciseType): T
         }
 
         if (exerciseType === 'arpeggio') {
-            const chord = Chord.get(cleanChord);
+            const chord = Chord.get(toTonalChordSymbol(cleanChord));
             if (chord.empty || !chord.notes?.length) return null;
             const pitchClasses = noteNamesToPitchClasses(chord.notes);
             return {

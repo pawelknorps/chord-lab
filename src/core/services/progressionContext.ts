@@ -1,5 +1,5 @@
 /**
- * Progression context for Chord Lab AI chatbot.
+ * Progression context for PawelSonik AI chatbot.
  * Builds compact markdown bundles and prompts for Gemini Nano.
  */
 
@@ -7,7 +7,7 @@ import { RomanNumeralAnalyzer } from '../theory/RomanNumeralAnalyzer';
 import { ConceptAnalyzer } from '../theory/ConceptAnalyzer';
 
 /**
- * Builds a compact markdown string for the current Chord Lab progression (key, chords, RN, concepts).
+ * Builds a compact markdown string for the current PawelSonik progression (key, chords, RN, concepts).
  * Used as context for the local AI prompt.
  */
 export function buildProgressionBundle(
@@ -41,7 +41,7 @@ const MAX_HISTORY_PAIRS = 2;
 
 /**
  * Builds the full prompt string to send to LocalAgentService.ask().
- * Includes Chord Lab persona hint, current progression bundle, optional history, and user message.
+ * Includes PawelSonik persona hint, current progression bundle, optional history, and user message.
  */
 export function buildChordLabPrompt(
   bundle: string,
@@ -49,7 +49,7 @@ export function buildChordLabPrompt(
   history?: Array<{ role: 'user' | 'assistant'; content: string }>
 ): string {
   const preamble =
-    'You are helping with a chord progression in Chord Lab. Answer briefly. Be concise. You can explain harmony, suggest continuations or substitutes, and answer questions about the progression.';
+    'You are helping with a chord progression in PawelSonik. Answer briefly. Be concise. You can explain harmony, suggest continuations or substitutes, and answer questions about the progression.';
   let body = `Current progression:\n${bundle}\n\n`;
   if (history && history.length > 0) {
     const recent = history.slice(-MAX_HISTORY_PAIRS * 2);
@@ -67,7 +67,7 @@ const COMMAND_REGEX = /\[\[\s*(DRILL|SET|UI)\s*:\s*[^\]]+\]\]/gi;
 
 /**
  * Strips [[DRILL:...]], [[SET:...]], [[UI:...]] tokens from AI response text
- * so they are not shown in Chord Lab chat.
+ * so they are not shown in PawelSonik chat.
  */
 export function stripCommandTokens(text: string): string {
   if (!text || typeof text !== 'string') return text;

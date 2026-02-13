@@ -17,8 +17,9 @@ export function useSoloistActivity() {
     useEffect(() => {
         if (samplerRef.current == null) {
             samplerRef.current = createSoloistActivitySampler({
-                windowMs: 1600,
+                windowMs: 1200,
                 sampleIntervalMs: POLL_MS,
+                onsetCap: 4,
             });
         }
         const sampler = samplerRef.current;

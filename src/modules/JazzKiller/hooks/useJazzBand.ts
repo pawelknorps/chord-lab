@@ -109,6 +109,8 @@ export const useJazzBand = (song: any, isActive: boolean = true, options?: UseJa
     const walkingBassEngineRef = useRef<WalkingBassEngine>(new WalkingBassEngine());
     const bassRhythmVariatorRef = useRef<BassRhythmVariator>(new BassRhythmVariator());
     const walkingLineRef = useRef<BassEvent[]>([]);
+    const bandWorkerRef = useRef<Worker | null>(null);
+    const barQueueRef = useRef<Map<number, { drumHits: DrumHit[], bassEvents: BassEvent[], lastBassNote: number }>>(new Map());
 
     /** true = beat-by-beat JazzTheoryService.getNextWalkingBassNote; false = WalkingBassEngine (Friedland/target-vector). */
     const USE_LEGACY_BASS_NOTE_CHOICE = true;
@@ -185,8 +187,23 @@ export const useJazzBand = (song: any, isActive: boolean = true, options?: UseJa
             reverbRef.current?.dispose(); pianoReverbRef.current?.dispose();
             outputGainRef.current?.dispose();
             outputGainRef.current = null;
+            bandWorkerRef.current?.terminate();
         };
     }, [options?.outputGateRef]);
+
+    useEffect(() => {
+        // Initialize BandWorker
+        const worker = new Worker(new URL('../../../core/audio/BandWorker.ts', import.meta.url), { type: 'module' });
+        worker.onmessage = (e) => {
+            const { type, data } = e.data;
+            if (type === 'bar_generated') {
+                barQueueRef.current.set(data.barIndex, data);
+            }
+        };
+        worker.postMessage({ type: 'init' });
+        bandWorkerRef.current = worker;
+        return () => worker.terminate();
+    }, []);
 
     // Helper to determine if a track should be audible
     const getOutputVolume = (id: 'piano' | 'bass' | 'drums', baseVol: number) => {
@@ -271,6 +288,25 @@ export const useJazzBand = (song: any, isActive: boolean = true, options?: UseJa
         }
 
         const totalBars = totalLoopsSignal.value * cycledLength + endingLength;
+        const prefetchBar = (barIdx: number, currentC: string, nextC: string, act: number, pianoD: number, trioC: any, q: any, beats: number, classicRide: boolean, isFill: boolean) => {
+            if (!bandWorkerRef.current || barQueueRef.current.has(barIdx)) return;
+            bandWorkerRef.current.postMessage({
+                type: 'generate_bar',
+                data: {
+                    barIndex: barIdx,
+                    currentChord: currentC,
+                    nextChord: nextC,
+                    density: act,
+                    pianoDensity: pianoD,
+                    trioContext: trioC,
+                    energy: activityLevelSignal.value,
+                    answerContext: q,
+                    divisionsPerBar: beats,
+                    preferClassicRide: classicRide,
+                    isFillBar: isFill
+                }
+            });
+        };
 
         const gateRef = options?.outputGateRef;
         const loop = new Tone.Loop((time) => {
@@ -481,8 +517,8 @@ export const useJazzBand = (song: any, isActive: boolean = true, options?: UseJa
                     vel *= 0.9 + Math.random() * 0.2;
                     const sampler = event.isGhost ? bassMutedRef.current : bassRef.current;
                     // Half-time walk: use the full space — two beats per note, long duration (no short-note cap).
-                const halfNoteGap = 0.01;
-                const rawDuration = event.isGhost
+                    const halfNoteGap = 0.01;
+                    const rawDuration = event.isGhost
                         ? beatDurationSec * 0.3
                         : isHalfNoteLine
                             ? 2 * beatDurationSec - halfNoteGap
@@ -517,15 +553,10 @@ export const useJazzBand = (song: any, isActive: boolean = true, options?: UseJa
                 const trioContext = { placeInCycle: placeInCycleRef.current, songStyle: songStyleRef.current };
                 const targetDensity = reactiveCompingEngineRef.current.getTargetDensity(activity, bassModeSignal.value, trioContext);
                 const qa = qaDecisionRef.current;
-
-                const pianoAnswerContext =
-                    qa?.doAnswer && qa.responder === 'piano'
-                        ? { questionFrom: qa.questionFrom, answerType: qa.answerType }
-                        : undefined;
                 const isBallad = s?.style === 'Ballad' || String(s?.compStyle ?? '').toLowerCase().includes('ballad');
                 const pianoPattern = rhythmEngineRef.current.getRhythmPattern(bpm, targetDensity, {
                     chordsPerBar,
-                    answerContext: pianoAnswerContext,
+                    answerContext: qa?.doAnswer && qa.responder === 'piano' ? { questionFrom: qa.questionFrom, answerType: qa.answerType } : undefined,
                     balladMode: isBallad,
                     placeInCycle: placeInCycleRef.current,
                     songStyle: songStyleRef.current,
@@ -534,29 +565,52 @@ export const useJazzBand = (song: any, isActive: boolean = true, options?: UseJa
                 currentPatternRef.current = pianoPattern;
                 const pianoDensity = pianoPattern.steps.length / beatsPerBar;
 
-                const drumsAnswerContext =
-                    qa?.doAnswer && qa.responder === 'drums'
-                        ? { questionFrom: qa.questionFrom, answerType: qa.answerType }
-                        : undefined;
-                // Phase 20: On FILL bar use drum fill instead of time
-                if (markovPatternTypeRef.current === 'FILL') {
-                    currentDrumHitsRef.current = drumEngineRef.current.generateFill(bar);
-                } else if (drumStyleIdSignal.value) {
-                    // JJazzLab Library Import: use JJazzLab-derived patterns when drum style is set
-                    currentDrumHitsRef.current = drumEngineRef.current.generateBarFromJJazzLab(drumStyleIdSignal.value, bar);
+                // PREFETCH future bars (N+1 and N+2)
+                const prefetch = (idx: number) => {
+                    // Logic to find chords for idx
+                    const pIdx = idx % (s.music.playbackPlan?.length || s.music.measures.length);
+                    const mIdx = (s.music.playbackPlan || [])[pIdx] ?? pIdx;
+                    const m = s.music.measures[mIdx];
+                    if (!m) return;
+                    const curC = JazzTheoryService.getMainChord((m.chords || [])[0] || "");
+                    const nC = JazzTheoryService.getMainChord((s.music.measures[(s.music.playbackPlan || [])[(idx + 1) % planIndices.length] ?? (idx + 1) % planIndices.length]?.chords || [])[0] || curC);
+
+                    const isF = markovPatternTypeRef.current === 'FILL' && idx % 4 === 3; // Simplified fill logic for prefetch
+                    prefetchBar(idx, curC, nC, activity, pianoDensity, trioContext, qa, beatsPerBar, markovPatternTypeRef.current !== 'HIGH_ENERGY', isF);
+                };
+                prefetch(bar + 1);
+                prefetch(bar + 2);
+
+                // CONSUME current bar from Queue
+                const queuedData = barQueueRef.current.get(bar);
+                if (queuedData) {
+                    currentDrumHitsRef.current = queuedData.drumHits;
+                    walkingLineRef.current = queuedData.bassEvents;
+                    lastBassNoteRef.current = queuedData.lastBassNote;
+                    barQueueRef.current.delete(bar);
                 } else {
-                    // Prioritise classic ride (full spang-a-lang): use for LOW/MEDIUM_ENERGY; allow linear/broken only in HIGH_ENERGY
-                    const preferClassicRide = markovPatternTypeRef.current !== 'HIGH_ENERGY';
-                    currentDrumHitsRef.current = drumEngineRef.current.generateBar(
-                        activity,
-                        pianoDensity,
-                        bar,
-                        drumsAnswerContext,
-                        pianoPattern.steps.map(s => s.time),
-                        trioContext,
-                        beatsPerBar,
-                        preferClassicRide
-                    );
+                    // Fallback (Synchronous) if worker too slow
+                    if (markovPatternTypeRef.current === 'FILL') {
+                        currentDrumHitsRef.current = drumEngineRef.current.generateFill(bar);
+                    } else if (drumStyleIdSignal.value) {
+                        currentDrumHitsRef.current = drumEngineRef.current.generateBarFromJJazzLab(drumStyleIdSignal.value, bar);
+                    } else {
+                        const preferClassicRide = markovPatternTypeRef.current !== 'HIGH_ENERGY';
+                        currentDrumHitsRef.current = drumEngineRef.current.generateBar(
+                            activity, pianoDensity, bar,
+                            qa?.doAnswer && qa.responder === 'drums' ? { questionFrom: qa.questionFrom, answerType: qa.answerType } : undefined,
+                            pianoPattern.steps.map(s => s.time), trioContext, beatsPerBar, preferClassicRide
+                        );
+                    }
+                    const next = nextChord?.trim() || currentChord;
+                    const soloistSpace = isSoloistSpace(placeInCycleRef.current, songStyleRef.current);
+                    if (beatsPerBar === 3) {
+                        const line = JazzTheoryService.generateWaltzWalkingLine(currentChord, next, lastBassNoteRef.current);
+                        walkingLineRef.current = bassRhythmVariatorRef.current.applyVariations(line, bar, activity, next, undefined, soloistSpace);
+                    } else {
+                        const line = JazzTheoryService.generateTargetApproachWalkingLine(currentChord, next, lastBassNoteRef.current);
+                        walkingLineRef.current = bassRhythmVariatorRef.current.applyVariations(line, bar, activity, next, undefined, soloistSpace);
+                    }
                 }
             }
 
@@ -636,8 +690,12 @@ export const useJazzBand = (song: any, isActive: boolean = true, options?: UseJa
                     // Trigger appropriate sampler limb
                     if (hit.instrument === "Ride") {
                         drumsRef.current?.ride.triggerAttack("C1", scheduleTime, hit.velocity);
+                    } else if (hit.instrument === "RideBell") {
+                        drumsRef.current?.ride.triggerAttack("E1", scheduleTime, hit.velocity);
                     } else if (hit.instrument === "Snare") {
                         drumsRef.current?.snare.triggerAttack("C1", scheduleTime, hit.velocity);
+                    } else if (hit.instrument === "SnareRim") {
+                        drumsRef.current?.snare.triggerAttack("E1", scheduleTime, hit.velocity);
                     } else if (hit.instrument === "Kick") {
                         drumsRef.current?.kick.triggerAttack("C1", scheduleTime, hit.velocity);
                     } else if (hit.instrument === "HatPedal") {
@@ -679,7 +737,7 @@ export const useJazzBand = (song: any, isActive: boolean = true, options?: UseJa
                 Tone.Transport.position = '0:0:0';
                 isPlayingSignal.value = true;
                 Tone.Transport.start();
-                if (!isAudioReady()) setTimeout(() => initGlobalAudio().catch(() => {}), 0);
+                if (!isAudioReady()) setTimeout(() => initGlobalAudio().catch(() => { }), 0);
             })
             .catch(() => {
                 // Context may be blocked by browser; next click will retry

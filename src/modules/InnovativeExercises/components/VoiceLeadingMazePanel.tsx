@@ -1,95 +1,177 @@
-import { useRef, useEffect, useCallback } from 'react';
+import { useRef, useEffect, useCallback, useState, useMemo } from 'react';
 import * as Tone from 'tone';
-import * as Chord from '@tonaljs/chord';
+import { Mic, Keyboard, RotateCcw } from 'lucide-react';
 import { useVoiceLeadingMaze } from '../hooks/useVoiceLeadingMaze';
-import { initAudio } from '../../../core/audio/globalAudio';
+import { getVoiceLeadingProgressionsFromStandards } from '../core/voiceLeadingProgressions';
+import { useJazzLibrary } from '../../JazzKiller/hooks/useJazzLibrary';
+import { useJazzBand } from '../../JazzKiller/hooks/useJazzBand';
+import { initAudio, isAudioReady } from '../../../core/audio/globalAudio';
+import type { ExerciseInputSource } from '../../JazzKiller/core/ExerciseInputAdapter';
+import type { InnovativeExerciseInitialParams } from '../types';
+import { innovativePanelContainerClass, innovativeSectionLabelClass } from '../InnovativeExercisesModule';
 
-const BPM = 120;
-const BEATS_PER_CHORD = 8;
-const SEC_PER_BEAT = 60 / BPM;
-const SEC_PER_CHORD = BEATS_PER_CHORD * SEC_PER_BEAT;
-
-function getChordMidis(symbol: string, octave: number = 4): number[] {
-  const c = Chord.get(symbol);
-  if (!c.notes?.length) return [];
-  return c.notes.map(n => Tone.Frequency(`${n}${octave}`).toMidi()).filter((m): m is number => typeof m === 'number' && m >= 0 && m <= 127);
+/** Minimal song for ii–V–I: one chord per measure, looped (full jazz band pipeline). */
+function buildIiVISong() {
+  return {
+    title: 'ii-V-I',
+    music: {
+      measures: [
+        { chords: ['Dm7'] },
+        { chords: ['G7'] },
+        { chords: ['Cmaj7'] },
+      ],
+      playbackPlan: [0, 1, 2],
+    },
+    TimeSignature: '4/4',
+  };
 }
 
-export function VoiceLeadingMazePanel() {
-  const { progression, currentChordIndex, currentChord, isMuted, hints, reset } = useVoiceLeadingMaze();
-  const gainRef = useRef<Tone.Gain | null>(null);
-  const synthRef = useRef<Tone.PolySynth | null>(null);
-  const scheduledRef = useRef(false);
+export interface VoiceLeadingMazePanelProps {
+  initialParams?: InnovativeExerciseInitialParams;
+}
+
+export function VoiceLeadingMazePanel({ initialParams }: VoiceLeadingMazePanelProps) {
+  const { standards, getSongAsIRealFormat } = useJazzLibrary();
+  const progressionOptions = useMemo(
+    () => getVoiceLeadingProgressionsFromStandards(standards),
+    [standards]
+  );
+  const [selectedProgressionId, setSelectedProgressionId] = useState<string>('ii-V-I');
+  useEffect(() => {
+    if (initialParams?.progressionId && progressionOptions.some(p => p.id === initialParams.progressionId)) {
+      setSelectedProgressionId(initialParams.progressionId);
+    }
+  }, [initialParams?.progressionId, progressionOptions]);
+  const selectedProgression = useMemo(
+    () => progressionOptions.find(p => p.id === selectedProgressionId) ?? progressionOptions[0],
+    [progressionOptions, selectedProgressionId]
+  );
+  const progressionChords = selectedProgression?.chords ?? [];
+
+  const song = useMemo(() => {
+    if (selectedProgressionId === 'ii-V-I' || !selectedProgression?.standard) {
+      return buildIiVISong();
+    }
+    return getSongAsIRealFormat(selectedProgression.standard!, 0);
+  }, [selectedProgressionId, selectedProgression, getSongAsIRealFormat]);
+
+  const outputGateRef = useRef(true);
+  const band = useJazzBand(song, true, { outputGateRef });
+
+  const isBackingRunning = band.isPlayingSignal.value;
+  const currentChordFromBand = isBackingRunning ? (band.currentChordSymbolSignal.value ?? '') : '';
+  const playbackChordIndexFromBand = isBackingRunning ? (band.currentMeasureIndexSignal.value ?? 0) : null;
+
+  const [inputSource, setInputSource] = useState<ExerciseInputSource>('mic');
+  const { progression, currentChordIndex, currentChord, isMuted, hints, reset } = useVoiceLeadingMaze(inputSource, {
+    playbackChordIndex: playbackChordIndexFromBand,
+    progression: progressionChords,
+    currentChordSymbol: currentChordFromBand || null,
+  });
+
+  outputGateRef.current = !isMuted;
 
   const startBacking = useCallback(async () => {
-    await initAudio();
     await Tone.start();
-    if (!synthRef.current) {
-      const gain = new Tone.Gain(1).toDestination();
-      gainRef.current = gain;
-      synthRef.current = new Tone.PolySynth(Tone.Synth, { volume: -10 }).connect(gain);
-    }
-    if (scheduledRef.current) return;
-    scheduledRef.current = true;
-    const times = [0, SEC_PER_CHORD, SEC_PER_CHORD * 2];
-    progression.forEach((symbol, i) => {
-      const midis = getChordMidis(symbol);
-      const noteNames = midis.map(m => Tone.Frequency(m, 'midi').toNote());
-      Tone.Transport.schedule(time => {
-        if (synthRef.current) synthRef.current.triggerAttackRelease(noteNames, SEC_PER_CHORD * 0.9, time);
-      }, times[i]);
-    });
-    Tone.Transport.start();
-  }, [progression]);
-
-  useEffect(() => {
-    const g = gainRef.current;
-    if (!g) return;
-    if (isMuted) g.gain.rampTo(0, 0.1);
-    else g.gain.rampTo(1, 0.1);
-  }, [isMuted]);
+    if (!isAudioReady()) await initAudio();
+    band.togglePlayback();
+  }, [band]);
 
   const handleReset = useCallback(() => {
-    Tone.Transport.stop();
-    Tone.Transport.cancel();
-    scheduledRef.current = false;
+    if (band.isPlayingSignal.value) band.togglePlayback();
     reset();
-  }, [reset]);
+  }, [band, reset]);
+
+  const handleProgressionChange = useCallback((id: string) => {
+    setSelectedProgressionId(id);
+    if (band.isPlayingSignal.value) band.togglePlayback();
+    reset();
+  }, [band, reset]);
 
   useEffect(() => {
     return () => {
-      Tone.Transport.stop();
-      Tone.Transport.cancel();
-      synthRef.current?.dispose();
-      gainRef.current?.dispose();
+      if (band.isPlayingSignal.value) band.togglePlayback();
     };
   }, []);
 
   return (
-    <div className="flex flex-col gap-4 p-4 rounded-lg bg-[var(--bg-panel)] border border-[var(--border-subtle)]">
-      <h2 className="text-lg font-semibold text-[var(--text-primary)]">Voice-Leading Maze</h2>
-      <p className="text-sm text-[var(--text-secondary)]">
-        ii–V–I progression. Play only guide tones (3rds and 7ths). Wrong note mutes the backing until you play a correct connective note.
-      </p>
-      <div className="flex items-center gap-2">
-        <button type="button" onClick={startBacking} className="px-4 py-2 rounded-md bg-[var(--accent)] text-[var(--text-on-accent)]">
-          Start Backing
+    <div className={`${innovativePanelContainerClass} flex flex-col gap-6`}>
+      <div>
+        <h3 className="text-sm font-black uppercase tracking-widest text-white">Voice-Leading Maze</h3>
+        <p className="text-[10px] text-neutral-500 mt-0.5">
+          Play only guide tones (3rds and 7ths). Backing plays only when you play a correct note; wrong note mutes.
+        </p>
+      </div>
+
+      <div>
+        <p className={innovativeSectionLabelClass}>Progression (from jazz standards)</p>
+        <select
+          value={selectedProgressionId}
+          onChange={(e) => handleProgressionChange(e.target.value)}
+          className="w-full max-w-md rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm font-medium text-white focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/50"
+          aria-label="Select chord progression"
+        >
+          {progressionOptions.map((opt) => (
+            <option key={opt.id} value={opt.id}>
+              {opt.name} ({opt.chords.length} chords)
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div>
+        <p className={innovativeSectionLabelClass}>Input</p>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => setInputSource('mic')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all ${inputSource === 'mic' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40' : 'border-white/10 text-neutral-400 hover:border-emerald-500/30'}`}
+          >
+            <Mic size={14} /> Mic
+          </button>
+          <button
+            type="button"
+            onClick={() => setInputSource('midi')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all ${inputSource === 'midi' ? 'bg-blue-500/20 text-blue-400 border-blue-500/40' : 'border-white/10 text-neutral-400 hover:border-emerald-500/30'}`}
+          >
+            <Keyboard size={14} /> MIDI
+          </button>
+        </div>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          onClick={startBacking}
+          className="px-4 py-2 rounded-xl border border-amber-500 bg-amber-500/20 text-amber-400 text-xs font-bold hover:bg-amber-500/30 transition-all"
+        >
+          {isBackingRunning ? 'Stop Backing' : 'Start Backing'}
         </button>
-        <button type="button" onClick={handleReset} className="px-4 py-2 rounded-md border border-[var(--border-subtle)] text-[var(--text-secondary)]">
-          Reset
+        <button
+          type="button"
+          onClick={handleReset}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-white/10 text-xs font-bold text-neutral-400 hover:text-white transition-colors"
+        >
+          <RotateCcw size={12} /> Reset
         </button>
       </div>
-      <p className="text-sm font-medium text-[var(--text-primary)]">
-        Current chord: <strong>{currentChord}</strong> ({currentChordIndex + 1}/{progression.length})
-      </p>
-      {hints && (
-        <p className="text-sm text-[var(--text-muted)]">
-          Guide tones: 3rd = {hints.third}, 7th = {hints.seventh}
+
+      <div className="p-3 bg-black/30 rounded-xl border border-white/5">
+        <p className={innovativeSectionLabelClass}>Current chord</p>
+        <p className="text-lg font-black text-white font-mono">{currentChord}</p>
+        <p className="text-[10px] text-neutral-500 mt-0.5">
+          {isBackingRunning && playbackChordIndexFromBand != null
+            ? (playbackChordIndexFromBand % progression.length) + 1
+            : currentChordIndex + 1} / {progression.length}
         </p>
-      )}
-      <p className={`text-sm font-medium ${isMuted ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}>
+        {hints && (
+          <p className="text-xs text-neutral-400 mt-1">Guide tones: 3rd = {hints.third}, 7th = {hints.seventh}</p>
+        )}
+      </div>
+
+      <div className={`p-3 rounded-xl border text-sm font-bold ${isMuted ? 'bg-red-500/10 border-red-500/30 text-red-400' : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'}`}>
         {isMuted ? 'Muted — play a guide tone (3rd or 7th) to unmute.' : 'Playing — keep playing guide tones!'}
-      </p>
+      </div>
     </div>
   );
 }

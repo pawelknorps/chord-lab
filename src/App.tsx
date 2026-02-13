@@ -25,6 +25,8 @@ const ProgressionsPage = lazy(() => import('./pages/ProgressionsPage'));
 const JazzKiller = lazy(() => import('./modules/JazzKiller/JazzKillerModule'));
 const TeacherDashboard = lazy(() => import('./pages/TeacherDashboard'));
 const LickFeedPage = lazy(() => import('./pages/LickFeedPage'));
+const ProgressPage = lazy(() => import('./pages/ProgressPage'));
+const LickHubPage = lazy(() => import('./pages/LickHubPage'));
 const InnovativeExercises = lazy(() => import('./modules/InnovativeExercises/InnovativeExercisesModule'));
 
 import { useSettingsStore } from './core/store/useSettingsStore';
@@ -45,96 +47,106 @@ function App() {
 
     return (
         <AuthProvider>
-        <AudioProvider>
-            <MidiProvider>
-                <GlobalMidiHandler />
-                <BrowserRouter>
-                    <div className="h-screen w-screen flex flex-col bg-[var(--bg-app)] text-[var(--text-primary)] overflow-hidden font-sans">
-                        <SessionHUD />
-                        <SyncBridge />
+            <AudioProvider>
+                <MidiProvider>
+                    <GlobalMidiHandler />
+                    <BrowserRouter>
+                        <div className="h-screen w-screen flex flex-col bg-[var(--bg-app)] text-[var(--text-primary)] overflow-hidden font-sans">
+                            <SessionHUD />
+                            <SyncBridge />
 
-                        <div className="flex-1 min-h-0 overflow-hidden">
-                            <Routes>
-                                <Route path="/" element={<Dashboard />}>
-                                    <Route index element={<ChordLab />} /> {/* Default View */}
-                                    <Route path="bi-tonal" element={
-                                        <Suspense fallback={<ModuleSkeleton label="Bi-Tonal Sandbox" />}>
-                                            <BiTonalSandbox />
-                                        </Suspense>
-                                    } />
-                                    <Route path="grips" element={
-                                        <Suspense fallback={<ModuleSkeleton label="Grips" />}>
-                                            <GripSequencer />
-                                        </Suspense>
-                                    } />
-                                    <Route path="tonnetz" element={
-                                        <Suspense fallback={<ModuleSkeleton label="Tonnetz" />}>
-                                            <Tonnetz />
-                                        </Suspense>
-                                    } />
-                                    <Route path="negative-harmony" element={
-                                        <Suspense fallback={<ModuleSkeleton label="Negative Harmony" />}>
-                                            <NegativeMirror />
-                                        </Suspense>
-                                    } />
-                                    <Route path="barry-harris" element={
-                                        <Suspense fallback={<ModuleSkeleton label="Barry Harris" />}>
-                                            <BarryHarris />
-                                        </Suspense>
-                                    } />
-                                    <Route path="rhythm-architect" element={
-                                        <Suspense fallback={<ModuleSkeleton label="Rhythm Architect" />}>
-                                            <RhythmArchitect />
-                                        </Suspense>
-                                    } />
-                                    <Route path="functional-ear-training" element={
-                                        <Suspense fallback={<ModuleSkeleton label="Ear Training" />}>
-                                            <FunctionalEarTraining />
-                                        </Suspense>
-                                    } />
-                                    <Route path="circle-chords" element={
-                                        <Suspense fallback={<ModuleSkeleton label="Circle Chords" />}>
-                                            <CircleChords />
-                                        </Suspense>
-                                    } />
-                                    <Route path="midi-library" element={
-                                        <Suspense fallback={<ModuleSkeleton label="MIDI Library" />}>
-                                            <MidiLibrary />
-                                        </Suspense>
-                                    } />
-                                    <Route path="progressions" element={
-                                        <Suspense fallback={<ModuleSkeleton label="Progressions" />}>
-                                            <ProgressionsPage />
-                                        </Suspense>
-                                    } />
-                                    <Route path="jazz-standards" element={
-                                        <Suspense fallback={<ModuleSkeleton label="Jazz Standards" />}>
-                                            <JazzKiller />
-                                        </Suspense>
-                                    } />
-                                    <Route path="teacher-dashboard" element={
-                                        <Suspense fallback={<ModuleSkeleton label="Teacher Dashboard" />}>
-                                            <TeacherDashboard />
-                                        </Suspense>
-                                    } />
-                                    <Route path="lick-feed" element={
-                                        <Suspense fallback={<ModuleSkeleton label="Lick Feed" />}>
-                                            <LickFeedPage />
-                                        </Suspense>
-                                    } />
-                                    <Route path="innovative-exercises" element={
-                                        <Suspense fallback={<ModuleSkeleton label="Innovative Exercises" />}>
-                                            <InnovativeExercises />
-                                        </Suspense>
-                                    } />
-                                </Route>
-                            </Routes>
+                            <div className="flex-1 min-h-0 overflow-hidden">
+                                <Routes>
+                                    <Route path="/" element={<Dashboard />}>
+                                        <Route index element={<ChordLab />} /> {/* Default View */}
+                                        <Route path="bi-tonal" element={
+                                            <Suspense fallback={<ModuleSkeleton label="Bi-Tonal Sandbox" />}>
+                                                <BiTonalSandbox />
+                                            </Suspense>
+                                        } />
+                                        <Route path="grips" element={
+                                            <Suspense fallback={<ModuleSkeleton label="Grips" />}>
+                                                <GripSequencer />
+                                            </Suspense>
+                                        } />
+                                        <Route path="tonnetz" element={
+                                            <Suspense fallback={<ModuleSkeleton label="Tonnetz" />}>
+                                                <Tonnetz />
+                                            </Suspense>
+                                        } />
+                                        <Route path="negative-harmony" element={
+                                            <Suspense fallback={<ModuleSkeleton label="Negative Harmony" />}>
+                                                <NegativeMirror />
+                                            </Suspense>
+                                        } />
+                                        <Route path="barry-harris" element={
+                                            <Suspense fallback={<ModuleSkeleton label="Barry Harris" />}>
+                                                <BarryHarris />
+                                            </Suspense>
+                                        } />
+                                        <Route path="rhythm-architect" element={
+                                            <Suspense fallback={<ModuleSkeleton label="Rhythm Architect" />}>
+                                                <RhythmArchitect />
+                                            </Suspense>
+                                        } />
+                                        <Route path="functional-ear-training" element={
+                                            <Suspense fallback={<ModuleSkeleton label="Ear Training" />}>
+                                                <FunctionalEarTraining />
+                                            </Suspense>
+                                        } />
+                                        <Route path="circle-chords" element={
+                                            <Suspense fallback={<ModuleSkeleton label="Circle Chords" />}>
+                                                <CircleChords />
+                                            </Suspense>
+                                        } />
+                                        <Route path="midi-library" element={
+                                            <Suspense fallback={<ModuleSkeleton label="MIDI Library" />}>
+                                                <MidiLibrary />
+                                            </Suspense>
+                                        } />
+                                        <Route path="progressions" element={
+                                            <Suspense fallback={<ModuleSkeleton label="Progressions" />}>
+                                                <ProgressionsPage />
+                                            </Suspense>
+                                        } />
+                                        <Route path="jazz-standards" element={
+                                            <Suspense fallback={<ModuleSkeleton label="Jazz Standards" />}>
+                                                <JazzKiller />
+                                            </Suspense>
+                                        } />
+                                        <Route path="teacher-dashboard" element={
+                                            <Suspense fallback={<ModuleSkeleton label="Teacher Dashboard" />}>
+                                                <TeacherDashboard />
+                                            </Suspense>
+                                        } />
+                                        <Route path="lick-feed" element={
+                                            <Suspense fallback={<ModuleSkeleton label="Lick Feed" />}>
+                                                <LickFeedPage />
+                                            </Suspense>
+                                        } />
+                                        <Route path="lick-hub" element={
+                                            <Suspense fallback={<ModuleSkeleton label="Lick Hub" />}>
+                                                <LickHubPage />
+                                            </Suspense>
+                                        } />
+                                        <Route path="mastery-tree" element={
+                                            <Suspense fallback={<ModuleSkeleton label="Mastery Tree" />}>
+                                                <ProgressPage />
+                                            </Suspense>
+                                        } />
+                                        <Route path="innovative-exercises" element={
+                                            <Suspense fallback={<ModuleSkeleton label="Innovative Exercises" />}>
+                                                <InnovativeExercises />
+                                            </Suspense>
+                                        } />
+                                    </Route>
+                                </Routes>
+                            </div>
                         </div>
-                    </div>
-                </BrowserRouter>
-                <PerformanceMonitor />
-            </MidiProvider>
-        </AudioProvider>
+                    </BrowserRouter>
+                    <PerformanceMonitor />
+                </MidiProvider>
+            </AudioProvider>
         </AuthProvider>
     );
 }

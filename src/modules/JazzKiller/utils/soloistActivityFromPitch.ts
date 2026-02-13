@@ -1,7 +1,7 @@
 /**
  * Phase 19: Soloist-Responsive Playback.
- * Derives a 0–1 "soloist activity" from pitch/onset over a rolling window.
- * High when user is playing more/faster; low when silent or sparse.
+ * Derives a 0–1 "soloist activity" from pitch + onset (rhythm) over a rolling window.
+ * Ignores RMS; relies on auto gain. Focus on rhythms: onset count + pitch duty cycle.
  * Used to steer band density (more space when soloist plays, more backing when soloist rests).
  */
 
@@ -12,53 +12,65 @@ export interface PitchSample {
     onset: number;
 }
 
-const DEFAULT_WINDOW_MS = 1600;
+/** Shorter window = snappier reaction to soloist rhythms. */
+const DEFAULT_WINDOW_MS = 1200;
 const DEFAULT_SAMPLE_INTERVAL_MS = 100;
-const PITCH_CONFIDENCE_THRESHOLD = 0.8;
-const MAX_SAMPLES = 32;
+const PITCH_CONFIDENCE_THRESHOLD = 0.7;
+const MAX_SAMPLES = 20;
+/** Onsets in window above this map to 1.0 rhythm component (~4 attacks in ~1.2 s = busy rhythm). */
+const ONSET_CAP = 4;
 
 /**
- * Rolling "has pitch" duty cycle over the last ~1–2 s.
- * Returns fraction of samples where frequency > 0 && clarity >= threshold.
+ * Rolling soloist intensity over a short window (~1.2 s): focus on rhythms via onset count + pitch duty cycle.
+ * Shorter window makes the band react more to soloist rhythms. No RMS; auto gain assumed.
  * When getLatestPitch returns null (no mic / store not ready), treat as 0.
  */
 export function createSoloistActivitySampler(options?: {
     windowMs?: number;
     sampleIntervalMs?: number;
     confidenceThreshold?: number;
+    onsetCap?: number;
 }) {
     const windowMs = options?.windowMs ?? DEFAULT_WINDOW_MS;
     const sampleIntervalMs = options?.sampleIntervalMs ?? DEFAULT_SAMPLE_INTERVAL_MS;
     const confidenceThreshold = options?.confidenceThreshold ?? PITCH_CONFIDENCE_THRESHOLD;
+    const onsetCap = options?.onsetCap ?? ONSET_CAP;
     const maxSamples = Math.min(MAX_SAMPLES, Math.ceil(windowMs / sampleIntervalMs));
 
-    const buffer: boolean[] = [];
+    /** Per slot: [hasPitch, hadOnset]. */
+    const pitchBuffer: boolean[] = [];
+    const onsetBuffer: boolean[] = [];
     let ptr = 0;
 
     /**
-     * Push one sample: true if "has pitch" (frequency > 0 && clarity >= threshold).
-     * Call this at sampleIntervalMs (e.g. from setInterval in useSoloistActivity).
+     * Push one sample: pitch presence and onset (attack). Call at sampleIntervalMs.
      */
     function push(reading: PitchSample | null): void {
         const hasPitch =
             reading != null &&
             reading.frequency > 0 &&
             reading.clarity >= confidenceThreshold;
-        if (buffer.length < maxSamples) {
-            buffer.push(hasPitch);
+        const hadOnset = reading != null && reading.onset > 0;
+        if (pitchBuffer.length < maxSamples) {
+            pitchBuffer.push(hasPitch);
+            onsetBuffer.push(hadOnset);
         } else {
-            buffer[ptr] = hasPitch;
+            pitchBuffer[ptr] = hasPitch;
+            onsetBuffer[ptr] = hadOnset;
             ptr = (ptr + 1) % maxSamples;
         }
     }
 
     /**
-     * Get current soloist activity 0–1 (duty cycle of "has pitch" over the window).
+     * Get current soloist activity 0–1: max(pitch duty cycle, rhythm from onset count).
      */
     function get(): number {
-        if (buffer.length === 0) return 0;
-        const count = buffer.filter(Boolean).length;
-        return count / buffer.length;
+        if (pitchBuffer.length === 0) return 0;
+        const pitchCount = pitchBuffer.filter(Boolean).length;
+        const pitchDuty = pitchCount / pitchBuffer.length;
+        const onsetCount = onsetBuffer.filter(Boolean).length;
+        const rhythmComponent = Math.min(1, onsetCount / onsetCap);
+        return Math.max(pitchDuty, rhythmComponent);
     }
 
     return { push, get };

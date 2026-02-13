@@ -2,7 +2,6 @@ import * as Tone from 'tone';
 
 export type InstrumentName =
     | 'piano-salamander'
-    | 'epiano-casio'
     | 'synth-plumber'
     | 'synth-wave'
     | 'synth-organ'
@@ -62,20 +61,6 @@ export class InstrumentService {
                             A4: 'A4.mp3',
                         },
                         baseUrl: 'https://tonejs.github.io/audio/salamander/',
-                        onload: () => resolve(sampler.toDestination())
-                    });
-                });
-
-            case 'epiano-casio':
-                return new Promise((resolve) => {
-                    const sampler = new Tone.Sampler({
-                        urls: {
-                            C3: 'C3.mp3',
-                            'D#3': 'Ds3.mp3',
-                            'F#3': 'Fs3.mp3',
-                            A3: 'A3.mp3',
-                        },
-                        baseUrl: 'https://tonejs.github.io/audio/casio/',
                         onload: () => resolve(sampler.toDestination())
                     });
                 });

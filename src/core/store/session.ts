@@ -16,7 +16,7 @@ export interface LessonStep {
     targetAnswer?: string;
 }
 
-const STORAGE_KEY = 'chord-lab-education-progress';
+const STORAGE_KEY = 'pawelsonik-education-progress';
 
 export function saveProgress(lessonId: string) {
     const saved = getProgress();

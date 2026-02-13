@@ -65,13 +65,13 @@ export class PolyrhythmEngine {
         Tone.Transport.bpm.value = bpm;
     }
 
-    start() {
+    async start() {
         if (this.isPlaying) return;
 
         // Clean up any existing loops first
         this.stop();
 
-        Tone.start();
+        await Tone.start();
         Tone.Transport.bpm.value = this.bpm;
         Tone.Transport.position = 0; // Reset position
 

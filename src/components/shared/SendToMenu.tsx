@@ -109,7 +109,7 @@ export function SendToMenu({ progression, chord, sourceModule, className = '' }:
                                 }}
                             >
                                 <Music size={16} />
-                                Build in ChordLab
+                                Build in PawelSonik
                             </button>
                         )}
 

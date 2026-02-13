@@ -11,13 +11,13 @@ export interface NoteInfo {
 
 /**
  * Converts a frequency (Hz) to note information using Tonal.js.
+ * Chromatic note conversion: n = 12*log2(f/440)+69 (MIDI note); cents offset = (n - round(n))*100.
  * Perfect intonation is defined as being within ±10 cents.
  */
 export function frequencyToNote(frequency: number): NoteInfo | null {
     if (frequency <= 0) return null;
 
-    // Formula: cents = 1200 * log2(f / referenceF)
-    // A4 = 440Hz is the standard reference.
+    // Chromatic: n (continuous semitones from A4); MIDI = round(n)+69; cents = (n - round(n))*100
     const n = 12 * Math.log2(frequency / 440);
     const midi = Math.round(n) + 69;
     const centsDeviation = Math.round((n - Math.round(n)) * 100);

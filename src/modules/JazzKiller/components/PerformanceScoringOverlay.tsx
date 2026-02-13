@@ -3,11 +3,14 @@ import { HighPerformanceScoringBridge } from '../../ITM/components/HighPerforman
 import { useMicrophone } from '../../../hooks/useMicrophone';
 import { Award, Target, TrendingUp, X, Sparkles } from 'lucide-react';
 
+export type PerformanceScoringVariant = 'overlay' | 'sidebar';
+
 /**
  * Real-time performance scoring UI (REQ-FB-02).
  * Shows Accuracy percentage, Grade, and matching note counts.
+ * Use variant="sidebar" to render inline in the menu sidebar (no fixed positioning).
  */
-export function PerformanceScoringOverlay() {
+export function PerformanceScoringOverlay({ variant = 'overlay' }: { variant?: PerformanceScoringVariant }) {
     const {
         score,
         grade,
@@ -20,6 +23,7 @@ export function PerformanceScoringOverlay() {
     } = useScoringStore();
 
     const { start: startMic, isActive: micActive } = useMicrophone();
+    const isSidebar = variant === 'sidebar';
 
     const handleStart = async () => {
         if (!micActive) await startMic();
@@ -32,19 +36,60 @@ export function PerformanceScoringOverlay() {
                 <HighPerformanceScoringBridge />
                 <button
                     onClick={handleStart}
-                    className="flex items-center gap-3 px-5 py-2.5 bg-indigo-600/10 hover:bg-indigo-600/20 border border-indigo-500/20 hover:border-indigo-500/40 rounded-2xl transition-all group relative overflow-hidden"
+                    className={`flex items-center gap-2 bg-indigo-600/10 hover:bg-indigo-600/20 border border-indigo-500/20 hover:border-indigo-500/40 rounded-xl transition-all group relative overflow-hidden ${isSidebar ? 'w-full px-3 py-2' : 'px-5 py-2.5'}`}
                 >
                     <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/0 via-white/5 to-indigo-500/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                    <TrendingUp size={18} className="text-indigo-400 group-hover:scale-110 transition-transform" />
-                    <div className="flex flex-col items-start">
+                    <TrendingUp size={isSidebar ? 14 : 18} className="text-indigo-400 group-hover:scale-110 transition-transform shrink-0" />
+                    <div className="flex flex-col items-start min-w-0">
                         <span className="text-[10px] font-black uppercase tracking-widest text-indigo-100 leading-none">Training Machine</span>
                         <span className="text-[9px] font-bold text-indigo-400/80 uppercase tracking-tighter">Enable Scoring</span>
                     </div>
-                    <div className="ml-2 bg-indigo-500/20 p-1 rounded-lg">
-                        <Sparkles size={12} className="text-indigo-300" />
-                    </div>
+                    {!isSidebar && (
+                        <div className="ml-2 bg-indigo-500/20 p-1 rounded-lg">
+                            <Sparkles size={12} className="text-indigo-300" />
+                        </div>
+                    )}
                 </button>
             </>
+        );
+    }
+
+    if (isSidebar) {
+        return (
+            <div className="mb-4 rounded-xl border border-white/10 bg-neutral-900/80 p-3 flex flex-col gap-3">
+                <HighPerformanceScoringBridge />
+                <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                        <div className="bg-amber-500/10 p-1 rounded-lg border border-amber-500/20 shrink-0">
+                            <Award size={12} className="text-amber-400" />
+                        </div>
+                        <div className="min-w-0">
+                            <span className="text-[9px] font-black uppercase tracking-wider text-neutral-300 block">Training Machine</span>
+                            <span className="text-[8px] font-black text-amber-500/80 uppercase">Active</span>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-0.5 shrink-0">
+                        <button onClick={resetScore} className="text-[8px] text-neutral-500 hover:text-white uppercase font-black px-1.5 py-0.5 hover:bg-white/5 rounded" title="Reset">Reset</button>
+                        <button onClick={stopScoring} className="p-1 hover:bg-white/10 rounded text-neutral-500 hover:text-white" title="Stop"><X size={12} /></button>
+                    </div>
+                </div>
+                <div className="flex items-baseline justify-between gap-2">
+                    <div className="flex items-baseline gap-0.5">
+                        <span className="text-2xl font-black tabular-nums text-white">{score}</span>
+                        <span className="text-sm font-black text-white/40">%</span>
+                    </div>
+                    <span className={`text-lg font-black ${grade.startsWith('S') ? 'text-amber-400' : grade === 'A' ? 'text-emerald-400' : grade === 'B' ? 'text-blue-400' : 'text-neutral-500'}`}>{grade}</span>
+                </div>
+                <div className="flex justify-between text-[9px] font-black text-neutral-400">
+                    <span>{matchingNotesCount} / {totalNotesProcessed}</span>
+                </div>
+                <div className="h-1.5 w-full bg-black/60 rounded-full overflow-hidden border border-white/5 p-0.5">
+                    <div
+                        className={`h-full transition-all duration-1000 ease-out rounded-full ${score >= 90 ? 'bg-amber-500' : score >= 70 ? 'bg-emerald-500' : 'bg-orange-500'}`}
+                        style={{ width: `${score}%` }}
+                    />
+                </div>
+            </div>
         );
     }
 

@@ -40,6 +40,24 @@ const GROOVE_OFFSETS = {
 
 export class ReactiveCompingEngine {
     private lastBarDensity: number = 0;
+    private soloistActivityWindow: number[] = [];
+    private readonly WINDOW_SIZE = 8; // 8 bars / samples for smooth responsiveness
+
+    /**
+     * Update soloist activity (0.0 to 1.0) for the rolling window.
+     * Higher activity (user playing more/faster) reduces comping density.
+     */
+    updateSoloistActivity(activity: number) {
+        this.soloistActivityWindow.push(activity);
+        if (this.soloistActivityWindow.length > this.WINDOW_SIZE) {
+            this.soloistActivityWindow.shift();
+        }
+    }
+
+    private getAverageSoloistActivity(): number {
+        if (this.soloistActivityWindow.length === 0) return 0;
+        return this.soloistActivityWindow.reduce((a, b) => a + b, 0) / this.soloistActivityWindow.length;
+    }
 
     /**
      * Target density (0.0–1.0) from the "Virtual Room": bass mode + whole-tune intensity.
@@ -54,7 +72,14 @@ export class ReactiveCompingEngine {
         const target = base * (0.35 + 0.65 * tuneIntensity);
         this.lastBarDensity = Math.max(0.1, Math.min(1, target));
         const soloistSpace = trioContext && (trioContext.placeInCycle === 'solo' || trioContext.songStyle === 'Ballad');
-        return soloistSpace ? Math.min(this.lastBarDensity, 0.5) : this.lastBarDensity;
+
+        let density = soloistSpace ? Math.min(this.lastBarDensity, 0.5) : this.lastBarDensity;
+
+        // REQ-AG-02: Reactive soloist space (Call-and-Response)
+        const activity = this.getAverageSoloistActivity();
+        density *= (1 - 0.55 * activity); // Up to 55% reduction when user is blazing
+
+        return Math.max(0.05, density);
     }
 
     /**
@@ -67,6 +92,7 @@ export class ReactiveCompingEngine {
         if (isAnticipation) return beatSeconds * GROOVE_OFFSETS.Push;
         const isStab = step.duration === '8n' || step.duration === '16n';
         if (isStab) return beatSeconds * GROOVE_OFFSETS.Tight;
+        // Long durations (4n, 2n, 4n., 2t, 4t, 8n.) get LayBack
         return beatSeconds * GROOVE_OFFSETS.LayBack;
     }
 
@@ -82,7 +108,7 @@ export class ReactiveCompingEngine {
         drumIntensity: number,
         bassMode: BassMode,
         chordSymbol: string,
-        nextChordSymbol: string,
+        _nextChordSymbol: string,
         bpm: number
     ): (CompingHit & { humanOffsetSeconds: number })[] {
         // 1. CONVERSATION: whole-tune intensity arc (calm start → middle peak) + bass mode
@@ -109,26 +135,41 @@ export class ReactiveCompingEngine {
         return beatSeconds * GROOVE_OFFSETS.LayBack;
     }
 
+    /** Long-duration templates (quarters, halves, dotted, triplets) — used when intensity is low. */
+    private static readonly LONG_TEMPLATES: CompingHit[][] = [
+        [{ time: '0:0:0', duration: '2n', velocity: 0.5, type: 'Pad', isStab: false }],
+        [{ time: '0:0:0', duration: '2n', velocity: 0.52, type: 'Pad', isStab: false }, { time: '0:2:0', duration: '2n', velocity: 0.48, type: 'Pad', isStab: false }],
+        [{ time: '0:0:0', duration: '4n', velocity: 0.55, type: 'Pad', isStab: false }, { time: '0:1:0', duration: '4n', velocity: 0.5, type: 'Pad', isStab: false }, { time: '0:2:0', duration: '4n', velocity: 0.5, type: 'Pad', isStab: false }, { time: '0:3:0', duration: '4n', velocity: 0.48, type: 'Pad', isStab: false }],
+        [{ time: '0:0:0', duration: '4n', velocity: 0.54, type: 'Pad', isStab: false }, { time: '0:1:0', duration: '4n', velocity: 0.5, type: 'Pad', isStab: false }, { time: '0:2:0', duration: '4n', velocity: 0.5, type: 'Pad', isStab: false }],
+        [{ time: '0:0:0', duration: '4n', velocity: 0.55, type: 'Pad', isStab: false }, { time: '0:2:0', duration: '4n', velocity: 0.5, type: 'Pad', isStab: false }],
+        [{ time: '0:0:0', duration: '4n', velocity: 0.54, type: 'Pad', isStab: false }, { time: '0:1:0', duration: '2n', velocity: 0.5, type: 'Pad', isStab: false }],
+        [{ time: '0:0:0', duration: '4n.', velocity: 0.54, type: 'Pad', isStab: false }, { time: '0:1:2', duration: '4n', velocity: 0.5, type: 'Pad', isStab: false }],
+        [{ time: '0:0:0', duration: '4n', velocity: 0.54, type: 'Pad', isStab: false }, { time: '0:1:2', duration: '4n.', velocity: 0.5, type: 'Pad', isStab: false }],
+        [{ time: '0:0:0', duration: '2n', velocity: 0.52, type: 'Pad', isStab: false }, { time: '0:2:0', duration: '4n', velocity: 0.48, type: 'Pad', isStab: false }],
+        [{ time: '0:0:0', duration: '2t', velocity: 0.5, type: 'Pad', isStab: false }],
+        [{ time: '0:0:0', duration: '4t', velocity: 0.52, type: 'Pad', isStab: false }, { time: '0:1:0', duration: '4t', velocity: 0.5, type: 'Pad', isStab: false }],
+        [{ time: '0:0:0', duration: '4t', velocity: 0.52, type: 'Pad', isStab: false }, { time: '0:1:0', duration: '4t', velocity: 0.5, type: 'Pad', isStab: false }, { time: '0:2:0', duration: '4t', velocity: 0.48, type: 'Pad', isStab: false }],
+        [{ time: '0:0:0', duration: '2n', velocity: 0.52, type: 'Pad', isStab: false }, { time: '0:2:0', duration: '2t', velocity: 0.48, type: 'Pad', isStab: false }],
+    ];
+
     private selectTemplate(density: number, _chord: string): CompingHit[] {
         this.lastBarDensity = density;
 
-        // A. Red Garland – syncopated off-beats (good for walking bass)
+        // A. Low intensity: prioritize long durations — quarters, halves, dotted, triplets
         if (density < 0.4) {
-            return [
-                { time: '0:1:2', duration: '16n', velocity: 0.7, type: 'Comp', isStab: true },
-                { time: '0:3:2', duration: '8n', velocity: 0.6, type: 'Comp', isStab: true },
-            ];
+            const idx = Math.floor(Math.random() * ReactiveCompingEngine.LONG_TEMPLATES.length);
+            return ReactiveCompingEngine.LONG_TEMPLATES[idx]!;
         }
 
-        // B. Bill Evans – sustained color (two-feel / ballads)
+        // B. Medium intensity: sustained color with some movement (Bill Evans style)
         if (density < 0.7) {
             return [
                 { time: '0:0:0', duration: '2n', velocity: 0.5, type: 'Pad', isStab: false },
-                { time: '0:2:2', duration: '8n', velocity: 0.4, type: 'Ghost', isStab: true },
+                { time: '0:2:2', duration: '4n', velocity: 0.45, type: 'Comp', isStab: false },
             ];
         }
 
-        // C. Herbie – aggressive rhythm, anticipations
+        // C. High intensity: Herbie – aggressive rhythm, anticipations
         return [
             { time: '0:1:1', duration: '16n', velocity: 0.8, type: 'Comp', isStab: true },
             { time: '0:2:0', duration: '16n', velocity: 0.4, type: 'Ghost', isStab: true },

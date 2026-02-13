@@ -1,5 +1,6 @@
 import type { Concept } from './AnalysisTypes';
 import type { CurriculumNodeId } from '../store/useMasteryTreeStore';
+import { PerformanceSegment } from '../../modules/ITM/types/PerformanceSegment';
 
 export interface XPContribution {
     nodeId: CurriculumNodeId;
@@ -16,15 +17,74 @@ export class CurriculumAnalysisService {
         'MinorII-V-i': 'minor-tonality',
         'SecondaryDominant': 'secondary-dominants',
         'TritoneSubstitution': 'tritone-sub',
-        'ColtraneChanges': 'upper-structures' // Coltrane changes are advanced
+        'ColtraneChanges': 'upper-structures'
     };
 
     /**
-     * Calculates XP rewards based on the patterns detected in a song and the user's performance.
-     * 
-     * @param detectedPatterns Patterns found in the song
-     * @param heatmap Performance data (measure index -> success score)
-     * @param songTitle Title of the song for specific node matching
+     * Modern entry point for XP calculation using the full PerformanceSegment.
+     */
+    static calculateRewardsFromSegment(
+        segment: PerformanceSegment,
+        detectedPatterns: Concept[]
+    ): XPContribution[] {
+        const contributions: XPContribution[] = [];
+        const nodePoints: Record<CurriculumNodeId, number> = {};
+
+        // 1. Reward Patterns with granular accuracy
+        detectedPatterns.forEach(pattern => {
+            const nodeId = this.CONCEPT_MAP[pattern.type];
+            if (nodeId) {
+                let totalAccuracy = 0;
+                let measureCount = 0;
+
+                for (let i = pattern.startIndex; i <= pattern.endIndex; i++) {
+                    const measure = segment.measures[i];
+                    if (measure) {
+                        totalAccuracy += measure.accuracyScore;
+                        measureCount++;
+                    }
+                }
+
+                if (measureCount > 0) {
+                    const avgAccuracy = totalAccuracy / measureCount;
+                    if (avgAccuracy > 20) {
+                        const baseXP = 60;
+                        const accuracyMultiplier = avgAccuracy / 80; // Reward higher accuracy
+                        const finalXP = Math.round(baseXP * accuracyMultiplier);
+                        nodePoints[nodeId] = (nodePoints[nodeId] || 0) + finalXP;
+                    }
+                }
+            }
+        });
+
+        // 2. Foundation XP
+        const totalAccuracy = segment.measures.reduce((acc: number, m) => acc + m.accuracyScore, 0);
+        const avgTotalAccuracy = totalAccuracy / segment.measures.length;
+        if (avgTotalAccuracy > 30) {
+            nodePoints['foundations'] = (nodePoints['foundations'] || 0) + Math.round(avgTotalAccuracy);
+        }
+
+        // 3. Rhythm/Swing XP (based on note density and accuracy)
+        const totalNotes = segment.measures.reduce((acc: number, m) => acc + m.notes.length, 0);
+        if (totalNotes > 20 && avgTotalAccuracy > 70) {
+            nodePoints['swing-feel'] = (nodePoints['swing-feel'] || 0) + 40;
+        }
+
+        Object.entries(nodePoints).forEach(([nodeId, points]) => {
+            if (points > 0) {
+                contributions.push({
+                    nodeId: nodeId as CurriculumNodeId,
+                    points,
+                    reason: this.getReasonForNode(nodeId, segment.standardId)
+                });
+            }
+        });
+
+        return contributions;
+    }
+
+    /**
+     * Legacy entry point (kept for compatibility or simple heatmap flows)
      */
     static calculateXPRewards(
         detectedPatterns: Concept[],
@@ -34,11 +94,9 @@ export class CurriculumAnalysisService {
         const contributions: XPContribution[] = [];
         const nodePoints: Record<CurriculumNodeId, number> = {};
 
-        // 1. Reward based on detected patterns
         detectedPatterns.forEach(pattern => {
             const nodeId = this.CONCEPT_MAP[pattern.type];
             if (nodeId) {
-                // Calculate average success score for the measures this pattern covers
                 let patternScore = 0;
                 let measureCount = 0;
 
@@ -47,10 +105,9 @@ export class CurriculumAnalysisService {
                     measureCount++;
                 }
 
-                // If they played it well (at least some points), give XP
                 if (patternScore > 0) {
-                    const baseXP = 50; // XP per pattern instance
-                    const performanceMultiplier = Math.min(2, patternScore / (measureCount * 10)); // Cap multiplier
+                    const baseXP = 50;
+                    const performanceMultiplier = Math.min(2, patternScore / (measureCount * 10));
                     const finalXP = Math.round(baseXP * performanceMultiplier);
 
                     nodePoints[nodeId] = (nodePoints[nodeId] || 0) + finalXP;
@@ -58,19 +115,15 @@ export class CurriculumAnalysisService {
             }
         });
 
-        // 2. Generic Repertoire/Foundations XP
-        // Always give some foundation XP if they played at all
         const totalScore = Object.values(heatmap).reduce((a, b) => a + b, 0);
         if (totalScore > 0) {
             nodePoints['foundations'] = (nodePoints['foundations'] || 0) + Math.min(100, Math.round(totalScore / 5));
         }
 
-        // 3. Rhythm/Swing XP (Placeholder: if they played with a certain density/accuracy)
         if (totalScore > 500) {
             nodePoints['swing-feel'] = (nodePoints['swing-feel'] || 0) + 25;
         }
 
-        // Convert grouped points to contributions
         Object.entries(nodePoints).forEach(([nodeId, points]) => {
             if (points > 0) {
                 contributions.push({

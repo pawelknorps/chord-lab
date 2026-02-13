@@ -44,15 +44,18 @@ import { NoteWaterfall } from './components/NoteWaterfall';
 import { DEFAULT_WATERFALL_OCTAVE_RANGE } from './utils/pianoKeyLayout';
 import { formatSongItemId, parseItemId } from '../../core/director/directorTypes';
 import { useDirector } from '../../hooks/useDirector';
+import { useAudio } from '../../context/AudioContext';
 import * as Tone from 'tone';
 import { HighPerformanceScoringBridge } from '../ITM/components/HighPerformanceScoringBridge';
 import { useSoloistActivity } from './hooks/useSoloistActivity';
+import { useLiveHarmonicOverrides } from './hooks/useLiveHarmonicOverrides';
 
 /** Set to true to show the falling-notes piano strip (currently not usable). */
 const SHOW_FALLING_NOTES = false;
 
 export default function JazzKillerModule() {
     useAudioCleanup('jazz-killer');
+    const { startAudio } = useAudio();
     useSignals();
     // Phase 19: Soloist-Responsive Playback — poll pitch store and update soloistActivitySignal when user turns toggle on
     useSoloistActivity();
@@ -116,7 +119,8 @@ export default function JazzKillerModule() {
     };
 
     // Practice Store integration
-    const { loadSong, detectedPatterns, showGuideTones, toggleGuideTones, showAnalysis, toggleAnalysis, guideToneSpotlightMode, setGuideToneSpotlightMode } = usePracticeStore();
+    const { loadSong, detectedPatterns, showGuideTones, toggleGuideTones, showAnalysis, toggleAnalysis, showLiveAnalysis, toggleLiveAnalysis, showLiveChordTone, toggleLiveChordTone, guideToneSpotlightMode, setGuideToneSpotlightMode } = usePracticeStore();
+    const liveOverrides = useLiveHarmonicOverrides(showLiveAnalysis && showAnalysis);
     const { isFinished: isRoutineFinished, resetRoutine } = useGuidedPracticeStore();
     const { nodes } = useMasteryTreeStore();
     const [showMasteryTree, setShowMasteryTree] = useState(false);
@@ -241,6 +245,8 @@ export default function JazzKillerModule() {
     };
 
     const handleSelectSong = (song: JazzStandard) => {
+        // Pre-warm audio context on song selection (user gesture) so START works on first click
+        Tone.start().catch(() => {});
         setSearchQuery('');
         setSelectedStandard(song);
         localStorage.setItem('jazz-killer-last-song', song.Title);
@@ -478,9 +484,12 @@ export default function JazzKillerModule() {
                             </div>
                         </div>
 
-                        {/* Main Play Action */}
+                        {/* Main Play Action — start global audio (same as workbench) when starting playback so standards have sound */}
                         <button
-                            onClick={() => togglePlayback()}
+                            onClick={async () => {
+                                if (!isPlayingSignal.value) await startAudio();
+                                togglePlayback();
+                            }}
                             disabled={!isLoadedSignal.value}
                             className={`flex items-center gap-2 md:gap-3 px-3 md:px-6 py-1.5 md:py-3 rounded-xl md:rounded-2xl font-black tracking-widest transition-all active:scale-95 text-[10px] md:text-sm ${!isLoadedSignal.value
                                 ? 'bg-neutral-800 text-neutral-600 cursor-not-allowed'
@@ -513,6 +522,26 @@ export default function JazzKillerModule() {
                             >
                                 <Layers size={18} />
                             </button>
+                            {showAnalysis && (
+                                <>
+                                    <button
+                                        onClick={toggleLiveAnalysis}
+                                        className={`p-1.5 md:p-2.5 rounded-lg md:rounded-xl transition-all ${showLiveAnalysis ? 'bg-amber-500 text-black' : 'text-neutral-500 hover:text-white'}`}
+                                        title="Live harmonic grounding (mic): subV7, pedal on current bracket"
+                                    >
+                                        <Activity size={18} />
+                                    </button>
+                                    {showLiveAnalysis && (
+                                        <button
+                                            onClick={toggleLiveChordTone}
+                                            className={`p-1.5 md:p-2.5 rounded-lg md:rounded-xl transition-all ${showLiveChordTone ? 'bg-teal-500 text-black' : 'text-neutral-500 hover:text-white'}`}
+                                            title="Show chord tone/extension from mic (e.g. R, 3rd, #11)"
+                                        >
+                                            <Music size={18} />
+                                        </button>
+                                    )}
+                                </>
+                            )}
                             <button
                                 onClick={toggleGuideTones}
                                 className={`p-1.5 md:p-2.5 rounded-lg md:rounded-xl transition-all ${showGuideTones ? 'bg-emerald-500 text-black' : 'text-neutral-500 hover:text-white'} ${showToolHints ? 'animate-hint-pulse text-emerald-400' : ''}`}
@@ -943,6 +972,8 @@ export default function JazzKillerModule() {
                                 filteredPatterns={filteredPatterns}
                                 onChordClick={handleChordClick}
                                 showExerciseHeatmap={showStandardsExercises}
+                                liveOverrides={liveOverrides}
+                                showLiveChordTone={showLiveChordTone}
                             />
                             {guideToneSpotlightMode && <MicPianoVisualizer />}
                             <div className="h-32 xl:hidden" />

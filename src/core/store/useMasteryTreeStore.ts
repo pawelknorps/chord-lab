@@ -55,7 +55,7 @@ const INITIAL_NODES: Record<CurriculumNodeId, CurriculumNode> = {
         description: 'The most important motor in jazz harmony.',
         parentIds: ['foundations'],
         requiredPoints: 600,
-        unlockStatus: 'locked',
+        unlockStatus: 'unlocked',
         category: 'harmonic',
         standards: ['Autumn Leaves', 'Tune Up']
     },

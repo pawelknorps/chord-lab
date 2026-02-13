@@ -38,7 +38,7 @@ function ChordLab() {
   const [searchParams] = useSearchParams();
 
   // Lab State
-  useAudioCleanup('chord-lab');
+  useAudioCleanup('pawelsonik');
   const [selectedKey, setSelectedKey] = useState('C');
   const [selectedScale, setSelectedScale] = useState('Major');
   const [selectedVoicing, setSelectedVoicing] = useState('Root Position');
@@ -712,7 +712,7 @@ function ChordLab() {
           open={showWorkbenchAi}
           onClose={() => setShowWorkbenchAi(false)}
           progressionChords={progression.filter((c): c is ChordInfo => c !== null).map(c => `${c.root}${c.quality === 'maj' ? '' : c.quality === 'min' ? 'm' : c.quality}${c.bass ? '/' + c.bass : ''}`)}
-          key={selectedKey}
+          keySignature={selectedKey}
           scale={selectedScale}
         />
         {selectedLessonTitle && (

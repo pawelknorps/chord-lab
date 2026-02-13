@@ -7,7 +7,7 @@
  */
 
 import * as Note from '@tonaljs/note';
-import { getChordDna } from './ChordDna';
+import { getChordDna, getChordToneLabelMap } from './ChordDna';
 
 /** Single sample from SwiftF0 or pitch pipeline (frequency in Hz; optional timestamp). */
 export interface PitchBufferEntry {
@@ -19,6 +19,8 @@ export interface PitchBufferEntry {
 export interface LiveOverrides {
   romanNumeral?: string;
   pedal?: string;
+  /** Chord tone/extension of the latest mic pitch (e.g. "R", "M3", "b7", "9", "#11"). Only set when showLiveChordTone is on. */
+  chordTone?: string;
 }
 
 /** Default bass cutoff (Hz): pitches below are considered "bass" for pedal detection. */
@@ -117,6 +119,36 @@ function detectPedal(entries: PitchBufferEntry[]): string | undefined {
 }
 
 /**
+ * Tritone sub chord symbol from chart dominant (e.g. C7 → Gb7).
+ */
+function getTritoneSubChordSymbol(chartChord: string): string {
+  const dna = getChordDna(chartChord);
+  if (!dna) return chartChord;
+  const rootPc = Note.chroma(dna.root) ?? 0;
+  const subPc = (rootPc + 6) % 12;
+  const subRootName = Note.pitchClass(Note.fromMidi(60 + subPc)) ?? 'C';
+  const match = chartChord.trim().match(/^([A-Ga-g][b#]?)(.*)$/);
+  const rest = match ? match[2] ?? '' : chartChord.slice(1);
+  return subRootName + rest;
+}
+
+/**
+ * Classify a single pitch as a chord tone/extension of the given chord.
+ * Returns label from ChordDna (e.g. "R", "M3", "5", "b7", "9", "#11") or undefined if not in chord.
+ */
+export function classifyChordTone(chordSymbol: string, frequency: number): string | undefined {
+  if (!chordSymbol || frequency <= 0) return undefined;
+  const map = getChordToneLabelMap(chordSymbol);
+  const dna = getChordDna(chordSymbol);
+  if (!map || !dna) return undefined;
+  const rootPc = Note.chroma(dna.root) ?? 0;
+  const notePc = frequencyToPitchClass(frequency);
+  if (notePc < 0) return undefined;
+  const interval = (notePc - rootPc + 12) % 12;
+  return map[interval];
+}
+
+/**
  * REQ-HAT-14: Live Grounding API.
  * Consumes chart chord at time t and pitch buffer (SwiftF0 stream); returns overrides
  * for the current segment. Lightweight; no full re-segmentation.
@@ -138,6 +170,14 @@ export function getLiveOverrides(
 
   const pedal = detectPedal(pitchBuffer);
   if (pedal) result.pedal = pedal;
+
+  const effectiveChord =
+    result.romanNumeral === 'subV7' ? getTritoneSubChordSymbol(chartChord) : chartChord;
+  const lastEntry = pitchBuffer[pitchBuffer.length - 1];
+  if (lastEntry?.frequency) {
+    const label = classifyChordTone(effectiveChord, lastEntry.frequency);
+    if (label) result.chordTone = label;
+  }
 
   return result;
 }

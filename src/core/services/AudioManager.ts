@@ -1,6 +1,7 @@
 import * as Tone from 'tone';
 import { useSettingsStore } from '../store/useSettingsStore';
 import { instrumentService, InstrumentName } from './InstrumentService';
+import { initAudio as initGlobalAudio } from '../audio/globalAudio';
 
 type ModuleAudioState = {
     activeNotes: Set<string>;
@@ -53,20 +54,21 @@ export class AudioManager {
 
         this.initPromise = (async () => {
             try {
+                // Use same engine as rest of app: init globalAudio first so one Tone context for all sections
+                await initGlobalAudio();
                 if (Tone.context.state !== 'running') {
                     await Tone.start();
                 }
                 Tone.Transport.bpm.value = 120;
 
-                // Load default instruments via InstrumentService
-                const [piano, epiano, synth] = await Promise.all([
+                // Load default instruments via InstrumentService (epiano uses piano)
+                const [piano, synth] = await Promise.all([
                     instrumentService.getInstrument('piano-salamander'),
-                    instrumentService.getInstrument('epiano-casio'),
                     instrumentService.getInstrument('synth-plumber')
                 ]);
 
                 this.instruments.set('piano', piano);
-                this.instruments.set('epiano', epiano);
+                this.instruments.set('epiano', piano);
                 this.instruments.set('synth', synth);
 
                 this.initialized = true;
@@ -103,7 +105,7 @@ export class AudioManager {
     private mapInstrumentName(name: string): InstrumentName | string {
         const mapping: Record<string, string> = {
             'piano': 'piano-salamander',
-            'epiano': 'epiano-casio',
+            'epiano': 'piano-salamander',
             'synth': 'synth-plumber',
             'guitar-nylon': 'guitar-nylon'
         };

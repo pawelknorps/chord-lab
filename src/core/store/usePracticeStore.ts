@@ -42,6 +42,10 @@ interface PracticeState {
     /** Measure indices where student hit the 3rd (for green bar) */
     guideToneBarsHit: Record<number, boolean>;
     showAnalysis: boolean;
+    /** Phase 21: when true, overlay shows live overrides (subV7, pedal) from mic pitch. Only relevant when showAnalysis is on. */
+    showLiveAnalysis: boolean;
+    /** Phase 21: when true (and Live on), overlay shows chord tone/extension of mic pitch (e.g. 3rd, #11). */
+    showLiveChordTone: boolean;
     showRomanNumerals: boolean;
     hotspots: number[];
 
@@ -59,6 +63,8 @@ interface PracticeState {
     addGuideToneBarHit: (measureIndex: number) => void;
     resetGuideToneBarsHit: () => void;
     toggleAnalysis: () => void;
+    toggleLiveAnalysis: () => void;
+    toggleLiveChordTone: () => void;
 }
 
 export const usePracticeStore = create<PracticeState>((set, get) => ({
@@ -78,6 +84,8 @@ export const usePracticeStore = create<PracticeState>((set, get) => ({
     guideToneSpotlightMode: false,
     guideToneBarsHit: {},
     showAnalysis: false,
+    showLiveAnalysis: false,
+    showLiveChordTone: false,
     showRomanNumerals: false,
     hotspots: [],
 
@@ -263,5 +271,11 @@ export const usePracticeStore = create<PracticeState>((set, get) => ({
     toggleAnalysis: () => {
         set((state) => ({ showAnalysis: !state.showAnalysis }));
         console.log(`📊 Analysis ${get().showAnalysis ? 'ON' : 'OFF'}`);
+    },
+    toggleLiveAnalysis: () => {
+        set((state) => ({ showLiveAnalysis: !state.showLiveAnalysis }));
+    },
+    toggleLiveChordTone: () => {
+        set((state) => ({ showLiveChordTone: !state.showLiveChordTone }));
     },
 }));

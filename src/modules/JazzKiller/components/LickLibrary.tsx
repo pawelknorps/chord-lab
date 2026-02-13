@@ -5,7 +5,7 @@ import { applyLickToChords, type LickResult } from '../utils/lickConverter';
 import { useAuth } from '../../../context/AuthContext';
 import { useLickFeed } from '../../../hooks/useLickFeed';
 
-const STORAGE_KEY = 'chord-lab-lick-library';
+const STORAGE_KEY = 'pawelsonik-lick-library';
 
 export interface SavedLick {
   id: string;

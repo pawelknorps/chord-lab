@@ -10,6 +10,7 @@ import * as Tone from 'tone';
 import { diagnoseEarError } from '../../utils/earDiagnosis';
 import { getEarHint } from '../../../../core/services/earHintService';
 import { getNextChallenge } from '../../utils/adaptiveCurriculum';
+import { useMicValidation } from '../../hooks/useMicValidation';
 
 const ALL_INTERVALS = [
     { name: 'm2', semitones: 1, label: 'Minor 2nd' },
@@ -30,7 +31,7 @@ const BASE_INTERVALS = ALL_INTERVALS.filter((i) => !['m2', 'M7', 'P8'].includes(
 const MIDI_DEBOUNCE_MS = 300;
 
 export const IntervalsLevel: React.FC = () => {
-    const { addScore, setPlaying, difficulty, streak, setDifficulty } = useFunctionalEarTrainingStore();
+    const { addScore, setPlaying, difficulty, streak, setDifficulty, setActiveTarget } = useFunctionalEarTrainingStore();
     const { addExperience, updateStreak } = useMasteryStore();
     const { lastNote } = useMidi();
     const recordAttempt = useEarPerformanceStore((s) => s.recordAttempt);
@@ -130,6 +131,25 @@ export const IntervalsLevel: React.FC = () => {
             }
         }
     }, [challenge, result, difficulty, streak, addScore, addExperience, updateStreak, loadNewChallenge, recordAttempt, shouldPromoteDifficulty, setDifficulty]);
+
+    useEffect(() => {
+        if (challenge && challenge.interval) {
+            setActiveTarget({
+                midi: (challenge.rootMidi + challenge.interval.semitones) % 12,
+                label: challenge.interval.name,
+                type: 'pitch'
+            });
+        } else {
+            setActiveTarget(null);
+        }
+        return () => setActiveTarget(null);
+    }, [challenge, setActiveTarget]);
+
+    useMicValidation(() => {
+        if (challenge && challenge.interval) {
+            handleAnswer(challenge.interval.name);
+        }
+    });
 
     useEffect(() => {
         if (!lastNote || lastNote.type !== 'noteon' || !challenge || result === 'correct') return;

@@ -4,12 +4,14 @@ import { Play, Square, Ghost, Zap, Shuffle, Trash2, Activity } from 'lucide-reac
 import * as Tone from 'tone';
 import { motion } from 'framer-motion';
 import { useRhythmStore } from '../state/useRhythmStore';
+import { useAudio } from '../../../context/AudioContext';
 
 const engine = new MetronomeEngine();
 const DEFAULT_PATTERN = [2, 0, 1, 0, 2, 0, 1, 0, 2, 0, 1, 0, 2, 0, 1, 0];
 
 export default function SyncopationLab() {
     const { bpm, setCurrentBpm, metronomeEnabled, setMetronomeEnabled } = useRhythmStore();
+    const { startAudio } = useAudio();
     const [isPlaying, setIsPlaying] = useState(false);
     const [pattern, setPattern] = useState<number[]>(DEFAULT_PATTERN);
     const [swing, setSwing] = useState(0);
@@ -23,17 +25,18 @@ export default function SyncopationLab() {
         if (isPlaying) engine.setPattern(pattern);
     }, [pattern, isPlaying]);
 
-    const togglePlay = () => {
+    const togglePlay = async () => {
         if (isPlaying) {
             engine.stop();
             setIsPlaying(false);
             setActiveStep(-1);
         } else {
+            await startAudio();
             engine.metronomeEnabled = metronomeEnabled;
             engine.setBpm(bpm);
             engine.setSwing(swing);
             engine.setPattern(pattern);
-            engine.start();
+            await engine.start();
             setIsPlaying(true);
             const scheduler = () => {
                 if (Tone.Transport.state !== 'started') return;

@@ -27,7 +27,8 @@ function throwIfOutOfSpace(e: unknown): void {
   }
 }
 
-async function createGeminiSession(systemPrompt: string, opts: { temperature?: number; topK?: number }): Promise<SessionLike | null> {
+/** Exported for use by Innovative Exercises AI (Phase 30). */
+export async function createGeminiSession(systemPrompt: string, opts: { temperature?: number; topK?: number }): Promise<SessionLike | null> {
   const w = window as Window;
   const nav = navigator as Navigator & { languageModel?: { create(opts?: object): Promise<SessionLike> } };
   const LM = nav?.languageModel ?? (w as unknown as { LanguageModel?: { create(opts?: object): Promise<SessionLike> } }).LanguageModel;
@@ -51,11 +52,11 @@ async function createGeminiSession(systemPrompt: string, opts: { temperature?: n
   }
   if (legacy?.create) {
     try {
-      return await legacy.create({
+      return (await legacy.create({
         systemPrompt,
         temperature: opts.temperature ?? 0.6,
         topK: opts.topK ?? 5,
-      });
+      })) as SessionLike;
     } catch (e) {
       throwIfOutOfSpace(e);
       console.warn('ai.languageModel.create failed', e);
@@ -584,5 +585,93 @@ Provide a short pedagogical analysis:
   } catch (err) {
     console.error('Standards Exercise AI analysis failed:', err);
     return 'The sensei is impressed by your dedication. Keep shedding.';
+  }
+}
+
+/**
+ * Turns raw recorded notes into a structured, readable jazz lick (Phase 27).
+ * Quantizes and organizes the output into measures.
+ */
+export async function musicalizeSolo(
+  songTitle: string,
+  key: string,
+  bpm: number,
+  notes: Array<{ frequency: number; timestamp: number; durationMs?: number }>
+): Promise<string> {
+  if (!isGeminiNanoAvailable() || notes.length < 3) return '';
+
+  try {
+    const session = await createGeminiSession(JAZZ_TEACHER_SYSTEM_PROMPT, { temperature: 0.1, topK: 1 });
+    if (!session) return '';
+
+    const noteContext = notes.slice(0, 50).map(n =>
+      `Freq: ${n.frequency}Hz, Start: ${n.timestamp}ms${n.durationMs ? `, Dur: ${n.durationMs}ms` : ''}`
+    ).join('\n');
+
+    const prompt = `
+### RAW PERFORMANCE DATA
+SONG: ${songTitle}
+KEY: ${key}
+BPM: ${bpm}
+RAW NOTES:
+${noteContext}
+
+### TASK
+"Musicalize" these notes into a human-readable jazz lick format.
+1. Quantize the notes to the nearest common jazz subdivisions (8ths, triplets, quarter notes).
+2. Group them into measures.
+3. Use note names (e.g. C, Eb, F#) instead of frequencies.
+4. If you detect a common jazz motif or lick, name it (e.g. "Charlie Parker phrase").
+
+### CONSTRAINTS
+- Return ONLY the notation snippet (e.g. "| C D E G | A Bb G E |").
+- Max 4 measures.
+- Use "|" for bar lines.
+
+### RESPONSE
+`.trim();
+
+    const response = await session.prompt(prompt);
+    session.destroy();
+    return response;
+  } catch (err) {
+    console.error('Musicalization failed:', err);
+    return '';
+  }
+}
+
+/**
+ * Analyzes a community-shared lick to explain its harmonic logic.
+ */
+export async function analyzeCommunityLick(
+  standardId: string,
+  musicalizedText: string,
+  bpm: number
+): Promise<string> {
+  if (!isGeminiNanoAvailable()) return '';
+
+  try {
+    const session = await createGeminiSession(JAZZ_TEACHER_SYSTEM_PROMPT, { temperature: 0.2, topK: 5 });
+    if (!session) return '';
+
+    const prompt = `
+### COMMUNITY LICK ANALYSIS
+STANDARD: ${standardId}
+LICK: ${musicalizedText}
+BPM: ${bpm}
+
+### TASK
+Provide a brief (2-sentence) analysis of why this lick works harmonically or rhythmically. 
+Mention specific chord-scale relationships or jazz vocabulary (e.g., "enclosures", "chromatic passing tones", "ii-V-I resolution").
+
+### RESPONSE
+`.trim();
+
+    const response = await session.prompt(prompt);
+    session.destroy();
+    return response;
+  } catch (err) {
+    console.error('Community lick analysis failed:', err);
+    return '';
   }
 }

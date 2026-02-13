@@ -10,7 +10,7 @@ export function QuickExerciseJump({ currentModule }: QuickExerciseJumpProps) {
         {
             id: 'ChordLab',
             to: '/',
-            label: 'Chord Lab',
+            label: 'PawelSonik',
             icon: Sparkles,
             color: 'text-purple-400',
             bg: 'bg-purple-500/10',

@@ -3,7 +3,9 @@ import { useScoringStore } from '../../../core/store/useScoringStore';
 import { useMasteryTreeStore } from '../../../core/store/useMasteryTreeStore';
 import { usePracticeStore } from '../../../core/store/usePracticeStore';
 import { CurriculumAnalysisService, XPContribution } from '../../../core/theory/CurriculumAnalysisService';
-import { generatePerformanceCritique } from '../ai/jazzTeacherLogic';
+import { localAgent } from '../../../core/services/LocalAgentService';
+import { SegmentBuilder } from '../../ITM/services/SegmentBuilder';
+import { useSessionHistoryStore } from '../../../core/store/useSessionHistoryStore';
 import { X, Sparkles, RefreshCw, ChevronRight, Award, Trophy } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -21,10 +23,7 @@ export function PracticeReportModal({ songTitle, songKey, onClose }: PracticeRep
     const {
         score,
         grade,
-        totalNotesProcessed,
-        perfectNotesCount,
         heatmap,
-        measureTicks,
         resetScore
     } = useScoringStore();
 
@@ -40,27 +39,30 @@ export function PracticeReportModal({ songTitle, songKey, onClose }: PracticeRep
     useEffect(() => {
         async function fetchCritique() {
             setIsLoading(true);
-            const feedback = await generatePerformanceCritique({
-                songTitle,
-                key: songKey,
-                score,
-                grade,
-                perfectNotesCount,
-                totalNotesCount: totalNotesProcessed,
-                heatmap,
-                measureTicks
-            });
-            setCritique(feedback);
+            try {
+                const segment = SegmentBuilder.build();
+                if (segment) {
+                    const feedback = await localAgent.analyzePracticeSession(segment);
+                    setCritique(feedback);
+
+                    // REQ-MT-02: Save persistent session history
+                    useSessionHistoryStore.getState().addSession(segment);
+                } else {
+                    setCritique("Unable to aggregate session data. Keep practicing!");
+                }
+            } catch (err) {
+                console.error('Failed to get async critique:', err);
+                setCritique("Sensei is currently away. Your performance was noted!");
+            }
             setIsLoading(false);
         }
 
         // --- Mastery Tree Sync Engine ---
         if (!hasSyncExecuted.current && score > 0) {
-            const contributions = CurriculumAnalysisService.calculateXPRewards(
-                detectedPatterns,
-                heatmap,
-                songTitle
-            );
+            const segment = SegmentBuilder.build();
+            const contributions = segment
+                ? CurriculumAnalysisService.calculateRewardsFromSegment(segment, detectedPatterns)
+                : CurriculumAnalysisService.calculateXPRewards(detectedPatterns, heatmap, songTitle);
 
             setXpContributions(contributions);
 

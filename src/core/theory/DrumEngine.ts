@@ -1,7 +1,7 @@
 import { GrooveManager, type GrooveInstrument } from './GrooveManager';
 import { getDrumPatternsByStyle } from '../../data/jjazzlab-drum-patterns';
 
-export type DrumInstrument = "Ride" | "Snare" | "Kick" | "HatPedal" | "HatOpen";
+export type DrumInstrument = "Ride" | "RideBell" | "Snare" | "SnareRim" | "Kick" | "HatPedal" | "HatOpen";
 
 export interface DrumHit {
     time: string; // Tone.js time (e.g., "0:1:2")
@@ -42,9 +42,11 @@ export class LinearDrummingEngine {
 
             if (isRideActive) {
                 const vel = isWaltz ? 0.7 + (index === 0 ? 0.1 : 0) : this.getRideVelocity(index);
+                // Trigger RideBell on high intensity accents (e.g. beats 2 and 4)
+                const isBell = !isWaltz && intensity > 0.8 && (index === 1 || index === 4 || Math.random() < 0.2);
                 events.push({
                     time: timeStep,
-                    instrument: "Ride",
+                    instrument: isBell ? "RideBell" : "Ride",
                     velocity: vel,
                     type: "Standard"
                 });
@@ -53,9 +55,10 @@ export class LinearDrummingEngine {
                 }
             } else {
                 if (Math.random() < intensity) {
+                    const isRim = intensity > 0.85 && Math.random() < 0.4;
                     events.push({
                         time: timeStep,
-                        instrument: "Snare",
+                        instrument: isRim ? "SnareRim" : "Snare",
                         velocity: 0.85,
                         type: "Accent"
                     });
@@ -119,9 +122,9 @@ export class LinearDrummingEngine {
                 : variant === 1
                     ? [{ time: "0:1:2", vel: 0.4 }, { time: "0:2:0", vel: 0.5 }, { time: "0:2:2", vel: 0.45 }, { time: "0:3:0", vel: 0.7 }, { time: "0:3:2", vel: 0.55 }]
                     : [
-                            { time: "0:0:0", vel: 0.45 }, { time: "0:0:2", vel: 0.4 }, { time: "0:1:0", vel: 0.5 }, { time: "0:1:2", vel: 0.45 },
-                            { time: "0:2:0", vel: 0.55 }, { time: "0:2:2", vel: 0.5 }, { time: "0:3:0", vel: 0.75 }, { time: "0:3:2", vel: 0.6 }
-                        ];
+                        { time: "0:0:0", vel: 0.45 }, { time: "0:0:2", vel: 0.4 }, { time: "0:1:0", vel: 0.5 }, { time: "0:1:2", vel: 0.45 },
+                        { time: "0:2:0", vel: 0.55 }, { time: "0:2:2", vel: 0.5 }, { time: "0:3:0", vel: 0.75 }, { time: "0:3:2", vel: 0.6 }
+                    ];
         eighthSlots.forEach(({ time, vel }) => {
             events.push({ time, instrument: "Snare", velocity: vel, type: "Accent" });
         });
@@ -194,14 +197,18 @@ export class LinearDrummingEngine {
         return patterns[(idx + motif) % patterns.length];
     }
 
-    /** Velocity map: Beat 1: 1.0, Beat 2: 1.2, Skip: 0.8, Beat 3: 1.0, Beat 4: 1.2, Skip: 0.8. Base 0.65. */
-    private static readonly RIDE_VELOCITY_MAP = [1.0, 1.2, 0.8, 1.0, 1.2, 0.8];
+    /** Elastic Pulse: skip = 0.65 × pulse (rebound). Beat 1: 1.0, Beat 2: 1.2, Skip: 0.78, Beat 3: 1.0, Beat 4: 1.2, Skip: 0.78. Base 0.65. */
+    private static readonly RIDE_VELOCITY_MAP = [1.0, 1.2, 0.78, 1.0, 1.2, 0.78];
     private getRideVelocity(index: number): number {
         const base = 0.65;
         const scale = LinearDrummingEngine.RIDE_VELOCITY_MAP[index] ?? 1;
         return base * scale + Math.random() * 0.06;
     }
 }
+
+// Placeholder types for now, assuming they are defined elsewhere or will be added.
+type PlaceInCycle = string;
+type SongStyleTag = string;
 
 /**
  * DrumEngine (Phase 11: Pro DeJohnette-Style)
@@ -366,7 +373,7 @@ export class DrumEngine {
      * Generates a 1-bar phrase of drum hits based on density.
      * @param density 0.0 to 1.0 (How busy the drummer is)
      * @param pianoDensity 0.0 to 1.0 (Optional: Piano activity to trigger collaborative "listening")
-     * @param barIndex Optional. When provided, uses hybrid linear phrasing: LinearDrummingEngine for Ride/Snare/HiHat,
+     * @param _barIndex Optional. When provided, uses hybrid linear phrasing: LinearDrummingEngine for Ride/Snare/HiHat,
      *                 fill on bar 4, plus Kick and optional comping phrase from the classic engine.
      * @param answerContext Optional. When drums are "answering" another instrument: echo = fill/response, complement = backbeat, space = simple time.
      * @param pianoStepTimes Optional. Piano comping step times (e.g. ["0:0:0", "0:1:2"]) — kick accents a subset of these instead of always 1 and 3.
@@ -376,13 +383,13 @@ export class DrumEngine {
      */
     public generateBar(
         density: number,
-        pianoDensity: number = 0,
-        barIndex?: number,
+        pianoDensity: number,
+        _barIndex: number,
         answerContext?: { questionFrom: string; answerType: 'echo' | 'complement' | 'space' },
         pianoStepTimes?: string[],
-        trioContext?: { placeInCycle?: string; songStyle?: string },
-        divisionsPerBar?: number,
-        preferClassicRide?: boolean
+        trioContext?: { placeInCycle: PlaceInCycle, songStyle: SongStyleTag },
+        divisionsPerBar: number = 8,
+        preferClassicRide: boolean = false
     ): DrumHit[] {
         const listenerAdjustment = pianoDensity > 0.8 ? -0.3 : (pianoDensity < 0.2 ? 0.1 : 0);
         let effectiveDensity = Math.max(0.1, Math.min(1.0, density + listenerAdjustment));
@@ -410,15 +417,15 @@ export class DrumEngine {
         }
 
         // Hybrid: Linear phrasing (Ride/Snare interlock) when barIndex is provided
-        if (barIndex !== undefined) {
+        if (_barIndex !== undefined) {
             const isWaltz = divisionsPerBar === 3;
-            const isPhraseEnd = barIndex % 4 === 3;
+            const isPhraseEnd = _barIndex % 4 === 3;
             const baseFillChance = answerContext ? answerFillChance : 0.15 * (0.2 + 0.8 * effectiveDensity);
             const isFillBar = !isWaltz && isPhraseEnd && Math.random() < baseFillChance;
             if (isFillBar) {
-                hits.push(...this.generateFill(barIndex));
+                hits.push(...this.generateFill(_barIndex));
             } else {
-                hits.push(...this.linearEngine.generatePhrase(barIndex, effectiveDensity, divisionsPerBar, preferClassicRide));
+                hits.push(...this.linearEngine.generatePhrase(_barIndex, effectiveDensity, divisionsPerBar, preferClassicRide));
             }
             // Kick: don't always hit every beat — either accent piano comping rhythms or sparse anchor (1 and sometimes 3)
             this.generateKickFromPianoOrSparse(hits, pianoStepTimes);
@@ -443,18 +450,19 @@ export class DrumEngine {
     }
 
     /**
-     * Bebop ride ostinato: 12-grid Spang-a-lang. Velocity map: Beat 1: 1.0, Beat 2: 1.2, Skip: 0.8, Beat 3: 1.0, Beat 4: 1.2, Skip: 0.8.
+     * Elastic Pulse: Spang-a-lang with rebound rule. Skip-beat velocity = 0.65 × preceding pulse (V_skip ≈ 0.65 × V_down).
+     * Backbeats 2 & 4 accented (1.2×); skip slots 2 & 5 = 0.78 (0.65 × 1.2) so skip is ghosted relative to pulse.
      */
-    private static readonly RIDE_VELOCITY_MAP = [1.0, 1.2, 0.8, 1.0, 1.2, 0.8];
+    private static readonly RIDE_VELOCITY_MAP = [1.0, 1.2, 0.78, 1.0, 1.2, 0.78]; // skip = 0.65 × backbeat
     private static readonly RIDE_BASE_VEL = 0.65;
     private generateRideStream(hits: DrumHit[], _density: number) {
         const RIDE_GRID_12 = [
             { time: "0:0:0", slot: 0 },   // beat 1
             { time: "0:1:0", slot: 1 },   // beat 2
-            { time: "0:1:2", slot: 2 },   // skip (2&)
+            { time: "0:1:2", slot: 2 },   // skip (2&) rebound of 2
             { time: "0:2:0", slot: 3 },   // beat 3
             { time: "0:3:0", slot: 4 },   // beat 4
-            { time: "0:3:2", slot: 5 },   // skip (4&)
+            { time: "0:3:2", slot: 5 },   // skip (4&) rebound of 4
         ];
         RIDE_GRID_12.forEach(({ time, slot }) => {
             const vel = DrumEngine.RIDE_BASE_VEL * DrumEngine.RIDE_VELOCITY_MAP[slot] + (Math.random() * 0.06 - 0.03);
@@ -584,12 +592,13 @@ export class DrumEngine {
 
     /**
      * Tempo-scaled micro-timing: offset as % of beat so feel stays consistent at any BPM.
-     * Ride: tight (-0.4%, -3ms, minimal jitter). Snare: +4.5%, Kick/HatPedal: 0%.
+     * Ride: tight (-3ms, ±3ms jitter). Snare: +4.5%. HatPedal/HatOpen: "lazy" +7ms for pocket. Kick: 0%.
      * @param bpm Current tempo (used to scale offsets and jitter).
      * @returns offset in seconds (positive = late, negative = early).
      */
     public getMicroTiming(bpm: number, inst: DrumInstrument): number {
-        const grooveInst: GrooveInstrument = (inst === "HatPedal" || inst === "HatOpen") ? "Kick" : inst;
+        const grooveInst: GrooveInstrument =
+            inst === "HatPedal" ? "HatPedal" : inst === "HatOpen" ? "HatOpen" : inst;
         return this.groove.getMicroTiming(bpm, grooveInst);
     }
 }

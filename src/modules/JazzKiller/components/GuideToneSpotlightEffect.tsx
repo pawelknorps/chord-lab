@@ -9,7 +9,7 @@ import { useMicrophone } from '../../../hooks/useMicrophone';
 /**
  * When Guide Tone Spotlight is on and mic is active, compares live note to the 3rd
  * of the current chord for the current measure; marks bar as hit when they match (REQ-MIC-12).
- * Uses high-performance WASM pitch detection (2026).
+ * Uses high-performance SwiftF0 pitch detection (2026).
  */
 export function GuideToneSpotlightEffect(): null {
   useSignals();

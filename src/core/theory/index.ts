@@ -16,7 +16,7 @@ import { toTonalChordSymbol } from './chordSymbolForTonal';
 
 export { getChordDna, getChordDnaIntervals, getChordToneLabelMap, type ChordDnaResult, CompingEngine, type Voicing, RhythmEngine, type RhythmPattern, type RhythmPatternOptions, type RhythmTemplateName, type AnswerContext, type TempoSubdivisionLimit, type PatternType, JazzMarkovEngine, DrumEngine, type DrumHit, type DrumInstrument, GrooveManager, type GrooveInstrument, WalkingBassEngine, BassRhythmVariator, type BassEvent, ReactiveCompingEngine, type CompingHit, type BassMode, type StepLike, QuestionAnswerCoordinator, type LastBarSummary, type AnswerDecision };
 export { CHORD_INTERVALS, parseChord, toTonalChordSymbol };
-export { getLiveOverrides, type LiveOverrides, type PitchBufferEntry } from './liveHarmonicGrounding';
+export { getLiveOverrides, classifyChordTone, type LiveOverrides, type PitchBufferEntry } from './liveHarmonicGrounding';
 
 export const NOTE_NAMES = ENHARMONIC_NOTE_NAMES;
 export const NOTE_NAMES_FLAT = ENHARMONIC_NOTE_NAMES_FLAT;

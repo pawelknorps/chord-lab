@@ -14,7 +14,8 @@ import {
     Library,
     Layout,
     Menu,
-    X
+    X,
+    Trophy
 } from 'lucide-react';
 import { useAudio } from '../../context/AudioContext';
 import { MidiSettings } from '../MidiSettings';
@@ -64,6 +65,8 @@ const Dashboard: React.FC = () => {
             items: [
                 { to: "/", icon: Layout, label: "Workbench" },
                 { to: "/jazz-standards", icon: Music, label: "Standards" },
+                { to: "/mastery-tree", icon: Trophy, label: "Mastery Tree" },
+                { to: "/lick-hub", icon: Share2, label: "Lick Hub" },
             ]
         },
         {

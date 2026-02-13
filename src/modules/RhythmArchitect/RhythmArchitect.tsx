@@ -93,8 +93,8 @@ export default function RhythmArchitect() {
                     </div>
                 </header>
 
-                <div className="flex-1 overflow-hidden relative flex flex-col">
-                    <div className="flex-1 overflow-y-auto custom-scrollbar active-area-container">
+                <div className="flex-1 overflow-hidden relative flex flex-col min-h-0">
+                    <div className="flex-1 overflow-y-auto custom-scrollbar active-area-container min-h-0">
                         <AnimatePresence mode="wait">
                             <motion.div
                                 key={level}
@@ -102,9 +102,9 @@ export default function RhythmArchitect() {
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -10 }}
                                 transition={{ duration: 0.2 }}
-                                className="w-full h-full flex items-center justify-center p-8"
+                                className={`w-full min-h-full flex p-4 sm:p-6 lg:p-8 ${level === 'Subdivision' ? 'items-stretch' : 'items-center justify-center'}`}
                             >
-                                <div className="w-full max-w-6xl min-w-0">
+                                <div className={`w-full max-w-6xl min-w-0 ${level === 'Subdivision' ? 'h-full min-h-0 flex flex-col' : ''}`}>
                                     {level === 'Subdivision' && <SubdivisionPyramid />}
                                     {level === 'Syncopation' && <SyncopationBuilder />}
                                     {level === 'Polyrhythm' && <PolyrhythmGenerator />}

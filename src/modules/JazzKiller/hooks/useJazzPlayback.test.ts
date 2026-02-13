@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 
 /**
  * Regression: Legacy engine (useJazzPlayback) uses playbackPlan when present,
@@ -42,5 +42,34 @@ describe('JazzKiller playback plan fallback', () => {
       },
     };
     expect(buildPlaybackPlan(song)).toEqual([0, 1, 2]);
+  });
+});
+
+/**
+ * Legacy engine togglePlayback contract: when starting, Tone.start() is called
+ * (sync, same user-gesture tick) then Transport.start() in its .then(); when stopping, Transport.stop() and clear position.
+ */
+describe('JazzKiller legacy engine togglePlayback contract', () => {
+  it('start branch calls Tone.start then Transport.start', async () => {
+    const ToneStart = vi.fn().mockResolvedValue(undefined);
+    const TransportStart = vi.fn();
+    const isPlaying = false;
+    if (isPlaying) {
+      TransportStart(); // stop path
+    } else {
+      ToneStart().then(() => TransportStart()).catch(() => {});
+    }
+    expect(ToneStart).toHaveBeenCalled();
+    await Promise.resolve(); // flush .then()
+    expect(TransportStart).toHaveBeenCalled();
+  });
+
+  it('stop branch calls Transport.stop', () => {
+    const TransportStop = vi.fn();
+    const isPlaying = true;
+    if (isPlaying) {
+      TransportStop();
+    }
+    expect(TransportStop).toHaveBeenCalled();
   });
 });

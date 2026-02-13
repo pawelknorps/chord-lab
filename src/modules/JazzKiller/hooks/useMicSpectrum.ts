@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { MutableRefObject } from 'react';
 import * as MicrophoneService from '../../../core/audio/MicrophoneService';
+import { getPitchAudioContext } from '../../../core/audio/sharedAudioContext';
 
 const FFT_SIZE = 2048;
 const SMOOTHING = 0.75;
@@ -34,6 +35,8 @@ export interface MicSpectrumState {
 /**
  * FFT analysis of the app-wide microphone stream for spectrum visualization
  * and tone feedback (warmth vs brightness). Only active when mic is started.
+ * Uses the pitch pipeline's AudioContext (getPitchAudioContext) so we don't
+ * create a third context and add more load on the audio thread when playback + pitch run together.
  */
 export function useMicSpectrum(): MicSpectrumState {
   const frequencyDataRef = useRef<Uint8Array | null>(null);
@@ -63,7 +66,8 @@ export function useMicSpectrum(): MicSpectrumState {
       return;
     }
 
-    const ctx = new (window.AudioContext || (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext)();
+    const { context: ctx } = getPitchAudioContext();
+    if (ctx.state === 'suspended') void ctx.resume();
     const source = ctx.createMediaStreamSource(stream);
     const analyser = ctx.createAnalyser();
     analyser.fftSize = FFT_SIZE;
@@ -94,7 +98,7 @@ export function useMicSpectrum(): MicSpectrumState {
       running = false;
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       source.disconnect();
-      void ctx.close();
+      // Do not close ctx — pitch pipeline may still use it; we only disconnect our nodes
       analyserRef.current = null;
       contextRef.current = null;
       dataRef.current = null;

@@ -15,7 +15,8 @@ export interface WorkbenchAiPanelProps {
   onClose: () => void;
   /** Chord symbols from current progression (e.g. ["C", "Dm", "G7", "C"]) */
   progressionChords: string[];
-  key: string;
+  /** Musical key (e.g. "C", "F") — named keySignature to avoid React's reserved `key` prop */
+  keySignature: string;
   scale?: string;
 }
 
@@ -23,7 +24,7 @@ export function WorkbenchAiPanel({
   open,
   onClose,
   progressionChords,
-  key: keySig,
+  keySignature: keySig,
   scale = 'Major',
 }: WorkbenchAiPanelProps) {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);

@@ -22,7 +22,7 @@ export function useMidiExport() {
 
         // Add a track
         const track = midi.addTrack();
-        track.name = options.name || "Chord Lab Rhythm";
+        track.name = options.name || "PawelSonik Rhythm";
 
         // Set BPM if provided, defaulting to Tone.Transport.bpm.value if running (or 120)
         const bpm = options.bpm || Tone.Transport.bpm.value || 120;

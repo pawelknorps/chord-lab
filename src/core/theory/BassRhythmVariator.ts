@@ -67,14 +67,15 @@ export class BassRhythmVariator {
             this.skipNextDownbeat = false;
         }
 
-        // 2. Iterate through beats
-        for (let i = startIndex; i < 4; i++) {
+        // 2. Iterate through beats (4/4 or 3/4 waltz: line.length is 4 or 3)
+        const numBeats = line.length;
+        for (let i = startIndex; i < numBeats; i++) {
             const note = line[i];
             const time = `0:${i}:0`;
 
             // --- BEBOP TRICK 1: THE PUSH (Anticipation) ---
-            // Only at higher energy (calm start = steady quarters, no anticipation).
-            if (i === 3 && energy > 0.55 && Math.random() < pushChance) {
+            // Only in 4/4 at beat 4 (calm start = steady quarters, no anticipation). DMP-07: no push in 3/4 waltz.
+            if (numBeats === 4 && i === 3 && energy > 0.55 && Math.random() < pushChance) {
                 const nextChord = Chord.get(toTonalChordSymbol(nextChordSymbol));
                 const nextRootName = nextChord.tonic || "C";
                 const nextRootMidi = Note.midi(nextRootName + "1") || 36; // Big low push
@@ -105,13 +106,14 @@ export class BassRhythmVariator {
                 continue;
             }
 
-            // --- STANDARD WALK (Paul Chambers / Ray Brown Velocity Profile) ---
+            // --- STANDARD WALK (Paul Chambers / Ray Brown Velocity Profile); waltz uses first 3 slots ---
             const bebopVelocities = [1.0, 0.6, 0.9, 0.85];
+            const vel = bebopVelocities[i] ?? 0.85;
             events.push({
                 time,
                 duration: "4n",
                 note,
-                velocity: bebopVelocities[i]
+                velocity: vel
             });
         }
 

@@ -1,9 +1,13 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { MetronomeEngine } from '../../../utils/rhythmEngine';
 import { PolyrhythmEngine } from '../../../utils/polyrhythmEngine';
-import { Play, Activity, Target, StopCircle, ArrowRight } from 'lucide-react';
+import { Play, Activity, Target, StopCircle, ArrowRight, Mic, MicOff } from 'lucide-react';
 import { useRhythmStore } from '../state/useRhythmStore';
+import { useMicrophone } from '../../../hooks/useMicrophone';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useClapValidation } from '../hooks/useClapValidation';
+import { useInteractionStore } from '../../../core/state/useInteractionStore';
+import { useAudio } from '../../../context/AudioContext';
 
 const engine = new MetronomeEngine();
 const polyEngine = new PolyrhythmEngine();
@@ -47,6 +51,9 @@ type ExerciseMode = 'Subdivision' | 'Polyrhythm' | 'Dictation';
 
 export default function RhythmArena() {
     const { difficulty, addScore, streak, bpm: currentBpm, setCurrentBpm, isPlaying, setPlaying, metronomeEnabled, setMetronomeEnabled } = useRhythmStore();
+    const { mode, setMode, setIsListening } = useInteractionStore();
+    const { start: startMic, isActive: isMicActive } = useMicrophone();
+    const { startAudio } = useAudio();
 
     const [exerciseMode, setExerciseMode] = useState<ExerciseMode>('Subdivision');
     const [targetSub, setTargetSub] = useState<number | null>(null);
@@ -55,7 +62,46 @@ export default function RhythmArena() {
     const [userDictation, setUserDictation] = useState<number[]>(new Array(16).fill(0));
     const [hasSwing, setHasSwing] = useState(false);
     const [feedback, setFeedback] = useState<{ success: boolean; msg: string } | null>(null);
+    const [userHits, setUserHits] = useState<{ time: number; error: number }[]>([]);
 
+    const toggleMic = async () => {
+        if (mode === 'Mouse') {
+            setMode('Mic');
+            setIsListening(true);
+            if (!isMicActive) await startMic();
+        } else {
+            setMode('Mouse');
+            setIsListening(false);
+        }
+    };
+
+    // Vocal/Percussion Interaction: Handle Claps
+    useClapValidation((timestamp) => {
+        if (!isPlaying || exerciseMode !== 'Subdivision' || !targetSub) return;
+
+        const elapsed = timestamp - engine.lastStartTime;
+        const beatDuration = (60 / currentBpm) * 1000;
+        const subDuration = beatDuration / targetSub;
+
+        // Find the closest expected hit
+        const closestIndex = Math.round(elapsed / subDuration);
+        const expectedTime = closestIndex * subDuration;
+        const error = elapsed - expectedTime;
+
+        setUserHits(prev => {
+            const newHits = [...prev.slice(-15), { time: elapsed, error }];
+
+            // Grade performance: if last 4 hits were super accurate, mark correct
+            if (newHits.length >= 4) {
+                const last4 = newHits.slice(-4);
+                const avgError = last4.reduce((sum, h) => sum + Math.abs(h.error), 0) / 4;
+                if (avgError < 40) { // 40ms avg error is very tight
+                    handleAnswer(targetSub);
+                }
+            }
+            return newHits;
+        });
+    });
     const playTimeoutRef = useRef<any>(null);
 
     const startNewQuestion = useCallback(() => {
@@ -105,7 +151,7 @@ export default function RhythmArena() {
         };
     }, [difficulty, exerciseMode, setCurrentBpm, startNewQuestion]);
 
-    const playQuestion = () => {
+    const playQuestion = async () => {
         if (isPlaying) {
             engine.stop();
             polyEngine.stop();
@@ -117,6 +163,7 @@ export default function RhythmArena() {
             return;
         }
 
+        await startAudio();
         setPlaying(true);
         engine.setSwing(hasSwing ? 0.5 : 0);
         engine.metronomeEnabled = metronomeEnabled;
@@ -131,22 +178,27 @@ export default function RhythmArena() {
             playTimeoutRef.current = null;
         };
 
-        if (exerciseMode === 'Subdivision' && targetSub) {
-            engine.setBpm(currentBpm);
-            engine.setSubdivision(targetSub);
-            engine.start();
-            playTimeoutRef.current = setTimeout(onFinish, duration);
-        } else if (exerciseMode === 'Polyrhythm' && targetPoly) {
-            polyEngine.setBpm(currentBpm);
-            polyEngine.setDivisions(targetPoly.a, targetPoly.b);
-            polyEngine.start();
-            playTimeoutRef.current = setTimeout(onFinish, duration);
-        } else if (exerciseMode === 'Dictation' && targetDictation) {
-            engine.setBpm(currentBpm);
-            engine.setSubdivision(4);
-            engine.setPattern(targetDictation);
-            engine.start();
-            playTimeoutRef.current = setTimeout(onFinish, duration);
+        try {
+            if (exerciseMode === 'Subdivision' && targetSub) {
+                engine.setBpm(currentBpm);
+                engine.setSubdivision(targetSub);
+                await engine.start();
+                playTimeoutRef.current = setTimeout(onFinish, duration);
+            } else if (exerciseMode === 'Polyrhythm' && targetPoly) {
+                polyEngine.setBpm(currentBpm);
+                polyEngine.setDivisions(targetPoly.a, targetPoly.b);
+                await polyEngine.start();
+                playTimeoutRef.current = setTimeout(onFinish, duration);
+            } else if (exerciseMode === 'Dictation' && targetDictation) {
+                engine.setBpm(currentBpm);
+                engine.setSubdivision(4);
+                engine.setPattern(targetDictation);
+                await engine.start();
+                playTimeoutRef.current = setTimeout(onFinish, duration);
+            }
+        } catch (e) {
+            setPlaying(false);
+            console.warn('Rhythm engine start failed:', e);
         }
     };
 
@@ -176,7 +228,7 @@ export default function RhythmArena() {
                         <button
                             key={m}
                             onClick={() => { setExerciseMode(m); feedback && startNewQuestion(); }}
-                            className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${exerciseMode === m ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
+                            className={`px - 6 py - 2 rounded - xl text - [10px] font - black uppercase tracking - widest transition - all ${exerciseMode === m ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20' : 'text-white/40 hover:text-white hover:bg-white/5'} `}
                         >
                             {m}
                         </button>
@@ -186,15 +238,26 @@ export default function RhythmArena() {
 
             <div className="flex flex-col items-center gap-12 py-8">
                 <div className="relative group flex flex-col items-center gap-8">
-                    {/* Metronome Toggle */}
-                    <button
-                        onClick={() => setMetronomeEnabled(!metronomeEnabled)}
-                        className={`z-20 flex items-center gap-2 px-6 py-3 rounded-full border transition-all text-[10px] font-black uppercase tracking-[0.2em] shadow-xl backdrop-blur-md
-                            ${metronomeEnabled ? 'bg-indigo-500/20 border-indigo-500/50 text-indigo-400' : 'bg-white/5 border-white/5 text-white/20'}`}
-                    >
-                        <Activity size={16} />
-                        Reference Metronome: {metronomeEnabled ? 'ACTIVE' : 'OFF'}
-                    </button>
+                    {/* Mic/Clap Toggle */}
+                    <div className="flex gap-4">
+                        <button
+                            onClick={() => setMetronomeEnabled(!metronomeEnabled)}
+                            className={`z-20 flex items-center gap-2 px-6 py-3 rounded-full border transition-all text-[10px] font-black uppercase tracking-[0.2em] shadow-xl backdrop-blur-md
+                                ${metronomeEnabled ? 'bg-indigo-500/20 border-indigo-500/50 text-indigo-400' : 'bg-white/5 border-white/5 text-white/20'}`}
+                        >
+                            <Activity size={16} />
+                            Reference Metronome: {metronomeEnabled ? 'ACTIVE' : 'OFF'}
+                        </button>
+
+                        <button
+                            onClick={toggleMic}
+                            className={`z-20 flex items-center gap-2 px-6 py-3 rounded-full border transition-all text-[10px] font-black uppercase tracking-[0.2em] shadow-xl backdrop-blur-md
+                                ${mode === 'Mic' ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-400' : 'bg-white/5 border-white/5 text-white/20'}`}
+                        >
+                            {mode === 'Mic' ? <Mic size={16} /> : <MicOff size={16} />}
+                            Input: {mode === 'Mic' ? 'PERCUSSION (CLAP)' : 'MOUSE/KEYS'}
+                        </button>
+                    </div>
 
                     <div className="relative">
                         <motion.div
@@ -206,11 +269,12 @@ export default function RhythmArena() {
                             className="absolute -inset-16 bg-indigo-500 rounded-full blur-[80px]"
                         />
                         <button
-                            className={`relative w-44 h-44 rounded-full bg-black/80 flex items-center justify-center transition-all border-2 
+                            className={`relative w - 44 h - 44 rounded - full bg - black / 80 flex items - center justify - center transition - all border - 2 
                                 ${feedback?.success ? 'border-emerald-500 shadow-[0_0_60px_rgba(16,185,129,0.3)]' :
                                     feedback?.success === false ? 'border-red-500 shadow-[0_0_60px_rgba(239,68,68,0.3)]' :
                                         isPlaying ? 'border-indigo-400 shadow-[0_0_60px_rgba(99,102,241,0.2)]' :
-                                            'border-white/10 hover:border-white/30'}`}
+                                            'border-white/10 hover:border-white/30'
+                                } `}
                             onClick={playQuestion}
                         >
                             {isPlaying ? <StopCircle size={64} className="text-indigo-400 fill-current animate-pulse" /> :
@@ -222,6 +286,33 @@ export default function RhythmArena() {
                         {exerciseMode} • {difficulty} {hasSwing && '• SWING'}
                     </div>
                 </div>
+
+                {/* Rhythm Feedback Tape (Visualizes Claps) */}
+                {mode === 'Mic' && isPlaying && exerciseMode === 'Subdivision' && userHits.length > 0 && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="w-full max-w-md h-12 bg-black/40 rounded-full border border-white/5 flex items-center justify-center relative overflow-hidden px-4"
+                    >
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                            <div className="h-full w-[1px] bg-[var(--accent)]/50" />
+                        </div>
+                        <AnimatePresence>
+                            {userHits.map((hit, idx) => (
+                                <motion.div
+                                    key={hit.time}
+                                    initial={{ x: hit.error * 2, opacity: 1, scale: 2 }}
+                                    animate={{ x: hit.error * 2, opacity: 0.2, scale: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    className={`absolute w-1 h-8 rounded-full ${Math.abs(hit.error) < 50 ? 'bg-emerald-400' : 'bg-red-400'}`}
+                                />
+                            ))}
+                        </AnimatePresence>
+                        <div className="absolute bottom-1 right-3 text-[8px] font-black uppercase text-white/20 tracking-tighter">
+                            Temporal Accuracy
+                        </div>
+                    </motion.div>
+                )}
             </div>
 
             <div className="w-full max-w-4xl mt-8">
@@ -246,7 +337,7 @@ export default function RhythmArena() {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {(POLY_OPTIONS[difficulty] || POLY_OPTIONS.Novice).map(opt => (
                             <motion.button
-                                key={`${opt.a}:${opt.b}`}
+                                key={`${opt.a}:${opt.b} `}
                                 whileHover={{ scale: 1.02 }}
                                 onClick={() => handleAnswer(opt)}
                                 className="p-10 bg-white/5 border border-white/5 hover:border-purple-500/50 rounded-[40px] transition-all text-center"
@@ -269,14 +360,15 @@ export default function RhythmArena() {
                                         next[idx] = (next[idx] + 1) % 3; // 0=Rest, 1=Ghost, 2=Accent
                                         setUserDictation(next);
                                     }}
-                                    className={`h-20 rounded-2xl transition-all border flex flex-col items-center justify-center gap-2 relative overflow-hidden group
+                                    className={`h - 20 rounded - 2xl transition - all border flex flex - col items - center justify - center gap - 2 relative overflow - hidden group
                                         ${val === 2 ? 'bg-indigo-500/20 border-indigo-400 shadow-[0_0_20px_rgba(99,102,241,0.2)]' :
-                                            val === 1 ? 'bg-white/10 border-white/20' : 'bg-white/5 border-white/5 hover:bg-white/10'}`}
+                                            val === 1 ? 'bg-white/10 border-white/20' : 'bg-white/5 border-white/5 hover:bg-white/10'
+                                        } `}
                                 >
-                                    <span className={`text-[8px] font-black uppercase tracking-tighter ${val === 0 ? 'text-white/10' : 'text-white/40'}`}>
+                                    <span className={`text - [8px] font - black uppercase tracking - tighter ${val === 0 ? 'text-white/10' : 'text-white/40'} `}>
                                         {val === 2 ? 'Accent' : val === 1 ? 'Ghost' : 'Rest'}
                                     </span>
-                                    <div className={`w-2 h-2 rounded-full ${val === 2 ? 'bg-white shadow-[0_0_10px_white]' : val === 1 ? 'bg-white/40' : 'bg-white/5'}`} />
+                                    <div className={`w - 2 h - 2 rounded - full ${val === 2 ? 'bg-white shadow-[0_0_10px_white]' : val === 1 ? 'bg-white/40' : 'bg-white/5'} `} />
                                     <div className="absolute top-1 left-1 text-[7px] font-mono text-white/10">{idx + 1}</div>
                                 </button>
                             ))}
@@ -302,7 +394,7 @@ export default function RhythmArena() {
             <div className="h-20 flex items-center justify-center">
                 <AnimatePresence>
                     {feedback && (
-                        <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className={`text-2xl font-black italic flex items-center gap-4 ${feedback.success ? 'text-emerald-400' : 'text-red-400'}`}>
+                        <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className={`text - 2xl font - black italic flex items - center gap - 4 ${feedback.success ? 'text-emerald-400' : 'text-red-400'} `}>
                             {feedback.success ? <Target className="animate-bounce" /> : <Activity />}
                             {feedback.msg}
                         </motion.div>

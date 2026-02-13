@@ -15,6 +15,8 @@ export interface UnifiedPianoProps {
     showLabels?: NoteLabel;
     showIntervals?: boolean;
     rootNote?: number;
+    /** When showLabels is chord-tone, pass chord symbol so labels match Chord Lab (e.g. #9 not m3 for C7#9). */
+    chordSymbol?: string;
     octaveRange?: [number, number];
     disabled?: boolean;
     playSound?: boolean;
@@ -40,6 +42,8 @@ export interface UnifiedFretboardProps {
     showStringNames?: boolean;
     fretRange?: [number, number];
     rootNote?: number;
+    /** When mode is chord-tones, pass chord symbol so labels match Chord Lab (e.g. #9 not m3). */
+    chordSymbol?: string;
     interactive?: boolean;
     playSound?: boolean;
     className?: string;

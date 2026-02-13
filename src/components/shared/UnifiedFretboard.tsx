@@ -25,6 +25,7 @@ export const UnifiedFretboard: React.FC<UnifiedFretboardProps> = ({
     showStringNames = true,
     fretRange = [0, 15],
     rootNote,
+    chordSymbol,
     interactive = true,
     playSound = true,
     className = '',
@@ -46,12 +47,12 @@ export const UnifiedFretboard: React.FC<UnifiedFretboardProps> = ({
             case 'scale-degrees':
                 return rootNote !== undefined ? getScaleDegree(rootNote, note) : '';
             case 'chord-tones':
-                return rootNote !== undefined ? getChordToneLabel(rootNote, note) : '';
+                return rootNote !== undefined ? getChordToneLabel(rootNote, note, chordSymbol) : '';
             case 'notes':
             default:
                 return midiToNoteName(note, rootNote !== undefined ? midiToNoteName(rootNote).replace(/[0-9]/g, '') : 'C').replace(/[0-9]/g, '');
         }
-    }, [mode, rootNote]);
+    }, [mode, rootNote, chordSymbol]);
 
     const handleFretClick = (stringIdx: number, fret: number, note: number) => {
         if (!interactive) return;

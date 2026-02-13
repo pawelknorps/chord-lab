@@ -14,6 +14,7 @@ interface ScoringState {
     grade: string;
     heatmap: Record<number, number>; // measureIndex -> sum of correctness points
     measureTicks: Record<number, number>; // measureIndex -> total processed samples
+    notesByMeasure: Record<number, { frequency: number; clarity: number; cents: number; timestamp: number }[]>;
     currentSessionId: string | null;
     isActive: boolean;
 
@@ -25,7 +26,7 @@ interface ScoringState {
    * Processes a single MIDI note sample against the current musical context.
    * Gives bonuses for "Target Notes" (3rds and 7ths).
    */
-    processNote: (midi: number, currentChordSymbol: string, measureIndex: number) => void;
+    processNote: (midi: number, frequency: number, clarity: number, cents: number, currentChordSymbol: string, measureIndex: number) => void;
 }
 
 const calculateGrade = (score: number): string => {
@@ -45,6 +46,7 @@ export const useScoringStore = create<ScoringState>((set, get) => ({
     grade: 'F',
     heatmap: {},
     measureTicks: {},
+    notesByMeasure: {},
     currentSessionId: null,
     isActive: false,
 
@@ -61,10 +63,11 @@ export const useScoringStore = create<ScoringState>((set, get) => ({
         grade: 'F',
         heatmap: {},
         measureTicks: {},
+        notesByMeasure: {},
         currentSessionId: null
     }),
 
-    processNote: (midi, currentChordSymbol, measureIndex) => {
+    processNote: (midi, frequency, clarity, cents, currentChordSymbol, measureIndex) => {
         const { isActive } = get();
         if (!isActive || midi === null || !currentChordSymbol) return;
 
@@ -81,7 +84,6 @@ export const useScoringStore = create<ScoringState>((set, get) => ({
         const isMatch = chordPcs.includes(pc);
 
         // Target Notes: 3rd and 7th
-        // In our CHORD_INTERVALS: index 1 is usually the 3rd, index 3 is usually the 7th
         const thirdPc = (rootMidi + intervals[1]) % 12;
         const isThird = pc === thirdPc;
 
@@ -104,21 +106,23 @@ export const useScoringStore = create<ScoringState>((set, get) => ({
             const newMatching = state.matchingNotesCount + (isMatch ? 1 : 0);
             const newPerfect = state.perfectNotesCount + (isPerfect ? 1 : 0);
 
-            // Calculate running average score
-            // Base performance is % of right notes
             const basePerformance = (newMatching / newTotal) * 100;
-
-            // Boost score if they hit many target notes (3/7)
-            // Mastery factor: how close are perfect notes to total matching notes?
             const masteryFactor = (newPerfect / Math.max(1, newMatching)) * 20;
-
             const newScore = Math.min(100, Math.round(basePerformance + masteryFactor));
 
             const newHeatmap = { ...state.heatmap };
             const newMeasureTicks = { ...state.measureTicks };
+            const newNotesByMeasure = { ...state.notesByMeasure };
 
             newHeatmap[measureIndex] = (newHeatmap[measureIndex] || 0) + points;
             newMeasureTicks[measureIndex] = (newMeasureTicks[measureIndex] || 0) + 1;
+
+            // Store note (sample)
+            if (!newNotesByMeasure[measureIndex]) newNotesByMeasure[measureIndex] = [];
+            // Cap notes per measure to avoid memory bloat during long sessions (e.g. 50 samples max)
+            if (newNotesByMeasure[measureIndex].length < 50) {
+                newNotesByMeasure[measureIndex].push({ frequency, clarity, cents, timestamp: Date.now() });
+            }
 
             return {
                 totalNotesProcessed: newTotal,
@@ -127,7 +131,8 @@ export const useScoringStore = create<ScoringState>((set, get) => ({
                 score: newScore,
                 grade: calculateGrade(newScore),
                 heatmap: newHeatmap,
-                measureTicks: newMeasureTicks
+                measureTicks: newMeasureTicks,
+                notesByMeasure: newNotesByMeasure
             };
         });
     }

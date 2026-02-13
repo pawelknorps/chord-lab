@@ -1,15 +1,18 @@
 import * as Chord from '@tonaljs/chord';
 import * as Scale from 'tonal-scale';
 import { ChordScaleMapping, ScaleOption } from './ChordScaleTypes';
+import { toTonalChordSymbol } from './chordSymbolForTonal';
 
 export class ChordScaleEngine {
     /**
      * Determines the best scales for a given chord symbol.
-     * @param chordSymbol The chord symbol (e.g., "Dm7", "G7alt")
+     * Uses unified theory (toTonalChordSymbol) so iReal-style symbols (E07, Eo7, C^) work.
+     * @param chordSymbol The chord symbol (e.g., "Dm7", "E07", "G7alt")
      * @param key Optional key context (e.g., "C")
      */
     static getScales(chordSymbol: string): ChordScaleMapping | null {
-        const chord = Chord.get(chordSymbol);
+        const tonalSymbol = toTonalChordSymbol(chordSymbol);
+        const chord = Chord.get(tonalSymbol);
         if (chord.empty) return null;
 
         const root = chord.tonic;

@@ -1,9 +1,13 @@
 import { useState, useEffect } from 'react';
-import { X, BookOpen, AlertTriangle, Zap, MessageCircle, Mic, Play, Send } from 'lucide-react';
+import { X, BookOpen, AlertTriangle, Zap, MessageCircle, Mic, Play, Send, Music } from 'lucide-react';
 import { localAgent } from '../../../core/services/LocalAgentService';
 import { buildProgressionBundle, buildChordLabPrompt, stripCommandTokens } from '../../../core/services/progressionContext';
 import { validateSuggestedNotes } from '../../../core/services/noteValidator';
 import * as Scale from 'tonal-scale';
+import { useFunctionalEarTrainingStore } from '../../FunctionalEarTraining/state/useFunctionalEarTrainingStore';
+import { useInteractionStore } from '../../../core/state/useInteractionStore';
+import { useMicrophone } from '../../../hooks/useMicrophone';
+import { getChordNotes } from '../../../core/theory';
 
 interface ChatMessage {
     role: 'user' | 'assistant';
@@ -61,6 +65,36 @@ export function SmartLessonPane({
     const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
     const [chatInput, setChatInput] = useState('');
     const [isChatThinking, setIsChatThinking] = useState(false);
+
+    const { setActiveTarget } = useFunctionalEarTrainingStore();
+    const { setMode, setIsListening } = useInteractionStore();
+    const { start: startMic, isActive: isMicActive } = useMicrophone();
+
+    const handleSingArpeggio = async () => {
+        if (!progressionChords || progressionChords.length === 0) return;
+
+        // Get the first chord of the current progression
+        const chordName = progressionChords[0];
+        const { root, quality } = await import('../../../core/theory').then(m => m.parseChord(chordName));
+        const midiNotes = await import('../../../core/theory').then(m => m.getChordNotes(root, quality, 4, 'Root Position'));
+
+        // Set up the FET store for a sequence drill
+        setActiveTarget({
+            midi: midiNotes[0],
+            label: `${chordName} Arpeggio`,
+            type: 'pitch',
+            sequence: midiNotes,
+            sequenceIndex: 0
+        });
+
+        // Switch to Mic mode and start listening
+        setMode('Mic');
+        setIsListening(true);
+        if (!isMicActive) await startMic();
+
+        // Provide some feedback or close pane/scroll to indicator? 
+        // For now, just setting the state is enough as the HUD will reflect the mode.
+    };
 
     useEffect(() => {
         if (!songTitle) return;
@@ -273,6 +307,15 @@ export function SmartLessonPane({
                                     Blindfold Mode
                                     <span className="block text-[10px] opacity-60 font-normal mt-1">Hide Visuals</span>
                                 </button>
+                                <button
+                                    onClick={handleSingArpeggio}
+                                    className="p-3 bg-emerald-900/30 hover:bg-emerald-900/50 border border-emerald-500/20 rounded-lg text-emerald-200 text-xs font-bold transition-colors text-center flex flex-col items-center justify-center"
+                                >
+                                    <div className="flex items-center gap-1">
+                                        <Mic size={10} /> Sing Arpeggio
+                                    </div>
+                                    <span className="block text-[10px] opacity-60 font-normal mt-1">Vocal Validation</span>
+                                </button>
                             </div>
                         </section>
                     </>
@@ -293,11 +336,10 @@ export function SmartLessonPane({
                         {chatMessages.map((m, i) => (
                             <div
                                 key={i}
-                                className={`rounded-lg p-3 text-xs ${
-                                    m.role === 'user'
-                                        ? 'bg-cyan-500/20 border border-cyan-500/30 text-cyan-100 ml-4'
-                                        : 'bg-white/5 border border-white/10 text-white/80 mr-4'
-                                }`}
+                                className={`rounded-lg p-3 text-xs ${m.role === 'user'
+                                    ? 'bg-cyan-500/20 border border-cyan-500/30 text-cyan-100 ml-4'
+                                    : 'bg-white/5 border border-white/10 text-white/80 mr-4'
+                                    }`}
                             >
                                 {m.content}
                             </div>

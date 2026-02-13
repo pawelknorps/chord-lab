@@ -16,9 +16,30 @@ import { Target, Mic, Keyboard, Check, X, RotateCcw, Zap, Sparkles } from 'lucid
 import { SoloTranscriptionPanel } from './SoloTranscriptionPanel';
 import { generateStandardsExerciseAnalysis, isGeminiNanoAvailable } from '../ai/jazzTeacherLogic';
 
+/** Typical mic → processing → detection delay; used only when no persisted calibration exists. */
 const DEFAULT_LATENCY_MS = 80;
 const MIN_LATENCY_MS = 0;
 const MAX_LATENCY_MS = 300;
+const LATENCY_STORAGE_KEY = 'standards-exercise-latency-ms';
+
+function getStoredLatencyMs(): number | null {
+    try {
+        const s = localStorage.getItem(LATENCY_STORAGE_KEY);
+        if (s == null) return null;
+        const n = Number(s);
+        return Number.isFinite(n) && n >= MIN_LATENCY_MS && n <= MAX_LATENCY_MS ? n : null;
+    } catch {
+        return null;
+    }
+}
+
+function setStoredLatencyMs(ms: number): void {
+    try {
+        localStorage.setItem(LATENCY_STORAGE_KEY, String(Math.round(ms)));
+    } catch {
+        // ignore
+    }
+}
 
 export interface StandardsExercisesPanelProps {
     /** Chord at transport time t (for latency-adjusted scoring). When provided, scoring uses chord at (now - latencyMs). */
@@ -39,7 +60,7 @@ export function StandardsExercisesPanel({ getChordAtTransportTime, standardTitle
     useSignals();
     const [exerciseType, setExerciseType] = useState<ExerciseType>('scale');
     const [inputSource, setInputSource] = useState<ExerciseInputSource>('mic');
-    const [latencyMs, setLatencyMs] = useState(DEFAULT_LATENCY_MS);
+    const [latencyMs, setLatencyMs] = useState(() => getStoredLatencyMs() ?? DEFAULT_LATENCY_MS);
     const isPlaying = isPlayingSignal.value;
 
     const playCalibrationTone = () => {
@@ -114,7 +135,9 @@ export function StandardsExercisesPanel({ getChordAtTransportTime, standardTitle
         setCalibrating(true);
         try {
             const measured = await runCalibration();
-            setLatencyMs(Math.min(MAX_LATENCY_MS, Math.max(MIN_LATENCY_MS, measured)));
+            const clamped = Math.min(MAX_LATENCY_MS, Math.max(MIN_LATENCY_MS, measured));
+            setLatencyMs(clamped);
+            setStoredLatencyMs(clamped);
         } finally {
             setCalibrating(false);
         }
@@ -183,7 +206,7 @@ export function StandardsExercisesPanel({ getChordAtTransportTime, standardTitle
                         className="w-full h-2 rounded-full bg-white/10 accent-amber-500"
                     />
                     <p className="text-[10px] text-neutral-500 mt-0.5">
-                        Increase if correct notes score as miss (feedback lags behind).
+                        Increase if correct notes score as miss (feedback lags behind). Run Calibrate once to measure and set the default for next time.
                     </p>
                     <button
                         type="button"

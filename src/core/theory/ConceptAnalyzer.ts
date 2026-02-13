@@ -60,12 +60,12 @@ export class ConceptAnalyzer {
                 // Check if we have valid chord parsing
                 if (!chord1.tonic || !chord2.tonic || !chord3.tonic) continue;
 
-                // ii: minor 7th (or variations)
-                const isMinorTwo = chord1.quality === 'm7' || chord1.quality === 'min7' || chord1.aliases.includes('m7');
+                // ii: minor 7th (or variations) — use type/aliases (Tonal chord.type is e.g. "m7", "maj7")
+                const isMinorTwo = chord1.type === 'm7' || chord1.type === 'min7' || chord1.aliases?.includes('m7') === true;
                 // V: dominant 7th
-                const isDominantFive = chord2.quality === '7' || chord2.quality === 'dom7' || chord2.aliases.includes('7');
+                const isDominantFive = chord2.type === '7' || chord2.type === '7alt' || chord2.aliases?.includes('7') === true;
                 // I: major 7th or major triad
-                const isMajorOne = chord3.quality === 'M7' || chord3.quality === 'maj7' || chord3.quality === '' || chord3.quality === 'M' || chord3.aliases.includes('maj7');
+                const isMajorOne = chord3.type === 'maj7' || chord3.type === 'M7' || chord3.quality === 'Major' || chord3.aliases?.includes('maj7') === true;
 
                 if (isMinorTwo && isDominantFive && isMajorOne) {
                     concepts.push({
@@ -103,12 +103,12 @@ export class ConceptAnalyzer {
 
                 if (!chord1.tonic || !chord2.tonic || !chord3.tonic) continue;
 
-                // ii: half-diminished (m7b5)
-                const isHalfDim = chord1.quality === 'm7b5' || chord1.quality === 'ø7' || chord1.aliases.includes('m7b5');
-                // V: dominant 7th (often altered)
-                const isDominant = chord2.quality === '7' || chord2.quality === '7alt' || chord2.aliases.includes('7');
+                // ii: half-diminished — Tonal type.name is "half-diminished", aliases include "m7b5", "ø", "h"
+                const isHalfDim = chord1.type === 'm7b5' || chord1.type === 'half-diminished' || chord1.type === 'ø7' || chord1.aliases?.includes('m7b5') === true || chord1.aliases?.some((a: string) => /ø|half-dim|h7|h\b/.test(a)) === true;
+                // V: dominant 7th (including altered) — Tonal "7alt" can be type "altered" or in aliases
+                const isDominant = chord2.type === '7' || chord2.type === '7alt' || chord2.type === 'altered' || chord2.aliases?.includes('7') === true || chord2.aliases?.includes('7alt') === true || chord2.aliases?.includes('alt7') === true;
                 // i: minor 7th, minor 6, or minor major 7
-                const isMinorOne = chord3.quality === 'm7' || chord3.quality === 'm6' || chord3.quality === 'mM7' || chord3.aliases.includes('m7');
+                const isMinorOne = chord3.type === 'm7' || chord3.type === 'm6' || chord3.type === 'mM7' || chord3.aliases?.includes('m7') === true;
 
                 if (isHalfDim && isDominant && isMinorOne) {
                     concepts.push({
@@ -144,15 +144,14 @@ export class ConceptAnalyzer {
 
                 if (!current.tonic || !next.tonic) continue;
 
-                // Check if current chord is a dominant 7th
-                const isDominant = current.quality === '7' || current.quality === 'dom7' || current.aliases.includes('7');
+                const isDominant = current.type === '7' || current.type === '7alt' || current.aliases?.includes('7') === true;
 
                 if (isDominant) {
-                    // Check if this is the diatonic V7 of the key
                     const tonicNote = keyInfo.tonic || keySignature;
-                    // Simple check: if it's not V7 of the key, it's secondary
+                    // Don't treat as secondary if we're resolving to I (primary V-I)
+                    if (next.tonic === tonicNote) continue;
+                    // If current is not the key's V, it's a secondary dominant (e.g. A7 -> Dm in C)
                     if (current.tonic !== tonicNote) {
-                        // This is likely a secondary dominant
                         concepts.push({
                             type: 'SecondaryDominant',
                             startIndex: i,
@@ -188,8 +187,7 @@ export class ConceptAnalyzer {
 
                 if (!current.tonic || !next.tonic) continue;
 
-                // Check if current chord is a dominant 7th
-                const isDominant = current.quality === '7' || current.quality === 'dom7' || current.aliases.includes('7');
+                const isDominant = current.type === '7' || current.type === '7alt' || current.aliases?.includes('7') === true;
 
                 if (isDominant) {
                     // Calculate the tritone (augmented 4th) from the next chord's root
@@ -249,9 +247,9 @@ export class ConceptAnalyzer {
                     this.isMajorThirdInterval(tonics[2], tonics[4]); // IV -> bVII (major third)
 
                 const hasDominantConnections =
-                    (parsedChords[1].quality === '7' || parsedChords[1].aliases.includes('7')) &&
-                    (parsedChords[3].quality === '7' || parsedChords[3].aliases.includes('7')) &&
-                    (parsedChords[5].quality === '7' || parsedChords[5].aliases.includes('7'));
+                    (parsedChords[1].type === '7' || parsedChords[1].aliases?.includes('7')) &&
+                    (parsedChords[3].type === '7' || parsedChords[3].aliases?.includes('7')) &&
+                    (parsedChords[5].type === '7' || parsedChords[5].aliases?.includes('7'));
 
                 if (isMajorThirdCycle && hasDominantConnections) {
                     concepts.push({

@@ -1,5 +1,6 @@
 import * as Chord from '@tonaljs/chord';
 import * as Note from '@tonaljs/note';
+import { toTonalChordSymbol } from '../../../core/theory/chordSymbolForTonal';
 
 /**
  * Map degree/shorthand to Tonal interval (from root).
@@ -39,10 +40,10 @@ export interface LickResult {
 
 /**
  * Convert a lick template (e.g. "1 2 b3 5" or "R b3 5 b7") into actual notes for a chord symbol.
- * Uses Tonal.js for correctness; template uses space-separated degrees.
+ * Uses unified theory (toTonalChordSymbol) so iReal-style symbols work; Tonal.js for intervals.
  */
 export function convertLick(lickTemplate: string, chordSymbol: string): LickResult {
-  const chord = Chord.get(chordSymbol);
+  const chord = Chord.get(toTonalChordSymbol(chordSymbol));
   const root = chord.tonic;
   if (!root) {
     return { chord: chordSymbol, notes: [], display: '' };

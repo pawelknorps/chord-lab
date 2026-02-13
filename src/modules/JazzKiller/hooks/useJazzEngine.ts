@@ -24,13 +24,14 @@ export const useJazzEngine = (song: any) => {
             if (active.isPlayingSignal.value) active.togglePlayback();
             isPremiumEngineSignal.value = !isPremiumEngineSignal.value;
         },
-        // Explicitly export these to satisfy potential destructuring issues or lints
+        getChordAtTransportTime: (active as { getChordAtTransportTime?: (t: number) => string }).getChordAtTransportTime ?? (() => ''),
         isPlayingSignal: active.isPlayingSignal,
         isLoadedSignal: active.isLoadedSignal,
         loopCountSignal: active.loopCountSignal,
         currentMeasureIndexSignal: active.currentMeasureIndexSignal,
         currentBeatSignal: active.currentBeatSignal,
         bpmSignal: active.bpmSignal,
-        totalLoopsSignal: active.totalLoopsSignal
+        totalLoopsSignal: active.totalLoopsSignal,
+        onNote: active.onNote
     };
 };

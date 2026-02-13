@@ -1,13 +1,14 @@
 import * as Chord from '@tonaljs/chord';
 import * as Note from '@tonaljs/note';
 import type { GuideTone } from './GuideToneTypes';
+import { toTonalChordSymbol } from './chordSymbolForTonal';
 
 export class GuideToneCalculator {
     private static readonly BASE_OCTAVE = 4;
 
     static calculate(chordSymbol: string): GuideTone | null {
         try {
-            const chord = Chord.get(chordSymbol);
+            const chord = Chord.get(toTonalChordSymbol(chordSymbol));
             if (!chord.notes || chord.notes.length < 3) return null;
 
             const intervals = chord.intervals;

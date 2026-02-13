@@ -3,6 +3,7 @@ import * as Tone from 'tone';
 import { Play, Square, ArrowRight, ArrowLeft, RefreshCw, Undo2, Music, Zap, Layers, Download, Move } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRhythmStore } from '../state/useRhythmStore';
+import { useAudio } from '../../../context/AudioContext';
 
 interface MotiStep {
     active: boolean;
@@ -11,6 +12,7 @@ interface MotiStep {
 
 export default function DisplacementLab() {
     const { bpm, setCurrentBpm, difficulty } = useRhythmStore();
+    const { startAudio } = useAudio();
     const [isPlaying, setIsPlaying] = useState(false);
     const [motive, setMotive] = useState<MotiStep[]>(
         new Array(16).fill(null).map((_, i) => ({
@@ -52,6 +54,7 @@ export default function DisplacementLab() {
             sequenceRef.current?.stop();
             setIsPlaying(false);
         } else {
+            await startAudio();
             await Tone.start();
             Tone.Transport.bpm.value = bpm;
             if (sequenceRef.current) sequenceRef.current.dispose();

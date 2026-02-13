@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import * as Scale from 'tonal-scale';
+import { useMicrophone } from '../../../hooks/useMicrophone';
+import { useHighPerformancePitch } from '../../ITM/hooks/useHighPerformancePitch';
 import { useITMPitchStore } from '../../ITM/state/useITMPitchStore';
 import { frequencyToNote } from '../../../core/audio/frequencyToNote';
 import type { ScaleDegreeResult, IntonationClassification } from '../types';
@@ -20,6 +22,10 @@ export function useIntonationHeatmap(root: string = 'C', scaleName: string = 'ma
   const [results, setResults] = useState<Map<number, ScaleDegreeResult>>(new Map());
   const [droneActive, setDroneActive] = useState(false);
   const lastDegreeRef = useRef<number | null>(null);
+
+  // Ensure pitch pipeline is running (this panel doesn't use ExerciseInputAdapter, so store would otherwise never be initialized).
+  const { stream } = useMicrophone();
+  useHighPerformancePitch(stream ?? null, 'general');
 
   const getDegreeFromPitchClass = useCallback(
     (pitchClass: string): number | null => {

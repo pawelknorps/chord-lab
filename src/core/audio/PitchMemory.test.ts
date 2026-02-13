@@ -24,15 +24,17 @@ describe('PitchMemory', () => {
       expect(() => createPitchMemory()).toThrow(/SharedArrayBuffer is not available/);
     });
 
-    it('returns sab and view with 2 Float32 slots when SAB is available', () => {
+    it('returns sab and view with 4 Float32 slots (frequency, confidence, rms, onset) when SAB is available', () => {
       if (typeof SharedArrayBuffer === 'undefined') return;
       const { sab, view } = createPitchMemory();
       expect(sab).toBeDefined();
-      expect(sab.byteLength).toBe(2 * Float32Array.BYTES_PER_ELEMENT);
+      expect(sab.byteLength).toBe(4 * Float32Array.BYTES_PER_ELEMENT);
       expect(view).toBeInstanceOf(Float32Array);
-      expect(view.length).toBe(2);
+      expect(view.length).toBe(4);
       expect(view[0]).toBe(0);
       expect(view[1]).toBe(0);
+      expect(view[2]).toBe(0);
+      expect(view[3]).toBe(0);
     });
   });
 });

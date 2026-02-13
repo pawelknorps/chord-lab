@@ -4,6 +4,7 @@ import { useMicrophone } from '../../../hooks/useMicrophone';
 import { useScoringStore } from '../../../core/store/useScoringStore';
 import { currentChordSymbolSignal, currentMeasureIndexSignal, isPlayingSignal } from '../../JazzKiller/state/jazzSignals';
 import * as Note from '@tonaljs/note';
+import { frequencyToNote } from '../../../core/audio/frequencyToNote';
 
 /**
  * Bridge component that connects the High-Performance Audio Worklet to the ITM Zustand Store.
@@ -15,15 +16,20 @@ export const HighPerformanceScoringBridge = () => {
     const processNote = useScoringStore(state => state.processNote);
     const isScoringActive = useScoringStore(state => state.isActive);
     const isPlaying = isPlayingSignal.value;
+    const startedByScoringRef = useRef(false);
 
-    // 1. Sync Microphone with Playback + Scoring State
+    // 1. Sync Microphone with Playback + Scoring State (only start for scoring; never stop mic that user turned on for Guide Tone Spotlight)
     useEffect(() => {
         const shouldBeActive = isPlaying && isScoringActive;
 
         if (shouldBeActive && !isMicActive) {
             void startMic();
-        } else if (!shouldBeActive && isMicActive) {
+            startedByScoringRef.current = true;
+        } else if (!shouldBeActive && isMicActive && startedByScoringRef.current) {
             stopMic();
+            startedByScoringRef.current = false;
+        } else if (!shouldBeActive) {
+            startedByScoringRef.current = false;
         }
     }, [isPlaying, isScoringActive, isMicActive, startMic, stopMic]);
 
@@ -39,14 +45,15 @@ export const HighPerformanceScoringBridge = () => {
             const result = getLatestPitch();
 
             if (result && result.clarity > 0.9) {
-                const midi = Note.midi(Note.fromFreq(result.frequency));
+                const noteInfo = frequencyToNote(result.frequency);
+                const midi = noteInfo ? Note.midi(noteInfo.noteName) : null;
 
-                if (midi !== null && midi !== lastResultRef.current) {
+                if (midi !== null && midi !== lastResultRef.current && noteInfo) {
                     const measureIndex = currentMeasureIndexSignal.value;
                     const currentChord = currentChordSymbolSignal.value;
 
                     if (measureIndex >= 0 && currentChord) {
-                        processNote(midi, currentChord, measureIndex);
+                        processNote(midi, result.frequency, result.clarity, noteInfo.centsDeviation, currentChord, measureIndex);
                         lastResultRef.current = midi;
                     }
                 }

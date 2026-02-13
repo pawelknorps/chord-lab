@@ -26,6 +26,7 @@ export function UnifiedPiano({
     onNotePress,
     showLabels = 'none',
     rootNote,
+    chordSymbol,
     octaveRange = [3, 5],
     disabled = false,
     className = '',
@@ -76,11 +77,11 @@ export function UnifiedPiano({
         }
 
         if (showLabels === 'chord-tone' && rootNote !== undefined) {
-            return getChordToneLabel(rootNote, note);
+            return getChordToneLabel(rootNote, note, chordSymbol);
         }
 
         return '';
-    }, [showLabels, rootNote]);
+    }, [showLabels, rootNote, chordSymbol]);
 
     const handleKeyClick = useCallback((note: number) => {
         if (disabled || mode === 'display' || mode === 'playback') return;

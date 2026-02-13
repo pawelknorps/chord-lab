@@ -7,6 +7,7 @@ import * as Tone from 'tone';
 import { Play, Check, X, ArrowRight, Music2, Keyboard } from 'lucide-react';
 import { useMasteryStore } from '../../../../core/store/useMasteryStore';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useMicValidation } from '../../hooks/useMicValidation';
 
 const ALL_INTERVALS = [
     { label: '9', value: 14, semitones: 2, difficulty: ['Novice', 'Advanced', 'Pro'] },
@@ -28,7 +29,7 @@ function buildSyntheticChord() {
 }
 
 export const MelodyStepsLevel: React.FC = () => {
-    const { addScore, setPlaying, difficulty, streak } = useFunctionalEarTrainingStore();
+    const { addScore, setPlaying, difficulty, streak, setActiveTarget } = useFunctionalEarTrainingStore();
     const { addExperience, updateStreak } = useMasteryStore();
     const { files, loading: libraryLoading } = useMidiLibrary();
     const { lastNote } = useMidi();
@@ -185,6 +186,20 @@ export const MelodyStepsLevel: React.FC = () => {
         }
     }, [files.length, libraryLoading, currentChord, currentPool.length, loadNewChallenge, loadSyntheticChallenge]);
 
+    useEffect(() => {
+        if (currentChord && targetInterval) {
+            const rootMidi = currentChord.root.midi;
+            setActiveTarget({
+                midi: (rootMidi + targetInterval.semitones) % 12, // Store pitch class or direct MIDI? Store pitch class 0-11 for easier octave-independent matching.
+                label: targetInterval.label,
+                type: 'pitch'
+            });
+        } else {
+            setActiveTarget(null);
+        }
+        return () => setActiveTarget(null);
+    }, [currentChord, targetInterval, setActiveTarget]);
+
     const playAudio = async () => {
         if (!currentChord || !targetInterval) return;
         setPlaying(true);
@@ -244,6 +259,9 @@ export const MelodyStepsLevel: React.FC = () => {
             handleIncorrectAnswer();
         }
     };
+
+    // Mic / Vocal Validation
+    useMicValidation(handleCorrectAnswer);
 
     // MIDI Input Support
     useEffect(() => {

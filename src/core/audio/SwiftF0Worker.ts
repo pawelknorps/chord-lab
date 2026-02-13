@@ -1,119 +1,171 @@
 import * as ort from 'onnxruntime-web';
 import { INSTRUMENT_PROFILES, InstrumentProfile } from './instrumentProfiles';
+import { classificationToPitch, computeRMS, MODEL_INPUT_SIZE, preprocessPcm } from './swiftF0Inference';
 
 /**
  * SwiftF0Worker: Neural Pitch Inference (SOTA 2026)
  * Handles non-blocking inference for SwiftF0 model using WebGPU/WASM.
+ * Instrument is set via manual dropdown (setProfile); fmin/fmax and threshold constrain search space (0ms classifier overhead).
  */
 
-let session: ort.InferenceSession | null = null;
-let currentProfile: InstrumentProfile = INSTRUMENT_PROFILES.auto;
+// Load ONNX Runtime WASM from CDN to avoid dev server returning HTML (wrong MIME) for .wasm requests
+const ONNX_WASM_VERSION = '1.24.1';
+if (typeof ort.env !== 'undefined') {
+    if (ort.env.wasm) {
+        ort.env.wasm.wasmPaths = `https://cdn.jsdelivr.net/npm/onnxruntime-web@${ONNX_WASM_VERSION}/dist/`;
+    }
+    ort.env.logLevel = 'error';
+}
 
-// Pre-allocated buffers for inference
-const MODEL_INPUT_SIZE = 1024;
+let session: ort.InferenceSession | null = null;
+/** Resolves when initSession() has finished (success or failure). Ensures polling does not run before model is loaded. */
+let sessionReady: Promise<void> = Promise.resolve();
+let sessionReadyResolve: (() => void) | null = null;
+let currentProfile: InstrumentProfile = INSTRUMENT_PROFILES.general;
+/** Cached input tensor name from session (model may use "input", "input_audio", "audio", etc.). */
+let sessionInputName: string = 'input_audio';
+
+/** When true, postMessage('timing', { preprocessMs, inferenceMs, totalMs }) each frame (dev-only, REQ-SF0-S01). */
+let enableTiming = false;
+/** When false, skip CrepeStabilizer and post raw pitch (optimization / A-B test). */
+let useStabilizer = true;
+
+// Pre-allocated buffers for inference (REQ-SF0-S02: zero allocations in hot path)
 const inputTensor = new Float32Array(MODEL_INPUT_SIZE);
+/** Reused input tensor wrapper; buffer updated in place each frame. */
+const inputTensorOrt = new ort.Tensor('float32', inputTensor, [1, MODEL_INPUT_SIZE]);
 
 /**
  * Initialize the ONNX session.
  */
 async function initSession() {
+    sessionReady = new Promise<void>((resolve) => {
+        sessionReadyResolve = resolve;
+    });
     try {
-        // Attempt WebGPU first for 2026 performance, fallback to WASM
+        // RESEARCH §2: ORT tuning — WebGPU first, WASM fallback; enableCpuMemArena, numThreads for wasm
         const options: ort.InferenceSession.SessionOptions = {
             executionProviders: ['webgpu', 'wasm'],
             graphOptimizationLevel: 'all',
+            enableCpuMemArena: true,
+            extra: {
+                session: { numThreads: 4 },
+            } as Record<string, unknown>,
         };
 
-        session = await ort.InferenceSession.create('/models/swiftf0.onnx', options);
-        console.log('SwiftF0: Session initialized with WebGPU/WASM');
+        session = await ort.InferenceSession.create('/models/model.onnx', options);
+        sessionInputName = session.inputNames?.[0] ?? 'input_audio';
+        console.log('SwiftF0: Session initialized with WebGPU/WASM, input:', sessionInputName);
     } catch (err) {
         console.error('SwiftF0: Failed to load model', err);
+    } finally {
+        if (sessionReadyResolve) {
+            sessionReadyResolve();
+            sessionReadyResolve = null;
+        }
     }
 }
 
 /**
  * Run inference on a PCM block.
  */
-async function runInference(pcm: Float32Array): Promise<{ pitch: number; confidence: number }> {
-    if (!session) return { pitch: 0, confidence: 0 };
+async function runInference(pcm: Float32Array): Promise<{ pitch: number; confidence: number; rms: number }> {
+    if (!session) return { pitch: 0, confidence: 0, rms: 0 };
 
-    // 1. Logarithmic Compression (mimic human hearing)
-    // Input pcm is expected to be raw STFT or time-domain. 
-    // User spec: Apply log(1 + 10 * magnitude)
-    for (let i = 0; i < pcm.length; i++) {
-        inputTensor[i] = Math.log(1 + 10 * Math.abs(pcm[i]));
-    }
+    const t0 = enableTiming ? performance.now() : 0;
 
-    // 2. Prepare Tensor
-    const tensor = new ort.Tensor('float32', inputTensor, [1, 1, MODEL_INPUT_SIZE]);
+    const rms = computeRMS(pcm);
 
-    // 3. Inference using Bins 3-134 (Goldilocks zone: 46.8Hz to 2093.7Hz)
-    const feeds = { input: tensor };
+    preprocessPcm(pcm, inputTensor, 0.08, 0.003, 6);
+
+    const t1 = enableTiming ? performance.now() : 0;
+
+    const feeds = { [sessionInputName]: inputTensorOrt };
     const results = await session.run(feeds);
 
-    // 4. Output Processing: Classification + Regression
-    // Assuming 'classification' and 'regression' output names
-    const classification = results.classification.data as Float32Array;
-    const regression = results.regression?.data as Float32Array | undefined;
-
-    // Find peak bin
-    let maxVal = -1;
-    let peakBin = -1;
-    for (let i = 3; i <= 134; i++) {
-        if (classification[i] > maxVal) {
-            maxVal = classification[i];
-            peakBin = i;
-        }
+    const t2 = enableTiming ? performance.now() : 0;
+    if (enableTiming && t2 > 0) {
+        self.postMessage({
+            type: 'timing',
+            data: {
+                preprocessMs: t1 - t0,
+                inferenceMs: t2 - t1,
+                totalMs: t2 - t0,
+            },
+        });
     }
 
-    if (peakBin === -1 || maxVal < 0.5) {
-        return { pitch: 0, confidence: maxVal };
-    }
+    const outNames = session.outputNames;
+    const classificationTensor = outNames[0] ? results[outNames[0]] : undefined;
+    const regressionTensor = outNames[1] ? results[outNames[1]] : undefined;
+    const classification = classificationTensor?.data as Float32Array | undefined;
+    const regression = regressionTensor?.data as Float32Array | undefined;
 
-    // Calculate frequency based on bin index
-    // Note: Bin-to-Hz mapping depends on model training (e.g. log-spaced)
-    // Placeholder mapping:
-    const baseFreq = 46.8 * Math.pow(2, (peakBin - 3) / 20); // 20 bins per octave
-
-    // Apply Regression Head for sub-cent accuracy
-    const offset = regression ? regression[peakBin] : 0;
-    const stabilizedFreq = baseFreq * Math.pow(2, offset / 1200); // offset in cents
-
-    return { pitch: stabilizedFreq, confidence: maxVal };
+    if (!classification) return { pitch: 0, confidence: 0, rms: 0 };
+    const { pitch, confidence } = classificationToPitch(classification, currentProfile, regression);
+    return { pitch, confidence, rms };
 }
 
 // Worker message handling
-import { CrepeStabilizer } from './CrepeStabilizer';
+import { CrepeStabilizer, type CrepeStabilizerMode } from './CrepeStabilizer';
 
 let stabilizer: CrepeStabilizer | null = null;
+/** Used when creating stabilizer in startPollingLoop. */
+let stabilizerMode: CrepeStabilizerMode = 'full';
 let isPolling = false;
 
 /**
  * Polling loop that reads PCM from SharedArrayBuffer and runs inference.
+ * Waits for the ONNX session to be ready before running inference so mic notes are not stuck at 0.
  */
-async function startPollingLoop(pcmSab: SharedArrayBuffer) {
+async function startPollingLoop(pcmSab: SharedArrayBuffer, pitchSab?: SharedArrayBuffer) {
     const pcmView = new Float32Array(pcmSab);
+    const pitchView = pitchSab ? new Float32Array(pitchSab) : null;
     isPolling = true;
 
-    // Initialize stabilizer with our current profile
-    stabilizer = new CrepeStabilizer({ profileId: currentProfile.id });
+    await sessionReady;
+    if (!session) {
+        console.warn('SwiftF0: Polling started but model failed to load; pitch will stay 0.');
+    }
 
+    stabilizer = useStabilizer
+        ? new CrepeStabilizer({
+            profileId: currentProfile.id,
+            mode: stabilizerMode,
+            minConfidence: currentProfile.confidenceThreshold, // so guitar (0.58) etc. can update stabilizer
+        })
+        : null;
+
+    const cycleMs = 8; // target cycle (hop size 128 @ 16kHz)
     while (isPolling) {
-        // User spec: Run on PCM from SAB
+        const t0 = performance.now();
         const result = await runInference(pcmView);
+        const elapsed = performance.now() - t0;
 
-        if (result.pitch > 0 && stabilizer) {
-            // 5. User Spec: Instrument-Specific Hysteresis Profiles
-            const stabilized = stabilizer.process(result.pitch, result.confidence, 0 /* RMS placeholder */);
+        const finalPitch = stabilizer
+            ? stabilizer.process(result.pitch, result.confidence, result.rms)
+            : result.pitch;
 
-            self.postMessage({
-                type: 'result',
-                data: { pitch: stabilized, confidence: result.confidence }
-            });
+        if (pitchView) {
+            // REQ-AG-02: Direct SAB write for zero-copy
+            pitchView[0] = finalPitch;
+            pitchView[1] = result.confidence;
+
+            // REQ-AG-05: Accurate latency monitoring
+            const captureTime = pitchView[4];
+            const now = performance.now();
+            if (captureTime > 0) {
+                pitchView[5] = now - captureTime;
+            }
+            pitchView[4] = now; // lastUpdated
+        } else {
+            // Fallback to postMessage if pitchSab not provided
+            self.postMessage({ type: 'result', data: { pitch: finalPitch, confidence: result.confidence } });
         }
 
-        // Sleep for approx 8ms (hop size 128 @ 16kHz)
-        await new Promise(resolve => setTimeout(resolve, 8));
+        // REQ-SF0-S04: sleep only the remainder of the target cycle
+        const sleepMs = Math.max(0, cycleMs - elapsed);
+        await new Promise(resolve => setTimeout(resolve, sleepMs));
     }
 }
 
@@ -124,10 +176,23 @@ self.onmessage = async (e) => {
         await initSession();
         self.postMessage({ type: 'ready' });
     } else if (type === 'setProfile') {
-        currentProfile = INSTRUMENT_PROFILES[data] || INSTRUMENT_PROFILES.auto;
+        currentProfile = INSTRUMENT_PROFILES[data] || INSTRUMENT_PROFILES.general;
         if (stabilizer) stabilizer.setProfile(currentProfile.id);
+    } else if (type === 'setTiming') {
+        enableTiming = Boolean(data);
+    } else if (type === 'setStabilizer') {
+        useStabilizer = Boolean(data);
+        if (stabilizer && !useStabilizer) stabilizer = null;
+    } else if (type === 'setStabilizerMode') {
+        stabilizerMode = data === 'light' ? 'light' : 'full';
+        if (stabilizer) stabilizer = new CrepeStabilizer({ profileId: currentProfile.id, mode: stabilizerMode });
     } else if (type === 'startPolling') {
-        void startPollingLoop(data);
+        // data can be pcmSab or { pcmSab, pitchSab }
+        if (data instanceof SharedArrayBuffer) {
+            void startPollingLoop(data);
+        } else {
+            void startPollingLoop(data.pcmSab, data.pitchSab);
+        }
     } else if (type === 'stopPolling') {
         isPolling = false;
     }

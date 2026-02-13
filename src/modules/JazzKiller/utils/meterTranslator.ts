@@ -127,7 +127,7 @@ export const PLAYBACK_LOOP_INTERVAL = '8n' as const;
 
 /**
  * Resolve the effective time signature for a given bar from a time map.
- * Bars are 0-based (bar 0 = first bar). When meterChanges is absent or empty, returns defaultMeter.
+ * Bars are 0-based (bar 0 = first bar). When meterChanges is absent or empty, returns defaultMeter (non-destructive: existing single-meter behavior).
  * When present, returns the meter for the latest change where change.bar <= barIndex + 1 (since change.bar is 1-based).
  */
 export function getMeterAtBar(
@@ -155,4 +155,42 @@ export function getParsedMeterAtBar(
   defaultMeter: string
 ): ParsedMeter {
   return parseMeter(getMeterAtBar(barIndex, meterChanges, defaultMeter));
+}
+
+/**
+ * Schedule Transport time-signature changes at the start of each bar where a meter change is defined.
+ * Call only when song.meterChanges?.length (non-destructive: no-op when no meter changes). Returns event IDs to clear on unload/stop.
+ * DMP-04, DMP-05: each change is scheduled at "${bar-1}:0:0"; callback sets Transport.timeSignature and optionally updates UI state.
+ */
+export function scheduleMeterChanges(
+  meterChanges: MeterChange[],
+  defaultMeter: string,
+  onMeterChange?: (meter: string) => void
+): number[] {
+  if (!meterChanges.length) return [];
+  const transport = Tone.getTransport();
+  const ids: number[] = [];
+  const sorted = [...meterChanges].sort((a, b) => a.bar - b.bar);
+  for (const change of sorted) {
+    const time = `${change.bar - 1}:0:0`;
+    const meter = `${change.top}/${change.bottom}`;
+    const id = transport.schedule((_time) => {
+      applyMeterToTransport(meter);
+      if (onMeterChange) {
+        Tone.Draw.schedule(() => onMeterChange(meter), _time);
+      }
+    }, time);
+    ids.push(id);
+  }
+  return ids;
+}
+
+/**
+ * Clear previously scheduled meter-change events. Call on song unload or playback stop (DMP-05).
+ */
+export function clearMeterChangeSchedules(ids: number[]): void {
+  const transport = Tone.getTransport();
+  for (const id of ids) {
+    transport.clear(id);
+  }
 }

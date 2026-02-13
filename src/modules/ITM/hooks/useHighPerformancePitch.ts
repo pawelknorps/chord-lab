@@ -10,27 +10,31 @@ import { frequencyToNote, NoteInfo } from '../../../core/audio/frequencyToNote';
  */
 export function useHighPerformancePitch(
     stream: MediaStream | null,
-    instrumentId: string = 'auto',
+    instrumentId: string = 'general',
     options?: PitchStoreOptions
 ) {
     const { isReady, initialize, cleanup, getLatestPitch, startLatencyMeasurement, stopLatencyMeasurement, lastLatencyMs } = useITMPitchStore();
 
     useEffect(() => {
         if (stream) {
-            void initialize(stream, instrumentId, { ...options, useSwiftF0: true });
+            void initialize(stream, instrumentId, { ...options, useSwiftF0: options?.useSwiftF0 ?? true });
         } else {
             cleanup();
         }
     }, [stream, initialize, cleanup, instrumentId, options?.hopBlocks, options?.useSwiftF0]);
 
+    const pitch = getLatestPitch();
+
     return {
         isReady,
+        pitch,
         getLatestPitch,
         getLatestNoteInfo: (): NoteInfo | null => {
-            const pitch = getLatestPitch();
             if (!pitch || pitch.frequency <= 0) return null;
             return frequencyToNote(pitch.frequency);
         },
+        rms: pitch?.rms ?? 0,
+        onset: pitch?.onset ?? 0,
         startLatencyMeasurement,
         stopLatencyMeasurement,
         lastLatencyMs,

@@ -76,7 +76,7 @@ export const useMasteryStore = create<MasteryState>()(
             },
         }),
         {
-            name: 'chord-lab-mastery',
+            name: 'pawelsonik-mastery',
         }
     )
 );

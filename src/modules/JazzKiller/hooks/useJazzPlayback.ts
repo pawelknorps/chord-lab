@@ -1,8 +1,10 @@
 import { useEffect, useRef } from 'react';
 import * as Tone from 'tone';
 import { parseChord, CHORD_INTERVALS } from '../../../core/theory/index';
+import { JazzTheoryService } from '../utils/JazzTheoryService';
 
 // Extended mapping for iReal Pro specific symbols to our Theory engine
+/** Map parseChord quality (or iReal shorthand) to CHORD_INTERVALS key. Unified theory: parseChord is source of truth; this only aliases shorthands. */
 const IREAL_QUALITY_MAP: Record<string, string> = {
     '-': 'min',
     'm': 'min',
@@ -11,12 +13,12 @@ const IREAL_QUALITY_MAP: Record<string, string> = {
     '^': 'maj7',
     'maj7': 'maj7',
     '7': 'dom7',
-    'h': 'm7b5', // half diminished
-    'o': 'dim7', // dim7
+    'h': 'm7b5',
+    'o': 'dim7',
     'o7': 'dim7',
+    'dim7': 'dim7',
     'alt': '7alt',
     'sus': 'sus4',
-    // Add more mappings as discovered
 };
 
 import {
@@ -25,6 +27,7 @@ import {
     loopCountSignal,
     isPlayingSignal,
     bpmSignal,
+    activityLevelSignal,
     totalLoopsSignal,
     isLoadedSignal,
     pianoVolumeSignal,
@@ -32,8 +35,24 @@ import {
     drumsVolumeSignal,
     reverbVolumeSignal,
     pianoReverbSignal,
-    currentChordSymbolSignal
+    currentChordSymbolSignal,
+    tuneIntensitySignal,
+    tuneProgressSignal,
+    meterSignal
 } from '../state/jazzSignals';
+import { getTuneIntensity } from '../utils/tuneArc';
+import {
+    parseMeter,
+    applyMeterToTransport,
+    positionToPlaybackState,
+    PLAYBACK_LOOP_INTERVAL,
+    scheduleMeterChanges,
+    clearMeterChangeSchedules,
+    getMeterAtBar,
+    getParsedMeterAtBar,
+    type ParsedMeter,
+} from '../utils/meterTranslator';
+import { GrooveManager } from '../../../core/theory/GrooveManager';
 
 import { Signal } from "@preact/signals-react";
 
@@ -63,6 +82,15 @@ export const useJazzPlayback = (song: any, isActive: boolean = true): JazzPlayba
     const reverbRef = useRef<Tone.Reverb | null>(null);
     const pianoReverbRef = useRef<Tone.Reverb | null>(null);
     const lastChordRef = useRef<string>("");
+    /** When set, first comp for this chord lands here (phrase across bar line / off the one). */
+    const pendingFirstCompRef = useRef<{ chord: string; beat: number; offsetInBeat: number } | null>(null);
+    const startPendingRef = useRef(false);
+    /** Ref so loop callback always reads current (transposed) song without recreating the loop. */
+    const songRef = useRef<any>(null);
+    /** Current meter (updated in effect when meterSignal changes). Callback reads this, not the signal, so meter is correct in Tone's thread. */
+    const meterRef = useRef<ParsedMeter>(parseMeter('4/4'));
+    /** IDs of scheduled meter-change events; cleared on unload/stop (DMP-05). */
+    const meterScheduleIdsRef = useRef<number[]>([]);
 
     // Initialize Instruments & FX
     useEffect(() => {
@@ -168,8 +196,10 @@ export const useJazzPlayback = (song: any, isActive: boolean = true): JazzPlayba
     }, []);
 
     useEffect(() => {
-        Tone.Transport.bpm.value = bpmSignal.value;
-        Tone.Transport.swing = 0.58;
+        const bpm = bpmSignal.value;
+        Tone.Transport.bpm.value = bpm;
+        const groove = new GrooveManager();
+        Tone.Transport.swing = groove.getSwingRatio(bpm);
         Tone.Transport.swingSubdivision = '8n';
     }, [bpmSignal.value]);
 
@@ -198,10 +228,35 @@ export const useJazzPlayback = (song: any, isActive: boolean = true): JazzPlayba
         if (pianoReverbRef.current) pianoReverbRef.current.wet.value = pianoReverbSignal.value;
     }, [pianoReverbSignal.value]);
 
+    // Keep ref in sync so loop callback always sees current (transposed) song
+    useEffect(() => {
+        songRef.current = song;
+    }, [song]);
+
+    // When meter changes: apply to Transport and update ref so the loop callback sees the new meter (ref is read in Tone's thread)
+    useEffect(() => {
+        const parsed = parseMeter(meterSignal.value);
+        meterRef.current = parsed;
+        applyMeterToTransport(meterSignal.value);
+    }, [meterSignal.value]);
+
     useEffect(() => {
         if (!isActive || !song || !song.music || !song.music.measures) return;
 
+        const defaultMeter = song.TimeSignature ?? meterSignal.value ?? '4/4';
+        if (song.meterChanges?.length) {
+            const initialMeter = getMeterAtBar(0, song.meterChanges, defaultMeter);
+            meterSignal.value = initialMeter;
+            meterRef.current = parseMeter(initialMeter);
+            applyMeterToTransport(initialMeter);
+        } else {
+            // DMP-13: no meterChanges → unchanged single meter (non-destructive)
+            applyMeterToTransport(meterSignal.value);
+        }
+
         Tone.Transport.cancel();
+        clearMeterChangeSchedules(meterScheduleIdsRef.current);
+        meterScheduleIdsRef.current = [];
         currentMeasureIndexSignal.value = -1;
 
         const plan: number[] =
@@ -210,47 +265,107 @@ export const useJazzPlayback = (song: any, isActive: boolean = true): JazzPlayba
                 : song.music.measures?.map((_: unknown, i: number) => i) ?? [];
         if (plan.length === 0) return;
 
+        const cycledLength = (song.music as { playbackPlanCycledLength?: number }).playbackPlanCycledLength ?? plan.length;
+        const endingLength = plan.length - cycledLength;
+
+        if (song.meterChanges?.length) {
+            const ids = scheduleMeterChanges(
+                song.meterChanges,
+                defaultMeter,
+                (meter) => {
+                    meterSignal.value = meter;
+                    meterRef.current = parseMeter(meter);
+                }
+            );
+            meterScheduleIdsRef.current = ids;
+        }
+
+        const totalBars = totalLoopsSignal.value * cycledLength + endingLength;
+
         const loop = new Tone.Loop((time) => {
-            const position = Tone.Transport.position.toString().split(':');
-            const bar = parseInt(position[0]);
-            const beat = parseInt(position[1]);
+            const s = songRef.current;
+            if (!s?.music?.measures) return;
 
-            const logicalBar = bar % plan.length;
-            const measureIndex = plan[logicalBar];
-            const currentLoop = Math.floor(bar / plan.length);
+            const positionString = Tone.Transport.position.toString();
+            const barFromPosition = parseInt(positionString.split(':')[0], 10) || 0;
+            const defaultMeter = s.TimeSignature ?? meterSignal.value ?? '4/4';
+            // DMP-13: no meterChanges → use existing meterRef (non-destructive)
+            const m = s.meterChanges?.length
+                ? getParsedMeterAtBar(barFromPosition, s.meterChanges, defaultMeter)
+                : meterRef.current;
+            const state = positionToPlaybackState(positionString, m);
+            if (!state.shouldRun) return;
 
-            if (currentLoop >= totalLoopsSignal.value) {
+            const { bar, beat, divisionsPerBar: beatsPerBar, midBarBeat } = state;
+
+            const planIndices = s.music.playbackPlan?.length > 0 ? s.music.playbackPlan : s.music.measures.map((_: unknown, i: number) => i);
+            const cycledLen = (s.music as { playbackPlanCycledLength?: number }).playbackPlanCycledLength ?? planIndices.length;
+            const endingLen = planIndices.length - cycledLen;
+
+            const inEnding = endingLen > 0 && bar >= totalLoopsSignal.value * cycledLen;
+            const logicalBar = inEnding ? bar - totalLoopsSignal.value * cycledLen : bar % cycledLen;
+            const planIndex = inEnding ? cycledLen + logicalBar : (bar % cycledLen);
+            const measureIndex = planIndices[planIndex];
+            const currentLoop = inEnding ? totalLoopsSignal.value : Math.floor(bar / cycledLen);
+            const planLen = inEnding ? endingLen : cycledLen;
+
+            if (bar >= totalBars) {
+                clearMeterChangeSchedules(meterScheduleIdsRef.current);
+                meterScheduleIdsRef.current = [];
                 Tone.Transport.stop();
                 isPlayingSignal.value = false;
                 currentMeasureIndexSignal.value = -1;
                 loopCountSignal.value = 0;
+                tuneProgressSignal.value = 0;
+                tuneIntensitySignal.value = getTuneIntensity(0);
                 return;
             }
+
+            const tuneProgress = totalBars > 0 ? Math.min(1, bar / totalBars) : 0;
+            const tuneIntensity = getTuneIntensity(tuneProgress);
 
             Tone.Draw.schedule(() => {
                 currentMeasureIndexSignal.value = measureIndex;
                 currentBeatSignal.value = beat;
                 loopCountSignal.value = currentLoop;
+                tuneProgressSignal.value = tuneProgress;
+                tuneIntensitySignal.value = tuneIntensity;
             }, time);
 
-            const measure = song.music.measures[measureIndex];
-            const nextLogicalBar = (logicalBar * 4 + beat + 1) / 4;
-            const nextMeasureIndex = plan[Math.floor(nextLogicalBar) % plan.length];
-            const nextMeasure = song.music.measures[nextMeasureIndex];
+            const measure = s.music.measures[measureIndex];
+            const nextLogicalBar = (logicalBar * beatsPerBar + beat + 1) / beatsPerBar;
+            const nextPlanIndex = inEnding
+                ? cycledLen + (Math.floor(nextLogicalBar) % endingLen)
+                : Math.floor(nextLogicalBar) % cycledLen;
+            const nextMeasureIndex = planIndices[nextPlanIndex];
+            const nextMeasure = s.music.measures[nextMeasureIndex];
             const chords = measure.chords || [];
 
-            let currentChordSymbol = "";
-            let nextChordSymbol = "";
+            let rawCurrent = "";
+            let rawNext = "";
 
             if (chords.length === 1) {
-                currentChordSymbol = chords[0];
-                nextChordSymbol = nextMeasure.chords?.[0] || chords[0];
+                rawCurrent = chords[0];
+                rawNext = nextMeasure.chords?.[0] || chords[0];
             } else if (chords.length === 2) {
-                currentChordSymbol = beat < 2 ? chords[0] : chords[1];
-                nextChordSymbol = beat < 2 ? chords[1] : (nextMeasure.chords?.[0] || chords[0]);
+                rawCurrent = beat < midBarBeat ? chords[0] : chords[1];
+                rawNext = beat < midBarBeat ? chords[1] : (nextMeasure.chords?.[0] || chords[0]);
             } else {
-                currentChordSymbol = chords[Math.min(beat, chords.length - 1)];
-                nextChordSymbol = chords[Math.min(beat + 1, chords.length - 1)] || nextMeasure.chords?.[0];
+                rawCurrent = chords[Math.min(beat, chords.length - 1)];
+                rawNext = chords[Math.min(beat + 1, chords.length - 1)] || nextMeasure.chords?.[0];
+            }
+
+            // iReal optional chords in () are not played — use main chord only for playback/scoring
+            let currentChordSymbol = JazzTheoryService.getMainChord(rawCurrent ?? "");
+            let nextChordSymbol = JazzTheoryService.getMainChord(rawNext ?? "");
+            // If this beat is optional-only (e.g. "(C7b9)"), carry over the measure's main chord so the chord lasts the full bar
+            if (!currentChordSymbol && chords.length > 0) {
+                const firstMainInMeasure = chords.map((c: string) => JazzTheoryService.getMainChord(c ?? "")).find(Boolean);
+                currentChordSymbol = firstMainInMeasure ?? "";
+            }
+            if (!nextChordSymbol && nextMeasure?.chords?.length) {
+                const firstMainInNext = nextMeasure.chords.map((c: string) => JazzTheoryService.getMainChord(c ?? "")).find(Boolean);
+                nextChordSymbol = firstMainInNext ?? nextChordSymbol;
             }
 
             // Update global signal for scoring/UI tools
@@ -261,11 +376,12 @@ export const useJazzPlayback = (song: any, isActive: boolean = true): JazzPlayba
             if (currentChordSymbol) {
                 const { root, quality } = parseChord(currentChordSymbol);
                 const rootMidi = Tone.Frequency(root + "2").toMidi();
+                const lastBeat = state.lastBeat;
                 let targetNote: string;
 
                 if (beat === 0) {
                     targetNote = root + "2";
-                } else if (beat === 3 && nextChordSymbol) {
+                } else if (beat === lastBeat && nextChordSymbol) {
                     const { root: nextRoot } = parseChord(nextChordSymbol);
                     const nextMidi = Tone.Frequency(nextRoot + "2").toMidi();
                     const approachMidi = Math.random() > 0.5 ? nextMidi + 1 : nextMidi - 1;
@@ -278,8 +394,21 @@ export const useJazzPlayback = (song: any, isActive: boolean = true): JazzPlayba
                 }
 
                 const vel = beat === 0 ? 0.9 : 0.7 + Math.random() * 0.2;
-                if (bassRef.current?.loaded) {
-                    bassRef.current?.triggerAttackRelease(targetNote, "4n", time, vel);
+                const isBalladFirstCycle = s?.style === 'Ballad' && currentLoop === 0;
+                const playBassThisBeat = !isBalladFirstCycle || beat === 0 || beat === midBarBeat;
+                if (bassRef.current?.loaded && playBassThisBeat) {
+                    const bpm = bpmSignal.value;
+                    const beatDurationSec = 60 / Math.max(20, Math.min(400, bpm));
+                    // Half-time walk: use the full space — two beats per note, long duration.
+                    const bassDuration = isBalladFirstCycle
+                        ? Math.max(0.05, 2 * beatDurationSec - 0.01)
+                        : (() => {
+                            const isLowTempo = beatDurationSec > 0.75;
+                            const fraction = isLowTempo ? 0.5 : 0.75;
+                            const maxSec = isLowTempo ? 0.5 : 0.85;
+                            return Math.max(0.05, Math.min(beatDurationSec * fraction, maxSec));
+                        })();
+                    bassRef.current?.triggerAttackRelease(targetNote, bassDuration, time, vel);
                 }
             }
 
@@ -289,54 +418,88 @@ export const useJazzPlayback = (song: any, isActive: boolean = true): JazzPlayba
             const isNewChord = currentChordSymbol !== lastChordRef.current;
 
             if (isNewChord && currentChordSymbol !== "") {
-                shouldPlayComp = true;
-                compOffset = 0;
-                compDuration = "2n";
                 lastChordRef.current = currentChordSymbol;
-            } else {
+                // ~50% land on the one; else phrase across the bar — first hit on & of 1, beat 2, & of 2, or last beat
+                const firstHitOptions: { beat: number; offsetInBeat: number }[] = [
+                    { beat: 0, offsetInBeat: 0 },
+                    { beat: 0, offsetInBeat: 0.5 },
+                    { beat: 1, offsetInBeat: 0 },
+                    { beat: 1, offsetInBeat: 0.5 },
+                    { beat: 2, offsetInBeat: 0 },
+                    ...(beatsPerBar > 3 ? [{ beat: beatsPerBar - 1, offsetInBeat: 0 }] : []),
+                ].slice(0, Math.min(6, beatsPerBar + 2));
+                const first = firstHitOptions[Math.floor(Math.random() * firstHitOptions.length)];
+                pendingFirstCompRef.current = { chord: currentChordSymbol, beat: first.beat, offsetInBeat: first.offsetInBeat };
+            }
+
+            const pending = pendingFirstCompRef.current;
+            if (pending && currentChordSymbol === pending.chord && beat === pending.beat) {
+                shouldPlayComp = true;
+                compOffset = pending.offsetInBeat;
+                compDuration = pending.beat === 0 && pending.offsetInBeat === 0 ? "2n" : pending.offsetInBeat === 0.5 ? "8n" : "4n.";
+                pendingFirstCompRef.current = null;
+            } else if (!pending) {
                 const measurePattern = (bar % 3);
                 if (measurePattern === 0) {
                     if (beat === 0) { shouldPlayComp = true; compOffset = 0; compDuration = "4n."; }
                     if (beat === 1) { shouldPlayComp = true; compOffset = 0.5; compDuration = "8n"; }
                 } else if (measurePattern === 1) {
-                    if (beat === 1 || beat === 3) { shouldPlayComp = true; compOffset = 0.5; compDuration = "8n"; }
+                    if (beat === 1 || beat === state.lastBeat) { shouldPlayComp = true; compOffset = 0.5; compDuration = "8n"; }
                 } else {
-                    if (beat === 0 || beat === 2) { shouldPlayComp = true; compOffset = 0; compDuration = "2n"; }
+                    if (beat === 0 || beat === midBarBeat) { shouldPlayComp = true; compOffset = 0; compDuration = "2n"; }
                 }
             }
 
             if (shouldPlayComp && currentChordSymbol) {
-                playChord(currentChordSymbol, time + (compOffset * Tone.Time("4n").toSeconds()), compDuration);
+                playChord(currentChordSymbol, time + (compOffset * Tone.Time(state.parsed.beatNote).toSeconds()), compDuration);
             }
 
             if (drumsRef.current) {
-                const isStrongBeat = beat === 0 || beat === 2;
-                const rideNote = Math.random() > 0.9 ? "E1" : (Math.random() > 0.4 ? "D1" : "C1");
-                const rideVel = (isStrongBeat ? 0.6 : 0.4) + (Math.random() * 0.1);
-                drumsRef.current.ride.triggerAttack(rideNote, time, rideVel);
+                const groove = new GrooveManager();
+                const bpm = bpmSignal.value;
+                const swingOffset = groove.getOffBeatOffsetInBeat(bpm);
+                // Elastic Pulse: ride ±3ms jitter, band 4ms
+                const rideJitter = () => groove.getHumanizationJitter(3);
+                const bandJitter = () => groove.getHumanizationJitter(4);
 
-                if (beat === 1 || beat === 3 || Math.random() > 0.75) {
-                    const skipTime = time + Tone.Time("4n").toSeconds() * 0.66;
-                    drumsRef.current.ride.triggerAttack(rideNote, skipTime, 0.2 + (Math.random() * 0.15));
+                // Ride: 4 quarter pulses + skip only on 2 & 4 (rebound V_skip = 0.65 × V_down). Backbeats 2 & 4 accented 1.2×.
+                const isBackbeat = beat === midBarBeat || (beatsPerBar === 4 && beat === 3);
+                const rideDownbeatScale = (beat === 0 || beat === 2) ? 1.0 : 1.2;
+                const baseVel = 0.65;
+                const pulseVel = baseVel * rideDownbeatScale + Math.random() * 0.06;
+                const skipVel = pulseVel * 0.65;
+                const usePing = isBackbeat && Math.random() > 0.55;
+                const rideNote = usePing ? "D1" : "C1";
+
+                drumsRef.current.ride.triggerAttack(rideNote, time + rideJitter(), pulseVel);
+                if (isBackbeat) {
+                    drumsRef.current.ride.triggerAttack("C1", time + swingOffset + rideJitter(), skipVel);
                 }
 
-                if (beat === 1 || beat === 3) {
-                    drumsRef.current.hihat.triggerAttack("C1", time, 0.5 + Math.random() * 0.1);
+                // Hi-hat on 2 & 4: "lazy" +7ms so ride pulls forward, hi-hat sits back → pocket
+                if (isBackbeat) {
+                    const lazyHatMs = 0.007;
+                    drumsRef.current.hihat.triggerAttack("C1", time + lazyHatMs + bandJitter(), 0.5 + Math.random() * 0.1);
                 }
 
-                drumsRef.current.kick.triggerAttack("C1", time, 0.15);
+                // Kick: strong on 1 and middle of bar, lighter on other beats
+                const isStrongBeat = beat === 0 || beat === midBarBeat;
+                const kickVel = isStrongBeat ? 0.4 + Math.random() * 0.08 : 0.22 + Math.random() * 0.06;
+                drumsRef.current.kick.triggerAttack("C1", time + bandJitter(), kickVel);
 
                 if (Math.random() > 0.65) {
                     const snareOffset = (Math.random() > 0.5 ? Tone.Time("8t").toSeconds() : Tone.Time("8t").toSeconds() * 2);
-                    drumsRef.current.snare.triggerAttack("C1", time + snareOffset, 0.1 + Math.random() * 0.2);
+                    drumsRef.current.snare.triggerAttack("C1", time + snareOffset + bandJitter(), 0.1 + Math.random() * 0.2);
                 }
             }
-        }, "4n").start(0);
+        }, PLAYBACK_LOOP_INTERVAL).start(0);
 
         return () => {
+            clearMeterChangeSchedules(meterScheduleIdsRef.current);
+            meterScheduleIdsRef.current = [];
             loop.dispose();
         };
-    }, [song, isActive]);
+    }, [isActive, !!song]);
 
     const playChord = (symbol: string, time: number = Tone.now(), duration: string = "2n") => {
         if (!pianoRef.current?.loaded) return;
@@ -366,17 +529,33 @@ export const useJazzPlayback = (song: any, isActive: boolean = true): JazzPlayba
         }
     };
 
-    const togglePlayback = async () => {
+    const togglePlayback = () => {
         if (isPlayingSignal.value) {
+            clearMeterChangeSchedules(meterScheduleIdsRef.current);
+            meterScheduleIdsRef.current = [];
             Tone.Transport.stop();
             isPlayingSignal.value = false;
             currentMeasureIndexSignal.value = -1;
             currentBeatSignal.value = -1;
-        } else {
-            await Tone.start();
-            Tone.Transport.start();
-            isPlayingSignal.value = true;
+            return;
         }
+        if (startPendingRef.current) return;
+        startPendingRef.current = true;
+        Tone.start()
+            .then(async () => {
+                const ctx = Tone.getContext() as { rawContext?: AudioContext };
+                const raw = ctx?.rawContext;
+                if (raw?.state === 'suspended') await raw.resume();
+                Tone.Transport.position = '0:0:0';
+                isPlayingSignal.value = true;
+                Tone.Transport.start();
+            })
+            .catch(() => {
+                // Context may be blocked by browser; next click will retry
+            })
+            .finally(() => {
+                startPendingRef.current = false;
+            });
     };
 
     return {
@@ -389,7 +568,10 @@ export const useJazzPlayback = (song: any, isActive: boolean = true): JazzPlayba
         totalLoopsSignal,
         togglePlayback,
         playChord,
-        setBpm: (val: number) => bpmSignal.value = val,
+        setBpm: (val: number) => {
+            bpmSignal.value = val;
+            activityLevelSignal.value = Math.max(0, Math.min(1, (val - 50) / 190));
+        },
         onNote: () => { }
     };
 };

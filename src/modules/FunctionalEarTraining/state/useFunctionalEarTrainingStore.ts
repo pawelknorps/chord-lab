@@ -11,6 +11,13 @@ interface FETState {
     currentKey: string;
     isPlaying: boolean;
     externalData: any | null;
+    activeTarget: {
+        midi: number | null;
+        label: string | null;
+        type: 'pitch' | 'rhythm';
+        sequence?: number[];
+        sequenceIndex?: number;
+    } | null;
 
     // Actions
     setLevel: (level: FETLevel) => void;
@@ -18,8 +25,9 @@ interface FETState {
     addScore: (points: number) => void;
     resetScore: () => void;
     setKey: (key: string) => void;
-    setPlaying: (playing: boolean) => void;
+    setPlaying: (isPlaying: boolean) => void;
     setExternalData: (data: any | null) => void;
+    setActiveTarget: (target: { midi: number | null; label: string | null; type: 'pitch' | 'rhythm', sequence?: number[], sequenceIndex?: number } | null) => void;
 }
 
 export const useFunctionalEarTrainingStore = create<FETState>((set) => ({
@@ -30,6 +38,7 @@ export const useFunctionalEarTrainingStore = create<FETState>((set) => ({
     currentKey: 'C',
     isPlaying: false,
     externalData: null,
+    activeTarget: null,
 
     setLevel: (level) => set({ level }),
     setDifficulty: (difficulty) => set({ difficulty }),
@@ -41,4 +50,5 @@ export const useFunctionalEarTrainingStore = create<FETState>((set) => ({
     setKey: (key) => set({ currentKey: key }),
     setPlaying: (playing) => set({ isPlaying: playing }),
     setExternalData: (externalData) => set({ externalData }),
+    setActiveTarget: (activeTarget) => set({ activeTarget }),
 }));

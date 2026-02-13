@@ -19,9 +19,11 @@ export function LiveNoteIndicator(): React.ReactElement | null {
     let rafId: number;
     const loop = () => {
       const result = getLatestPitch();
-      if (result && result.clarity > 0.9) {
+      if (result && result.frequency > 0 && result.clarity >= 0.5) {
         const note = Note.fromFreq(result.frequency);
         setActiveNote(note.replace(/\d/g, ''));
+      } else {
+        setActiveNote(null);
       }
       rafId = requestAnimationFrame(loop);
     };

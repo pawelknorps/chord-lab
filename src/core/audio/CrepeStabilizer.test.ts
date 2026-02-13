@@ -35,9 +35,8 @@ describe('CrepeStabilizer', () => {
 
     it('should only update when crossing hysteresis threshold', () => {
         const stabilizer = new CrepeStabilizer({
-            hysteresisCents: 20,
-            minConfidence: 0,
-            stabilityThreshold: 3
+            profileId: 'trumpet',
+            minConfidence: 0
         });
 
         // Seed initial pitch (fill history with 440)
@@ -49,15 +48,58 @@ describe('CrepeStabilizer', () => {
         for (let i = 0; i < 10; i++) stabilizer.process(smallChange, 1);
         expect(stabilizer.getLastStablePitch()).toBe(440);
 
-        // Large change (30 cents)
-        const largeChange = 440 * Math.pow(2, 30 / 1200);
+        // Large change (40 cents) — trumpet profile hysteresis is 35 cents, so this crosses
+        const largeChange = 440 * Math.pow(2, 40 / 1200);
 
-        // Process enough frames to shift the median (4 frames) 
-        // and satisfy stability threshold (3 frames)
         for (let i = 0; i < 15; i++) {
             stabilizer.process(largeChange, 1);
         }
 
         expect(stabilizer.getLastStablePitch()).toBeCloseTo(largeChange, 1);
+    });
+
+    it('light mode: confidence gate only, no median/hysteresis', () => {
+        const stabilizer = new CrepeStabilizer({ minConfidence: 0.9, mode: 'light' });
+
+        expect(stabilizer.process(440, 0.95)).toBe(440);
+        expect(stabilizer.process(880, 0.5)).toBe(440);
+        expect(stabilizer.process(880, 0.95)).toBe(880);
+    });
+
+    it('holds last pitch on RMS rise when confidence dips (onset hold)', () => {
+        const stabilizer = new CrepeStabilizer({
+            minConfidence: 0.8,
+            stabilityThreshold: 1,
+        });
+        expect(stabilizer.process(440, 0.9)).toBe(440);
+        expect(stabilizer.process(440, 0.5)).toBe(440);
+    });
+
+    it('general profile uses stabilityThreshold 5 after enough median frames', () => {
+        const stabilizer = new CrepeStabilizer({
+            profileId: 'general',
+            minConfidence: 0,
+            windowSize: 7,
+        });
+        const newPitch = 440 * Math.pow(2, 60 / 1200);
+        for (let i = 0; i < 10; i++) stabilizer.process(440, 1);
+        expect(stabilizer.getLastStablePitch()).toBe(440);
+        for (let i = 0; i < 10; i++) stabilizer.process(newPitch, 1);
+        expect(stabilizer.getLastStablePitch()).toBeCloseTo(newPitch, 0);
+    });
+
+    it('light mode updates immediately when confidence returns', () => {
+        const stabilizer = new CrepeStabilizer({
+            minConfidence: 0.8,
+            stabilityThreshold: 1,
+            mode: 'light',
+        });
+        stabilizer.process(440, 0.9);
+        expect(stabilizer.getLastStablePitch()).toBe(440);
+        stabilizer.process(500, 0.5);
+        stabilizer.process(500, 0.5);
+        expect(stabilizer.getLastStablePitch()).toBe(440);
+        stabilizer.process(500, 0.9);
+        expect(stabilizer.getLastStablePitch()).toBe(500);
     });
 });

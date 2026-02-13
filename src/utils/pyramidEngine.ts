@@ -79,9 +79,9 @@ export class PyramidEngine {
         Tone.Transport.bpm.value = bpm;
     }
 
-    start() {
+    async start() {
         if (this.isPlaying) return;
-        Tone.start();
+        await Tone.start();
         Tone.Transport.position = 0;
 
         // Setup metronome if enabled

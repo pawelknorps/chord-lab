@@ -13,10 +13,21 @@ interface AudioContextType {
 
 const AudioContext = createContext<AudioContextType | null>(null);
 
-export const useAudio = () => {
+/** Fallback when used outside AudioProvider (e.g. route/layout edge cases). */
+let fallbackVolume: Tone.Volume | null = null;
+const fallbackAudioContext: AudioContextType = {
+    isReady: false,
+    startAudio: async () => {},
+    get masterVolume() {
+        if (!fallbackVolume) fallbackVolume = new Tone.Volume(0).toDestination();
+        return fallbackVolume;
+    },
+    audioManager,
+};
+
+export const useAudio = (): AudioContextType => {
     const context = useContext(AudioContext);
-    if (!context) throw new Error('useAudio must be used within an AudioProvider');
-    return context;
+    return context ?? fallbackAudioContext;
 };
 
 export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -33,11 +44,19 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }, [masterVolumeValue]);
 
     const startAudio = useCallback(async () => {
+        try {
+            await initGlobalAudio();
+        } catch (e) {
+            console.warn('Global audio init failed, using fallback engine:', e);
+        }
         if (Tone.context.state !== 'running') {
             await Tone.start();
         }
-        await initGlobalAudio();
-        await audioManager.initialize();
+        try {
+            await audioManager.initialize();
+        } catch (e) {
+            console.error('AudioManager init failed:', e);
+        }
         setIsReady(true);
         console.log('Audio Engine Started/Resumed');
     }, []);
@@ -55,14 +74,18 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             window.removeEventListener('touchstart', handleInteraction);
         };
 
+        const onEngineReady = () => setIsReady(true);
+
         window.addEventListener('mousedown', handleInteraction);
         window.addEventListener('keydown', handleInteraction);
         window.addEventListener('touchstart', handleInteraction);
+        window.addEventListener('audio-engine-ready', onEngineReady);
 
         return () => {
             window.removeEventListener('mousedown', handleInteraction);
             window.removeEventListener('keydown', handleInteraction);
             window.removeEventListener('touchstart', handleInteraction);
+            window.removeEventListener('audio-engine-ready', onEngineReady);
         };
     }, [isReady, startAudio]);
 

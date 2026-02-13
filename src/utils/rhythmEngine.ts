@@ -6,6 +6,7 @@ export class MetronomeEngine {
     private bpm: number = 120;
     private swing: number = 0;
     private isPlaying: boolean = false;
+    public lastStartTime: number = 0;
 
     // Synths
     private clickSynth: Tone.MembraneSynth;
@@ -74,10 +75,10 @@ export class MetronomeEngine {
         }
     }
 
-    start() {
+    async start() {
         if (this.isPlaying) return;
 
-        Tone.start();
+        await Tone.start();
         Tone.Transport.bpm.value = this.bpm;
         Tone.Transport.swing = this.swing;
 
@@ -99,6 +100,7 @@ export class MetronomeEngine {
 
         this.scheduleLoop();
         Tone.Transport.start();
+        this.lastStartTime = performance.now();
         this.isPlaying = true;
     }
 
@@ -175,7 +177,7 @@ export class MetronomeEngine {
 
     restart() {
         this.stop();
-        this.start();
+        void this.start();
     }
 
     dispose() {

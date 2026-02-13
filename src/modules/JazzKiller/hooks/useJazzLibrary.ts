@@ -27,6 +27,11 @@ export interface JazzSection {
         Chords: string;
     };
     Endings?: { Chords: string }[];
+    /**
+     * Chords after the double bar at the end of this section (iReal: ] or Z).
+     * Played once at the end of the whole song, after all loops — not repeated with the main form.
+     */
+    AfterDoubleBar?: { Chords: string };
 }
 
 export const useJazzLibrary = () => {
@@ -37,6 +42,8 @@ export const useJazzLibrary = () => {
         // Transform the structured JSON into the format expected by our components
         const visualMeasures: any[] = [];
         const playbackPlan: number[] = [];
+        /** Indices of measures after the double bar — played once at end of song, not in the loop. */
+        const playOnceAtEndIndices: number[] = [];
 
         // Determine new key with correct spelling
         const originalKey = song.Key || "C";
@@ -49,11 +56,11 @@ export const useJazzLibrary = () => {
             const iterations = numEndings > 0 ? numEndings : (section.Repeats ? section.Repeats + 1 : 1);
             const isRepeated = iterations > 1;
 
-            const sectionStartVisualIndex = visualMeasures.length;
             const mainSegmentVisualIndices: number[] = [];
             const endingVisualIndices: number[][] = [];
+            const afterDoubleBarVisualIndices: number[] = [];
 
-            // 1. Process MainSegment once for visual
+            // 1. Process MainSegment once for visual (cycled part — up to double bar)
             if (section.MainSegment.Chords) {
                 const measureStrings = section.MainSegment.Chords.split('|');
                 measureStrings.forEach((ms, msIdx) => {
@@ -92,12 +99,27 @@ export const useJazzLibrary = () => {
                 });
             }
 
-            // 3. Build Playback Plan (Logical Expansion)
+            // 2b. Process AfterDoubleBar once for visual — not in loop; played once at end of song
+            if (section.AfterDoubleBar?.Chords) {
+                const measureStrings = section.AfterDoubleBar.Chords.split('|');
+                measureStrings.forEach((ms, msIdx) => {
+                    const beatChords = ms.split(',').filter(c => c !== "");
+                    const transposedChords = beatChords.map(c => transposeChordSymbol(c, transpose, transposedKey));
+
+                    afterDoubleBarVisualIndices.push(visualMeasures.length);
+                    visualMeasures.push({
+                        chords: transposedChords.length > 0 ? transposedChords : [""],
+                        afterDoubleBar: true,
+                        isFirstOfSection: msIdx === 0
+                    });
+                });
+                playOnceAtEndIndices.push(...afterDoubleBarVisualIndices);
+            }
+
+            // 3. Build Playback Plan: loop only MainSegment + Endings (not AfterDoubleBar)
             for (let i = 0; i < iterations; i++) {
-                // Add MainSegment to playback
                 playbackPlan.push(...mainSegmentVisualIndices);
 
-                // Add correct ending to playback
                 if (endingVisualIndices.length > 0) {
                     if (endingVisualIndices[i]) {
                         playbackPlan.push(...endingVisualIndices[i]);
@@ -105,6 +127,12 @@ export const useJazzLibrary = () => {
                 }
             }
         });
+
+        // Cycled part length (one chorus); "after double bar" is appended to plan but not repeated.
+        const playbackPlanCycledLength = playOnceAtEndIndices.length > 0 ? playbackPlan.length : undefined;
+        if (playbackPlanCycledLength != null) {
+            playbackPlan.push(...playOnceAtEndIndices);
+        }
 
         return {
             title: song.Title,
@@ -116,7 +144,9 @@ export const useJazzLibrary = () => {
             meterChanges: song.meterChanges,
             music: {
                 measures: visualMeasures,
-                playbackPlan: playbackPlan
+                playbackPlan: playbackPlan,
+                /** When set, only this many indices are repeated; the rest of playbackPlan is played once at end. */
+                playbackPlanCycledLength
             }
         };
     }, []);

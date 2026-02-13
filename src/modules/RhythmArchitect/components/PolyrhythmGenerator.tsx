@@ -3,6 +3,7 @@ import { PolyrhythmEngine } from '../../../utils/polyrhythmEngine';
 import { Play, Square, Trophy, Activity } from 'lucide-react';
 import * as Tone from 'tone';
 import { useRhythmStore } from '../state/useRhythmStore';
+import { useAudio } from '../../../context/AudioContext';
 
 const engine = new PolyrhythmEngine();
 
@@ -35,6 +36,7 @@ const POLY_CHALLENGES: Record<string, any[]> = {
 
 export default function PolyrhythmLab() {
     const { bpm, setCurrentBpm, difficulty, metronomeEnabled, setMetronomeEnabled } = useRhythmStore();
+    const { startAudio } = useAudio();
     const [isPlaying, setIsPlaying] = useState(false);
     const [divA, setDivA] = useState(3);
     const [divB, setDivB] = useState(2);
@@ -58,16 +60,17 @@ export default function PolyrhythmLab() {
         };
     }, []);
 
-    const togglePlay = () => {
+    const togglePlay = async () => {
         if (isPlaying) {
             isPlayingRef.current = false;
             engine.stop();
             setIsPlaying(false);
         } else {
+            await startAudio();
             engine.metronomeEnabled = metronomeEnabled;
             engine.setBpm(bpm);
             engine.setDivisions(divA, divB);
-            engine.start();
+            await engine.start();
             isPlayingRef.current = true;
             setIsPlaying(true);
             requestAnimationFrame(draw);
