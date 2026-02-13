@@ -213,6 +213,18 @@
   - [x] **Phase 2 – Chromatic + Cents API**: Verify frequencyToNote chromatic + cents; consumers can read cents (REQ-SF0-P04).
   - [x] **Phase 3 – Tuner Bar UI**: Add or wire tuner bar (cents) to at least one pitch screen (REQ-SF0-P05).
 
+## Phase 14.4: Temporal Alignment (Time-Travel) & BPM Heatmap ✅
+
+*Focus: Solve the "Time-Travel Problem"—compensate for output/input/inference latency so the app judges the student's note at the moment of the beat, not the delayed reading. BPM Heatmap (Stability vs Speed) and optional round-trip calibration.*
+
+- **Success Criteria**: Latency-aware beat check (look back in pitch history by L_total); BPM Heatmap component (Tempo vs Accuracy thermal trail); optional 2 s calibration wizard for device-specific lag.
+- **Tasks**:
+  - [x] **LatencyEngine**: getSystemLatency(ctx), getAdjustedNote(history, targetTime, lag); use ctx.outputLatency + input/inference constants.
+  - [x] **Pitch history**: Ring buffer of { timestamp, midi } from getLatestPitch polling; getPitchHistory() for drill logic.
+  - [x] **Latency-aware registerPass**: useDrillWithLatency hook; registerPass(targetMidi) uses historical note at (beatTime - L_total).
+  - [x] **BpmHeatmap**: SVG grid (BPM X, Accuracy Y), green/red points, trend line; data: DrillData[].
+  - [ ] **Optional**: Round-trip calibration (bip → mic → measured lag) for Pro mode (deferred).
+
 ## Phase 17: Innovative Interactive Exercises (Ear + Rhythm) ✅
 
 *Focus: New module of pitch-centric ear exercises (Ghost Note, Intonation Heatmap, Voice-Leading Maze) and micro-timing rhythm exercises (Swing Pocket, Call and Response, Ghost Rhythm).*
