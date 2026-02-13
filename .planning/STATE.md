@@ -2,8 +2,8 @@
 
 ## Current Status
 
-- **Phase**: Phase 17–22 ✅; Phase 6 Polish or next roadmap phase
-- **Status**: Phase 22 completed (Trio Hi-Fi Mixer: parallel bus, soft-knee worklet, RMS makeup, Pro Mix toggle, drums Air band)
+- **Phase**: Phase 17–22 ✅; Phase 6 (06-ai-teacher) verified ✅; Phase 6 Polish or next roadmap phase
+- **Status**: Phase 22 completed (Trio Hi-Fi Mixer); Phase 6 (06-ai-teacher) executed and verified — AOT script, SmartLessonPane, Drills, Local Agent with jazz Teacher Logic.
 - **Next Milestone**: Phase 6 Polish or `/gsd-complete-milestone` for trio-hifi-mixer
 - **Overall Progress**: ~98%
 
@@ -27,6 +27,7 @@
 
 ## Recent Achievements
 
+- **Phase 6 (06-ai-teacher) — Execute & Verify**: `/gsd-execute-phase 6` completed; all success criteria verified (AOT `generate-lessons.js`, SmartLessonPane ChordLab + JazzKiller, Spotlight/Blindfold, LocalAgentService, `generateJazzLesson` shared Teacher Logic). See `.planning/phases/06-ai-teacher/VERIFICATION.md`.
 - **Phase 22: Trio Hi-Fi Mixer (WASM Compressor & Parallel Processing)**:
   - Parallel bus: trio sum → dry Gain(0.4) + wet (compressor/worklet) → parallelSumGain → makeupGain → masterBus; Pro Mix toggle in Mixer (REQ-HIFI-01, REQ-HIFI-02, REQ-HIFI-08).
   - Soft-knee compressor worklet `jazz-compressor-processor.js` (ratio 4, knee 30 dB, attack 5 ms, release 150 ms); wet path swaps when loaded; fallback Tone.Compressor (REQ-HIFI-03–05).

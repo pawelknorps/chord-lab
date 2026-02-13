@@ -16,3 +16,5 @@
 - Spotlight Drill and Blindfold work in Chord Lab Smart Lesson.
 
 **Status**: Phase complete; no open tasks. Roadmap Phase 6 (Chord Lab Progression Chatbot) is tracked separately in `06-chordlab-chatbot`.
+
+**Execution**: `/gsd-execute-phase 6` — verification pass completed; all deliverables present (`scripts/generate-lessons.js`, SmartLessonPane in ChordLab + JazzKiller, LocalAgentService, jazzTeacherLogic.generateJazzLesson`).
