@@ -3,16 +3,16 @@
 ## Current Status
 
 - **Active Milestone**: Wave III - The Brain
-- **Current Phase**: Phase 28: Performance Hub - Classroom & Communities
-- **Overall Progress**: 96%
-- **Status**: Phase 27 complete. Analytics dashboard active.
+- **Current Phase**: Phase 29: Final Polish & Mastering
+- **Overall Progress**: 98%
+- **Status**: Phase 28 complete. Social hub and teacher analytics active.
 
 ## Recent Achievements
 
-- ✅ **Phase 24**: Generative Rhythm Section (Barry Harris Bass, DeJohnette Drums)
 - ✅ **Phase 25**: Advanced AI Interaction (Async worker-based critique, SegmentBuilder)
 - ✅ **Phase 26**: Mastery Tree & Long-term Progression (Session history, Visual curriculum)
 - ✅ **Phase 27**: Performance Trends & AI Transcriptions (Analytics dashboard, Solo vault)
+- ✅ **Phase 28**: Performance Hub - Classroom & Communities (Cloud sync, Lick Hub)
 
 ## Completed Phases
 
@@ -29,7 +29,8 @@
 
 ## Next Steps
 
+- [ ] **Phase 22.1 – Studio Polish (Priority: High)**: Parallel compression bus (70/30, 8:1 Worklet), Air band +2 dB @ 12 kHz, Master -14 LUFS, Note Waterfall 60fps. Milestone: `.planning/milestones/studio-polish/`.
+- [ ] **Phase 23 – Glitch Defense (Priority: Critical)**: Thread audit (SwiftF0=Worker A, Gemini=Worker B, Main &lt;5 ms); zero garbage in Bass/Drum loops; cache last 5 Standards in IndexedDB; Airplane Mode test. Milestone: `.planning/milestones/audio-glitches-architecture/`.
 - [ ] **Phase 14.3 – SwiftF0 SOTA Precision**: Verify LEV + median + hysteresis; add tuner bar (cents). Milestone: `.planning/milestones/swiftf0-precision/`.
-- [ ] Initialize Phase 26 planning (if applicable).
 - [ ] Implement local database for session persistence (if not done).
 - [ ] Create Mastery Progress Map visualization.

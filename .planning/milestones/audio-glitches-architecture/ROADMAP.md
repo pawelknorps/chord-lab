@@ -34,7 +34,28 @@
 
 ---
 
-## Phase 4 (Optional): Guards and Regression Prevention
+## Phase 4: Strict Thread Audit (Glitch Defense)
+
+**Goal**: Guarantee &lt;10 ms latency even when Gemini Nano is thinking; enforce thread boundaries with measurable criteria.
+
+- **REQ-AG-08**: Use Chrome Performance Monitor; fail if SwiftF0 inference spikes Main Thread &gt;5 ms. Confirm SwiftF0 in Worker A (Analysis), Gemini Nano in Worker B (Pedagogy). Document audit steps and results.
+
+**Success**: Thread ownership verified; main-thread pitch path &lt;5 ms; architecture doc updated.
+
+---
+
+## Phase 5: GC Hunt and Offline Resilience
+
+**Goal**: Eliminate GC-induced stutters in audio loops; support offline use for last-used standards.
+
+- **REQ-AG-09**: Profile memory; ensure Bass and Drum engines generate zero garbage in hot path (reuse objects/arrays). Code review and/or heap snapshot during playback.
+- **REQ-AG-10**: Test app in Airplane Mode. Cache last 5 used Standards (JSON + Audio assets) in IndexedDB; document cache strategy (LRU, 5 items).
+
+**Success**: No allocations in Bass/Drum tick path; last 5 standards load from IndexedDB when offline.
+
+---
+
+## Phase 6 (Optional): Guards and Regression Prevention
 
 - Add a short “architecture checklist” in a CONTRIBUTING or .planning doc: “Before adding audio/AI work: ensure no new heavy work on audio thread; no blocking LLM on real-time path.”
 - Optional: simple test that asserts worklet file does not contain `detectPitch` or `runInference` (string check).
@@ -52,3 +73,6 @@
 | REQ-AG-04 | 2 |
 | REQ-AG-05 | 3 |
 | REQ-AG-07 | 3 |
+| REQ-AG-08 | 4 |
+| REQ-AG-09 | 5 |
+| REQ-AG-10 | 5 |

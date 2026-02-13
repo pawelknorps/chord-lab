@@ -43,6 +43,25 @@
 - **Requirement**: With mic on, playback on (JazzKiller trio), and (when enabled) SwiftF0 and optional AI critique, the app must not exhibit audible dropouts or clicks attributable to thread contention.
 - **Acceptance**: Manual test (or automated if feasible): play along with mic + full band + “Analyze performance”; no sustained glitches; regression test or checklist in STATE.md/VERIFICATION.md.
 
+### Strict Thread Audit & GC (Glitch Defense)
+
+#### REQ-AG-08: Strict Thread Audit (Chrome Performance Monitor)
+
+- **Requirement**: Use the **Chrome Performance Monitor** (or equivalent) to enforce thread isolation. **Fail condition**: If SwiftF0 inference spikes the **Main Thread > 5 ms**, the architecture is in violation. SwiftF0 must run in **Worker A (Analysis)**; Gemini Nano must run in **Worker B (Pedagogy)**. No heavy inference on main or audio thread.
+- **Acceptance**: Document audit steps; confirm SwiftF0 in Worker A only; confirm Gemini in Worker B only; main-thread inference time for pitch path &lt;5 ms (measure and document).
+
+#### REQ-AG-09: Garbage Collection (GC) Hunt – Zero Garbage in Audio Loops
+
+- **Requirement**: Profile memory usage. Ensure **audio loops** (Bass engine, Drum engine) generate **zero garbage** during playback—reuse objects and arrays, no allocations in hot path—to prevent audio stutters during GC pauses.
+- **Acceptance**: Code review and/or heap snapshot during playback; Bass and Drum scheduling paths do not allocate new objects/arrays per tick; reuse buffers and event objects.
+
+### Offline Resilience
+
+#### REQ-AG-10: Offline Resilience (Airplane Mode + Cache)
+
+- **Requirement**: The app must be testable and usable in **Airplane Mode**. **Task**: Cache the **last 5 used "Standards"** (JSON + Audio assets) in **IndexedDB** so that recently used standards are available offline and load without network.
+- **Acceptance**: With network disabled, last 5 used standards load from IndexedDB (chart JSON + associated audio if any); no hard failure when offline; document cache strategy (LRU, 5 items) in milestone or RESEARCH.md.
+
 ## v2 / Deferred
 
 - **Worker B dedicated thread**: Formalize a single “AI Worker” that owns all Gemini Nano calls and queues prompts/results.
@@ -66,3 +85,6 @@
 | REQ-AG-05 | Real-time feedback latency &lt;10 ms | Latency |
 | REQ-AG-06 | Data flow and SAB ownership documented | Data flow |
 | REQ-AG-07 | No glitches under combined load | Verification |
+| REQ-AG-08 | Strict thread audit (Main &lt;5 ms; SwiftF0=Worker A, Gemini=Worker B) | Glitch defense |
+| REQ-AG-09 | Zero garbage in Bass/Drum audio loops | Glitch defense |
+| REQ-AG-10 | Offline: cache last 5 Standards (JSON + Audio) in IndexedDB | Offline resilience |

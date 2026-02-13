@@ -202,16 +202,16 @@
   - [x] **Phase 2 – Inference and Hot Path**: Reused input tensor; tightened preprocessing loop (REQ-SF0-S02, S03, S05).
   - [x] **Phase 3 – Scheduling and Polish**: Adaptive sleep `max(0, cycleMs − elapsed)`; STATE.md and SUMMARY/VERIFICATION updated (REQ-SF0-S04, S05).
 
-## Phase 14.3: SwiftF0 SOTA Precision (Flicker-Free, Semitone-Stable)
+## Phase 14.3: SwiftF0 SOTA Precision (Flicker-Free, Semitone-Stable) ✅
 
 *Focus: Achieve SOTA precision for SwiftF0—Local Expected Value (no argmax-only), median filter, hysteresis (60¢, 3-frame note lock), chromatic + cents, tuner bar.*
 
 - **Milestone**: `.planning/milestones/swiftf0-precision/` (PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md).
 - **Success Criteria**: LEV used for pitch; median (5–7 frames) + hysteresis (60¢, 3-frame stability) active; chromatic note + cents exposed; at least one tuner bar (cents) in the app.
 - **Tasks**:
-  - [ ] **Phase 1 – Verify LEV and Temporal Stack**: Confirm swiftF0Inference 9-bin LEV; CrepeStabilizer median + hysteresis; instrumentProfiles 60¢/3-frame reference; smoothing in Worker (REQ-SF0-P01, P02, P03, P06).
-  - [ ] **Phase 2 – Chromatic + Cents API**: Verify frequencyToNote chromatic + cents; consumers can read cents (REQ-SF0-P04).
-  - [ ] **Phase 3 – Tuner Bar UI**: Add or wire tuner bar (cents) to at least one pitch screen (REQ-SF0-P05).
+  - [x] **Phase 1 – Verify LEV and Temporal Stack**: Confirm swiftF0Inference 9-bin LEV; CrepeStabilizer median + hysteresis; instrumentProfiles 60¢/3-frame reference; smoothing in Worker (REQ-SF0-P01, P02, P03, P06).
+  - [x] **Phase 2 – Chromatic + Cents API**: Verify frequencyToNote chromatic + cents; consumers can read cents (REQ-SF0-P04).
+  - [x] **Phase 3 – Tuner Bar UI**: Add or wire tuner bar (cents) to at least one pitch screen (REQ-SF0-P05).
 
 ## Phase 17: Innovative Interactive Exercises (Ear + Rhythm) ✅
 
@@ -284,17 +284,30 @@
   - [ ] **Wave 3**: RMS pre/post measurement; automatic makeup gain; "Mastering" / "Pro Mix" toggle (REQ-HIFI-06–08).
   - [ ] **Wave 4**: Drums Air band (+3 dB @ 12 kHz) (REQ-HIFI-09).
 
-## Phase 23: Audio Glitches & Architecture (Critical Feasibility)
+## Phase 22.1: The "Studio" Polish (Priority: High)
 
-*Focus: Fix audio glitches forever via **strict thread isolation** and **architecture expansion**—Main / AudioWorklet / Worker A (analysis) / Worker B (AI); <10 ms real-time path; AI feedback post-phrase only.*
+*Focus: When a user puts on headphones, the app must **sound like a mastered record, not a MIDI file**—what justifies $29/mo. Current status: 0% complete.*
 
-- **Success Criteria**: No dropouts when mic + playback + SwiftF0 + optional Gemini; worklet stays light; pitch inference in workers only; data flow and SAB ownership documented.
+- **Success Criteria**: Parallel compression bus (NY: DryBus + WetBus, 70/30, Worklet 8:1 fast attack); "Air" band +2 dB @ 12 kHz on Drum Bus; Master limiter -14 LUFS; Note Waterfall 60fps decoupled from audio ticks.
+- **Milestone**: `.planning/milestones/studio-polish/` (PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md).
+- **Tasks**:
+  - [ ] **Parallel Compression Bus**: DryBus and WetBus; WetBus = heavy Worklet Compressor (8:1, fast attack); blend 70/30 (REQ-STUDIO-01, 02, 03).
+  - [ ] **The "Air" Band**: High-shelf EQ +2 dB @ 12 kHz on Drum Bus (REQ-STUDIO-04).
+  - [ ] **Auto-Leveling (LUFS)**: Limiter on Master Output for -14 LUFS (REQ-STUDIO-05).
+  - [ ] **Visualizer Interpolation**: Note Waterfall 60fps independent of audio logic; decouple UI ticks from audio ticks (REQ-STUDIO-06).
+
+## Phase 23: The "Glitch" Defense – Audio Glitches & Architecture (Priority: Critical)
+
+*Focus: Guarantee **&lt;10 ms latency** even when Gemini Nano is thinking. Critical risk of audio dropouts on mobile. **Strict thread isolation**: Main / AudioWorklet / Worker A (analysis) / Worker B (AI).*
+
+- **Success Criteria**: No dropouts when mic + playback + SwiftF0 + optional Gemini; worklet stays light; pitch inference in workers only; data flow and SAB ownership documented; thread audit pass (Main &lt;5 ms); zero garbage in Bass/Drum loops; offline resilience (last 5 Standards cached in IndexedDB).
 - **Milestone**: `.planning/milestones/audio-glitches-architecture/` (PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md, RESEARCH.md).
 - **Tasks**:
-  - [ ] **Phase 1: Strict Isolation Implementation**: Verify worklet light (REQ-AG-01), move all pitch math/inference to Workers (REQ-AG-02), document thread ownership (REQ-AG-06).
-  - [ ] **Phase 2: Asynchronous AI Pipeline**: Implement `PerformanceSegment` JSON streaming; Gemini Nano never blocks real-time path; AI feedback is post-phrase (REQ-AG-03).
-  - [ ] **Phase 3: Audio Topology & Reactive Logic**: Implement the "Rolling Window" density tracker for 1-measure look-ahead reactive comping; verify <10 ms latency budget (REQ-AG-05).
-  - [ ] **Phase 4: Glitch Verification**: Automated stress tests under combined load (Mic + SwiftF0 + AI + Mixer + Worklets) to ensure zero dropouts (REQ-AG-07).
+  - [ ] **Phase 1: Strict Isolation**: Verify worklet light (REQ-AG-01), pitch inference in Workers only (REQ-AG-02), document thread ownership (REQ-AG-06).
+  - [ ] **Phase 2: Async AI**: Gemini Nano never blocks real-time path (REQ-AG-03, REQ-AG-04).
+  - [ ] **Phase 3: Latency & Verification**: &lt;10 ms budget (REQ-AG-05); no glitches under combined load (REQ-AG-07).
+  - [ ] **Phase 4: Strict Thread Audit**: Chrome Performance Monitor; fail if SwiftF0 on Main &gt;5 ms; SwiftF0 = Worker A, Gemini = Worker B (REQ-AG-08).
+  - [ ] **Phase 5: GC Hunt & Offline**: Zero garbage in Bass/Drum audio loops (REQ-AG-09); cache last 5 Standards (JSON + Audio) in IndexedDB; test in Airplane Mode (REQ-AG-10).
 
 ## Phase 24: Wave II - The Band (Generative Rhythm Section) 🚀
 
@@ -338,6 +351,16 @@
   - [x] **Wave 1: Progress Analytics**: SVG-based trend charts for Accuracy and Consistency.
   - [x] **Wave 2: AI Trend Insights**: Gemini Nano analysis comparing the last 5 sessions of a standard.
   - [x] **Wave 3: Transcription Musicalization**: Persist raw solo recordings and use AI to clean/quantize them into high-quality licks.
+
+## Phase 28: Performance Hub - Classroom & Communities ✅
+
+*Focus: Collaborative pedagogy—connecting students to the Lick Hub and teachers to student analytics.*
+
+- **Success Criteria**: Cloud sync for performance history and solos active via Supabase; Lick Hub allows sharing/auditioning musicalizations; Teacher Dashboard provides visual roster of student mastery trees and trends.
+- **Tasks**:
+  - [x] **Wave 1: Data Sync Logic**: Implement `itmSyncService` to bridge local stores with Supabase.
+  - [x] **Wave 2: The Lick Hub**: Community feed for browsing, auditioning, and "stealing" community-refined licks.
+  - [x] **Wave 3: Teacher Dashboard**: Roster-based interface for educators to monitor student XP and analysis.
 
 ## Strategic Re-Phasing (2026 Expansion)
 

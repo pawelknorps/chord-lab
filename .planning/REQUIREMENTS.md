@@ -410,7 +410,20 @@
 
 - **Summary**: Toggle (default off); soloist activity (0-1) from useITMPitchStore / useHighPerformancePitch; useJazzBand reads soloist activity when on and drives effective activity/density; comping, drums, bass leave more space when soloist plays more; toggle UI; no regression when off.
 
-## Phase 23: Audio Glitches & Architecture (Critical Feasibility)
+## Phase 22.1: The "Studio" Polish (Priority: High)
+
+*When a user puts on headphones, the app must sound like a **mastered record**, not a MIDI file ($29/mo justification). Full requirements in `.planning/milestones/studio-polish/REQUIREMENTS.md`.*
+
+### REQ-STUDIO-01..06: Studio Polish (Parallel Bus, Air, LUFS, Visualizer)
+
+- **REQ-STUDIO-01, 02, 03**: DryBus and WetBus; Worklet Compressor on WetBus (8:1, fast attack); 70/30 dry/wet blend (NY parallel compression).
+- **REQ-STUDIO-04**: High-shelf EQ +2 dB @ 12 kHz on Drum Bus ("Air" band).
+- **REQ-STUDIO-05**: Master limiter targeting -14 LUFS (auto-leveling).
+- **REQ-STUDIO-06**: Note Waterfall 60fps independent of audio ticks (decouple UI from audio).
+
+## Phase 23: The "Glitch" Defense – Audio Glitches & Architecture (Priority: Critical)
+
+*Guarantee &lt;10 ms latency even when Gemini Nano is thinking. Full requirements in `.planning/milestones/audio-glitches-architecture/REQUIREMENTS.md`.*
 
 ### REQ-AG-01: Worklet Lightness Verification
 
@@ -444,6 +457,18 @@
 ### REQ-AG-07: Stress Testing
 
 - **Requirement**: High-load test pass: Mic + Playback + SwiftF0 + AI + Mixer + Worklets simultaneously. Zero dropouts expected on target devices (Mac/iPad).
+
+### REQ-AG-08: Strict Thread Audit (Chrome Performance Monitor)
+
+- **Requirement**: Use Chrome Performance Monitor; **fail** if SwiftF0 inference spikes Main Thread &gt;5 ms. SwiftF0 in **Worker A (Analysis)**, Gemini Nano in **Worker B (Pedagogy)**.
+
+### REQ-AG-09: Zero Garbage in Audio Loops (GC Hunt)
+
+- **Requirement**: Bass and Drum engines must generate **zero garbage** in hot path (reuse objects/arrays) to prevent GC-induced audio stutters.
+
+### REQ-AG-10: Offline Resilience (Airplane Mode + Cache)
+
+- **Requirement**: Cache the **last 5 used Standards** (JSON + Audio assets) in **IndexedDB**; app testable in Airplane Mode.
 
 ## Pillar 2 & 6: Feedback Loop & Mastery Tree Expansion
 
