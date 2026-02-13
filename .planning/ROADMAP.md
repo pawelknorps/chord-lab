@@ -308,18 +308,18 @@
   - [ ] **Auto-Leveling (LUFS)**: Limiter on Master Output for -14 LUFS (REQ-STUDIO-05).
   - [ ] **Visualizer Interpolation**: Note Waterfall 60fps independent of audio logic; decouple UI ticks from audio ticks (REQ-STUDIO-06).
 
-## Phase 23: The "Glitch" Defense – Audio Glitches & Architecture (Priority: Critical)
+## Phase 23: The "Glitch" Defense – Audio Glitches & Architecture (Priority: Critical) ✅
 
 *Focus: Guarantee **&lt;10 ms latency** even when Gemini Nano is thinking. Critical risk of audio dropouts on mobile. **Strict thread isolation**: Main / AudioWorklet / Worker A (analysis) / Worker B (AI).*
 
-- **Success Criteria**: No dropouts when mic + playback + SwiftF0 + optional Gemini; worklet stays light; pitch inference in workers only; data flow and SAB ownership documented; thread audit pass (Main &lt;5 ms); zero garbage in Bass/Drum loops; offline resilience (last 5 Standards cached in IndexedDB).
+- **Success Criteria**: No dropouts when mic + playback + SwiftF0 + optional Gemini; worklet stays light; pitch inference in workers only; data flow and SAB ownership documented; thread audit pass (Main &lt;5 ms). *Deferred to milestone Phase 5:* zero garbage in Bass/Drum loops; offline resilience (last 5 Standards cached in IndexedDB).
 - **Milestone**: `.planning/milestones/audio-glitches-architecture/` (PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md, RESEARCH.md).
 - **Tasks**:
-  - [ ] **Phase 1: Strict Isolation**: Verify worklet light (REQ-AG-01), pitch inference in Workers only (REQ-AG-02), document thread ownership (REQ-AG-06).
-  - [ ] **Phase 2: Async AI**: Gemini Nano never blocks real-time path (REQ-AG-03, REQ-AG-04).
-  - [ ] **Phase 3: Latency & Verification**: &lt;10 ms budget (REQ-AG-05); no glitches under combined load (REQ-AG-07).
-  - [ ] **Phase 4: Strict Thread Audit**: Chrome Performance Monitor; fail if SwiftF0 on Main &gt;5 ms; SwiftF0 = Worker A, Gemini = Worker B (REQ-AG-08).
-  - [ ] **Phase 5: GC Hunt & Offline**: Zero garbage in Bass/Drum audio loops (REQ-AG-09); cache last 5 Standards (JSON + Audio) in IndexedDB; test in Airplane Mode (REQ-AG-10).
+  - [x] **Phase 1: Strict Isolation**: Verify worklet light (REQ-AG-01), pitch inference in Workers only (REQ-AG-02), document thread ownership (REQ-AG-06).
+  - [x] **Phase 2: Async AI**: Gemini Nano never blocks real-time path (REQ-AG-03, REQ-AG-04).
+  - [x] **Phase 3: Latency & Verification**: &lt;10 ms budget (REQ-AG-05); no glitches under combined load (REQ-AG-07); checklist in VERIFICATION.md.
+  - [x] **Phase 4: Strict Thread Audit**: Chrome Performance Monitor; SwiftF0 = Worker A, Gemini = Worker B (REQ-AG-08); doc in RESEARCH.md + VERIFICATION.md.
+  - [ ] **Phase 5: GC Hunt & Offline**: Zero garbage in Bass/Drum audio loops (REQ-AG-09); cache last 5 Standards (JSON + Audio) in IndexedDB; test in Airplane Mode (REQ-AG-10) — *milestone follow-up*.
 
 ## Phase 24: Wave II - The Band (Generative Rhythm Section) 🚀
 
@@ -373,6 +373,24 @@
   - [x] **Wave 1: Data Sync Logic**: Implement `itmSyncService` to bridge local stores with Supabase.
   - [x] **Wave 2: The Lick Hub**: Community feed for browsing, auditioning, and "stealing" community-refined licks.
   - [x] **Wave 3: Teacher Dashboard**: Roster-based interface for educators to monitor student XP and analysis.
+
+## Phase 29: Final Polish & Mastering
+
+*Focus: Production readiness and final quality (see STATE.md for current focus).*
+
+## Phase 30: Innovative Exercises Revamp (Progress + AI + Layers/Levels)
+
+*Focus: Connect Innovative Exercises to student progress and AI recommendations; add **exercise layers** (Ear/Rhythm, optional difficulty) and **levels** (per-exercise 1–3) for parameterized, level-aware recommendations and launch.*
+
+- **Success Criteria**: Progress summary (read-only); AI recommendations with exerciseId, params (key, chords, lickId, tempo, **level**), **layer**, reason; level config per exercise; panels accept initialParams and level; "For You" section with refresh; manual list preserved; mic unchanged.
+- **Milestone**: `.planning/milestones/innovative-exercises-revamp/` (PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md).
+- **Plan**: `.planning/phases/30-innovative-exercises-revamp/` (PLAN.md, RESEARCH.md).
+- **Tasks**:
+  - [ ] **Wave 1**: Progress summary & data layer (REQ-IER-01, IER-02).
+  - [ ] **Wave 2**: AI recommendation engine with level/layer in output (REQ-IER-03, IER-04).
+  - [ ] **Wave 3**: Level config + parameterized launch for all six exercises; library audio (REQ-IER-05, IER-06, IER-07).
+  - [ ] **Wave 4**: "For You" UI & refresh (REQ-IER-08, IER-09, IER-10).
+  - [ ] **Wave 5**: Verification & docs.
 
 ## Strategic Re-Phasing (2026 Expansion)
 

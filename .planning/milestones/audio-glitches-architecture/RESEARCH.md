@@ -14,9 +14,9 @@
 ### Pitch result SAB (main pitch memory)
 
 - **Created by**: Main (PitchMemory.createPitchMemory).
-- **Written by**: Audio Worklet (RMS, onset in slots 2, 3); MpmWorker or SwiftF0Worker (frequency, confidence in slots 0, 1). Workers write after inference; worklet writes every block (light).
+- **Written by**: Audio Worklet (RMS, onset in slots 2, 3; capture timestamp in slot 4 when frame is ready); MpmWorker or SwiftF0Worker (frequency, confidence in slots 0, 1; lastUpdated and latencyScore in slots 4, 5). Workers write after inference; worklet writes every block (light).
 - **Read by**: Main (useITMPitchStore, useHighPerformancePitch, usePitchTracker) via Float32Array view; typically in rAF or poll.
-- **Layout**: `[frequency, clarity, rms, onset]` (or equivalent 4-slot Float32).
+- **Layout**: `[0: frequency, 1: confidence (clarity), 2: rms, 3: onset, 4: lastUpdated (performance.now()), 5: latencyScore (ms)]` — 6 × Float32 (REQ-AG-05 latency monitoring).
 
 ### PCM SAB (downsampled 16 kHz frame)
 
