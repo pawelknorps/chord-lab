@@ -1,18 +1,18 @@
 # ITM Roadmap 2026
 
-## Phase 1: The "Feedback" Engine
+## Phase 1: The "Feedback" Engine ✅
 
 *Focus: Turning the app into an active listener and teacher.*
 
 - **Success Criteria**: Student can play along to a song and receive a numerical accuracy score based on microphone input with <10ms latency.
 - **Tasks**:
-  - [ ] Implement **High-Performance Pitch Detection**: Use **SwiftF0 (2026 SOTA)** for neural jazz-proof accuracy.
-  - [ ] Implement **Audio Worklet + SharedArrayBuffer Pattern**: Move pitch math to a separate thread or background worker to ensure 120Hz UI smoothness.
-  - [ ] Enable **MediaTrackConstraints.voiceIsolation**: Built-in browser AI for cleaning instrument input in noisy environments.
-  - [ ] Implement **Zustand Scoring Logic**: Real-time comparison of Mic Pitch to Tonal.js Chord Tones.
-  - [ ] Build **Guided Practice UI**: Component to manage the 15-minute routine timer and narrations.
-  - [ ] Integrate **Gemini Nano Analysis**: Hook that summarizes session performance into a pedagogical critique.
-  - [ ] Create **Performance Heatmap**: Visualization of where in the song the student succeeded/failed.
+  - [x] Implement **High-Performance Pitch Detection**: Use **SwiftF0 (2026 SOTA)** for neural jazz-proof accuracy.
+  - [x] Implement **Audio Worklet + SharedArrayBuffer Pattern**: Move pitch math to a separate thread or background worker to ensure 120Hz UI smoothness.
+  - [x] Enable **MediaTrackConstraints.voiceIsolation**: Built-in browser AI for cleaning instrument input in noisy environments.
+  - [x] Implement **Zustand Scoring Logic**: Real-time comparison of Mic Pitch to Tonal.js Chord Tones.
+  - [x] Build **Guided Practice UI**: Component to manage the 15-minute routine timer and narrations.
+  - [x] Integrate **Gemini Nano Analysis**: Hook that summarizes session performance into a pedagogical critique.
+  - [x] Create **Performance Heatmap**: Visualization of where in the song the student succeeded/failed.
 
 ## Phase 2: The "Mastery Tree" ✅
 
@@ -129,6 +129,7 @@
   - [x] **Band integration**: useJazzBand generates line at beat 0, plays `line[beat]` for 0–3; state carried to next bar.
 
 ## Phase 12.1: Bass Rhythm Variation (2026-02-12) ✅
+
 ## Phase 12.2: Bebop Bass Engine (2026-02-12) ✅
 
 *Focus: Organic bass variations (Skips, Rakes, Drops) to avoid robotic 4-note loops.*
@@ -143,7 +144,6 @@
   - [ ] **BassRhythmVariator**: Implement class with `applyVariations(line, barIndex)` that transforms MIDI arrays into `BassEvent[]`.
   - [ ] **Sample Switch Logic**: Update audio engine to use staccato envelope/sample for ghost/muted notes.
   - [ ] **JazzBand Integration**: Refactor `useJazzBand` to consume `BassEvent[]` and handle sub-beat timing for variations.
-
 
 ## Phase 13: Standards-Based Exercises (Scales, Guide Tones, Arpeggios) ✅
 
@@ -178,6 +178,7 @@
   - [x] **Error heatmaps**: Expose per-measure hit/miss from useStandardsExercise; show heatmap on lead sheet (overlay per measure: green/amber/red) via StandardsExerciseHeatmapOverlay and useStandardsExerciseHeatmapStore; filter by exercise type (Scales, Guide Tones, Arpeggios).
   - [x] **Record solo & transcription**: In Standards Exercises, add "Record solo" (SoloTranscriptionPanel); capture timestamped notes (pitch + measure/beat) from mic or MIDI via useSoloTranscription; at end of recording produce written note list (Tonal.js). Tie to current standard and transport.
   - [x] **AI analysis**: generateStandardsExerciseAnalysis(sessionData) in jazzTeacherLogic: input heatmap (hits/misses), optional transcription, accuracy, exercise type, standard, key; output AI text (Gemini Nano) with strengths/weaknesses, advice, development suggestions. "Analyze performance" button in StandardsExercisesPanel.
+
 ## Phase 14.1: SwiftF0 SOTA 2026 Integration ✅
 
 *Focus: Pro-grade neural pitch detection with instrument-aware post-processing.*
@@ -200,6 +201,17 @@
   - [x] **Phase 1 – Measure and Baseline**: Optional timing via `setTiming` + `enableTiming` option; STATE baseline instructions (REQ-SF0-S01).
   - [x] **Phase 2 – Inference and Hot Path**: Reused input tensor; tightened preprocessing loop (REQ-SF0-S02, S03, S05).
   - [x] **Phase 3 – Scheduling and Polish**: Adaptive sleep `max(0, cycleMs − elapsed)`; STATE.md and SUMMARY/VERIFICATION updated (REQ-SF0-S04, S05).
+
+## Phase 14.3: SwiftF0 SOTA Precision (Flicker-Free, Semitone-Stable)
+
+*Focus: Achieve SOTA precision for SwiftF0—Local Expected Value (no argmax-only), median filter, hysteresis (60¢, 3-frame note lock), chromatic + cents, tuner bar.*
+
+- **Milestone**: `.planning/milestones/swiftf0-precision/` (PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md).
+- **Success Criteria**: LEV used for pitch; median (5–7 frames) + hysteresis (60¢, 3-frame stability) active; chromatic note + cents exposed; at least one tuner bar (cents) in the app.
+- **Tasks**:
+  - [ ] **Phase 1 – Verify LEV and Temporal Stack**: Confirm swiftF0Inference 9-bin LEV; CrepeStabilizer median + hysteresis; instrumentProfiles 60¢/3-frame reference; smoothing in Worker (REQ-SF0-P01, P02, P03, P06).
+  - [ ] **Phase 2 – Chromatic + Cents API**: Verify frequencyToNote chromatic + cents; consumers can read cents (REQ-SF0-P04).
+  - [ ] **Phase 3 – Tuner Bar UI**: Add or wire tuner bar (cents) to at least one pitch screen (REQ-SF0-P05).
 
 ## Phase 17: Innovative Interactive Exercises (Ear + Rhythm) ✅
 
@@ -226,7 +238,7 @@
 
 ## Phase 19: Soloist-Responsive Playback (Call-and-Response) ✅
 
-*Focus: **Experimental feature** (toggle): playback listens to the soloist via SwiftF0 and steers the band—more space when user plays more/faster, more backing when user plays less.*
+*Focus: [Experimental feature] (toggle): playback listens to the soloist via SwiftF0 and steers the band—more space when user plays more/faster, more backing when user plays less.*
 
 - **Success Criteria**: Toggle (default off); soloist activity derived from SwiftF0 drives band density/space when on; no regression when off; toggle UI in Mixer or band panel.
 - **Milestone**: `.planning/milestones/soloist-responsive-playback/` (PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md).
@@ -274,11 +286,89 @@
 
 ## Phase 23: Audio Glitches & Architecture (Critical Feasibility)
 
-*Focus: Fix audio glitches forever via **strict thread isolation** and **architecture expansion**—Main / AudioWorklet / Worker A (analysis) / Worker B (AI); &lt;10 ms real-time path; AI feedback post-phrase only.*
+*Focus: Fix audio glitches forever via **strict thread isolation** and **architecture expansion**—Main / AudioWorklet / Worker A (analysis) / Worker B (AI); <10 ms real-time path; AI feedback post-phrase only.*
 
 - **Success Criteria**: No dropouts when mic + playback + SwiftF0 + optional Gemini; worklet stays light; pitch inference in workers only; data flow and SAB ownership documented.
 - **Milestone**: `.planning/milestones/audio-glitches-architecture/` (PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md, RESEARCH.md).
 - **Tasks**:
-  - [ ] **Phase 1**: Verify worklet light (REQ-AG-01), pitch in workers only (REQ-AG-02), document data flow (REQ-AG-06).
-  - [ ] **Phase 2**: Async AI—Gemini never blocks real-time path (REQ-AG-03); main-thread guarantees (REQ-AG-04).
-  - [ ] **Phase 3**: Latency budget &lt;10 ms (REQ-AG-05); glitch verification under combined load (REQ-AG-07).
+  - [ ] **Phase 1: Strict Isolation Implementation**: Verify worklet light (REQ-AG-01), move all pitch math/inference to Workers (REQ-AG-02), document thread ownership (REQ-AG-06).
+  - [ ] **Phase 2: Asynchronous AI Pipeline**: Implement `PerformanceSegment` JSON streaming; Gemini Nano never blocks real-time path; AI feedback is post-phrase (REQ-AG-03).
+  - [ ] **Phase 3: Audio Topology & Reactive Logic**: Implement the "Rolling Window" density tracker for 1-measure look-ahead reactive comping; verify <10 ms latency budget (REQ-AG-05).
+  - [ ] **Phase 4: Glitch Verification**: Automated stress tests under combined load (Mic + SwiftF0 + AI + Mixer + Worklets) to ensure zero dropouts (REQ-AG-07).
+
+## Phase 24: Wave II - The Band (Generative Rhythm Section) 🚀
+
+*Focus: Replace static backing with high-fidelity, generative Bass and Drum engines using WASM/Worklet processing and "Bebop-Native" algorithms.*
+
+- **Success Criteria**: Generative Drum engine (Jack DeJohnette style) and Bebop Bass engine (Barry Harris style) fully integrated; Zero-latency execution in dedicated workers; Dynamic interaction between instruments.
+- **Milestone**: `.planning/milestones/the-band/` (PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md).
+- **Tasks**:
+  - [ ] **Wave 1: Jack DeJohnette Drum Engine**: Limb independence, micro-timing, and dynamic density.
+  - [ ] **Wave 2: Barry Harris Bass Engine**: Targeted approaches, enclosures, and bebop logic.
+  - [ ] **Wave 3: Instrument Interaction**: Band members "listen" to each other and adapt density.
+
+## Phase 25: Wave III - The Brain (Advanced AI Interaction) 🧠
+
+*Focus: Connect the high-speed audio pipeline to the AI pedagogical layer. Implement the JSON-to-Critique pipeline using Gemini Nano/local LLMs for deep performance synthesis.*
+
+- **Success Criteria**: AI provides context-aware critiques based on `PerformanceSegment` data; Asynchronous AI feedback loop (no main thread blocking); Actionable practice recommendations generated after sessions.
+- **Milestone**: `.planning/milestones/ai-brain/` (PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md).
+- **Tasks**:
+  - [x] **Wave 1: Performance Synthesis Engine**: Implement the aggregator that turns raw pitch/time data into `PerformanceSegment` JSON.
+  - [x] **Wave 2: Local AI Pedagogical Layer**: Implement prompt templates for Gemini Nano that consume performance data and output structured critique.
+  - [x] **Wave 3: Interactive Teacher UI**: Create the "Post-Session Review" dashboard where AI feedback is visualized alongside the performance heatmap.
+
+## Phase 26: Wave III - Long-term Progression (Mastery Tree) ✅
+
+*Focus: Implement the persistent storage for performance segments and the visual Mastery Tree. Connect individual practice sessions to a long-term progress map.*
+
+- **Success Criteria**: Performance sessions are persisted locally (IndexedDB/LocalStorage); Mastery Tree visualized with XP progress; Skills (Roots, Guide Tones, Arpeggios) unlock based on performance data.
+- **Milestone**: `.planning/milestones/mastery-tree/`
+- **Tasks**:
+  - [x] **Wave 1: Session Persistence**: Implement a repository or service to store `PerformanceSegment` objects for historical analysis.
+  - [x] **Wave 2: Mastery Progress Logic**: Implement the XP calculation and node unlock logic based on REQ-MT-04.
+  - [x] **Wave 3: Progress Map UI**: Create the visual Mastery Tree (Force-directed or Tree layout) to show the user's journey.
+
+## Phase 27: Wave III - Performance Trends & AI Transcriptions 📈
+
+*Focus: Leverage persistent session history to visualize growth and refine solo captures into licks.*
+
+- **Success Criteria**: Line charts showing accuracy trends over 50 sessions; AI Trend Analysis (Gemini Nano) identifying growth patterns; Solo transcriptions persisted and "musicalized" into lick format.
+- **Tasks**:
+  - [x] **Wave 1: Progress Analytics**: SVG-based trend charts for Accuracy and Consistency.
+  - [x] **Wave 2: AI Trend Insights**: Gemini Nano analysis comparing the last 5 sessions of a standard.
+  - [x] **Wave 3: Transcription Musicalization**: Persist raw solo recordings and use AI to clean/quantize them into high-quality licks.
+
+## Strategic Re-Phasing (2026 Expansion)
+
+Based on the 2026 Architecture Critique, the remaining work is regrouped into the following strategic waves:
+
+### Wave I: The Loop (Latency & Accuracy)
+
+#### Pillars: 1, 6, 11
+
+- **Focus**: A user plays; System detects pitch/time; System renders score. High-speed SwiftF0.
+
+### Wave II: The Band (Generative Rhythm Section)
+
+#### Pillars: 5, 10, 15
+
+- **Focus**: Generative Bass/Drums with high-fidelity WASM processing. Replace static backing.
+
+### Wave III: The Brain (AI Pedagogy)
+
+#### Pillars: 1, 14, 12
+
+- **Focus**: Connect Gemini Nano via JSON-to-Critique pipeline. Context-aware harmonic analysis.
+
+### Wave IV: The Game (Progression)
+
+#### Pillars: 2, 4
+
+- **Focus**: Mastery Tree UI, Supabase backend, and progress tracking.
+
+### Wave V: Polish (Finesse)
+
+#### Pillars: 3, 7, 8
+
+- **Focus**: High-fidelity stems, Sing & Clap interaction, Micro-timing exercises.

@@ -85,6 +85,13 @@ Transition from a music theory prototype to a full-scale "Incredible Teaching Ma
 - **Tech**: Optional timing baseline; zero allocations in inference hot path; preprocessing cost reduction; poll interval aligned with inference; SwiftF0Worker, useHighPerformancePitch, useITMPitchStore unchanged from consumer perspective.
 - **Milestone**: `.planning/milestones/swiftf0-speed/` (PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md).
 
+### 11.1. SwiftF0 SOTA Precision (Flicker-Free, Semitone-Stable)
+
+- **Concept**: Achieve **State-of-the-Art precision** for SwiftF0 by eliminating flickering and semitone jitter. SwiftF0 bin resolution (~33.1 cents) plus raw argmax causes audible jumps; sub-bin decoding and temporal smoothing fix this.
+- **Goal**: (1) **Local Expected Value** decoding: 9-bin weighted average in log-frequency space so pitch is cent-level precise (no argmax-only). (2) **Temporal Smoothing**: Median filter (5–7 frames) to remove spikes/octave jumps; Hysteresis (note lock): change note label only if new frequency >60 cents away and stable for ≥3 consecutive frames (~48 ms). (3) **Chromatic + Cents**: Map via n = 12·log2(f/440)+69; expose **tuner bar** (cents) so neighbor-tone variation reads as vibrato.
+- **Tech**: swiftF0Inference (LEV); CrepeStabilizer (median + hysteresis); frequencyToNote (chromatic + cents); tuner bar UI where pitch is shown.
+- **Milestone**: `.planning/milestones/swiftf0-precision/` (PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md).
+
 ### 12. Soloist-Responsive Playback (Call-and-Response)
 
 - **Concept**: **Experimental feature** (toggle): the playback engine **listens** to the soloist via SwiftF0 and **steers** the band in real time—more space when the user plays more and faster, more backing when the user plays less. **Existing band rules stay intact**; this is additive only—a layer that steers inputs (e.g. effective activity) so the same engines behave in the right direction.
@@ -115,15 +122,41 @@ Transition from a music theory prototype to a full-scale "Incredible Teaching Ma
 
 ## Key Decisions
 
-| Decision | Rationale | Status |
-| :--- | :--- | :--- |
-| **Zustand for Scoring** | Centralized, performant state management for real-time microphone analysis. | [Decided] |
-| **Local-First AI** | Use Gemini Nano for instantaneous narration and performance critique feedback. | [Decided] |
-| **PWA over Native** | Maximize accessibility on iPads and phones without app store friction. | [Decided] |
-| **SwiftF0 (2026 SOTA)** | Use Neural Pitch detection (SwiftF0) for jazz-proof overtone handling and ultra-low latency. | [Decided] |
-| **Audio Worklets** | Decouple pitch math from the UI thread using SharedArrayBuffer for 120Hz smoothness. | [Decided] |
-| **Supabase for Backend** | Reliable, real-time database for teacher dashboards and lick sharing. | [Proposed] |
-| **Template-Based Comping** | Switch from mathematical voicing generation to Grip-Libraries and Phrase-Templates for musicality. | [Decided] |
+| Decision                   | Rationale                                                                                          | Status     |
+| :------------------------- | :------------------------------------------------------------------------------------------------- | :--------- |
+| **Zustand for Scoring**    | Centralized, performant state management for real-time microphone analysis.                        | [Decided]  |
+| **Local-First AI**         | Use Gemini Nano for instantaneous narration and performance critique feedback.                     | [Decided]  |
+| **PWA over Native**        | Maximize accessibility on iPads and phones without app store friction.                             | [Decided]  |
+| **SwiftF0 (2026 SOTA)**    | Use Neural Pitch detection (SwiftF0) for jazz-proof overtone handling and ultra-low latency.       | [Decided]  |
+| **Audio Worklets**         | Decouple pitch math from the UI thread using SharedArrayBuffer for 120Hz smoothness.               | [Decided]  |
+| **Supabase for Backend**   | Reliable, real-time database for teacher dashboards and lick sharing.                              | [Proposed] |
+| **Template-Based Comping** | Switch from mathematical voicing generation to Grip-Libraries and Phrase-Templates for musicality. | [Decided]  |
+
+## Critical Feasibility Analysis (2026 Architecture Expansion)
+
+The ITM 2026 vision requires careful resource management to avoid audio glitches and memory crashes in mobile browsers.
+
+### Architectural Risks & Mitigation
+
+- **Risk**: Javascript Single-Threaded Nature vs. Heavy Processing.
+- **Strict Isolation Strategy**:
+  - **Main Thread**: UI Rendering (React), State Management (Zustand).
+  - **AudioWorklet**: DSP (Compressor, Mixer), Playback scheduling.
+  - **Worker A (Analysis)**: SwiftF0 inference loop.
+  - **Worker B (AI)**: Gemini Nano prompt processing (asynchronous).
+- **Latency Budget**: <10ms for audio path; AI feedback is asynchronous (post-phrase/segment).
+
+### The "Feedback Loop" Data Specification
+
+- **Performance Capture Object**: Standardized JSON (measures, chords, target notes, played notes, cent/timing offsets).
+- **Gemini Nano Protocol**: AI receives JSON summary (features/vectors) instead of raw audio.
+
+### Audio Engine Topology
+
+- **Signal Path**:
+  - Bus A (Backing): Sampler/Synth -> ParallelMixer (WASM Compressor) -> Master.
+  - Bus B (User): Mic -> SwiftF0_Worklet (Analysis only, muted/monitored).
+- **Reactive Comping**: 1-measure look-ahead; reacts to previous bar's density (rolling window).
 
 ## Out of Scope
 
