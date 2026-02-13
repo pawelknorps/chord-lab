@@ -17,3 +17,6 @@ export type { JJazzLabDrumPattern, JJazzLabDrumEvent, JJazzLabDrumInstrument } f
 export function getDrumPatternsByStyle(styleId: string): JJazzLabDrumPattern[] {
   return patterns.filter((p) => p.styleId === styleId);
 }
+
+/** Unique drum style ids available (for UI dropdown). */
+export const JJAZZLAB_DRUM_STYLE_IDS = [...new Set(patterns.map((p) => p.styleId))] as string[];

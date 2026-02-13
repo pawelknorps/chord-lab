@@ -12,6 +12,7 @@ import {
     soloistResponsiveEnabledSignal,
     soloistActivitySignal,
     proMixEnabledSignal,
+    drumStyleIdSignal,
     pianoMutedSignal,
     bassMutedSignal,
     drumsMutedSignal,
@@ -19,6 +20,7 @@ import {
     bassSoloSignal,
     drumsSoloSignal
 } from '../state/jazzSignals';
+import { JJAZZLAB_DRUM_STYLE_IDS } from '../../../data/jjazzlab-drum-patterns';
 import { ToneSpectrumAnalyzer } from './ToneSpectrumAnalyzer';
 import { AcousticFeedbackWidget } from './AcousticFeedbackWidget';
 
@@ -200,6 +202,26 @@ export function Mixer({ onClose }: MixerProps) {
                             <span>Mellow (Ballad)</span>
                             <span>Burning (Up-tempo)</span>
                         </div>
+                    </div>
+                </section>
+
+                {/* JJazzLab drum style: use JJazzLab-derived patterns when set */}
+                <section className="space-y-4">
+                    <h3 className="text-[10px] font-black text-neutral-500 uppercase tracking-[0.2em]">Drum Style</h3>
+                    <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
+                        <select
+                            value={drumStyleIdSignal.value ?? ''}
+                            onChange={(e) => drumStyleIdSignal.value = e.target.value || null}
+                            className="w-full bg-neutral-900 border border-white/10 rounded-lg px-3 py-2 text-sm text-white font-medium focus:outline-none focus:ring-2 focus:ring-teal-500/50 accent-teal-500"
+                        >
+                            <option value="">Generative (default)</option>
+                            {JJAZZLAB_DRUM_STYLE_IDS.map((id) => (
+                                <option key={id} value={id} className="bg-neutral-900 text-amber-500">
+                                    {id.replace(/_/g, ' ')}
+                                </option>
+                            ))}
+                        </select>
+                        <p className="text-[10px] text-neutral-500 mt-2">JJazzLab patterns: Ride, Brushes, Shuffle, Intro, Ending. Set to &quot;Generative&quot; for built-in engine.</p>
                     </div>
                 </section>
 

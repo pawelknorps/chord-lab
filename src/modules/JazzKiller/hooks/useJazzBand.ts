@@ -31,6 +31,7 @@ import {
     bassSoloSignal,
     drumsSoloSignal,
     bassModeSignal,
+    drumStyleIdSignal,
     meterSignal,
     soloistResponsiveEnabledSignal,
     soloistActivitySignal
@@ -99,6 +100,7 @@ export const useJazzBand = (song: any, isActive: boolean = true, options?: UseJa
     const compingEngineRef = useRef<CompingEngine>(new CompingEngine());
     const rhythmEngineRef = useRef<RhythmEngine>(new RhythmEngine());
     const drumEngineRef = useRef<DrumEngine>(new DrumEngine());
+    // JJ-04: Single swing + humanization pipeline — one GrooveManager for bass and drums (getOffBeatOffsetInBeat, getHumanizationJitter)
     const grooveRef = useRef<GrooveManager>(new GrooveManager());
     const currentPatternRef = useRef<RhythmPattern | null>(null);
     const currentDrumHitsRef = useRef<DrumHit[]>([]);
@@ -470,9 +472,9 @@ export const useJazzBand = (song: any, isActive: boolean = true, options?: UseJa
                         : Tone.Time(`0:0:${sixteenthOffset}`).toSeconds();
                     const bassTiming = grooveRef.current.getMicroTiming(bpm, "Bass");
                     const sampleLatencyCompensation = -0.010;
-                    let bassTime = time + offsetTime + bassTiming + sampleLatencyCompensation;
-                    // Phase 20: Bass micro-timing humanization (−5 ms to +2 ms)
-                    bassTime += (Math.random() * 7 - 5) / 1000;
+                    // JJ-04: Single swing + humanization pipeline — bass uses same grooveRef.getHumanizationJitter as drums
+                    const bassJitter = grooveRef.current.getHumanizationJitter(4);
+                    let bassTime = time + offsetTime + bassTiming + sampleLatencyCompensation + bassJitter;
 
                     let vel = event.velocity * (0.8 + currentTension * 0.4);
                     // Phase 20: Bass velocity humanization (±10%)
@@ -502,7 +504,8 @@ export const useJazzBand = (song: any, isActive: boolean = true, options?: UseJa
             // PIANO: Combined reactive + RhythmEngine — room drives density; pocket + shell/full + velocity on every hit
             // 1. At bar start: reactive target density drives RhythmEngine; drums use hybrid linear phrasing when bar is passed
             if (beat === 0) {
-                // Phase 20: Markov pattern type every 4 bars; optional density bias when soloist-responsive
+                // Phase 20: Markov pattern type every 4 bars. Call-and-Response: when soloist-responsive,
+                // band leaves more space when you play (mic pitch high) and fills when you rest (mic pitch low).
                 if (bar % 4 === 0) {
                     if (soloistResponsiveEnabledSignal.value) {
                         markovEngineRef.current.updateIntensity(soloistActivitySignal.value);
@@ -538,7 +541,12 @@ export const useJazzBand = (song: any, isActive: boolean = true, options?: UseJa
                 // Phase 20: On FILL bar use drum fill instead of time
                 if (markovPatternTypeRef.current === 'FILL') {
                     currentDrumHitsRef.current = drumEngineRef.current.generateFill(bar);
+                } else if (drumStyleIdSignal.value) {
+                    // JJazzLab Library Import: use JJazzLab-derived patterns when drum style is set
+                    currentDrumHitsRef.current = drumEngineRef.current.generateBarFromJJazzLab(drumStyleIdSignal.value, bar);
                 } else {
+                    // Prioritise classic ride (full spang-a-lang): use for LOW/MEDIUM_ENERGY; allow linear/broken only in HIGH_ENERGY
+                    const preferClassicRide = markovPatternTypeRef.current !== 'HIGH_ENERGY';
                     currentDrumHitsRef.current = drumEngineRef.current.generateBar(
                         activity,
                         pianoDensity,
@@ -546,7 +554,8 @@ export const useJazzBand = (song: any, isActive: boolean = true, options?: UseJa
                         drumsAnswerContext,
                         pianoPattern.steps.map(s => s.time),
                         trioContext,
-                        beatsPerBar
+                        beatsPerBar,
+                        preferClassicRide
                     );
                 }
             }
@@ -620,7 +629,9 @@ export const useJazzBand = (song: any, isActive: boolean = true, options?: UseJa
                     const sixteenthOffset = hit.time.split(':')[2];
                     const isOffBeat = sixteenthOffset === '2';
                     const offsetTime = isOffBeat ? offBeatOffsetSec : Tone.Time(`0:0:${sixteenthOffset}`).toSeconds();
-                    const scheduleTime = time + offsetTime + microTiming;
+                    // Gaussian humanization: t_final = t_calculated + ε, ε ~ N(0, σ²), σ ≈ 3ms (Ride tighter)
+                    const humanJitter = grooveRef.current.getHumanizationJitter(hit.instrument === 'Ride' ? 2.5 : 4);
+                    const scheduleTime = time + offsetTime + microTiming + humanJitter;
 
                     // Trigger appropriate sampler limb
                     if (hit.instrument === "Ride") {
@@ -660,14 +671,18 @@ export const useJazzBand = (song: any, isActive: boolean = true, options?: UseJa
         }
         if (startPendingRef.current) return;
         startPendingRef.current = true;
-        isPlayingSignal.value = true;
         Tone.start()
-            .then(() => {
+            .then(async () => {
+                const ctx = Tone.getContext() as { rawContext?: AudioContext };
+                const raw = ctx?.rawContext;
+                if (raw?.state === 'suspended') await raw.resume();
+                Tone.Transport.position = '0:0:0';
+                isPlayingSignal.value = true;
                 Tone.Transport.start();
-                if (!isAudioReady()) initGlobalAudio().catch(() => {});
+                if (!isAudioReady()) setTimeout(() => initGlobalAudio().catch(() => {}), 0);
             })
             .catch(() => {
-                isPlayingSignal.value = false;
+                // Context may be blocked by browser; next click will retry
             })
             .finally(() => {
                 startPendingRef.current = false;

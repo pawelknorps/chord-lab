@@ -1,4 +1,5 @@
 import { GrooveManager, type GrooveInstrument } from './GrooveManager';
+import { getDrumPatternsByStyle } from '../../data/jjazzlab-drum-patterns';
 
 export type DrumInstrument = "Ride" | "Snare" | "Kick" | "HatPedal" | "HatOpen";
 
@@ -26,12 +27,15 @@ export class LinearDrummingEngine {
      * @param barIndex Used for 2-bar motivic repetition (same mask for barIndex % 2).
      * @param intensity 0.0–1.0 (how busy; drives snare fill probability in holes).
      * @param divisionsPerBar When 3, use waltz ride (1, 2, 3) and hi-hat on 2 & 3.
+     * @param preferClassicRide When true, use full spang-a-lang ride (no skips); prioritised by Markov (LOW/MEDIUM_ENERGY).
      */
-    generatePhrase(barIndex: number, intensity: number, divisionsPerBar?: number): DrumHit[] {
+    generatePhrase(barIndex: number, intensity: number, divisionsPerBar?: number, preferClassicRide?: boolean): DrumHit[] {
         const events: DrumHit[] = [];
         const isWaltz = divisionsPerBar === 3;
         const grid = isWaltz ? this.WALTZ_GRID : this.STANDARD_GRID;
-        const phraseMask = this.selectPhraseMask(intensity, barIndex, grid.length);
+        const phraseMask = preferClassicRide
+            ? grid.map(() => true)
+            : this.selectPhraseMask(intensity, barIndex, grid.length);
 
         grid.forEach((timeStep, index) => {
             const isRideActive = phraseMask[index];
@@ -190,11 +194,12 @@ export class LinearDrummingEngine {
         return patterns[(idx + motif) % patterns.length];
     }
 
-    /** Bebop 12-grid: downbeats (0,1,3,4) accented; skip beats (2,5 = 2&, 4&) ghosted. */
+    /** Velocity map: Beat 1: 1.0, Beat 2: 1.2, Skip: 0.8, Beat 3: 1.0, Beat 4: 1.2, Skip: 0.8. Base 0.65. */
+    private static readonly RIDE_VELOCITY_MAP = [1.0, 1.2, 0.8, 1.0, 1.2, 0.8];
     private getRideVelocity(index: number): number {
-        if (index === 2 || index === 5) return 0.32 + Math.random() * 0.08; // ghosted
-        if (index === 0 || index === 3) return 0.74 + Math.random() * 0.08; // 1 and 3
-        return 0.68 + Math.random() * 0.08; // 2 and 4
+        const base = 0.65;
+        const scale = LinearDrummingEngine.RIDE_VELOCITY_MAP[index] ?? 1;
+        return base * scale + Math.random() * 0.06;
     }
 }
 
@@ -221,6 +226,34 @@ export class DrumEngine {
      */
     public generateFill(barIndex: number): DrumHit[] {
         return this.linearEngine.generateFill(barIndex);
+    }
+
+    /**
+     * JJazzLab Library Import (Phase 6): Generate one bar of drum hits from a JJazzLab pattern.
+     * When styleId is set, uses getDrumPatternsByStyle(styleId) and converts timeBeats → "0:beat:sixteenth".
+     * Uses first bar of pattern only (events with timeBeats < 4); picks pattern by barIndex % pool length.
+     */
+    public generateBarFromJJazzLab(styleId: string, barIndex: number): DrumHit[] {
+        const list = getDrumPatternsByStyle(styleId);
+        if (list.length === 0) {
+            return this.linearEngine.generatePhrase(barIndex, 0.5, 4, true);
+        }
+        const stdPatterns = list.filter((p) => p.type !== 'fill');
+        const pool = stdPatterns.length > 0 ? stdPatterns : list;
+        const pattern = pool[barIndex % pool.length];
+        const hits: DrumHit[] = [];
+        const maxBeats = 4; // one bar 4/4
+        for (const e of pattern.events) {
+            if (e.timeBeats >= maxBeats) continue;
+            const beat = Math.floor(e.timeBeats);
+            const sixteenth = Math.min(3, Math.max(0, Math.round((e.timeBeats - beat) * 4)));
+            hits.push({
+                time: `0:${beat}:${sixteenth}`,
+                instrument: e.instrument as DrumInstrument,
+                velocity: e.velocity,
+            });
+        }
+        return hits;
     }
 
     /**
@@ -339,6 +372,7 @@ export class DrumEngine {
      * @param pianoStepTimes Optional. Piano comping step times (e.g. ["0:0:0", "0:1:2"]) — kick accents a subset of these instead of always 1 and 3.
      * @param trioContext Optional Phase 18: when solo or Ballad, density is capped (soloist space). Hybrid—additive.
      * @param divisionsPerBar Optional. When 3, use waltz ride (1, 2, 3) and hi-hat on 2 & 3. DMP-08.
+     * @param preferClassicRide Optional. When true, ride uses full spang-a-lang (no linear skips). Set from Markov: LOW/MEDIUM_ENERGY → true, HIGH_ENERGY → false.
      */
     public generateBar(
         density: number,
@@ -347,7 +381,8 @@ export class DrumEngine {
         answerContext?: { questionFrom: string; answerType: 'echo' | 'complement' | 'space' },
         pianoStepTimes?: string[],
         trioContext?: { placeInCycle?: string; songStyle?: string },
-        divisionsPerBar?: number
+        divisionsPerBar?: number,
+        preferClassicRide?: boolean
     ): DrumHit[] {
         const listenerAdjustment = pianoDensity > 0.8 ? -0.3 : (pianoDensity < 0.2 ? 0.1 : 0);
         let effectiveDensity = Math.max(0.1, Math.min(1.0, density + listenerAdjustment));
@@ -383,7 +418,7 @@ export class DrumEngine {
             if (isFillBar) {
                 hits.push(...this.generateFill(barIndex));
             } else {
-                hits.push(...this.linearEngine.generatePhrase(barIndex, effectiveDensity, divisionsPerBar));
+                hits.push(...this.linearEngine.generatePhrase(barIndex, effectiveDensity, divisionsPerBar, preferClassicRide));
             }
             // Kick: don't always hit every beat — either accent piano comping rhythms or sparse anchor (1 and sometimes 3)
             this.generateKickFromPianoOrSparse(hits, pianoStepTimes);
@@ -408,23 +443,25 @@ export class DrumEngine {
     }
 
     /**
-     * Bebop ride ostinato: 12-grid Spang-a-lang. Indices 0,3,5,6,9,11 (1, 2, 2-let, 3, 4, 4-let).
-     * Downbeats (0,3,6,9) accented; skip beats (5,11) ghosted to propel momentum.
+     * Bebop ride ostinato: 12-grid Spang-a-lang. Velocity map: Beat 1: 1.0, Beat 2: 1.2, Skip: 0.8, Beat 3: 1.0, Beat 4: 1.2, Skip: 0.8.
      */
+    private static readonly RIDE_VELOCITY_MAP = [1.0, 1.2, 0.8, 1.0, 1.2, 0.8];
+    private static readonly RIDE_BASE_VEL = 0.65;
     private generateRideStream(hits: DrumHit[], _density: number) {
         const RIDE_GRID_12 = [
-            { time: "0:0:0", velocity: 0.78 },   // n0  downbeat
-            { time: "0:1:0", velocity: 0.72 },   // n3  downbeat
-            { time: "0:1:2", velocity: 0.34 },   // n5  skip (ghosted)
-            { time: "0:2:0", velocity: 0.74 },   // n6  downbeat
-            { time: "0:3:0", velocity: 0.72 },   // n9  downbeat
-            { time: "0:3:2", velocity: 0.36 },   // n11 skip (ghosted)
+            { time: "0:0:0", slot: 0 },   // beat 1
+            { time: "0:1:0", slot: 1 },   // beat 2
+            { time: "0:1:2", slot: 2 },   // skip (2&)
+            { time: "0:2:0", slot: 3 },   // beat 3
+            { time: "0:3:0", slot: 4 },   // beat 4
+            { time: "0:3:2", slot: 5 },   // skip (4&)
         ];
-        RIDE_GRID_12.forEach(({ time, velocity }) => {
+        RIDE_GRID_12.forEach(({ time, slot }) => {
+            const vel = DrumEngine.RIDE_BASE_VEL * DrumEngine.RIDE_VELOCITY_MAP[slot] + (Math.random() * 0.06 - 0.03);
             hits.push({
                 time,
                 instrument: "Ride",
-                velocity: velocity + (Math.random() * 0.06 - 0.03),
+                velocity: Math.max(0.1, Math.min(1, vel)),
             });
         });
     }
